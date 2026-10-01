@@ -64,6 +64,7 @@ export function validateTx(data: Data, d: TxDraft, today: ISODate, editingId?: I
 
   if (d.type === 'refund') {
     const orig = data.txs.find((t) => t.id === d.refundOf);
+    if (d.refundOf === editingId) fail('Bir kayıt kendisinin iadesi olamaz.');
     if (!orig || orig.type !== 'expense') fail('İade, var olan bir gidere bağlanmalı.');
     if (d.date < orig!.date) fail('İade tarihi, giderin tarihinden önce olamaz.');
     const others = data.txs
@@ -76,6 +77,8 @@ export function validateTx(data: Data, d: TxDraft, today: ISODate, editingId?: I
     const refunded = data.txs.filter((t) => t.type === 'refund' && t.refundOf === existing.id).reduce((a, t) => a + t.amount, 0);
     if (refunded > 0 && d.type !== 'expense') fail('Bu gidere bağlı iade var; türü değiştirilemez.');
     if (refunded > d.amount) fail('Tutar, bu gidere yapılmış iadelerin toplamından az olamaz.');
+    const firstRefund = data.txs.filter((t) => t.type === 'refund' && t.refundOf === existing.id).map((t) => t.date).sort()[0];
+    if (firstRefund && d.date > firstRefund) fail('Bu giderin iadesi daha önceki bir tarihte; gider tarihi iadeden sonra olamaz.');
   }
 
   if (d.planRef) {
@@ -287,7 +290,8 @@ export function skipOccurrence(data: Data, planId: ID, due: ISODate, skip = true
     ...data,
     plans: data.plans.map((p) => {
       if (p.id !== planId) return p;
-      const rest = p.skipped.filter((d) => d !== due);
+      // Dönem anahtarıyla eşleştir: plan günü sonradan değişse de atlama geri alınabilsin.
+      const rest = p.skipped.filter((d) => occKey(p, d) !== occKey(p, due));
       return { ...p, skipped: skip ? [...rest, due] : rest };
     }),
   };

@@ -510,10 +510,11 @@ export function budgetStatus(data: Data, month: MonthKey, today: ISODate): Budge
   const usedPct = Math.round((s.spending / B) * 100);
   const flexUsedPct = flexibleBudget > 0 ? Math.round((Math.max(flexibleSpent, 0) / flexibleBudget) * 100) : null;
   let state: BudgetState;
+  // Planlı ödemeler bütçeyi tek başına dolduruyorsa bu bir aşım değil, bilgidir.
   if (month > current) state = 'future';
+  else if (flexibleBudget <= 0) state = 'planned-full';
   else if (s.spending > B) state = 'over';
   else if (!isCurrent) state = 'closed-within';
-  else if (flexibleBudget <= 0) state = 'planned-full';
   else if ((flexUsedPct ?? 0) > 100) state = 'tight';
   else {
     const lead = (flexUsedPct ?? 0) - elapsedPct;
@@ -554,7 +555,8 @@ export function goalProgress(data: Data, goal: Goal): GoalProgress | null {
     .filter((x): x is { t: Tx; a: Money } => x !== null)
     .sort((x, y) => (x.t.date === y.t.date ? x.t.seq - y.t.seq : x.t.date < y.t.date ? -1 : 1));
   let running = base;
-  let reachedAt: ISODate | null = base >= goal.target ? st.account.openingDate : null;
+  // Takip öncesi katkıyla zaten ulaşılmışsa kutlanacak yeni bir an yoktur.
+  let reachedAt: ISODate | null = null;
   for (const f of flows) {
     const before = running;
     running += f.a;

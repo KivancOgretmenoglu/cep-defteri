@@ -61,7 +61,6 @@ export function parseBackup(text: string): Result {
     catIds.add(c.id);
   }
   const txIds = new Set<string>();
-  const seqs = new Set<number>();
   let maxSeq = 0;
   for (const t of d.txs as unknown[]) {
     if (!isObj(t) || !isStr(t.id) || !['expense', 'income', 'transfer', 'refund'].includes(t.type as string)) return err('işlem kaydı.');
@@ -72,7 +71,6 @@ export function parseBackup(text: string): Result {
     if (!optStr(t.note) || !optStr(t.refundOf)) return err('işlem notu.');
     if (t.planRef !== undefined && (!isObj(t.planRef) || !isStr(t.planRef.planId) || !isISODate(t.planRef.due))) return err('plan bağlantısı.');
     txIds.add(t.id);
-    seqs.add(t.seq as number);
     maxSeq = Math.max(maxSeq, t.seq as number);
   }
   for (const t of d.txs as Record<string, unknown>[]) if (t.type === 'refund' && t.refundOf !== undefined && !txIds.has(t.refundOf as string)) return err('iadenin bağlı olduğu gider yok.');
@@ -90,16 +88,81 @@ export function parseBackup(text: string): Result {
   for (const g of d.goals as unknown[]) {
     if (!isObj(g) || !isStr(g.id) || !isStr(g.title) || !isMoney(g.target) || !isStr(g.accountId) || !accIds.has(g.accountId)) return err('hedef kaydı.');
   }
+  const semantic = semanticCheck(d as unknown as Data);
+  if (semantic) return err(semantic);
   const s = d.settings;
+  if (s.monthlyBudget != null && (!isMoney(s.monthlyBudget) || (s.monthlyBudget as number) <= 0)) return err('bütçe ayarı.');
+  if (s.reserve !== undefined && (!isMoney(s.reserve) || (s.reserve as number) < 0)) return err('birikim payı ayarı.');
+  if (s.periodMode !== undefined && !['month', 'days30'].includes(s.periodMode as string)) return err('dönem ayarı.');
+  if (s.theme !== undefined && !['system', 'light', 'dark'].includes(s.theme as string)) return err('tema ayarı.');
   const settings = {
     ...DEFAULT_SETTINGS,
     ...s,
     clawd: { ...DEFAULT_SETTINGS.clawd, ...(isObj(s.clawd) ? s.clawd : {}) },
   };
-  if (settings.monthlyBudget !== null && !isMoney(settings.monthlyBudget)) return err('bütçe ayarı.');
-  if (!isMoney(settings.reserve)) return err('birikim payı ayarı.');
   const data = { ...(d as unknown as Data), settings, nextSeq: Math.max(d.nextSeq as number, maxSeq + 1) };
   return { ok: true, data, exportedAt: isStr(raw.exportedAt) ? raw.exportedAt : null };
+}
+
+/**
+ * Yapısal olarak doğru ama anlamca bozuk yedekleri yakalar (uygulamanın kendisinin asla üretmeyeceği durumlar):
+ * negatif değerler, yinelenen kimlikler, kendine transfer, kuralsız iadeler, yanlış hesap türü vb.
+ */
+function semanticCheck(d: Data): string | null {
+  const dup = (xs: { id: string }[]) => new Set(xs.map((x) => x.id)).size !== xs.length;
+  if (dup(d.accounts) || dup(d.categories) || dup(d.txs) || dup(d.valuations) || dup(d.plans) || dup(d.goals)) return 'yinelenen kayıt kimliği.';
+  const seqs = [...d.txs.map((t) => t.seq), ...d.valuations.map((v) => v.seq)];
+  if (new Set(seqs).size !== seqs.length || seqs.some((q) => q < 1)) return 'kayıt sırası tutarsız.';
+  const acc = accountIndex(d);
+  const cat = new Map(d.categories.map((c) => [c.id, c]));
+  for (const a of d.accounts) {
+    if (a.kind === 'investment' && a.openingBalance < 0) return 'yatırım açılış değeri negatif.';
+    if (a.priorContribution != null && a.priorContribution < 0) return 'önceki katkı negatif.';
+  }
+  for (const c of d.categories) if (c.limit != null && c.limit <= 0) return 'kategori limiti.';
+  const txById = new Map(d.txs.map((t) => [t.id, t]));
+  const refunded = new Map<string, number>();
+  for (const t of d.txs) {
+    const a = acc.get(t.accountId)!;
+    if (t.date < a.openingDate) return 'hesabın takip başlangıcından önce işlem var.';
+    if (t.type === 'transfer') {
+      const to = acc.get(t.toAccountId!)!;
+      if (to.id === a.id) return 'bir hesaptan kendisine transfer.';
+      if (a.kind === 'investment' && to.kind === 'investment') return 'iki yatırım hesabı arasında transfer.';
+      if (t.date < to.openingDate) return 'hesabın takip başlangıcından önce işlem var.';
+    } else {
+      if (a.kind === 'investment') return 'yatırım hesabında gelir/gider kaydı.';
+      if (cat.get(t.categoryId!)!.kind !== (t.type === 'income' ? 'income' : 'expense')) return 'kategori türü uyuşmuyor.';
+    }
+    if (t.type === 'refund') {
+      const o = t.refundOf ? txById.get(t.refundOf) : undefined;
+      if (!o || o.type !== 'expense' || o.id === t.id) return 'iade geçerli bir gidere bağlı değil.';
+      if (t.date < o.date) return 'iade, giderden önce tarihli.';
+      const sumR = (refunded.get(o.id) ?? 0) + t.amount;
+      if (sumR > o.amount) return 'iade, giderin tutarını aşıyor.';
+      refunded.set(o.id, sumR);
+    } else if (t.refundOf !== undefined) return 'yalnız iade bir gidere bağlanabilir.';
+  }
+  for (const v of d.valuations) {
+    if (v.value < 0) return 'negatif yatırım değeri.';
+    if (acc.get(v.accountId)!.kind !== 'investment') return 'değer kaydı yatırım hesabında değil.';
+  }
+  for (const p of d.plans) {
+    if (p.amount <= 0) return 'plan tutarı sıfır ya da negatif.';
+    if (p.endDate && p.endDate < p.startDate) return 'plan bitişi başlangıçtan önce.';
+    const a = acc.get(p.accountId)!;
+    if (p.kind === 'transfer') {
+      const to = p.toAccountId ? acc.get(p.toAccountId) : undefined;
+      if (!to || to.id === a.id || (a.kind === 'investment' && to.kind === 'investment')) return 'planlı aktarımın hedefi geçersiz.';
+    } else {
+      const c = p.categoryId ? cat.get(p.categoryId) : undefined;
+      if (!c || c.kind !== p.kind || a.kind === 'investment') return 'planın kategorisi ya da hesabı geçersiz.';
+    }
+  }
+  for (const g of d.goals) {
+    if (g.target <= 0 || acc.get(g.accountId)!.kind !== 'investment') return 'hedef kaydı geçersiz.';
+  }
+  return null;
 }
 
 // ───────────────────────── CSV ─────────────────────────

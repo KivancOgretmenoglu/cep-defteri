@@ -416,3 +416,69 @@ describe('Türkçe yüzde ekleri', () => {
     expect(pct(86, 'locYou')).toBe("%86'sındasın");
   });
 });
+
+describe('bağımsız denetimde bulunan hatalar (regresyon)', () => {
+  it('planlandığı gibi ödenen kira, bütçeyi tek başına aşsa da Clawd’ı olumsuz yapmaz', () => {
+    let { d, bank } = setup();
+    d = A.updateSettings(d, { monthlyBudget: TL(5000) });
+    const p = A.addPlan(d, { kind: 'expense', title: 'Kira', amount: TL(6000), accountId: bank, categoryId: 'e-housing', freq: 'monthly', startDate: '2026-10-05' });
+    d = A.confirmOccurrence(p.data, p.plan.id, '2026-10-05', {}, TODAY).data;
+    expect(L.budgetStatus(d, '2026-10', TODAY).state).toBe('planned-full');
+    expect(clawdMood(d, TODAY).mood).not.toBe('thoughtful');
+  });
+
+  it('plan günü değişse de atlama geri alınabilir', () => {
+    let { d, bank } = setup();
+    const p = A.addPlan(d, { kind: 'expense', title: 'Abonelik', amount: TL(60), accountId: bank, categoryId: 'e-subs', freq: 'monthly', startDate: '2026-10-05' });
+    d = A.skipOccurrence(p.data, p.plan.id, '2026-10-05');
+    d = A.updatePlan(d, p.plan.id, { kind: 'expense', title: 'Abonelik', amount: TL(60), accountId: bank, categoryId: 'e-subs', freq: 'monthly', startDate: '2026-10-10' });
+    expect(L.occurrences(d, '2026-10-01', '2026-10-31')[0].status).toBe('skipped');
+    d = A.skipOccurrence(d, p.plan.id, '2026-10-10', false);
+    expect(L.occurrences(d, '2026-10-01', '2026-10-31')[0].status).toBe('pending');
+  });
+
+  it('bir gider kendisinin iadesine dönüştürülemez; gider tarihi iadesinden sonraya alınamaz', () => {
+    let { d, bank } = setup();
+    const e = add(d, { type: 'expense', amount: TL(100), date: '2026-10-01', accountId: bank, categoryId: 'e-food' });
+    expect(() => A.updateTx(e.data, e.tx.id, { type: 'refund', amount: TL(100), date: '2026-10-01', accountId: bank, categoryId: 'e-food', refundOf: e.tx.id }, TODAY)).toThrow();
+    d = add(e.data, { type: 'refund', amount: TL(50), date: '2026-10-02', accountId: bank, categoryId: 'e-food', refundOf: e.tx.id }).data;
+    expect(() => A.updateTx(d, e.tx.id, { type: 'expense', amount: TL(100), date: '2026-10-10', accountId: bank, categoryId: 'e-food' }, TODAY)).toThrow(/iade/);
+  });
+
+  it('planlı yatırım aktarımı ve takip öncesi ulaşılmış hedef olumsuz/boş tepki üretmez', () => {
+    let { d, bank, inv } = setup();
+    d = add(d, { type: 'expense', amount: TL(10), date: TODAY, accountId: bank, categoryId: 'e-food' }).data;
+    d = A.addPlan(d, { kind: 'transfer', title: 'Yatırım', amount: TL(12000), accountId: bank, toAccountId: inv, freq: 'once', startDate: '2026-10-20' }).data;
+    expect(clawdMood(d, TODAY).mood).not.toBe('thoughtful');
+    let e = emptyData();
+    e = A.addAccount(e, { name: 'B', kind: 'bank', openingBalance: TL(100), openingDate: '2026-10-14' }).data;
+    const f = A.addAccount(e, { name: 'F', kind: 'investment', openingBalance: TL(6000), openingDate: '2026-10-14', priorContribution: TL(5000) });
+    e = A.addGoal(f.data, { title: 'Fon', target: TL(4000), accountId: f.account.id }).data;
+    e = add(e, { type: 'expense', amount: TL(10), date: TODAY, accountId: e.accounts[0].id, categoryId: 'e-food' }).data;
+    expect(clawdMood(e, TODAY).mood).not.toBe('celebrate');
+  });
+
+  it('anlamca bozuk yedekleri reddeder', () => {
+    let { d, bank, inv } = setup();
+    const e = add(d, { type: 'expense', amount: TL(100), date: TODAY, accountId: bank, categoryId: 'e-food' });
+    d = add(e.data, { type: 'transfer', amount: TL(500), date: TODAY, accountId: bank, toAccountId: inv }).data;
+    d = A.addValuation(d, { accountId: inv, date: TODAY, value: TL(600) }, TODAY).data;
+    const mutate = (fn: (x: any) => void) => {
+      const j = JSON.parse(serializeBackup(d));
+      fn(j.data);
+      return parseBackup(JSON.stringify(j)).ok;
+    };
+    expect(mutate(() => {})).toBe(true);
+    expect(mutate((x) => (x.valuations[0].value = -1))).toBe(false);
+    expect(mutate((x) => x.txs.push({ ...x.txs[0] }))).toBe(false);
+    expect(mutate((x) => (x.txs[1].seq = x.txs[0].seq))).toBe(false);
+    expect(mutate((x) => (x.txs[1].toAccountId = x.txs[1].accountId))).toBe(false);
+    expect(mutate((x) => x.txs.push({ ...x.txs[0], id: 'r', seq: 99, type: 'refund', amount: 20000, refundOf: x.txs[0].id }))).toBe(false);
+    expect(mutate((x) => x.txs.push({ ...x.txs[0], id: 'r', seq: 99, type: 'refund' }))).toBe(false);
+    expect(mutate((x) => (x.txs[0].accountId = inv))).toBe(false);
+    expect(mutate((x) => (x.txs[0].date = '2026-08-01'))).toBe(false);
+    expect(mutate((x) => (x.settings.reserve = -5))).toBe(false);
+    expect(mutate((x) => (x.settings.periodMode = 'zzz'))).toBe(false);
+    expect(mutate((x) => x.goals.push({ id: 'g', title: 'x', target: -1, accountId: bank, createdAt: 0 }))).toBe(false);
+  });
+});
