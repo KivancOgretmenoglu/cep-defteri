@@ -15,6 +15,7 @@ import { useData } from '../ui/hooks';
 import { CatIcon, ACCOUNT_ICONS } from '../ui/icons';
 import { Clawd, BODY_COLORS, HOME_OUTFITS, OUTFITS } from '../clawd/Clawd';
 import { isNative, saveFile } from '../platform';
+import { SecuritySettings, NotificationSettings, AutoBackupSettings } from '../native/NativeSettings';
 
 async function download(name: string, content: string, type: string): Promise<boolean> {
   try {
@@ -225,6 +226,10 @@ export function Settings() {
             </div>
           )}
         </section>
+
+        <SecuritySettings />
+        <NotificationSettings />
+        <AutoBackupSettings />
 
         <section className="card" aria-labelledby="s-demo">
           <SectionHead id="s-demo" title="Örnek veri" />

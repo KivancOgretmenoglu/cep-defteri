@@ -33,11 +33,13 @@ export async function saveFile(name: string, content: string, type: string): Pro
 }
 
 /** Android geri tuşu: önce açık sayfayı kapatır, sonra Özet'e döner, en son uygulamayı arka plana alır. */
-export async function setupBackButton(handlers: { hasSheet: () => boolean; closeSheet: () => void; isHome: () => boolean; goHome: () => void }) {
+export async function setupBackButton(handlers: { isLocked: () => boolean; hasSheet: () => boolean; closeSheet: () => void; isHome: () => boolean; goHome: () => void }) {
   if (!isNative()) return;
   const { App } = await import('@capacitor/app');
   App.addListener('backButton', () => {
-    if (handlers.hasSheet()) handlers.closeSheet();
+    // Kilit ekranındayken alttaki uygulamada gezinme yapılmaz; geri tuşu uygulamayı arka plana alır.
+    if (handlers.isLocked()) App.minimizeApp();
+    else if (handlers.hasSheet()) handlers.closeSheet();
     else if (!handlers.isHome()) handlers.goHome();
     else App.minimizeApp();
   });

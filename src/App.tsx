@@ -13,6 +13,8 @@ import { Balance } from './screens/Balance';
 import { People } from './screens/People';
 import { OccurrenceSheet, CancelPlanSheet } from './sheets/PlanSheets';
 import { ReportCardSheet } from './sheets/ReportCardSheet';
+import { LockGate } from './lock/LockGate';
+import { useNativeSync } from './native/useNativeSync';
 import { TxSheet, RefundSheet, ConfirmSheet } from './sheets/TxSheet';
 import { AccountSheet, BudgetSheet, CategorySheet, GoalSheet, LimitSheet, PlanSheet, ValuationSheet } from './sheets/OtherSheets';
 
@@ -92,6 +94,7 @@ function Toast() {
 
 export function App() {
   useTheme();
+  useNativeSync();
   const { screen, sheet } = useNav();
   const mode = useStore((s) => s.mode);
   const warning = useStore((s) => s.warning);
@@ -116,6 +119,7 @@ export function App() {
   const Main = { home: Home, tx: Transactions, budget: Budget, invest: Invest, reports: Reports, settings: Settings, balance: Balance, people: People }[screen];
 
   return (
+    <LockGate>
     <div className={`app ${showOnboarding ? 'app--onboarding' : ''}`}>
       <a className="skip" href="#main">İçeriğe geç</a>
       {!showOnboarding && (
@@ -188,6 +192,7 @@ export function App() {
       <SheetHost />
       <Toast />
     </div>
+    </LockGate>
   );
 }
 
