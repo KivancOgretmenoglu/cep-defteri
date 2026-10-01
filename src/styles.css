@@ -29,7 +29,9 @@
   --font-display: 'Bricolage Grotesque Variable', 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
   --font-body: 'Atkinson Hyperlegible Next Variable', 'Atkinson Hyperlegible Next', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --tabbar-h: 68px;
-  --safe-b: env(safe-area-inset-bottom, 0px);
+  /* Android uygulaması --safe-area-inset-* verir; tarayıcı/iOS env() kullanır. */
+  --safe-b: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --safe-t: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
   color-scheme: light;
 }
 
@@ -202,7 +204,7 @@ kbd {
   min-height: 100dvh;
 }
 .main {
-  padding: 16px 16px calc(var(--tabbar-h) + var(--safe-b) + 28px);
+  padding: calc(16px + var(--safe-t)) 16px calc(var(--tabbar-h) + var(--safe-b) + 28px);
   max-width: 1120px;
   margin: 0 auto;
   outline: none;
@@ -275,7 +277,7 @@ kbd {
     display: none;
   }
   .main {
-    padding: 28px 32px 48px;
+    padding: calc(28px + var(--safe-t)) 32px calc(48px + var(--safe-b));
     width: 100%;
   }
   .rail {
@@ -285,7 +287,7 @@ kbd {
     position: sticky;
     top: 0;
     height: 100dvh;
-    padding: 22px 14px;
+    padding: calc(22px + var(--safe-t)) 14px calc(22px + var(--safe-b));
     border-right: 1px solid var(--line);
     background: var(--surface);
   }
@@ -1440,7 +1442,7 @@ fieldset.block {
 }
 .sheet {
   width: 100%;
-  max-height: 94dvh;
+  max-height: calc(94dvh - var(--safe-t));
   display: flex;
   flex-direction: column;
   background: var(--surface);

@@ -14,17 +14,16 @@ import { go, openSheet } from '../ui/nav';
 import { useData } from '../ui/hooks';
 import { CatIcon, ACCOUNT_ICONS } from '../ui/icons';
 import { Clawd, BODY_COLORS, HOME_OUTFITS, OUTFITS } from '../clawd/Clawd';
+import { isNative, saveFile } from '../platform';
 
-function download(name: string, content: string, type: string) {
-  const blob = new Blob([content], { type });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = name;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 2000);
+async function download(name: string, content: string, type: string): Promise<boolean> {
+  try {
+    const r = await saveFile(name, content, type);
+    return r !== 'cancelled';
+  } catch {
+    showToast('Dosya kaydedilemedi.', { tone: 'error' });
+    return false;
+  }
 }
 const stamp = (today: string) => today;
 
@@ -32,11 +31,12 @@ export function downloadCSV(data: Data) {
   download(`cep-defteri-islemler-${stamp(getState().today)}.csv`, transactionsCSV(data), 'text/csv;charset=utf-8');
 }
 
-export function downloadBackup() {
+export async function downloadBackup() {
   const { data, mode, today } = getState();
-  download(`cep-defteri-yedek-${mode === 'demo' ? 'ORNEK-' : ''}${stamp(today)}.json`, serializeBackup(data), 'application/json');
+  const ok = await download(`cep-defteri-yedek-${mode === 'demo' ? 'ORNEK-' : ''}${stamp(today)}.json`, serializeBackup(data), 'application/json');
+  if (!ok) return;
   if (mode === 'real') commit((d) => A.updateSettings(d, { lastBackupAt: Date.now() }), undefined);
-  showToast('Yedek dosyası indirildi');
+  showToast(isNative() ? 'Yedek hazır; kaydettiğin yeri unutma' : 'Yedek dosyası indirildi');
 }
 
 /** Yedek dosyası seçme + önizleme + onay. Ayarlar ve ilk açılış ekranında kullanılır. */

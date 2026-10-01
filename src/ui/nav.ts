@@ -56,6 +56,8 @@ export function useNav() {
   );
 }
 
+export const getNav = () => nav;
+
 export function go(screen: Screen, opts: { filter?: TxFilter; reportMonth?: MonthKey } = {}) {
   emit({ screen, filter: opts.filter ?? (screen === 'tx' ? nav.filter : {}), reportMonth: opts.reportMonth ?? nav.reportMonth });
   const slug = '#/' + SLUG[screen];

@@ -1,0 +1,76 @@
+name: Android APK
+
+# Her gönderimde testleri çalıştırır, APK'yı derler ve "Releases" sayfasına ekler.
+# Telefonda: github.com/<kullanıcı>/<depo>/releases/latest → .apk dosyasını indir → kur.
+on:
+  push:
+    paths-ignore: ['**.md']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: npx cap sync android
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: İmza anahtarını hazırla
+        id: sign
+        env:
+          KEYSTORE_B64: ${{ secrets.CEP_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/cep.jks"
+            echo "path=$RUNNER_TEMP/cep.jks" >> "$GITHUB_OUTPUT"
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::CEP_KEYSTORE_B64 tanımlı değil; APK geçici bir test anahtarıyla imzalanacak. Bu sürümün üzerine güncelleme kurulamaz (bkz. ANDROID.md)."
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: APK derle
+        working-directory: android
+        env:
+          CEP_KEYSTORE_PATH: ${{ steps.sign.outputs.path }}
+          CEP_KEYSTORE_PASSWORD: ${{ secrets.CEP_KEYSTORE_PASSWORD }}
+        run: ./gradlew assembleRelease -PversionCode=${{ github.run_number }} -PversionName=1.0.${{ github.run_number }} --no-daemon
+
+      - name: Dosyayı adlandır
+        run: cp android/app/build/outputs/apk/release/app-release.apk "CepDefteri-1.0.${{ github.run_number }}.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CepDefteri-1.0.${{ github.run_number }}
+          path: CepDefteri-*.apk
+
+      - name: Releases sayfasına ekle
+        if: github.ref_name == github.event.repository.default_branch
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Cep Defteri 1.0.${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          make_latest: true
+          files: CepDefteri-*.apk
+          body: |
+            Telefonda bu sayfadan **CepDefteri-1.0.${{ github.run_number }}.apk** dosyasını indirip aç. Android "bilinmeyen uygulamalar" izni isteyebilir.
+            ${{ steps.sign.outputs.signed == 'true' && 'Kalıcı anahtarla imzalandı: önceki sürümün üzerine kurabilirsin, verilerin korunur.' || '⚠️ Geçici test anahtarıyla imzalandı: önceki bir sürüm yüklüyse önce Ayarlar → Yedek indir, sonra eski uygulamayı kaldırıp bunu kur.' }}

@@ -2,7 +2,7 @@ name: Test ve yayınla (GitHub Pages)
 
 on:
   push:
-    branches: [main]
+    paths-ignore: ['**.md']
   workflow_dispatch:
 
 permissions:
@@ -30,6 +30,8 @@ jobs:
         with:
           path: dist
   deploy:
+    # Yalnız varsayılan daldan yayınla.
+    if: github.ref_name == github.event.repository.default_branch
     needs: build
     runs-on: ubuntu-latest
     environment:

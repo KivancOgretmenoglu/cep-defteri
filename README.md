@@ -12,7 +12,9 @@ npm run build      # dist/ klasörüne üretim derlemesi
 npm run preview    # derlenmiş sürümü yerelde aç
 ```
 
-`dist/` klasörü herhangi bir statik barındırmaya konabilir (göreli yollar kullanır). `main` dalına gönderildiğinde `.github/workflows/pages.yml`, testleri çalıştırıp GitHub Pages'e yayınlar (depo ayarlarında *Pages → Source: GitHub Actions* seçilmeli). Telefonda tarayıcıdan **Ana ekrana ekle** ile uygulama gibi açılır ve çevrimdışı çalışır.
+**Telefona kurulum (APK veya ana ekrana ekleme): [ANDROID.md](ANDROID.md).**
+
+`dist/` klasörü herhangi bir statik barındırmaya konabilir (göreli yollar kullanır). Varsayılan dala gönderildiğinde `.github/workflows/pages.yml`, testleri çalıştırıp GitHub Pages'e yayınlar (depo ayarlarında *Pages → Source: GitHub Actions* seçilmeli). Telefonda tarayıcıdan **Ana ekrana ekle** ile uygulama gibi açılır ve çevrimdışı çalışır.
 
 ## Kullanım
 
@@ -55,6 +57,8 @@ src/clawd/    piksel Clawd: 5 duygu, 10 kıyafet, 5 gövde rengi
 src/store/    kalıcı saklama ve geri alma
 src/screens/  Özet, İşlemler, Bütçe, Yatırım, Raporlar, Ayarlar, İlk açılış
 src/sheets/   işlem/iade/plan/hesap/değer formları
+src/platform.ts  Android (Capacitor) farkları: dosya paylaşımı, geri tuşu
+android/      Capacitor ile üretilen Android projesi
 ```
 
 ## Bilinen sınırlar
