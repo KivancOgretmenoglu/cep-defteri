@@ -25,6 +25,12 @@ npm run preview    # derlenmiş sürümü yerelde aç
 - **Yatırım**: güncel değer (elle, tarihli), bu ay / toplam yatırılan, çekilen, net katkı, birikim hedefleri.
 - **Raporlar**: kategori ve gelir kaynağı dağılımı, önceki dönemle karşılaştırma (devam eden ayda aynı gün aralığı), son 6 ay. Satıra dokununca o işlemlere gidilir.
 - **Ayarlar**: hesaplar, kategoriler, Clawd'ın dolabı, tema, yedek indir / geri yükle, CSV, örnek veri modu.
+- **Bakiye gizleme**: Özet'teki göz simgesi toplam bakiyeleri (kullanılabilir para, hesap bakiyeleri, yatırım değeri) "•••••" yapar; işlem tutarları görünür kalır. Clawd bu sırada gizli ajan kılığına girer.
+- **Bakiye geçmişi**: Özet'teki küçük grafikten açılır. Günlük hesapların gün sonu bakiyesi (1/3/6 ay, tümü; hesap hesap), kesik çizgiyle dönem sonuna kadar tahmin (bekleyen ödemeler ve beklenen gelirler vadelerinde).
+- **Borç ve alacak**: arkadaşlar "kişi" hesabıdır. *Ben verdim / ben aldım* hareketleri gelir/gider sayılmaz. *O ödedi*: harcama sana yazılır, ona borçlanırsın. Gider girerken **Hesabı bölüş** ile arkadaşın payı alacak olarak ayrılır. Borçların kullanılabilir paradan düşülür; alacaklar gelene kadar eklenmez.
+- **Planlar**: yaklaşan bir kaleme dokununca *Ödendi · Bu seferlik atla · Planı düzenle (ad, tutar…) · Planı iptal et*. İptal, seçilen günden sonraki vadeleri kaldırır; geçmiş korunur; biten planlar yeniden başlatılabilir. **Taksitli ödeme**: aylık ödeme + taksit sayısı; vadeler "2/6" diye görünür.
+- **Etiketler**: işleme en fazla 5 etiket (ör. #erasmus). İşlemler'de etikete göre filtre, Raporlar'da etiket toplamları.
+- **Ay karnesi**: ay bitince Özet'te belirir; ayın özeti ve resim olarak paylaşma.
 
 ## Hesaplama kuralları
 
@@ -33,7 +39,8 @@ Tüm hesaplar `src/domain/ledger.ts` içindeki saf fonksiyonlardan gelir; bakiye
 | Gösterge | Tanım |
 |---|---|
 | Günlük hesaplarda | Banka + nakit hesapların açılış bakiyesi + tüm hareketleri. Yatırım hariç. |
-| Kullanılabilir para | Günlük hesaplar − dönem sonuna kadar bekleyen planlı ödemeler (gecikmişler dahil) − bekleyen planlı yatırım aktarımları − birikim payı. Beklenen gelir eklenmez. |
+| Kullanılabilir para | Günlük hesaplar − dönem sonuna kadar bekleyen planlı ödemeler (gecikmişler dahil) − bekleyen planlı yatırım aktarımları − birikim payı − arkadaşlara borçların. Beklenen gelir ve alacaklar eklenmez. |
+| Kişi bakiyesi | > 0: o sana borçlu, < 0: sen ona borçlusun. Kişiyle yapılan para hareketleri transferdir (gelir/gider değil). |
 | Bu ay gelir | Gerçekleşmiş gelirler. Açılış bakiyesi, transfer, iade ve yatırımdan çekim hariç. |
 | Bu ay harcama | Giderler − iadeler. Transfer ve yatırım katkısı hariç. |
 | Yatırım değeri | Son girilen değer + o değerden sonraki katkı − çekim. Değer girişi para hareketi değildir. |
@@ -64,6 +71,6 @@ android/      Capacitor ile üretilen Android projesi
 ## Bilinen sınırlar
 
 - Kredi kartı ayrı hesap türü değil (kart harcaması, ödendiği hesaptan gider olarak girilir).
+- Döviz yok; tek para birimi TL.
 - Bağımsız (bir gidere bağlı olmayan) iade girişi yok.
 - Fiş fotoğrafı, banka bağlantısı, canlı fiyatlar yok (ilk sürüm kapsamı dışında).
-- Tek para birimi: TL.
