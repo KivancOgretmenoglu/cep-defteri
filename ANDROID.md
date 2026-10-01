@@ -4,7 +4,7 @@
 
 ## 1. Android APK (önerilen: gerçek uygulama)
 
-**APK'yı indir:** telefonda <https://github.com/KivancOgretmenoglu/-turkiye-faiz-atlasi/releases/latest> adresini aç, `CepDefteri-1.0.N.apk` dosyasına dokun.
+**APK'yı indir:** telefonda <https://github.com/KivancOgretmenoglu/cep-defteri/releases/latest> adresini aç, `CepDefteri-1.0.N.apk` dosyasına dokun.
 
 **Kur:** indirilen dosyayı aç. Android "bilinmeyen uygulamaları yükleme" izni isterse tarayıcına (Chrome) bu izni ver ve **Yükle**'ye dokun. Play Protect uyarısı çıkarsa *Yine de yükle* de: uygulama Play Store'dan gelmediği için bu uyarı normal.
 
@@ -45,7 +45,7 @@ cd android && ./gradlew assembleDebug   # app/build/outputs/apk/debug/app-debug.
 
 ## 2. Tarayıcıdan "uygulama olarak yükle" (Android ve iPhone)
 
-Bunun için uygulamanın bir adreste yayında olması gerekir. Depo ayarlarında **Settings → Pages → Source: GitHub Actions** seçilince `.github/workflows/pages.yml` uygulamayı <https://kivancogretmenoglu.github.io/-turkiye-faiz-atlasi/> adresinde yayınlar.
+Bunun için uygulamanın bir adreste yayında olması gerekir. Depo ayarlarında **Settings → Pages → Source: GitHub Actions** seçilince `.github/workflows/pages.yml` uygulamayı <https://kivancogretmenoglu.github.io/cep-defteri/> adresinde yayınlar.
 
 - **Android (Chrome):** adresi aç, ⋮ menüsünden **Uygulamayı yükle / Ana ekrana ekle**'ye dokun.
 - **iPhone (Safari):** adresi aç, Paylaş düğmesinden **Ana Ekrana Ekle**'ye dokun. iPhone'a APK kurulamaz; bu yol iPhone için tek seçenek.
