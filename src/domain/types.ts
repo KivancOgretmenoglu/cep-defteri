@@ -1,0 +1,147 @@
+import type { Money } from './money';
+import type { ISODate } from './dates';
+
+export type ID = string;
+
+/**
+ * cash/bank: günlük harcanabilir hesaplar.
+ * investment: yatırım hesabı. Bakiyesi "harcanabilir para"ya hiç karışmaz.
+ */
+export type AccountKind = 'cash' | 'bank' | 'investment';
+
+export interface Account {
+  id: ID;
+  name: string;
+  kind: AccountKind;
+  /**
+   * Takibe başlarken hesapta olan tutar. Gelir sayılmaz.
+   * Yatırım hesabında bu, açılış tarihindeki piyasa değeridir (açılış değerlemesi).
+   */
+  openingBalance: Money;
+  /** Takip başlangıcı. Bu tarihten önceye işlem girilmez. */
+  openingDate: ISODate;
+  /**
+   * Yalnız yatırım hesabı: takipten önce bu hesaba toplam ne kadar para koyduğun (net).
+   * null = bilinmiyor → kâr/zarar hesaplanmaz.
+   */
+  priorContribution?: Money | null;
+  archived?: boolean;
+  createdAt: number;
+}
+
+export type CategoryKind = 'expense' | 'income';
+
+export interface Category {
+  id: ID;
+  kind: CategoryKind;
+  name: string;
+  icon: string;
+  color: string;
+  /** İsteğe bağlı aylık limit (yalnız gider). */
+  limit?: Money | null;
+  archived?: boolean;
+}
+
+/**
+ * expense: tüketim gideri.
+ * income: gerçekleşmiş gelir (beklenen gelir burada değil, Plan olarak tutulur).
+ * transfer: kendi hesapların arasında para hareketi. Gelir/gider değildir.
+ *   Günlük → yatırım = yatırıma katkı; yatırım → günlük = yatırımdan çekim.
+ * refund: bir giderin iadesi; o kategorideki harcamayı azaltır, gelir sayılmaz.
+ */
+export type TxType = 'expense' | 'income' | 'transfer' | 'refund';
+
+export interface PlanRef {
+  planId: ID;
+  due: ISODate;
+}
+
+export interface Tx {
+  id: ID;
+  /** Oluşturulma sırası; aynı gündeki değerleme ile işlem sırasını belirler. */
+  seq: number;
+  type: TxType;
+  amount: Money; // her zaman > 0
+  date: ISODate;
+  accountId: ID; // transferde kaynak hesap
+  toAccountId?: ID; // yalnız transfer
+  categoryId?: ID; // expense/income/refund
+  note?: string;
+  refundOf?: ID; // yalnız refund
+  planRef?: PlanRef; // planlı bir kalemin gerçekleşmesi
+  createdAt: number;
+}
+
+/** Yatırım hesabının belirli bir andaki piyasa değeri. Para hareketi değildir. */
+export interface Valuation {
+  id: ID;
+  seq: number;
+  accountId: ID;
+  date: ISODate;
+  value: Money; // ≥ 0
+  note?: string;
+  createdAt: number;
+}
+
+export type PlanKind = 'expense' | 'income' | 'transfer';
+export type Freq = 'once' | 'weekly' | 'monthly' | 'yearly';
+
+/** Yaklaşan ödeme, beklenen gelir veya planlı aktarım. Vadesi gelince kendiliğinden gerçekleşmez. */
+export interface Plan {
+  id: ID;
+  kind: PlanKind;
+  title: string;
+  amount: Money;
+  accountId: ID;
+  toAccountId?: ID;
+  categoryId?: ID;
+  freq: Freq;
+  startDate: ISODate;
+  endDate?: ISODate | null;
+  /** Atlanan vadeler. */
+  skipped: ISODate[];
+  createdAt: number;
+}
+
+export interface Goal {
+  id: ID;
+  title: string;
+  target: Money;
+  /** Hedef, bu yatırım hesabına yapılan net katkıyla ölçülür (piyasa değeriyle değil). */
+  accountId: ID;
+  createdAt: number;
+}
+
+export type PeriodMode = 'month' | 'days30';
+export type ThemePref = 'system' | 'light' | 'dark';
+
+export interface ClawdPrefs {
+  body: string; // gövde rengi anahtarı
+  homeOutfit: string; // ana ekran kıyafeti anahtarı
+}
+
+export interface Settings {
+  /** Genel aylık harcama bütçesi; null = tanımlı değil. */
+  monthlyBudget: Money | null;
+  /** Günlük hesaplarda dokunulmadan tutulan birikim payı (stok tutar). */
+  reserve: Money;
+  periodMode: PeriodMode;
+  theme: ThemePref;
+  clawd: ClawdPrefs;
+  lastAccountId: ID | null;
+  /** Son dışa aktarma zamanı (yedek hatırlatması için). */
+  lastBackupAt: number | null;
+}
+
+export interface Data {
+  schema: 1;
+  accounts: Account[];
+  categories: Category[];
+  txs: Tx[];
+  valuations: Valuation[];
+  plans: Plan[];
+  goals: Goal[];
+  settings: Settings;
+  /** Bir sonraki seq değeri. */
+  nextSeq: number;
+}
