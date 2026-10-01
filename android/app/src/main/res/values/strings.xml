@@ -4,4 +4,13 @@
     <string name="title_activity_main">Cep Defteri</string>
     <string name="package_name">io.github.kivancogretmenoglu.cepdefteri</string>
     <string name="custom_url_scheme">io.github.kivancogretmenoglu.cepdefteri</string>
+
+    <!-- Ana ekran aracı -->
+    <string name="widget_name">Kullanılabilir para</string>
+    <string name="widget_description">Dönem sonuna kadar rahatça harcayabileceğin tutar ve tek dokunuşla kayıt ekleme.</string>
+    <string name="widget_title">Kullanılabilir</string>
+    <string name="widget_waiting">Uygulamayı bir kez açınca görünür</string>
+    <string name="widget_add">+ Ekle</string>
+    <string name="widget_add_desc">Yeni kayıt ekle</string>
+    <string name="widget_clawd_desc">Clawd</string>
 </resources>

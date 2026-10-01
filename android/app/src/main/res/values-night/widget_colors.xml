@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ana ekran aracı renkleri (koyu tema). -->
+<resources>
+    <color name="widget_bg">#25221E</color>
+    <color name="widget_line">#3A352F</color>
+    <color name="widget_ink">#F1EBE0</color>
+    <color name="widget_ink_2">#C3B9A9</color>
+    <color name="widget_accent">#E8825C</color>
+    <color name="widget_accent_ink">#1C1A17</color>
+</resources>

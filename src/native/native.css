@@ -1,0 +1,63 @@
+/* Ayarlar: cihaz kartlarının satırları */
+.nset-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.nset-row__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 160px;
+}
+.nset-row__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+.nset-row__hint {
+  font-size: 13.5px;
+  color: var(--ink-3);
+}
+.nset-row__ctl {
+  flex: 0 0 auto;
+}
+.nset-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.nset-pin {
+  letter-spacing: 0.3em;
+  max-width: 220px;
+}
+.nset-select {
+  text-align: left;
+}
+.nset-list {
+  list-style: none;
+  margin: 8px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.nset-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+.nset-list li:last-child {
+  border-bottom: 0;
+}
+.nset-row .segmented button {
+  white-space: nowrap;
+  padding: 0 10px;
+}
