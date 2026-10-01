@@ -66,9 +66,9 @@ export function Invest() {
             <h2 id="inv-h" className="label">{st.account.name} · güncel değer</h2>
             <button className="icon-btn" onClick={() => openSheet({ kind: 'account', accountId })} aria-label="Hesabı düzenle"><Pencil size={18} /></button>
           </div>
-          <Amount value={st.currentValue} size="xl" tone="invest" />
+          <Amount value={st.currentValue} size="xl" tone="invest" hide={data.settings.hideTotals} />
           <p className="invest-hero__date">
-            {st.lastValuation.isOpening ? 'Açılış değeri' : 'Son girdiğin değer'}: {formatMoney(st.lastValuation.value)} · {shortDate(st.lastValuation.date, today)}
+            {st.lastValuation.isOpening ? 'Açılış değeri' : 'Son girdiğin değer'}: {data.settings.hideTotals ? '••••• TL' : formatMoney(st.lastValuation.value)} · {shortDate(st.lastValuation.date, today)}
             {st.flowsSinceValuation !== 0 && <> · sonrasındaki net hareket {formatMoney(st.flowsSinceValuation, { sign: true })} eklendi</>}
           </p>
           <div className="btn-row">

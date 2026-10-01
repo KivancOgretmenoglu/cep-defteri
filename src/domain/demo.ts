@@ -65,6 +65,7 @@ export function buildDemo(today: ISODate): Data {
     if (rand() < 0.62) add({ type: 'expense', amount: between(40, 160), date: day, accountId: rand() < 0.7 ? B : C, categoryId: 'e-food', note: rand() < 0.4 ? 'Kafeterya' : undefined });
     if (dow !== 0 && dow !== 6 && rand() < 0.6) add({ type: 'expense', amount: between(20, 35), date: day, accountId: C, categoryId: 'e-transport', note: 'Dolmuş' });
     if (dow === 6) add({ type: 'expense', amount: between(250, 520), date: day, accountId: B, categoryId: 'e-market' });
+    if (rand() < 0.04) add({ type: 'expense', amount: between(60, 140), date: day, accountId: C, categoryId: 'e-food', note: 'Kahve', tags: ['kampüs'] });
     if (rand() < 0.07) add({ type: 'expense', amount: between(150, 420), date: day, accountId: B, categoryId: 'e-fun', note: rand() < 0.5 ? 'Sinema' : 'Konser' });
     if (rand() < 0.05) add({ type: 'expense', amount: between(120, 380), date: day, accountId: B, categoryId: 'e-school', note: 'Kitap' });
     if (day.endsWith('-02') || day.endsWith('-16')) add({ type: 'transfer', amount: 70000, date: day, accountId: B, toAccountId: C, note: 'ATM' });
@@ -74,6 +75,23 @@ export function buildDemo(today: ISODate): Data {
       d = A.addValuation(d, { accountId: I, date: day, value: 400000 + (st + 1) * 100000 + Math.round((rand() - 0.35) * 9000) * 10 }, today, now()).data;
     }
   }
+
+  // Arkadaşlar: bölüşülen akşam yemeği, "o ödedi" sinema bileti, kısmi geri ödeme.
+  const ali = A.addAccount(d, { name: 'Ali', kind: 'person', openingBalance: 0, openingDate: start }, now());
+  d = ali.data;
+  const zeynep = A.addAccount(d, { name: 'Zeynep', kind: 'person', openingBalance: 0, openingDate: start }, now());
+  d = zeynep.data;
+  const dinner = addDays(today, -9) < start ? start : addDays(today, -9);
+  add({ type: 'expense', amount: 32000, date: dinner, accountId: B, categoryId: 'e-food', note: 'Akşam yemeği', tags: ['doğum günü'] });
+  add({ type: 'transfer', amount: 32000, date: dinner, accountId: B, toAccountId: ali.account.id, note: 'Akşam yemeği · Ali payı', tags: ['doğum günü'] });
+  add({ type: 'expense', amount: 18000, date: addDays(dinner, 2), accountId: zeynep.account.id, categoryId: 'e-fun', note: 'Sinema bileti', tags: ['doğum günü'] });
+  add({ type: 'transfer', amount: 20000, date: addDays(dinner, 4) > today ? today : addDays(dinner, 4), accountId: ali.account.id, toAccountId: B, note: 'Ali kısmen ödedi' });
+
+  // Taksitli alışveriş: kulaklık, 6 taksit.
+  const inst = dayInMonth(monthOf(start), 14);
+  const ph = A.addPlan(d, { kind: 'expense', title: 'Kulaklık taksiti', amount: 41500, accountId: B, categoryId: 'e-phone', freq: 'monthly', startDate: inst, installments: 6 }, now());
+  d = ph.data;
+  for (const o of occurrences(d, start, today, [ph.plan])) if (o.status === 'pending') d = A.confirmOccurrence(d, ph.plan.id, o.due, {}, today, now()).data;
 
   // İade örneği: geri gönderilen bir kıyafet.
   const buyDay = addDays(start, 18);

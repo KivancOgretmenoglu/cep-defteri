@@ -3,23 +3,27 @@ import { useSyncExternalStore } from 'react';
 import type { ID, TxType } from '../domain/types';
 import type { MonthKey } from '../domain/dates';
 
-export type Screen = 'home' | 'tx' | 'budget' | 'invest' | 'reports' | 'settings';
-export const SCREENS: Screen[] = ['home', 'tx', 'budget', 'invest', 'reports', 'settings'];
-const SLUG: Record<Screen, string> = { home: 'ozet', tx: 'islemler', budget: 'butce', invest: 'yatirim', reports: 'raporlar', settings: 'ayarlar' };
+export type Screen = 'home' | 'tx' | 'budget' | 'invest' | 'reports' | 'settings' | 'balance' | 'people';
+export const SCREENS: Screen[] = ['home', 'tx', 'budget', 'invest', 'reports', 'settings', 'balance', 'people'];
+const SLUG: Record<Screen, string> = { home: 'ozet', tx: 'islemler', budget: 'butce', invest: 'yatirim', reports: 'raporlar', settings: 'ayarlar', balance: 'bakiye', people: 'borclar' };
 
 export interface TxFilter {
   month?: MonthKey;
-  kind?: 'all' | 'expense' | 'income' | 'transfer' | 'invest';
+  kind?: 'all' | 'expense' | 'income' | 'transfer' | 'invest' | 'debt';
   categoryId?: ID;
   accountId?: ID;
+  tag?: string;
 }
 
 export type SheetState =
-  | { kind: 'add'; preset?: { type?: TxType | 'invest'; direction?: 'in' | 'out'; accountId?: ID } }
+  | { kind: 'add'; preset?: { type?: TxType | 'invest' | 'debt'; direction?: 'in' | 'out'; accountId?: ID; personId?: ID; paidByPerson?: boolean } }
   | { kind: 'edit'; txId: ID }
   | { kind: 'refund'; txId: ID }
   | { kind: 'confirm'; planId: ID; due: string }
-  | { kind: 'account'; accountId?: ID; kindPreset?: 'investment' }
+  | { kind: 'occurrence'; planId: ID; due: string }
+  | { kind: 'cancelPlan'; planId: ID }
+  | { kind: 'reportCard'; month: string }
+  | { kind: 'account'; accountId?: ID; kindPreset?: 'investment' | 'person' }
   | { kind: 'plan'; planId?: ID; preset?: 'expense' | 'income' | 'transfer' }
   | { kind: 'valuation'; accountId: ID }
   | { kind: 'goal'; goalId?: ID; accountId?: ID }

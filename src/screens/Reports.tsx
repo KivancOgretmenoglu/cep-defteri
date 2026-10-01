@@ -1,12 +1,13 @@
 import { pct } from '../domain/tr';
 import { useMemo } from 'react';
-import { Download, ChevronRight } from 'lucide-react';
+import { Download, ChevronRight, ScrollText } from 'lucide-react';
 import type { Data, ID } from '../domain/types';
 import { formatMoney, type Money } from '../domain/money';
 import { addMonths, dayOfMonth, monthLabel, monthName, monthOf, monthShort, shortDate, type MonthKey } from '../domain/dates';
-import { budgetStatus, compareMonth, monthTrend, type Comparison } from '../domain/ledger';
+import { allTags, budgetStatus, compareMonth, monthTrend, tagSummary, type Comparison } from '../domain/ledger';
+import { monthEnd, monthStart } from '../domain/dates';
 import { MonthSwitcher, SectionHead } from '../ui/kit';
-import { go, useNav } from '../ui/nav';
+import { go, openSheet, useNav } from '../ui/nav';
 import { useData, useLookups } from '../ui/hooks';
 import { ClawdNote, EmptyState } from '../ui/ClawdNote';
 import { CatIcon } from '../ui/icons';
@@ -70,6 +71,11 @@ export function Reports() {
   const incomeRows = [...s.incomeBySource.entries()].sort((a, b) => b[1] - a[1]);
   const maxSpend = Math.max(1, ...spendRows.map(([, v]) => v));
   const maxInc = Math.max(1, ...incomeRows.map(([, v]) => v));
+  const tagRows = allTags(data)
+    .map((t) => ({ tag: t.tag, month: tagSummary(data, t.tag, monthStart(month), monthEnd(month)), all: tagSummary(data, t.tag) }))
+    .filter((r) => r.month.txCount > 0 || r.all.txCount > 0)
+    .sort((a, b) => b.month.spending - a.month.spending || b.all.spending - a.all.spending)
+    .slice(0, 8);
 
   if (data.txs.length === 0) {
     return (
@@ -90,6 +96,13 @@ export function Reports() {
       </header>
 
       <ClawdNote mood={comment.mood} text={comment.text} why={comment.why} outfit="scholar" size={84} />
+      {month < current && (
+        <button className="report-prompt" onClick={() => openSheet({ kind: 'reportCard', month })}>
+          <ScrollText size={20} aria-hidden />
+          <span><b>{monthLabel(month)} karnesi</b><small>Ayın özeti, paylaşılabilir resim</small></span>
+          <ChevronRight size={18} aria-hidden />
+        </button>
+      )}
 
       <div className="report-grid">
         <section className="card" aria-labelledby="sum-h">
@@ -166,6 +179,29 @@ export function Reports() {
           )}
           <p className="note-line">Transferler, yatırımdan çekimler, iadeler ve açılış bakiyeleri gelir sayılmaz.</p>
         </section>
+
+        {tagRows.length > 0 && (
+          <section className="card" aria-labelledby="tag-h">
+            <SectionHead id="tag-h" title="Etiketler" />
+            <ul className="bars">
+              {tagRows.map((r) => (
+                <li key={r.tag}>
+                  <button className="bar-row" onClick={() => go('tx', { filter: { tag: r.tag } })}>
+                    <span className="bar-row__head">
+                      <span className="bar-row__name">#{r.tag}</span>
+                      <span className="bar-row__val">
+                        {formatMoney(r.month.spending)}
+                        <small className="bar-row__delta">tüm zamanlar {formatMoney(r.all.spending)}</small>
+                      </span>
+                    </span>
+                    <ChevronRight size={16} className="bar-row__chev" aria-hidden />
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <p className="note-line">Bu ayki harcama ve etiketin tüm zamanlardaki toplamı (iadeler düşülmüş). Bir etiket birden çok kategoriye yayılabilir.</p>
+          </section>
+        )}
 
         <section className="card" aria-labelledby="trend-h">
           <SectionHead id="trend-h" title="Son 6 ay" />

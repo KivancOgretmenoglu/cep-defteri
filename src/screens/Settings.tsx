@@ -6,7 +6,7 @@ import { buildDemo } from '../domain/demo';
 import { parseBackup, serializeBackup, transactionsCSV, valuationsCSV } from '../domain/backup';
 import * as A from '../domain/actions';
 import { formatMoney } from '../domain/money';
-import { cashBalance, investmentState, isDaily } from '../domain/ledger';
+import { cashBalance, investmentState } from '../domain/ledger';
 import { commit, getState, replaceData, setMode, showToast, useStore } from '../store/store';
 import * as storage from '../store/storage';
 import { Chip, SectionHead, Segmented } from '../ui/kit';
@@ -116,16 +116,16 @@ export function Settings() {
           <ul className="acc-list">
             {data.accounts.map((a) => {
               const I = ACCOUNT_ICONS[a.kind];
-              const val = isDaily(a) ? cashBalance(data, a.id) : investmentState(data, a.id)!.currentValue;
+              const val = a.kind === 'investment' ? investmentState(data, a.id)!.currentValue : cashBalance(data, a.id);
               return (
                 <li key={a.id}>
                   <button className="acc-row" onClick={() => openSheet({ kind: 'account', accountId: a.id })}>
                     <I size={18} aria-hidden />
                     <span className="acc-row__name">
                       {a.name}
-                      <small>{a.kind === 'bank' ? 'Banka' : a.kind === 'cash' ? 'Nakit' : 'Yatırım'}{a.archived ? ' · arşivde' : ''}</small>
+                      <small>{a.kind === 'bank' ? 'Banka' : a.kind === 'cash' ? 'Nakit' : a.kind === 'person' ? (val > 0 ? 'kişi · sana borçlu' : val < 0 ? 'kişi · ona borçlusun' : 'kişi') : 'Yatırım'}{a.archived ? ' · arşivde' : ''}</small>
                     </span>
-                    <span className={a.kind === 'investment' ? 'tone-invest' : ''}>{formatMoney(val)}</span>
+                    <span className={a.kind === 'investment' ? 'tone-invest' : ''}>{a.kind === 'person' ? formatMoney(Math.abs(val)) : data.settings.hideTotals ? '••••• TL' : formatMoney(val)}</span>
                     <ChevronRight size={16} aria-hidden />
                   </button>
                 </li>
@@ -169,6 +169,10 @@ export function Settings() {
               </Chip>
             ))}
           </div>
+          <label className="check-row">
+            <input type="checkbox" checked={data.settings.clawdQuips} onChange={(e) => commit((d) => A.updateSettings(d, { clawdQuips: e.target.checked }))} />
+            <span>Clawd ara sıra espri yapsın<small>Kayıttan sonra kısa, yargılamayan şakalar ve ipuçları</small></span>
+          </label>
           <details className="details">
             <summary>Clawd nasıl karar verir?</summary>
             <ul className="rules">

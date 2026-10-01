@@ -1,10 +1,15 @@
 import { useMemo } from 'react';
-import { Settings, ChevronRight, Plus, Sprout, Info, CalendarClock } from 'lucide-react';
+import { Settings, ChevronRight, Plus, Sprout, Info, Eye, EyeOff, HandCoins, ScrollText, ChartLine } from 'lucide-react';
 import { formatMoney } from '../domain/money';
-import { dueLabel, monthLabel, monthOf, shortDate, monthName } from '../domain/dates';
+import { monthLabel, monthOf, shortDate, monthName } from '../domain/dates';
 import {
-  availability, budgetStatus, cashBalance, dailyBalance, investmentState, investmentTotal, isDaily, isInvestment, monthSummary, upcomingOutflows, pendingUntil, planIsInflow,
+  availability, balanceSeries, budgetStatus, cashBalance, dailyBalance, debtTotals, investmentState, investmentTotal, isDaily, isInvestment, monthSummary, pendingReportCard, personBalances, upcomingOutflows, pendingUntil, trackingStart,
 } from '../domain/ledger';
+import * as A from '../domain/actions';
+import { commit } from '../store/store';
+import { clawdEvent } from '../clawd/events';
+import { BalanceChart } from '../ui/BalanceChart';
+import { DueRow } from '../ui/DueRow';
 import { clawdMood } from '../domain/mood';
 import { addDays } from '../domain/dates';
 import { Amount, Progress, SectionHead } from '../ui/kit';
@@ -25,7 +30,11 @@ export function Home() {
     const budget = budgetStatus(data, month, today);
     const up = upcomingOutflows(data, today, 7);
     const soon = pendingUntil(data, addDays(today, 14)).slice(0, 6);
-    return { av, mood, sum, budget, up, soon };
+    const start = trackingStart(data);
+    const from = start && start > addDays(today, -29) ? start : addDays(today, -29);
+    const spark = start ? balanceSeries(data, from, today) : [];
+    const card = pendingReportCard(data, today);
+    return { av, mood, sum, budget, up, soon, spark, card };
   }, [data, today, month]);
   const { av, mood, sum, budget, soon } = d;
   const dailyAccs = data.accounts.filter((a) => isDaily(a) && (!a.archived || cashBalance(data, a.id) !== 0));
@@ -33,6 +42,14 @@ export function Home() {
   const recent = [...data.txs].sort((a, b) => (a.date === b.date ? b.seq - a.seq : a.date < b.date ? 1 : -1)).slice(0, 5);
   const daily = dailyBalance(data);
   const invTotal = investmentTotal(data);
+  const hide = data.settings.hideTotals;
+  const people = personBalances(data).filter((p) => p.balance !== 0 || !p.account.archived);
+  const debts = debtTotals(data);
+  const toggleHide = () => {
+    commit((x) => A.updateSettings(x, { hideTotals: !hide }));
+    clawdEvent({ type: 'hide-totals', hidden: !hide });
+  };
+  const H = (v: number) => (hide ? '••••• TL' : formatMoney(v));
   const periodText = data.settings.periodMode === 'days30' ? `önümüzdeki 30 gün (son gün ${shortDate(av.periodEnd)})` : `${monthName(month)} sonuna kadar`;
 
   return (
@@ -42,16 +59,29 @@ export function Home() {
           <p className="eyebrow">{monthLabel(month)}</p>
           <h1 className="wordmark">Cep Defteri</h1>
         </div>
-        <button className="icon-btn only-phone" onClick={() => go('settings')} aria-label="Ayarlar">
-          <Settings size={22} />
-        </button>
+        <div className="head-actions">
+          <button className="icon-btn" onClick={toggleHide} aria-pressed={hide} aria-label={hide ? 'Bakiyeleri göster' : 'Bakiyeleri gizle'} title={hide ? 'Bakiyeleri göster' : 'Bakiyeleri gizle'}>
+            {hide ? <EyeOff size={22} /> : <Eye size={22} />}
+          </button>
+          <button className="icon-btn only-phone" onClick={() => go('settings')} aria-label="Ayarlar">
+            <Settings size={22} />
+          </button>
+        </div>
       </header>
+
+      {d.card && (
+        <button className="report-prompt" onClick={() => openSheet({ kind: 'reportCard', month: d.card! })}>
+          <ScrollText size={20} aria-hidden />
+          <span><b>{monthName(d.card)} karnen hazır</b><small>Clawd ayın özetini çıkardı</small></span>
+          <ChevronRight size={18} aria-hidden />
+        </button>
+      )}
 
       <ClawdNote
         mood={mood.mood}
         text={mood.text}
         why={mood.why}
-        outfit={data.settings.clawd.homeOutfit}
+        outfit={hide ? 'spy' : data.settings.clawd.homeOutfit}
         action={
           mood.focus === 'accounts' ? <button className="link link--small" onClick={() => openSheet({ kind: 'account' })}>Hesap ekle</button>
           : mood.focus === 'add' ? <button className="link link--small" onClick={() => openSheet({ kind: 'add' })}>İlk kaydı gir</button>
@@ -72,12 +102,15 @@ export function Home() {
             <p className="muted">Bir hesap ekleyince burada ne kadarını rahatça harcayabileceğini göreceksin.</p>
           ) : (
             <>
-              <Amount value={av.available} size="xl" className={av.available < 0 ? 'tone-warn' : ''} />
-              {av.available > 0 && <p className="receipt__perday">günde yaklaşık <b>{formatMoney(av.perDay)}</b> · {av.daysLeft} gün</p>}
+              <div className="receipt__hero">
+                <Amount value={av.available} size="xl" hide={hide} className={av.available < 0 && !hide ? 'tone-warn' : ''} />
+                <button className="icon-btn icon-btn--small" onClick={toggleHide} aria-label={hide ? 'Bakiyeleri göster' : 'Bakiyeleri gizle'}>{hide ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+              </div>
+              {av.available > 0 && <p className="receipt__perday">günde yaklaşık <b>{H(av.perDay)}</b> · {av.daysLeft} gün</p>}
               <dl className="receipt__lines">
                 <div>
                   <dt>Günlük hesaplarda</dt>
-                  <dd>{formatMoney(av.dailyBalance)}</dd>
+                  <dd>{H(av.dailyBalance)}</dd>
                 </div>
                 <div>
                   <dt>
@@ -97,11 +130,22 @@ export function Home() {
                     <dd>{formatMoney(av.reserve)}</dd>
                   </div>
                 )}
+                {av.debtsOwed > 0 && (
+                  <div>
+                    <dt>− Arkadaşlara borcun</dt>
+                    <dd>{formatMoney(av.debtsOwed)}</dd>
+                  </div>
+                )}
                 <div className="receipt__total">
                   <dt>= Kullanılabilir</dt>
-                  <dd>{formatMoney(av.available)}</dd>
+                  <dd>{H(av.available)}</dd>
                 </div>
               </dl>
+              {av.debtsReceivable > 0 && (
+                <p className="receipt__note">
+                  <Info size={14} aria-hidden /> Sana borçlu olanların {formatMoney(av.debtsReceivable)} ödemesi gelene kadar hesaba katılmadı.
+                </p>
+              )}
               {av.expectedTotal > 0 && (
                 <p className="receipt__note">
                   <Info size={14} aria-hidden /> Beklenen {formatMoney(av.expectedTotal)} gelir henüz gelmediği için hesaba katılmadı.
@@ -126,22 +170,7 @@ export function Home() {
             </p>
           ) : (
             <ul className="due-list">
-              {soon.map((o) => {
-                const inflow = planIsInflow(o.plan, lookups.accounts);
-                return (
-                  <li key={o.plan.id + o.due} className={o.due < today ? 'is-overdue' : ''}>
-                    <CalendarClock size={18} aria-hidden />
-                    <span className="due-list__main">
-                      <span className="due-list__title">{o.plan.title}</span>
-                      <span className="due-list__sub">{shortDate(o.due, today)} · {dueLabel(o.due, today)}{inflow ? ' · beklenen' : ''}</span>
-                    </span>
-                    <span className={`due-list__amt ${inflow ? 'tone-pos' : o.plan.kind === 'transfer' ? 'tone-invest' : ''}`}>{inflow ? '+' : ''}{formatMoney(o.amount)}</span>
-                    <button className="btn btn--small btn--secondary" onClick={() => openSheet({ kind: 'confirm', planId: o.plan.id, due: o.due })}>
-                      {o.plan.kind === 'income' ? 'Geldi' : o.plan.kind === 'transfer' ? 'Aktarıldı' : 'Ödendi'}
-                    </button>
-                  </li>
-                );
-              })}
+              {soon.map((o) => <DueRow key={o.plan.id + o.due} o={o} today={today} accounts={lookups.accounts} />)}
             </ul>
           )}
           {d.up.total > 0 && <p className="note-line">Önümüzdeki 7 günde {formatMoney(d.up.total)} ödeme var{d.up.overdue.length ? `; ${d.up.overdue.length} tanesi gecikmiş görünüyor` : ''}.</p>}
@@ -175,6 +204,12 @@ export function Home() {
 
         <section className="card" aria-labelledby="acc-h">
           <SectionHead id="acc-h" title="Hesaplar" action={<button className="link" onClick={() => openSheet({ kind: 'account' })}><Plus size={16} /> Ekle</button>} />
+          {d.spark.length > 1 && (
+            <button className="spark-btn" onClick={() => go('balance')} aria-label="Bakiye geçmişini aç">
+              <BalanceChart history={d.spark} today={today} hide={hide} compact height={64} label="Son 30 günün bakiye grafiği" />
+              <span className="spark-btn__label"><ChartLine size={15} aria-hidden /> Bakiye geçmişi <ChevronRight size={15} aria-hidden /></span>
+            </button>
+          )}
           {dailyAccs.length === 0 && invAccs.length === 0 && <p className="muted">Henüz hesap yok.</p>}
           <ul className="acc-list">
             {dailyAccs.map((a) => {
@@ -184,7 +219,7 @@ export function Home() {
                   <button className="acc-row" onClick={() => go('tx', { filter: { accountId: a.id } })}>
                     <I size={18} aria-hidden />
                     <span className="acc-row__name">{a.name}{a.archived && <small> (arşiv)</small>}</span>
-                    <Amount value={cashBalance(data, a.id)} />
+                    <Amount value={cashBalance(data, a.id)} hide={hide} />
                   </button>
                 </li>
               );
@@ -192,7 +227,7 @@ export function Home() {
             {dailyAccs.length > 1 && (
               <li className="acc-total">
                 <span>Günlük hesaplar toplamı</span>
-                <Amount value={daily} />
+                <Amount value={daily} hide={hide} />
               </li>
             )}
           </ul>
@@ -210,14 +245,14 @@ export function Home() {
                           {a.name}
                           <small>değer {shortDate(st.lastValuation.date, today)}{st.flowsSinceValuation !== 0 ? ' + sonraki hareketler' : ''}</small>
                         </span>
-                        <Amount value={st.currentValue} tone="invest" />
+                        <Amount value={st.currentValue} tone="invest" hide={hide} />
                       </button>
                     </li>
                   );
                 })}
               </ul>
               <p className="acc-net">
-                Günlük hesaplar + yatırım = <b>{formatMoney(daily + invTotal)}</b>
+                Günlük hesaplar + yatırım = <b>{H(daily + invTotal)}</b>
                 <small>Yatırım harcanabilir paraya dahil değildir.</small>
               </p>
             </>
@@ -229,6 +264,27 @@ export function Home() {
           )}
         </section>
 
+
+        {people.length > 0 && (
+          <section className="card" aria-labelledby="debt-h">
+            <SectionHead id="debt-h" title="Borç ve alacak" action={<button className="link" onClick={() => go('people')}>Tümü <ChevronRight size={16} /></button>} />
+            <div className="debt-mini">
+              <span>Sana borçlu: <b className="tone-pos">{formatMoney(debts.receivable)}</b></span>
+              <span>Senin borcun: <b>{formatMoney(debts.owed)}</b></span>
+            </div>
+            <ul className="acc-list">
+              {people.filter((p) => p.balance !== 0).slice(0, 4).map((p) => (
+                <li key={p.account.id}>
+                  <button className="acc-row" onClick={() => go('people')}>
+                    <HandCoins size={18} aria-hidden />
+                    <span className="acc-row__name">{p.account.name}<small>{p.balance > 0 ? 'sana borçlu' : 'ona borçlusun'}</small></span>
+                    <span className={p.balance > 0 ? 'tone-pos amount' : 'amount'}>{formatMoney(Math.abs(p.balance))}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <section className="card" aria-labelledby="recent-h">
           <SectionHead id="recent-h" title="Son işlemler" action={data.txs.length > 0 && <button className="link" onClick={() => go('tx', { filter: {} })}>Tümü <ChevronRight size={16} /></button>} />

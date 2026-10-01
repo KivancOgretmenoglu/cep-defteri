@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Plus, House, ListOrdered, CalendarRange, ChartColumn, Sprout, Settings as Gear, AlertTriangle, FlaskConical, Undo2, X } from 'lucide-react';
+import { Plus, House, ListOrdered, CalendarRange, ChartColumn, Sprout, Settings as Gear, AlertTriangle, FlaskConical, Undo2, X, HandCoins } from 'lucide-react';
 import { dismissWarning, hideToast, setMode, undo, useStore } from './store/store';
 import { go, openSheet, useNav, closeSheet, type Screen } from './ui/nav';
 import { Home } from './screens/Home';
@@ -9,6 +9,10 @@ import { Invest } from './screens/Invest';
 import { Reports } from './screens/Reports';
 import { Settings } from './screens/Settings';
 import { Onboarding } from './screens/Onboarding';
+import { Balance } from './screens/Balance';
+import { People } from './screens/People';
+import { OccurrenceSheet, CancelPlanSheet } from './sheets/PlanSheets';
+import { ReportCardSheet } from './sheets/ReportCardSheet';
 import { TxSheet, RefundSheet, ConfirmSheet } from './sheets/TxSheet';
 import { AccountSheet, BudgetSheet, CategorySheet, GoalSheet, LimitSheet, PlanSheet, ValuationSheet } from './sheets/OtherSheets';
 
@@ -17,6 +21,7 @@ const NAV: { screen: Screen; label: string; icon: typeof House; phone: boolean }
   { screen: 'tx', label: 'İşlemler', icon: ListOrdered, phone: true },
   { screen: 'budget', label: 'Bütçe', icon: CalendarRange, phone: true },
   { screen: 'invest', label: 'Yatırım', icon: Sprout, phone: false },
+  { screen: 'people', label: 'Borçlar', icon: HandCoins, phone: false },
   { screen: 'reports', label: 'Raporlar', icon: ChartColumn, phone: true },
   { screen: 'settings', label: 'Ayarlar', icon: Gear, phone: false },
 ];
@@ -37,17 +42,23 @@ function SheetHost() {
   if (!sheet) return null;
   switch (sheet.kind) {
     case 'add':
-      return <TxSheet key="add" preset={sheet.preset} />;
+      return <TxSheet key={'add' + JSON.stringify(sheet.preset ?? {})} preset={sheet.preset} />;
     case 'edit':
       return <TxSheet key={'e' + sheet.txId} txId={sheet.txId} />;
     case 'refund':
       return <RefundSheet key={'r' + sheet.txId} txId={sheet.txId} />;
     case 'confirm':
       return <ConfirmSheet planId={sheet.planId} due={sheet.due} />;
+    case 'occurrence':
+      return <OccurrenceSheet key={sheet.planId + sheet.due} planId={sheet.planId} due={sheet.due} />;
+    case 'cancelPlan':
+      return <CancelPlanSheet planId={sheet.planId} />;
+    case 'reportCard':
+      return <ReportCardSheet month={sheet.month} />;
     case 'account':
-      return <AccountSheet accountId={sheet.accountId} kindPreset={sheet.kindPreset} />;
+      return <AccountSheet key={sheet.accountId ?? 'new-' + sheet.kindPreset} accountId={sheet.accountId} kindPreset={sheet.kindPreset} />;
     case 'plan':
-      return <PlanSheet planId={sheet.planId} preset={sheet.preset} />;
+      return <PlanSheet key={sheet.planId ?? 'new'} planId={sheet.planId} preset={sheet.preset} />;
     case 'valuation':
       return <ValuationSheet accountId={sheet.accountId} />;
     case 'goal':
@@ -102,7 +113,7 @@ export function App() {
     return () => window.removeEventListener('keydown', onKey);
   }, [sheet]);
 
-  const Main = { home: Home, tx: Transactions, budget: Budget, invest: Invest, reports: Reports, settings: Settings }[screen];
+  const Main = { home: Home, tx: Transactions, budget: Budget, invest: Invest, reports: Reports, settings: Settings, balance: Balance, people: People }[screen];
 
   return (
     <div className={`app ${showOnboarding ? 'app--onboarding' : ''}`}>

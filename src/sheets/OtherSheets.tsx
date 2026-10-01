@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Trash2, Archive, ArchiveRestore } from 'lucide-react';
+import { Trash2, Archive, ArchiveRestore, Ban, RotateCw } from 'lucide-react';
 import type { AccountKind, Freq, ID, PlanKind } from '../domain/types';
 import * as A from '../domain/actions';
 import { formatMoney, parseMoney } from '../domain/money';
 import { shortDate } from '../domain/dates';
-import { cashBalance, investmentState, isDaily, isInvestment } from '../domain/ledger';
+import { cashBalance, installmentEnd, investmentState, isDaily, isInvestment } from '../domain/ledger';
 import { commit } from '../store/store';
-import { closeSheet } from '../ui/nav';
+import { closeSheet, openSheet } from '../ui/nav';
 import { Chip, Field, FormError, MoneyInput, Segmented, Sheet, inputFromMoney } from '../ui/kit';
 import { CATEGORY_COLORS, CATEGORY_ICONS, CatIcon } from '../ui/icons';
 import { dailyAccounts, useData, useLookups } from '../ui/hooks';
@@ -20,21 +20,24 @@ const parseSigned = (raw: string) => {
 };
 
 // ───────────────────────── Hesap ─────────────────────────
-export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPreset?: 'investment' }) {
+export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPreset?: 'investment' | 'person' }) {
   const { data, today } = useData();
   const acc = accountId ? data.accounts.find((a) => a.id === accountId) : undefined;
   const used = acc ? A.isAccountUsed(data, acc.id) : false;
   const [name, setName] = useState(acc?.name ?? (kindPreset === 'investment' ? 'Yatırım hesabı' : ''));
   const [kind, setKind] = useState<AccountKind>(acc?.kind ?? kindPreset ?? 'bank');
-  const [opening, setOpening] = useState(acc ? (acc.openingBalance < 0 ? '-' : '') + inputFromMoney(Math.abs(acc.openingBalance)) : '');
+  const [opening, setOpening] = useState(acc ? inputFromMoney(Math.abs(acc.openingBalance)) : '');
+  // Kişi hesabında açılış yönü: + o bana borçlu, − ben ona borçluyum
+  const [owesDir, setOwesDir] = useState<'none' | 'they' | 'me'>(acc?.kind === 'person' ? (acc.openingBalance > 0 ? 'they' : acc.openingBalance < 0 ? 'me' : 'none') : 'none');
   const [openingDate, setOpeningDate] = useState(acc?.openingDate ?? today);
   const [priorKnown, setPriorKnown] = useState(acc?.priorContribution != null);
   const [prior, setPrior] = useState(inputFromMoney(acc?.priorContribution ?? null));
   const [err, setErr] = useState<string | null>(null);
 
   function save() {
-    const ob = parseSigned(opening);
+    let ob = parseSigned(opening);
     if (ob === null) return setErr('Tutarı 1.250,50 gibi yaz.');
+    if (kind === 'person') ob = owesDir === 'none' ? 0 : owesDir === 'they' ? Math.abs(ob) : -Math.abs(ob);
     let pc: number | null = null;
     if (kind === 'investment' && priorKnown) {
       pc = prior.trim() ? parseSigned(prior) : 0;
@@ -60,7 +63,7 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
 
   return (
     <Sheet
-      title={acc ? 'Hesabı düzenle' : kind === 'investment' ? 'Yatırım hesabı ekle' : 'Hesap ekle'}
+      title={acc ? (kind === 'person' ? 'Kişiyi düzenle' : 'Hesabı düzenle') : kind === 'investment' ? 'Yatırım hesabı ekle' : kind === 'person' ? 'Kişi ekle' : 'Hesap ekle'}
       onClose={closeSheet}
       footer={
         <div className="sheet-actions">
@@ -87,12 +90,20 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
             { value: 'bank', label: 'Banka' },
             { value: 'cash', label: 'Nakit' },
             { value: 'investment', label: 'Yatırım' },
+            { value: 'person', label: 'Kişi' },
           ]}
         />
       )}
-      <Field label="Hesap adı">
-        <input className="input" value={name} maxLength={40} onChange={(e) => setName(e.target.value)} placeholder={kind === 'cash' ? 'Cüzdan' : kind === 'bank' ? 'ör. Banka kartı' : 'ör. Fon hesabı'} />
+      <Field label={kind === 'person' ? 'Kişinin adı' : 'Hesap adı'}>
+        <input className="input" value={name} maxLength={40} onChange={(e) => setName(e.target.value)} placeholder={kind === 'cash' ? 'Cüzdan' : kind === 'bank' ? 'ör. Banka kartı' : kind === 'person' ? 'ör. Ali' : 'ör. Fon hesabı'} />
       </Field>
+      {kind === 'person' ? (
+        <div className="callout">
+          <p><b>Şu an aranızda borç var mı?</b> Bu bir başlangıç durumudur; gelir ya da gider sayılmaz.</p>
+          <Segmented size="sm" label="Borç durumu" value={owesDir} onChange={setOwesDir} options={[{ value: 'none', label: 'Yok' }, { value: 'they', label: 'O bana borçlu' }, { value: 'me', label: 'Ben borçluyum' }]} />
+          {owesDir !== 'none' && <MoneyInput label="Tutar" value={opening} onChange={setOpening} />}
+        </div>
+      ) : (
       <MoneyInput
         label={kind === 'investment' ? 'Takibe başladığın gün hesabın değeri' : 'Takibe başladığın gün hesaptaki para'}
         value={opening}
@@ -100,6 +111,7 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
         allowZero
         placeholder="0"
       />
+      )}
       <Field label="Takip başlangıcı" hint="Bu tarihten önceki hareketler girilmez; açılış tutarı gelir sayılmaz.">
         <input className="input" type="date" value={openingDate} max={today} onChange={(e) => e.target.value && setOpeningDate(e.target.value)} />
       </Field>
@@ -115,6 +127,10 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
           {priorKnown && <MoneyInput label="Takip öncesi net katkı" value={prior} onChange={setPrior} allowZero />}
         </div>
       )}
+      {acc?.kind === 'person' && (() => {
+        const b = cashBalance(data, acc.id);
+        return <p className="note-line">Şu anki durum: {b === 0 ? 'hesap kapalı' : b > 0 ? `sana ${formatMoney(b)} borçlu` : `ona ${formatMoney(-b)} borçlusun`}. Hesap kapanınca arşivleyebilirsin.</p>;
+      })()}
       {balanceNow !== null && (
         <p className="note-line">Güncel bakiye: {formatMoney(balanceNow)} (açılış + tüm hareketler)</p>
       )}
@@ -182,13 +198,20 @@ export function PlanSheet({ planId, preset }: { planId?: ID; preset?: PlanKind }
   const [freq, setFreq] = useState<Freq>(plan?.freq ?? 'monthly');
   const [startDate, setStartDate] = useState(plan?.startDate ?? today);
   const [endDate, setEndDate] = useState(plan?.endDate ?? '');
+  const [instOn, setInstOn] = useState(!!plan?.installments);
+  const [instN, setInstN] = useState(String(plan?.installments ?? 6));
   const [err, setErr] = useState<string | null>(null);
   const { accounts } = useLookups(data);
+  const ended = !!plan?.endDate && plan.endDate < today;
+  const canInstall = kind === 'expense' && freq === 'monthly';
 
   function save() {
     const amt = parseMoney(amount);
     if (!amt) return setErr('Tutarı yaz.');
-    const draft: A.PlanDraft = { kind, title, amount: amt, accountId, categoryId, toAccountId, freq, startDate, endDate: endDate || null };
+    const n = Number(instN);
+    const useInst = canInstall && instOn;
+    if (useInst && (!Number.isInteger(n) || n < 2 || n > 60)) return setErr('Taksit sayısı 2 ile 60 arasında olmalı.');
+    const draft: A.PlanDraft = { kind, title, amount: amt, accountId, categoryId, toAccountId, freq, startDate, endDate: useInst ? null : endDate || null, installments: useInst ? n : null };
     const e = plan ? commit((d) => A.updatePlan(d, plan.id, draft), 'Plan güncellendi') : commit((d) => A.addPlan(d, draft).data, 'Plan eklendi');
     if (e) setErr(e);
     else closeSheet();
@@ -203,13 +226,30 @@ export function PlanSheet({ planId, preset }: { planId?: ID; preset?: PlanKind }
 
   return (
     <Sheet
-      title={plan ? 'Planı düzenle' : 'Plan ekle'}
+      title={plan ? (ended ? 'Biten plan' : 'Planı düzenle') : 'Plan ekle'}
       onClose={closeSheet}
       footer={
         <div className="sheet-actions">
           {plan && (
-            <button className="btn btn--ghost btn--danger" onClick={remove}>
-              <Trash2 size={18} /> Sil
+            <button className="btn btn--ghost btn--danger icon-only-phone" onClick={remove} aria-label="Planı sil">
+              <Trash2 size={18} /> <span>Sil</span>
+            </button>
+          )}
+          {plan && !ended && (
+            <button className="btn btn--ghost" onClick={() => openSheet({ kind: 'cancelPlan', planId: plan.id })}>
+              <Ban size={18} /> İptal et
+            </button>
+          )}
+          {plan && ended && (
+            <button
+              className="btn btn--ghost"
+              onClick={() => {
+                const e = commit((d, t) => A.restartPlan(d, plan.id, t).data, `${plan.title} bugünden yeniden başladı`);
+                if (e) setErr(e);
+                else closeSheet();
+              }}
+            >
+              <RotateCw size={18} /> Yeniden başlat
             </button>
           )}
           <button className="btn btn--primary btn--grow" onClick={save}>Kaydet</button>
@@ -275,12 +315,32 @@ export function PlanSheet({ planId, preset }: { planId?: ID; preset?: PlanKind }
         <Field label={freq === 'once' ? 'Tarih' : 'İlk vade'}>
           <input className="input" type="date" value={startDate} onChange={(e) => e.target.value && setStartDate(e.target.value)} />
         </Field>
-        {freq !== 'once' && (
+        {freq !== 'once' && !(canInstall && instOn) && (
           <Field label="Bitiş (isteğe bağlı)">
             <input className="input" type="date" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} />
           </Field>
         )}
       </div>
+      {canInstall && (
+        <div className="callout">
+          <div className="chip-row">
+            <Chip on={instOn} onClick={() => setInstOn(!instOn)}>{instOn ? '✓ ' : ''}Taksitli ödeme</Chip>
+          </div>
+          {instOn && (
+            <>
+              <Field label="Taksit sayısı">
+                <input className="input input--small" inputMode="numeric" value={instN} onChange={(e) => setInstN(e.target.value.replace(/\D/g, '').slice(0, 2))} />
+              </Field>
+              {(() => {
+                const a = parseMoney(amount), n = Number(instN);
+                return a && n >= 2 && n <= 60 ? <p className="note-line">Aylık {formatMoney(a)} × {n} taksit = toplam <b>{formatMoney(a * n)}</b>. Son taksit {shortDate(installmentEnd(startDate, n), today)}.</p> : null;
+              })()}
+              <p className="note-line">Tutar alanına <b>bir taksitin</b> tutarını yaz. Her taksit vadesinde ayrı ayrı “Ödendi” ile kaydedilir.</p>
+            </>
+          )}
+        </div>
+      )}
+      {ended && <p className="note-line">Bu plan {shortDate(plan!.endDate!, today)} tarihinde bitti/iptal edildi. Geçmiş kayıtları duruyor.</p>}
       <p className="note-line">
         Vadesi gelince kendiliğinden gerçekleşmez; “{kind === 'income' ? 'Geldi' : kind === 'transfer' ? 'Aktarıldı' : 'Ödendi'}” deyip tutarı düzeltebilirsin.
         {kind === 'income' && ' Beklenen gelir, gelene kadar bakiyeye ve kullanılabilir paraya eklenmez.'}

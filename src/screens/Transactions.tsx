@@ -3,7 +3,7 @@ import { Search, X } from 'lucide-react';
 import type { Tx } from '../domain/types';
 import { formatMoney } from '../domain/money';
 import { monthEnd, monthOf, monthStart, relativeDay, type MonthKey } from '../domain/dates';
-import { rangeSummary, transferKind, refundCategory } from '../domain/ledger';
+import { allTags, rangeSummary, transferKind, refundCategory } from '../domain/ledger';
 import { Chip, MonthSwitcher } from '../ui/kit';
 import { TxRow, txView } from '../ui/TxRow';
 import { setFilter, useNav, openSheet, type TxFilter } from '../ui/nav';
@@ -16,13 +16,15 @@ const KINDS: { value: NonNullable<TxFilter['kind']>; label: string }[] = [
   { value: 'income', label: 'Gelir' },
   { value: 'transfer', label: 'Transfer' },
   { value: 'invest', label: 'Yatırım' },
+  { value: 'debt', label: 'Borç' },
 ];
 
 export function Transactions() {
   const { data, today } = useData();
   const lookups = useLookups(data);
   const { filter } = useNav();
-  const month: MonthKey | 'all' = filter.month ?? (filter.accountId ? 'all' : monthOf(today));
+  // Hesap ya da etiket seçilince varsayılan olarak tüm zamanlar gösterilir (ör. bir gezinin toplamı).
+  const month: MonthKey | 'all' = filter.month ?? (filter.accountId || filter.tag ? 'all' : monthOf(today));
   const kind = filter.kind ?? 'all';
   const [q, setQ] = useState('');
 
@@ -36,17 +38,20 @@ export function Transactions() {
         if (kind === 'income') return t.type === 'income';
         const k = t.type === 'transfer' ? transferKind(t, lookups.accounts) : null;
         if (kind === 'invest') return k === 'contribution' || k === 'withdrawal';
+        if (kind === 'debt') return k === 'debt' || (t.type === 'expense' && lookups.accounts.get(t.accountId)?.kind === 'person');
         return k === 'internal';
       })
       .filter((t) => !filter.accountId || t.accountId === filter.accountId || t.toAccountId === filter.accountId)
+      .filter((t) => !filter.tag || t.tags?.includes(filter.tag))
       .filter((t) => !filter.categoryId || (t.type === 'refund' ? refundCategory(t, lookups.txById) : t.categoryId) === filter.categoryId)
       .filter((t) => {
         if (!needle) return true;
         const v = txView(t, lookups.accounts, lookups.cats, lookups.txById);
-        return `${v.title} ${v.sub} ${formatMoney(t.amount)}`.toLocaleLowerCase('tr').includes(needle);
+        return `${v.title} ${v.sub} ${formatMoney(t.amount)} ${(t.tags ?? []).map((x) => '#' + x).join(' ')}`.toLocaleLowerCase('tr').includes(needle);
       })
       .sort((a, b) => (a.date === b.date ? b.seq - a.seq : a.date < b.date ? 1 : -1));
-  }, [data, month, kind, filter.accountId, filter.categoryId, q, lookups]);
+  }, [data, month, kind, filter.accountId, filter.categoryId, filter.tag, q, lookups]);
+  const tagList = useMemo(() => allTags(data).slice(0, 12), [data]);
 
   const groups = useMemo(() => {
     const g: { date: string; txs: Tx[] }[] = [];
@@ -90,6 +95,15 @@ export function Transactions() {
             <Chip key={k.value} on={kind === k.value} onClick={() => setFilter({ ...filter, kind: k.value })}>{k.label}</Chip>
           ))}
         </div>
+        {tagList.length > 0 && (
+          <div className="chip-row chip-row--scroll" role="group" aria-label="Etiket filtresi">
+            {tagList.map((t) => (
+              <Chip key={t.tag} className="chip--small" on={filter.tag === t.tag} onClick={() => setFilter({ ...filter, tag: filter.tag === t.tag ? undefined : t.tag, month: filter.tag === t.tag ? filter.month : undefined })}>
+                #{t.tag} <span className="chip__meta">{t.count}</span>
+              </Chip>
+            ))}
+          </div>
+        )}
         {(acc || cat) && (
           <div className="chip-row">
             {acc && (

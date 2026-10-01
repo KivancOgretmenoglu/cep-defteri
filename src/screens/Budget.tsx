@@ -1,10 +1,10 @@
 import { pct } from '../domain/tr';
 import { useMemo, useState } from 'react';
-import { Plus, CalendarClock, Pencil, Repeat } from 'lucide-react';
+import { Plus, Pencil, Repeat } from 'lucide-react';
 import type { Plan } from '../domain/types';
 import { formatMoney, parseMoney } from '../domain/money';
-import { addDays, daysInMonth, dayOfMonth, dueLabel, monthLabel, monthOf, shortDate } from '../domain/dates';
-import { accountIndex, availability, budgetStatus, occurrences, pendingUntil, planIsInflow, type BudgetState } from '../domain/ledger';
+import { addDays, daysInMonth, dayOfMonth, monthLabel, monthOf, shortDate } from '../domain/dates';
+import { accountIndex, availability, budgetStatus, occurrences, pendingUntil, type BudgetState } from '../domain/ledger';
 import * as A from '../domain/actions';
 import { commit } from '../store/store';
 import { Chip, Progress, SectionHead, Segmented, inputFromMoney } from '../ui/kit';
@@ -12,6 +12,7 @@ import { go, openSheet } from '../ui/nav';
 import { useData, useLookups } from '../ui/hooks';
 import { ClawdNote, EmptyState } from '../ui/ClawdNote';
 import { CatIcon } from '../ui/icons';
+import { DueRow } from '../ui/DueRow';
 import type { Mood } from '../domain/mood';
 
 const FREQ_LABEL = { once: 'Bir kez', weekly: 'Her hafta', monthly: 'Her ay', yearly: 'Her yıl' } as const;
@@ -40,6 +41,24 @@ export function Budget() {
     [data, month, today],
   );
   const left = daysInMonth(month) - dayOfMonth(today) + 1;
+  const sortedPlans = [...data.plans].sort((a, b) => a.title.localeCompare(b.title, 'tr'));
+  const activePlans = sortedPlans.filter((p) => !p.endDate || p.endDate >= today);
+  const endedPlans = sortedPlans.filter((p) => p.endDate && p.endDate < today);
+  const PlanRow = ({ p }: { p: Plan }) => (
+    <li>
+      <button className="plan-row" onClick={() => openSheet({ kind: 'plan', planId: p.id })}>
+        <Repeat size={16} aria-hidden />
+        <span className="plan-row__main">
+          <span>{p.title}{p.installments ? <span className="tag">{p.installments} taksit</span> : null}</span>
+          <small>
+            {FREQ_LABEL[p.freq]} · {p.kind === 'transfer' ? `${accounts.get(p.accountId)?.name} → ${accounts.get(p.toAccountId!)?.name}` : `${cats.get(p.categoryId!)?.name ?? ''} · ${accounts.get(p.accountId)?.name ?? ''}`}
+            {p.endDate ? (p.endDate < today ? ` · ${shortDate(p.endDate, today)} tarihinde bitti` : ` · son vade ${shortDate(p.endDate, today)}`) : ''}
+          </small>
+        </span>
+        <span className={p.kind === 'income' ? 'tone-pos' : p.kind === 'transfer' ? 'tone-invest' : ''}>{p.kind === 'income' ? '+' : ''}{formatMoney(p.amount)}</span>
+      </button>
+    </li>
+  );
 
   let note: { text: string; why: string; mood: Mood } | null = null;
   if (b.budget !== null) {
@@ -127,26 +146,7 @@ export function Budget() {
           <p className="muted">45 gün içinde bekleyen plan yok. Yurt, abonelik, burs gibi düzenli kalemleri ekleyince kullanılabilir paran daha gerçekçi olur.</p>
         ) : (
           <ul className="due-list">
-            {upcoming.map((o) => {
-              const inflow = planIsInflow(o.plan, accIdx);
-              return (
-                <li key={o.plan.id + o.due} className={o.due < today ? 'is-overdue' : ''}>
-                  <CalendarClock size={18} aria-hidden />
-                  <span className="due-list__main">
-                    <span className="due-list__title">{o.plan.title}</span>
-                    <span className="due-list__sub">
-                      {shortDate(o.due, today)} · {dueLabel(o.due, today)}
-                      {inflow ? ' · beklenen gelir' : o.plan.kind === 'transfer' ? ' · aktarım' : ''}
-                      {o.due <= av.periodEnd && !inflow ? ' · ayrıldı' : ''}
-                    </span>
-                  </span>
-                  <span className={`due-list__amt ${inflow ? 'tone-pos' : o.plan.kind === 'transfer' ? 'tone-invest' : ''}`}>{inflow ? '+' : ''}{formatMoney(o.amount)}</span>
-                  <button className="btn btn--small btn--secondary" onClick={() => openSheet({ kind: 'confirm', planId: o.plan.id, due: o.due })}>
-                    {o.plan.kind === 'income' ? 'Geldi' : o.plan.kind === 'transfer' ? 'Aktarıldı' : 'Ödendi'}
-                  </button>
-                </li>
-              );
-            })}
+            {upcoming.map((o) => <DueRow key={o.plan.id + o.due} o={o} today={today} accounts={accIdx} reserved={o.due <= av.periodEnd} />)}
           </ul>
         )}
         {doneThisMonth.length > 0 && (
@@ -182,23 +182,19 @@ export function Budget() {
             <Chip onClick={() => openSheet({ kind: 'plan', preset: 'transfer' })}><Plus size={14} /> Aylık yatırım</Chip>
           </div>
         ) : (
-          <ul className="plan-list">
-            {[...data.plans].sort((a, b) => a.title.localeCompare(b.title, 'tr')).map((p: Plan) => (
-              <li key={p.id}>
-                <button className="plan-row" onClick={() => openSheet({ kind: 'plan', planId: p.id })}>
-                  <Repeat size={16} aria-hidden />
-                  <span className="plan-row__main">
-                    <span>{p.title}</span>
-                    <small>
-                      {FREQ_LABEL[p.freq]} · {p.kind === 'transfer' ? `${accounts.get(p.accountId)?.name} → ${accounts.get(p.toAccountId!)?.name}` : `${cats.get(p.categoryId!)?.name ?? ''} · ${accounts.get(p.accountId)?.name ?? ''}`}
-                      {p.endDate ? ` · ${shortDate(p.endDate, today)} bitiş` : ''}
-                    </small>
-                  </span>
-                  <span className={p.kind === 'income' ? 'tone-pos' : p.kind === 'transfer' ? 'tone-invest' : ''}>{p.kind === 'income' ? '+' : ''}{formatMoney(p.amount)}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
+          <>
+            <ul className="plan-list">
+              {activePlans.map((p) => <PlanRow key={p.id} p={p} />)}
+            </ul>
+            {endedPlans.length > 0 && (
+              <details className="details">
+                <summary>Biten / iptal edilen planlar ({endedPlans.length})</summary>
+                <ul className="plan-list plan-list--ended">
+                  {endedPlans.map((p) => <PlanRow key={p.id} p={p} />)}
+                </ul>
+              </details>
+            )}
+          </>
         )}
       </section>
 

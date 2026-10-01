@@ -4,7 +4,18 @@ import { formatMoney, moneyParts, moneyToInput, parseMoney, type Money } from '.
 import { addMonths, monthLabel, type MonthKey } from '../domain/dates';
 
 // ── Tutar gösterimi ────────────────────────────────────
-export function Amount({ value, size = 'md', sign = false, tone, className = '' }: { value: Money; size?: 'sm' | 'md' | 'lg' | 'xl'; sign?: boolean; tone?: 'pos' | 'neg' | 'invest' | 'muted'; className?: string }) {
+/** Gizli tutar gösterimi (bakiye gizleme açıkken). */
+export const HIDDEN = '•••••';
+
+export function Amount({ value, size = 'md', sign = false, tone, className = '', hide = false }: { value: Money; size?: 'sm' | 'md' | 'lg' | 'xl'; sign?: boolean; tone?: 'pos' | 'neg' | 'invest' | 'muted'; className?: string; hide?: boolean }) {
+  if (hide)
+    return (
+      <span className={`amount amount--${size} amount--hidden ${tone ? 'tone-' + tone : ''} ${className}`} aria-label="gizli tutar">
+        {HIDDEN}
+        {(size === 'xl' || size === 'lg') && <span className="amount__unit"> TL</span>}
+        {size !== 'xl' && size !== 'lg' && ' TL'}
+      </span>
+    );
   if (size === 'xl' || size === 'lg') {
     const p = moneyParts(value);
     const plus = sign && value > 0 ? '+' : '';

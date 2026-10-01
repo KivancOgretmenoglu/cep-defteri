@@ -48,6 +48,8 @@ export function clawdMood(data: Data, today: ISODate): MoodResult {
 
   const month = monthOf(today);
   const av = availability(data, today);
+  // Bakiye gizliyken toplam bakiyeden türeyen tutarlar notta da gizlenir.
+  const tlb = (k: number) => (data.settings.hideTotals ? '••••• TL' : tl(k));
   const budget = budgetStatus(data, month, today);
   const goals = data.goals.map((g) => goalProgress(data, g)).filter((g) => g !== null);
 
@@ -57,7 +59,7 @@ export function clawdMood(data: Data, today: ISODate): MoodResult {
     const commitments = av.paymentsTotal + av.reserve + av.debtsOwed;
     return {
       mood: 'thoughtful',
-      text: `${shortDate(av.periodEnd)} tarihine kadar ayrılması gereken ${tl(commitments)} var, hesaplarında ${tl(av.dailyBalance)} bulunuyor. Aradaki ${tl(commitments - av.dailyBalance)} için yaklaşan ödemelere birlikte bakalım.`,
+      text: `${shortDate(av.periodEnd)} tarihine kadar ayrılması gereken ${tl(commitments)} var, hesaplarında ${tlb(av.dailyBalance)} bulunuyor. Aradaki ${tlb(commitments - av.dailyBalance)} için yaklaşan ödemelere birlikte bakalım.`,
       why: `Kural: günlük hesap bakiyesi, dönem sonuna kadarki bekleyen ödemeler${av.reserve ? ', birikim payı' : ''}${av.debtsOwed ? ', arkadaşlara borcun' : ''} toplamından az. Bu bir uyarı, suçlama değil.`,
       focus: 'upcoming',
     };
@@ -110,7 +112,7 @@ export function clawdMood(data: Data, today: ISODate): MoodResult {
       const up = upcomingOutflows(data, today, 7);
       return {
         mood: 'thoughtful',
-        text: `Yaklaşan ${tl(av.paymentsTotal)} ödeme ayrılınca günde yaklaşık ${tl(av.perDay)} kalıyor; bütçen günde ${tl(typicalDaily)} öngörüyor.${up.total > 0 ? ` Önümüzdeki 7 günde ${tl(up.total)} ödeme var.` : ''}`,
+        text: `Yaklaşan ${tl(av.paymentsTotal)} ödeme ayrılınca günde yaklaşık ${tlb(av.perDay)} kalıyor; bütçen günde ${tl(typicalDaily)} öngörüyor.${up.total > 0 ? ` Önümüzdeki 7 günde ${tl(up.total)} ödeme var.` : ''}`,
         why: 'Kural: bekleyen ödemeler ayrıldıktan sonra günlük kullanılabilir pay, aylık bütçenin günlük payının yarısının altında.',
         focus: 'available',
       };

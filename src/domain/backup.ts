@@ -179,10 +179,11 @@ const csvAmount = (k: number) => {
 };
 
 export function txTypeLabel(t: Tx, data: Data): string {
-  if (t.type === 'expense') return 'Gider';
+  if (t.type === 'expense') return accountIndex(data).get(t.accountId)?.kind === 'person' ? 'Gider (başkası ödedi)' : 'Gider';
   if (t.type === 'income') return 'Gelir';
   if (t.type === 'refund') return 'İade';
   const k = transferKind(t, accountIndex(data));
+  if (k === 'debt') return 'Borç / alacak';
   return k === 'contribution' ? 'Yatırıma aktarım' : k === 'withdrawal' ? 'Yatırımdan çekim' : 'Hesaplar arası transfer';
 }
 
@@ -193,7 +194,7 @@ export function transactionsCSV(data: Data): string {
   const acc = accountIndex(data);
   const cats = new Map(data.categories.map((c) => [c.id, c]));
   const txById = new Map(data.txs.map((t) => [t.id, t]));
-  const header = ['Tarih', 'Tür', 'Tutar', 'Hesap', 'Hedef hesap', 'Kategori', 'Not', 'Planlı'];
+  const header = ['Tarih', 'Tür', 'Tutar', 'Hesap', 'Hedef hesap', 'Kategori', 'Not', 'Planlı', 'Etiketler'];
   const rows = [...data.txs]
     .sort((a, b) => (a.date === b.date ? a.seq - b.seq : a.date < b.date ? -1 : 1))
     .map((t) => {
@@ -207,6 +208,7 @@ export function transactionsCSV(data: Data): string {
         catId ? cats.get(catId)?.name ?? '' : '',
         t.note ?? '',
         t.planRef ? 'Evet' : '',
+        (t.tags ?? []).join(', '),
       ];
     });
   return '﻿' + [header, ...rows].map((r) => r.map(csvCell).join(';')).join('\r\n') + '\r\n';
