@@ -482,3 +482,115 @@ describe('bağımsız denetimde bulunan hatalar (regresyon)', () => {
     expect(mutate((x) => x.goals.push({ id: 'g', title: 'x', target: -1, accountId: bank, createdAt: 0 }))).toBe(false);
   });
 });
+
+describe('ikinci paket: borç/alacak, taksit, plan iptali, etiket, bakiye geçmişi, ay karnesi', () => {
+  function withFriend() {
+    const s = setup();
+    const f = A.addAccount(s.d, { name: 'Ali', kind: 'person', openingBalance: 0, openingDate: '2026-09-01' });
+    return { ...s, d: f.data, ali: f.account.id };
+  }
+
+  it('hesabı bölüşmek: kendi payın gider, arkadaşın payı alacak; geri ödeme gelir değil', () => {
+    let { d, bank, ali } = withFriend();
+    // 300 TL'lik yemek: 150 benim payım (gider), 150 Ali'nin (alacak)
+    d = add(d, { type: 'expense', amount: TL(150), date: '2026-10-10', accountId: bank, categoryId: 'e-food' }).data;
+    d = add(d, { type: 'transfer', amount: TL(150), date: '2026-10-10', accountId: bank, toAccountId: ali }).data;
+    expect(L.cashBalance(d, bank)).toBe(TL(9700));
+    expect(L.cashBalance(d, ali)).toBe(TL(150)); // Ali bana borçlu
+    expect(L.monthSummary(d, '2026-10').spending).toBe(TL(150));
+    expect(L.dailyBalance(d)).toBe(TL(9700)); // kişi hesabı günlük bakiyeye girmez
+    expect(L.availability(d, TODAY).debtsReceivable).toBe(TL(150));
+    expect(L.availability(d, TODAY).available).toBe(TL(9700)); // alacak gelene kadar eklenmez
+    // Ali öder
+    d = add(d, { type: 'transfer', amount: TL(150), date: '2026-10-12', accountId: ali, toAccountId: bank }).data;
+    expect(L.cashBalance(d, ali)).toBe(0);
+    expect(L.monthSummary(d, '2026-10').income).toBe(0);
+    expect(L.cashBalance(d, bank)).toBe(TL(9850));
+  });
+
+  it('başkası ödedi: gider kaydedilir, borç kullanılabilir paradan düşülür, ödeyince kapanır', () => {
+    let { d, bank, ali } = withFriend();
+    d = add(d, { type: 'expense', amount: TL(80), date: '2026-10-10', accountId: ali, categoryId: 'e-food' }).data;
+    expect(L.monthSummary(d, '2026-10').spending).toBe(TL(80));
+    expect(L.cashBalance(d, ali)).toBe(TL(-80));
+    expect(L.dailyBalance(d)).toBe(TL(10000));
+    const av = L.availability(d, TODAY);
+    expect(av.debtsOwed).toBe(TL(80));
+    expect(av.available).toBe(TL(10000 - 80));
+    d = add(d, { type: 'transfer', amount: TL(80), date: '2026-10-11', accountId: bank, toAccountId: ali }).data;
+    expect(L.monthSummary(d, '2026-10').spending).toBe(TL(80)); // geri ödeme ikinci kez gider değil
+    expect(L.availability(d, TODAY).available).toBe(TL(9920));
+    expect(() => add(d, { type: 'income', amount: TL(10), date: TODAY, accountId: ali, categoryId: 'i-gift' })).toThrow();
+  });
+
+  it('taksit: bitiş tarihi ve taksit numarası; iptal sonrası vadeler oluşmaz, geçmiş korunur', () => {
+    let { d, bank } = setup();
+    const p = A.addPlan(d, { kind: 'expense', title: 'Telefon', amount: TL(1200), accountId: bank, categoryId: 'e-phone', freq: 'monthly', startDate: '2026-09-31'.replace('31', '30'), installments: 6 });
+    d = p.data;
+    expect(p.plan.endDate).toBe('2027-02-28');
+    const occ = L.occurrences(d, '2026-09-01', '2027-12-31');
+    expect(occ).toHaveLength(6);
+    expect(L.installmentNo(p.plan, occ[2].due)).toBe(3);
+    d = A.confirmOccurrence(d, p.plan.id, '2026-09-30', {}, TODAY).data;
+    d = A.cancelPlan(d, p.plan.id, TODAY, true);
+    const after = L.occurrences(d, '2026-09-01', '2027-12-31');
+    expect(after.map((o) => o.status)).toEqual(['done']);
+    expect(L.monthSummary(d, '2026-09').spending).toBe(TL(1200));
+    // iptal edilmiş taksitli plan düzenlenince iptal geri gelmez
+    const pl = d.plans[0];
+    d = A.updatePlan(d, pl.id, { ...pl, title: 'Telefon taksiti' });
+    expect(d.plans[0].title).toBe('Telefon taksiti');
+    expect(L.occurrences(d, '2026-09-01', '2027-12-31')).toHaveLength(1);
+    // yeniden başlatma yeni plan olarak
+    const r = A.restartPlan(d, pl.id, '2026-11-01');
+    expect(r.data.plans).toHaveLength(2);
+    expect(() => A.addPlan(d, { kind: 'income', title: 'x', amount: 1, accountId: bank, categoryId: 'i-job', freq: 'monthly', startDate: TODAY, installments: 3 })).toThrow();
+  });
+
+  it('iptal, iptal gününden önceki bekleyen vadeleri istenirse atlar', () => {
+    let { d, bank } = setup();
+    const p = A.addPlan(d, { kind: 'expense', title: 'Spor', amount: TL(500), accountId: bank, categoryId: 'e-health', freq: 'monthly', startDate: '2026-09-05' });
+    expect(L.availability(p.data, TODAY).paymentsTotal).toBe(TL(1000));
+    expect(L.availability(A.cancelPlan(p.data, p.plan.id, TODAY, false), TODAY).paymentsTotal).toBe(TL(1000));
+    expect(L.availability(A.cancelPlan(p.data, p.plan.id, TODAY, true), TODAY).paymentsTotal).toBe(0);
+    expect(L.availability(A.cancelPlan(p.data, p.plan.id, '2026-10-01', false), TODAY).paymentsTotal).toBe(TL(500));
+  });
+
+  it('etiketler normalize edilir ve özetlenir (iadeler dahil)', () => {
+    let { d, bank } = setup();
+    const e = add(d, { type: 'expense', amount: TL(1000), date: '2026-10-02', accountId: bank, categoryId: 'e-fun', tags: ['#Erasmus', 'erasmus ', 'Tatil'] });
+    expect(e.tx.tags).toEqual(['erasmus', 'tatil']);
+    d = add(e.data, { type: 'refund', amount: TL(100), date: '2026-10-03', accountId: bank, categoryId: 'e-fun', refundOf: e.tx.id }).data;
+    expect(L.tagSummary(d, 'erasmus').spending).toBe(TL(900));
+    expect(L.allTags(d).map((t) => t.tag)).toEqual(['erasmus', 'tatil']);
+    expect(parseBackup(serializeBackup(d)).ok).toBe(true);
+  });
+
+  it('bakiye geçmişi ve tahmini ileriye doğru', () => {
+    let { d, bank } = setup();
+    d = add(d, { type: 'expense', amount: TL(1000), date: '2026-09-10', accountId: bank, categoryId: 'e-fun' }).data;
+    d = add(d, { type: 'income', amount: TL(500), date: '2026-10-05', accountId: bank, categoryId: 'i-job' }).data;
+    const s = L.balanceSeries(d, '2026-08-30', TODAY);
+    expect(s[0].balance).toBe(0); // takipten önce
+    expect(s.find((p) => p.date === '2026-09-01')!.balance).toBe(TL(10000));
+    expect(s.find((p) => p.date === '2026-09-10')!.balance).toBe(TL(9000));
+    expect(s[s.length - 1].balance).toBe(TL(9500));
+    d = A.addPlan(d, { kind: 'expense', title: 'Yurt', amount: TL(4000), accountId: bank, categoryId: 'e-housing', freq: 'monthly', startDate: '2026-10-20' }).data;
+    d = A.addPlan(d, { kind: 'income', title: 'Burs', amount: TL(3000), accountId: bank, categoryId: 'i-scholarship', freq: 'monthly', startDate: '2026-10-25' }).data;
+    const pr = L.balanceProjection(d, TODAY, '2026-10-31');
+    expect(pr[0].balance).toBe(TL(9500));
+    expect(pr.find((p) => p.date === '2026-10-20')!.balance).toBe(TL(5500));
+    expect(pr[pr.length - 1].balance).toBe(TL(8500));
+  });
+
+  it('ay karnesi biten ay için bir kez önerilir', () => {
+    let { d, bank } = setup();
+    d = add(d, { type: 'expense', amount: TL(300), date: '2026-09-15', accountId: bank, categoryId: 'e-market' }).data;
+    expect(L.pendingReportCard(d, TODAY)).toBe('2026-09');
+    const r = L.monthReport(d, '2026-09', TODAY);
+    expect(r.topCategory).toEqual({ id: 'e-market', amount: TL(300) });
+    expect(r.activeDays).toBe(1);
+    d = A.updateSettings(d, { reportCardSeen: '2026-09' });
+    expect(L.pendingReportCard(d, TODAY)).toBeNull();
+  });
+});

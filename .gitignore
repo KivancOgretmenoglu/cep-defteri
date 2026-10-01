@@ -6,3 +6,4 @@ screenshots-tmp
 .dev
 *.jks
 *.keystore
+.claude/worktrees

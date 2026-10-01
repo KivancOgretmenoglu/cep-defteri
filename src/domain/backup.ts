@@ -69,6 +69,7 @@ export function parseBackup(text: string): Result {
     if (t.type === 'transfer' ? !isStr(t.toAccountId) || !accIds.has(t.toAccountId) : !isStr(t.categoryId) || !catIds.has(t.categoryId))
       return err('işlemin hedefi/kategorisi bulunamadı.');
     if (!optStr(t.note) || !optStr(t.refundOf)) return err('işlem notu.');
+    if (t.tags !== undefined && (!Array.isArray(t.tags) || !t.tags.every((x) => isStr(x) && x.length > 0 && x.length <= 24) || t.tags.length > 5)) return err('etiketler.');
     if (t.planRef !== undefined && (!isObj(t.planRef) || !isStr(t.planRef.planId) || !isISODate(t.planRef.due))) return err('plan bağlantısı.');
     txIds.add(t.id);
     maxSeq = Math.max(maxSeq, t.seq as number);
@@ -84,6 +85,7 @@ export function parseBackup(text: string): Result {
     if (!isMoney(p.amount) || !isISODate(p.startDate) || !['once', 'weekly', 'monthly', 'yearly'].includes(p.freq as string)) return err('plan ayrıntısı.');
     if (!isStr(p.accountId) || !accIds.has(p.accountId) || !Array.isArray(p.skipped) || !p.skipped.every(isISODate)) return err('plan hesabı.');
     if (p.endDate != null && !isISODate(p.endDate)) return err('plan bitişi.');
+    if (p.installments != null && (!Number.isInteger(p.installments) || (p.installments as number) < 2 || (p.installments as number) > 60)) return err('taksit sayısı.');
   }
   for (const g of d.goals as unknown[]) {
     if (!isObj(g) || !isStr(g.id) || !isStr(g.title) || !isMoney(g.target) || !isStr(g.accountId) || !accIds.has(g.accountId)) return err('hedef kaydı.');
@@ -129,9 +131,11 @@ function semanticCheck(d: Data): string | null {
       const to = acc.get(t.toAccountId!)!;
       if (to.id === a.id) return 'bir hesaptan kendisine transfer.';
       if (a.kind === 'investment' && to.kind === 'investment') return 'iki yatırım hesabı arasında transfer.';
+      if ((a.kind === 'person' || to.kind === 'person') && (a.kind === 'investment' || to.kind === 'investment' || a.kind === to.kind)) return 'kişi hesabıyla geçersiz transfer.';
       if (t.date < to.openingDate) return 'hesabın takip başlangıcından önce işlem var.';
     } else {
       if (a.kind === 'investment') return 'yatırım hesabında gelir/gider kaydı.';
+      if (a.kind === 'person' && t.type !== 'expense') return 'kişi hesabında gelir/iade kaydı.';
       if (cat.get(t.categoryId!)!.kind !== (t.type === 'income' ? 'income' : 'expense')) return 'kategori türü uyuşmuyor.';
     }
     if (t.type === 'refund') {
@@ -149,14 +153,13 @@ function semanticCheck(d: Data): string | null {
   }
   for (const p of d.plans) {
     if (p.amount <= 0) return 'plan tutarı sıfır ya da negatif.';
-    if (p.endDate && p.endDate < p.startDate) return 'plan bitişi başlangıçtan önce.';
     const a = acc.get(p.accountId)!;
     if (p.kind === 'transfer') {
       const to = p.toAccountId ? acc.get(p.toAccountId) : undefined;
-      if (!to || to.id === a.id || (a.kind === 'investment' && to.kind === 'investment')) return 'planlı aktarımın hedefi geçersiz.';
+      if (!to || to.id === a.id || (a.kind === 'investment' && to.kind === 'investment') || a.kind === 'person' || to.kind === 'person') return 'planlı aktarımın hedefi geçersiz.';
     } else {
       const c = p.categoryId ? cat.get(p.categoryId) : undefined;
-      if (!c || c.kind !== p.kind || a.kind === 'investment') return 'planın kategorisi ya da hesabı geçersiz.';
+      if (!c || c.kind !== p.kind || a.kind === 'investment' || a.kind === 'person') return 'planın kategorisi ya da hesabı geçersiz.';
     }
   }
   for (const g of d.goals) {

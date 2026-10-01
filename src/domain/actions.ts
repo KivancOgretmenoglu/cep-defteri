@@ -6,7 +6,8 @@
 import type { Account, Category, Data, Goal, ID, Plan, PlanRef, Settings, Tx, TxType, Valuation } from './types';
 import { isMoney, type Money } from './money';
 import { isISODate, type ISODate } from './dates';
-import { accountIndex, isDaily, isInvestment, occKey, occurrences } from './ledger';
+import { accountIndex, installmentEnd, isDaily, isInvestment, isPerson, occKey, occurrences } from './ledger';
+import { addDays } from './dates';
 
 export class ActionError extends Error {}
 const fail = (msg: string): never => {
@@ -35,6 +36,18 @@ export interface TxDraft {
   note?: string;
   refundOf?: ID;
   planRef?: PlanRef;
+  tags?: string[];
+}
+
+/** Etiketleri temizler: küçük harf, baştaki # yok, boşluk tekil, en fazla 5 etiket × 24 karakter. */
+export function normalizeTags(tags: string[] | undefined): string[] {
+  const out: string[] = [];
+  for (const raw of tags ?? []) {
+    const t = raw.trim().replace(/^#+/, '').replace(/\s+/g, ' ').toLocaleLowerCase('tr').slice(0, 24);
+    if (t && !out.includes(t)) out.push(t);
+    if (out.length >= 5) break;
+  }
+  return out;
 }
 
 export function validateTx(data: Data, d: TxDraft, today: ISODate, editingId?: ID): void {
@@ -53,10 +66,14 @@ export function validateTx(data: Data, d: TxDraft, today: ISODate, editingId?: I
     if (to.id === acc.id) fail('Kaynak ve hedef hesap aynı olamaz.');
     if (to.archived && existing?.toAccountId !== to.id) fail(`"${to.name}" arşivde; başka bir hesap seç.`);
     if (isInvestment(acc) && isInvestment(to)) fail('İki yatırım hesabı arasında aktarım desteklenmiyor.');
+    if ((isPerson(acc) || isPerson(to)) && (isInvestment(acc) || isInvestment(to))) fail('Kişi ile yatırım hesabı arasında doğrudan aktarım desteklenmiyor.');
+    if (isPerson(acc) && isPerson(to)) fail('İki kişi arasında aktarım desteklenmiyor.');
     if (d.date < to.openingDate) fail(`"${to.name}" ${to.openingDate} tarihinden itibaren takip ediliyor.`);
     if (d.categoryId || d.refundOf) fail('Transferin kategorisi olmaz.');
   } else {
-    if (!isDaily(acc)) fail('Yatırım hesabıyla yalnızca aktarım yapılabilir; gelir ve gider günlük hesaplardan girilir.');
+    // "Başkası ödedi": gider bir kişinin hesabından girilebilir (sen ona borçlanırsın).
+    if (!isDaily(acc) && !(d.type === 'expense' && isPerson(acc)))
+      fail(isPerson(acc) ? 'Bir kişi üzerinden yalnızca gider ("o ödedi") ya da borç hareketi girilebilir.' : 'Yatırım hesabıyla yalnızca aktarım yapılabilir; gelir ve gider günlük hesaplardan girilir.');
     const cat = data.categories.find((c) => c.id === d.categoryId) ?? fail('Bir kategori seç.');
     const wantKind = d.type === 'income' ? 'income' : 'expense';
     if (cat.kind !== wantKind) fail('Kategori türü işlem türüyle uyuşmuyor.');
@@ -101,6 +118,8 @@ function cleanDraft(d: TxDraft): TxDraft {
   const note = d.note?.trim();
   if (note) out.note = note.slice(0, 200);
   if (d.planRef) out.planRef = { ...d.planRef };
+  const tags = normalizeTags(d.tags);
+  if (tags.length) out.tags = tags;
   return out;
 }
 
@@ -151,6 +170,7 @@ function validateAccount(data: Data, d: AccountDraft, editing?: Account) {
   if (data.accounts.some((a) => a.id !== editing?.id && a.name.toLocaleLowerCase('tr') === name.toLocaleLowerCase('tr')))
     fail('Bu adda bir hesap zaten var.');
   if (!isMoney(d.openingBalance)) fail('Başlangıç bakiyesi geçersiz.');
+  if (d.kind === 'person' && !name) fail('Kişinin adını yaz.');
   if (d.kind === 'investment' && d.openingBalance < 0) fail('Yatırım değeri negatif olamaz.');
   if (!isISODate(d.openingDate)) fail('Başlangıç tarihi geçersiz.');
   if (d.priorContribution != null && (!isMoney(d.priorContribution) || d.priorContribution < 0))
@@ -168,7 +188,7 @@ export function addAccount(data: Data, d: AccountDraft, now = Date.now()): { dat
     createdAt: now,
   };
   if (d.kind === 'investment') account.priorContribution = d.priorContribution ?? null;
-  const settings = !data.settings.lastAccountId && d.kind !== 'investment' ? { ...data.settings, lastAccountId: account.id } : data.settings;
+  const settings = !data.settings.lastAccountId && (d.kind === 'bank' || d.kind === 'cash') ? { ...data.settings, lastAccountId: account.id } : data.settings;
   return { data: { ...data, accounts: [...data.accounts, account], settings }, account };
 }
 
@@ -235,17 +255,24 @@ export function deleteValuation(data: Data, id: ID): Data {
 
 export type PlanDraft = Omit<Plan, 'id' | 'skipped' | 'createdAt'>;
 
-function validatePlan(data: Data, d: PlanDraft) {
+function validatePlan(data: Data, d: PlanDraft, old?: Plan) {
   if (!d.title.trim()) fail('Plana bir ad ver.');
   positive(d.amount);
   if (!isISODate(d.startDate)) fail('Geçerli bir tarih seç.');
-  if (d.endDate && (!isISODate(d.endDate) || d.endDate < d.startDate)) fail('Bitiş tarihi başlangıçtan önce olamaz.');
+  if (d.installments != null) {
+    if (!Number.isInteger(d.installments) || d.installments < 2 || d.installments > 60) fail('Taksit sayısı 2 ile 60 arasında olmalı.');
+    if (d.freq !== 'monthly' || d.kind !== 'expense') fail('Taksit yalnızca aylık ödemelerde kullanılır.');
+  }
+  // İptal edilmiş planın bitişi başlangıçtan önce olabilir (hiç vadesi kalmamış); yalnız bu değişmiyorsa kabul edilir.
+  if (d.endDate && (!isISODate(d.endDate) || (d.endDate < d.startDate && !(old && old.endDate === d.endDate && old.startDate === d.startDate))))
+    fail('Bitiş tarihi başlangıçtan önce olamaz.');
   const accounts = accountIndex(data);
   const acc = accounts.get(d.accountId) ?? fail('Bir hesap seç.');
   if (d.kind === 'transfer') {
     const to = accounts.get(d.toAccountId ?? '') ?? fail('Hedef hesabı seç.');
     if (to.id === acc.id) fail('Kaynak ve hedef hesap aynı olamaz.');
     if (isInvestment(acc) && isInvestment(to)) fail('İki yatırım hesabı arasında aktarım desteklenmiyor.');
+    if (isPerson(acc) || isPerson(to)) fail('Kişilerle planlı aktarım desteklenmiyor.');
   } else {
     if (!isDaily(acc)) fail('Planlı gelir ve ödemeler günlük hesaplardan yapılır.');
     const cat = data.categories.find((c) => c.id === d.categoryId) ?? fail('Bir kategori seç.');
@@ -257,7 +284,10 @@ function cleanPlan(d: PlanDraft): PlanDraft {
   const out: PlanDraft = { kind: d.kind, title: d.title.trim().slice(0, 60), amount: d.amount, accountId: d.accountId, freq: d.freq, startDate: d.startDate };
   if (d.kind === 'transfer') out.toAccountId = d.toAccountId;
   else out.categoryId = d.categoryId;
-  if (d.endDate && d.freq !== 'once') out.endDate = d.endDate;
+  if (d.freq === 'monthly' && d.kind === 'expense' && d.installments) {
+    out.installments = d.installments;
+    out.endDate = installmentEnd(d.startDate, d.installments);
+  } else if (d.endDate && d.freq !== 'once') out.endDate = d.endDate;
   return out;
 }
 
@@ -273,11 +303,35 @@ export function planHasHistory(data: Data, id: ID): boolean {
 
 export function updatePlan(data: Data, id: ID, d: PlanDraft): Data {
   const old = data.plans.find((p) => p.id === id) ?? fail('Plan bulunamadı.');
-  validatePlan(data, d);
+  validatePlan(data, d, old);
   if (planHasHistory(data, id) && (d.freq !== old.freq || d.kind !== old.kind))
     fail('Gerçekleşmiş kaydı olan planın türü ve sıklığı değiştirilemez. Bunu bitirip yeni plan oluşturabilirsin.');
   const plan: Plan = { id, skipped: old.skipped, createdAt: old.createdAt, ...cleanPlan(d) };
+  // İptal edilmiş taksitli plan düzenlenince bitiş, taksit sayısından yeniden hesaplanıp iptali geri almasın.
+  if (old.installments && old.endDate && plan.endDate && old.endDate < plan.endDate && old.startDate === plan.startDate && old.installments === plan.installments)
+    plan.endDate = old.endDate;
   return { ...data, plans: data.plans.map((p) => (p.id === id ? plan : p)) };
+}
+
+/**
+ * Planı belirtilen günden itibaren iptal eder: o gün ve sonrası vadeler oluşmaz.
+ * Geçmişte gerçekleşenler ve raporlar korunur. İstenirse ondan önceki bekleyen (gecikmiş) vadeler de atlanır.
+ */
+export function cancelPlan(data: Data, id: ID, from: ISODate, skipEarlierPending = false): Data {
+  const plan = data.plans.find((p) => p.id === id) ?? fail('Plan bulunamadı.');
+  if (!isISODate(from)) fail('Geçerli bir tarih seç.');
+  let next: Data = { ...data, plans: data.plans.map((p) => (p.id === id ? { ...p, endDate: addDays(from, -1), installments: p.installments } : p)) };
+  if (skipEarlierPending) {
+    const pend = occurrences(next, plan.startDate, addDays(from, -1), [next.plans.find((p) => p.id === id)!]).filter((o) => o.status === 'pending');
+    for (const o of pend) next = skipOccurrence(next, id, o.due, true);
+  }
+  return next;
+}
+
+/** İptal edilmiş/bitmiş bir planı belirtilen tarihten yeni bir plan olarak yeniden başlatır (eski geçmiş korunur). */
+export function restartPlan(data: Data, id: ID, startDate: ISODate, now = Date.now()) {
+  const p = data.plans.find((x) => x.id === id) ?? fail('Plan bulunamadı.');
+  return addPlan(data, { kind: p.kind, title: p.title, amount: p.amount, accountId: p.accountId, toAccountId: p.toAccountId, categoryId: p.categoryId, freq: p.freq, startDate }, now);
 }
 
 /** Planı siler. Gerçekleşmiş işlemler gerçek kayıt olarak kalır. */

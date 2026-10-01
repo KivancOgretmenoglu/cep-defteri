@@ -20,12 +20,14 @@ export function accountIndex(data: Data): Map<ID, Account> {
   return new Map(data.accounts.map((a) => [a.id, a]));
 }
 
-export type TransferKind = 'internal' | 'contribution' | 'withdrawal' | 'investment-internal';
+export type TransferKind = 'internal' | 'contribution' | 'withdrawal' | 'investment-internal' | 'debt';
 
 /** Transferin anlamı, hesap türlerinden türetilir (tek doğruluk kaynağı). */
 export function transferKind(tx: Tx, accounts: Map<ID, Account>): TransferKind {
   const from = accounts.get(tx.accountId);
   const to = accounts.get(tx.toAccountId ?? '');
+  // Bir kişiyle yapılan para hareketi borç/alacaktır: gelir, gider ya da yatırım değildir.
+  if (isPerson(from) || isPerson(to)) return 'debt';
   if (isDaily(from) && isInvestment(to)) return 'contribution';
   if (isInvestment(from) && isDaily(to)) return 'withdrawal';
   if (isInvestment(from) && isInvestment(to)) return 'investment-internal';
@@ -54,6 +56,22 @@ export function cashBalance(data: Data, accountId: ID): Money {
   const acc = data.accounts.find((a) => a.id === accountId);
   if (!acc) return 0;
   return acc.openingBalance + sum(data.txs.map((t) => txEffectOn(t, accountId)));
+}
+
+/**
+ * Kişilerle borç/alacak durumu. balance > 0 → o kişi sana borçlu; < 0 → sen ona borçlusun.
+ */
+export function personBalances(data: Data) {
+  return data.accounts.filter(isPerson).map((a) => ({ account: a, balance: cashBalance(data, a.id) }));
+}
+/** Senin başkalarına toplam borcun (pozitif sayı) ve sana olan toplam alacak. */
+export function debtTotals(data: Data) {
+  let owed = 0, receivable = 0;
+  for (const p of personBalances(data)) {
+    if (p.balance < 0) owed -= p.balance;
+    else receivable += p.balance;
+  }
+  return { owed, receivable };
 }
 
 /** Harcanabilir hesapların (nakit + banka) toplam bakiyesi. Yatırım hariç. */
@@ -376,7 +394,11 @@ export interface Availability {
   transfersTotal: Money;
   /** Hesapta tutulan birikim payı. */
   reserve: Money;
-  /** dailyBalance − ödemeler − planlı aktarımlar − birikim payı */
+  /** Arkadaşlara olan toplam borcun (tarihsiz ödeme gibi ayrılır). */
+  debtsOwed: Money;
+  /** Sana olan alacaklar: gelene kadar eklenmez (bilgi). */
+  debtsReceivable: Money;
+  /** dailyBalance − ödemeler − planlı aktarımlar − birikim payı − borçların */
   available: Money;
   /** Bilgi amaçlı: dönem içinde beklenen ama henüz gelmemiş para. Hesaba katılmaz. */
   expected: Occurrence[];
@@ -401,7 +423,8 @@ export function availability(data: Data, today: ISODate): Availability {
   const paymentsTotal = sum(payments.map((o) => o.amount));
   const transfersTotal = sum(transfers.map((o) => o.amount));
   const reserve = data.settings.reserve;
-  const available = balance - paymentsTotal - transfersTotal - reserve;
+  const debts = debtTotals(data);
+  const available = balance - paymentsTotal - transfersTotal - reserve - debts.owed;
   const daysLeft = diffDays(periodEnd, today) + 1;
   const hasDaily = data.accounts.some(isDaily);
   return {
@@ -413,6 +436,8 @@ export function availability(data: Data, today: ISODate): Availability {
     transfers,
     transfersTotal,
     reserve,
+    debtsOwed: debts.owed,
+    debtsReceivable: debts.receivable,
     available,
     expected,
     expectedTotal: sum(expected.map((o) => o.amount)),
@@ -621,4 +646,141 @@ export function monthTrend(data: Data, endMonth: MonthKey, n: number) {
     const tracked = start !== null && start <= monthEnd(m);
     return { month: m, tracked, partialTracking: tracked && start! > monthStart(m), summary: monthSummary(data, m) };
   });
+}
+
+// ───────────────────────── Taksit ─────────────────────────
+
+/** Taksitli planda vadenin kaçıncı taksit olduğu (1'den başlar); taksitli değilse null. */
+export function installmentNo(plan: Plan, due: ISODate): number | null {
+  if (!plan.installments) return null;
+  const [y1, m1] = plan.startDate.split('-').map(Number);
+  const [y2, m2] = due.split('-').map(Number);
+  return (y2 - y1) * 12 + (m2 - m1) + 1;
+}
+
+/** Taksit sayısına göre son vadenin tarihi. */
+export function installmentEnd(startDate: ISODate, n: number): ISODate {
+  return dayInMonth(addMonths(monthOf(startDate), n - 1), dayOfMonth(startDate));
+}
+
+// ───────────────────────── Bakiye geçmişi ─────────────────────────
+
+export interface BalancePoint {
+  date: ISODate;
+  balance: Money;
+}
+
+/**
+ * Seçilen hesapların her günün sonundaki toplam bakiyesi. Bir hesap takip başlangıcından önce sayılmaz.
+ * accountIds verilmezse tüm günlük (nakit + banka) hesaplar.
+ */
+export function balanceSeries(data: Data, from: ISODate, to: ISODate, accountIds?: ID[]): BalancePoint[] {
+  const ids = new Set(accountIds ?? data.accounts.filter(isDaily).map((a) => a.id));
+  const accs = data.accounts.filter((a) => ids.has(a.id));
+  // Gün bazında net değişim
+  const delta = new Map<ISODate, Money>();
+  for (const a of accs) delta.set(a.openingDate, (delta.get(a.openingDate) ?? 0) + a.openingBalance);
+  for (const t of data.txs) {
+    let e = 0;
+    for (const id of ids) e += txEffectOn(t, id);
+    if (e) delta.set(t.date, (delta.get(t.date) ?? 0) + e);
+  }
+  let running = 0;
+  for (const [d, v] of delta) if (d < from) running += v;
+  const out: BalancePoint[] = [];
+  for (let d = from; d <= to; d = addDays(d, 1)) {
+    running += delta.get(d) ?? 0;
+    out.push({ date: d, balance: running });
+  }
+  return out;
+}
+
+/**
+ * Bugünden dönem sonuna kadar tahmini bakiye: bekleyen planlı kalemler vadelerinde uygulanır
+ * (gecikmişler bugüne). Beklenen gelirler dahil edilir; bu bir tahmindir, gerçek kayıt değildir.
+ */
+export function balanceProjection(data: Data, today: ISODate, to: ISODate, accountIds?: ID[]): BalancePoint[] {
+  const ids = new Set(accountIds ?? data.accounts.filter(isDaily).map((a) => a.id));
+  const start = sum([...ids].map((id) => cashBalance(data, id)));
+  const delta = new Map<ISODate, Money>();
+  for (const o of pendingUntil(data, to)) {
+    const d = o.due < today ? today : o.due;
+    let e = 0;
+    if (o.plan.kind === 'expense' && ids.has(o.plan.accountId)) e -= o.amount;
+    if (o.plan.kind === 'income' && ids.has(o.plan.accountId)) e += o.amount;
+    if (o.plan.kind === 'transfer') {
+      if (ids.has(o.plan.accountId)) e -= o.amount;
+      if (ids.has(o.plan.toAccountId ?? '')) e += o.amount;
+    }
+    if (e) delta.set(d, (delta.get(d) ?? 0) + e);
+  }
+  let running = start;
+  const out: BalancePoint[] = [];
+  for (let d = today; d <= to; d = addDays(d, 1)) {
+    running += delta.get(d) ?? 0;
+    out.push({ date: d, balance: running });
+  }
+  return out;
+}
+
+// ───────────────────────── Etiketler ─────────────────────────
+
+export function allTags(data: Data): { tag: string; count: number; last: number }[] {
+  const m = new Map<string, { tag: string; count: number; last: number }>();
+  for (const t of data.txs)
+    for (const tag of t.tags ?? []) {
+      const e = m.get(tag) ?? { tag, count: 0, last: 0 };
+      e.count++;
+      e.last = Math.max(e.last, t.seq);
+      m.set(tag, e);
+    }
+  return [...m.values()].sort((a, b) => b.last - a.last);
+}
+
+/** Bir etiketin (verilen aralıkta) net harcaması, geliri ve kayıt sayısı. */
+export function tagSummary(data: Data, tag: string, from = '0000-01-01', to = '9999-12-31') {
+  const sub = { ...data, txs: data.txs.filter((t) => t.tags?.includes(tag) || (t.type === 'refund' && data.txs.find((o) => o.id === t.refundOf)?.tags?.includes(tag))) };
+  return rangeSummary(sub, from, to);
+}
+
+// ───────────────────────── Ay karnesi ─────────────────────────
+
+export interface MonthReport {
+  month: MonthKey;
+  summary: RangeSummary;
+  /** Önceki ayla karşılaştırma anlamlıysa harcama farkı */
+  spendingChange: Money | null;
+  topCategory: { id: ID; amount: Money } | null;
+  biggestExpense: Tx | null;
+  budget: BudgetStatus;
+  /** Kayıt girilen gün sayısı */
+  activeDays: number;
+  /** Gelir − harcama (yatırım ve transfer hariç) */
+  net: Money;
+}
+
+export function monthReport(data: Data, month: MonthKey, today: ISODate): MonthReport {
+  const summary = monthSummary(data, month);
+  const cmp = compareMonth(data, month, today);
+  const top = [...summary.spendingByCategory.entries()].filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])[0];
+  const exp = data.txs.filter((t) => t.type === 'expense' && monthOf(t.date) === month).sort((a, b) => b.amount - a.amount)[0] ?? null;
+  const days = new Set(data.txs.filter((t) => monthOf(t.date) === month).map((t) => t.date));
+  return {
+    month,
+    summary,
+    spendingChange: cmp.meaningful ? summary.spending - cmp.previous.spending : null,
+    topCategory: top ? { id: top[0], amount: top[1] } : null,
+    biggestExpense: exp,
+    budget: budgetStatus(data, month, today),
+    activeDays: days.size,
+    net: summary.income - summary.spending,
+  };
+}
+
+/** Karnesi gösterilecek ay: biten son ay (kayıt varsa ve henüz görülmediyse). */
+export function pendingReportCard(data: Data, today: ISODate): MonthKey | null {
+  const prev = addMonths(monthOf(today), -1);
+  if (data.settings.reportCardSeen && data.settings.reportCardSeen >= prev) return null;
+  if (!data.txs.some((t) => monthOf(t.date) === prev)) return null;
+  return prev;
 }

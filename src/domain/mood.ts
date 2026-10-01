@@ -53,12 +53,12 @@ export function clawdMood(data: Data, today: ISODate): MoodResult {
 
   // 1) Bekleyen ödemeler bakiyeyi aşıyor.
   // Yalnız ödemeler (ve birikim payı) bakiyeyi aşıyorsa; planlı yatırım aktarımı tek başına bu uyarıyı doğurmaz.
-  if (av.dailyBalance - av.paymentsTotal - av.reserve < 0) {
-    const commitments = av.paymentsTotal + av.reserve;
+  if (av.dailyBalance - av.paymentsTotal - av.reserve - av.debtsOwed < 0) {
+    const commitments = av.paymentsTotal + av.reserve + av.debtsOwed;
     return {
       mood: 'thoughtful',
       text: `${shortDate(av.periodEnd)} tarihine kadar ayrılması gereken ${tl(commitments)} var, hesaplarında ${tl(av.dailyBalance)} bulunuyor. Aradaki ${tl(commitments - av.dailyBalance)} için yaklaşan ödemelere birlikte bakalım.`,
-      why: `Kural: günlük hesap bakiyesi, dönem sonuna kadarki bekleyen ödemeler${av.reserve ? ' ve birikim payı' : ''} toplamından az. Bu bir uyarı, suçlama değil.`,
+      why: `Kural: günlük hesap bakiyesi, dönem sonuna kadarki bekleyen ödemeler${av.reserve ? ', birikim payı' : ''}${av.debtsOwed ? ', arkadaşlara borcun' : ''} toplamından az. Bu bir uyarı, suçlama değil.`,
       focus: 'upcoming',
     };
   }
