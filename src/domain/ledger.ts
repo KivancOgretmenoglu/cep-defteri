@@ -11,8 +11,10 @@ import {
 
 // ───────────────────────── Hesaplar ─────────────────────────
 
-export const isDaily = (a: Account | undefined): boolean => !!a && a.kind !== 'investment';
+/** Harcanabilir (günlük) hesaplar: nakit ve banka. */
+export const isDaily = (a: Account | undefined): boolean => !!a && (a.kind === 'cash' || a.kind === 'bank');
 export const isInvestment = (a: Account | undefined): boolean => !!a && a.kind === 'investment';
+export const isPerson = (a: Account | undefined): boolean => !!a && a.kind === 'person';
 
 export function accountIndex(data: Data): Map<ID, Account> {
   return new Map(data.accounts.map((a) => [a.id, a]));

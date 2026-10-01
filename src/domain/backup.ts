@@ -47,7 +47,7 @@ export function parseBackup(text: string): Result {
   const accounts = d.accounts as Record<string, unknown>[];
   const accIds = new Set<string>();
   for (const a of accounts) {
-    if (!isObj(a) || !isStr(a.id) || !isStr(a.name) || !['cash', 'bank', 'investment'].includes(a.kind as string)) return err('hesap kaydı.');
+    if (!isObj(a) || !isStr(a.id) || !isStr(a.name) || !['cash', 'bank', 'investment', 'person'].includes(a.kind as string)) return err('hesap kaydı.');
     if (!isMoney(a.openingBalance) || !isISODate(a.openingDate)) return err(`"${a.name}" hesabının açılış bilgisi.`);
     if (a.priorContribution != null && !isMoney(a.priorContribution)) return err('önceki katkı.');
     if (accIds.has(a.id)) return err('yinelenen hesap.');

@@ -30,6 +30,9 @@ export const DEFAULT_SETTINGS: Settings = {
   clawd: { body: 'coral', homeOutfit: 'hoodie' },
   lastAccountId: null,
   lastBackupAt: null,
+  hideTotals: false,
+  clawdQuips: true,
+  reportCardSeen: null,
 };
 
 export function emptyData(): Data {

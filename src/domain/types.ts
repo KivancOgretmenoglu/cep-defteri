@@ -6,8 +6,10 @@ export type ID = string;
 /**
  * cash/bank: günlük harcanabilir hesaplar.
  * investment: yatırım hesabı. Bakiyesi "harcanabilir para"ya hiç karışmaz.
+ * person: bir kişiyle borç/alacak defteri. Bakiye > 0 → o sana borçlu; < 0 → sen ona borçlusun.
+ *   Kişiyle yapılan para hareketleri transferdir: gelir ya da gider sayılmaz.
  */
-export type AccountKind = 'cash' | 'bank' | 'investment';
+export type AccountKind = 'cash' | 'bank' | 'investment' | 'person';
 
 export interface Account {
   id: ID;
@@ -69,6 +71,8 @@ export interface Tx {
   note?: string;
   refundOf?: ID; // yalnız refund
   planRef?: PlanRef; // planlı bir kalemin gerçekleşmesi
+  /** Serbest etiketler (ör. "erasmus", "tatil"); küçük harf, tekil. */
+  tags?: string[];
   createdAt: number;
 }
 
@@ -100,6 +104,8 @@ export interface Plan {
   endDate?: ISODate | null;
   /** Atlanan vadeler. */
   skipped: ISODate[];
+  /** Taksitli ödeme ise toplam taksit sayısı (aylık; bitiş tarihi buna göre hesaplanır). */
+  installments?: number | null;
   createdAt: number;
 }
 
@@ -131,6 +137,12 @@ export interface Settings {
   lastAccountId: ID | null;
   /** Son dışa aktarma zamanı (yedek hatırlatması için). */
   lastBackupAt: number | null;
+  /** Toplam bakiyeleri gizle (işlem tutarları görünür kalır). */
+  hideTotals: boolean;
+  /** Clawd ara sıra espri yapsın. */
+  clawdQuips: boolean;
+  /** Ay sonu karnesinin görüldüğü son ay. */
+  reportCardSeen: string | null;
 }
 
 export interface Data {

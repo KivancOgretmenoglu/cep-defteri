@@ -1,7 +1,7 @@
 import {
   Utensils, ShoppingBasket, Bus, House, Zap, Repeat, Smartphone, BookOpen, Ticket, Shirt, HeartPulse, Gift,
   CircleEllipsis, GraduationCap, HandHeart, Briefcase, Coffee, Dumbbell, PawPrint, Plane, Gamepad2, Wallet, Landmark,
-  Sprout, Banknote, Music, Laptop, Pill, Baby, Scissors, Car, Fuel, Sparkles, type LucideIcon,
+  Sprout, Banknote, Music, Laptop, Pill, Baby, Scissors, Car, Fuel, Sparkles, UserRound, type LucideIcon,
 } from 'lucide-react';
 
 /** Kategori simgeleri (kayıtta yalnızca anahtar tutulur). */
@@ -20,4 +20,4 @@ export function CatIcon({ icon, size = 18 }: { icon: string; size?: number }) {
   return <I size={size} strokeWidth={2} aria-hidden />;
 }
 
-export const ACCOUNT_ICONS = { cash: Banknote, bank: Landmark, investment: Sprout } as const;
+export const ACCOUNT_ICONS = { cash: Banknote, bank: Landmark, investment: Sprout, person: UserRound } as const;
