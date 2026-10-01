@@ -534,67 +534,8 @@ kbd {
   border-color: transparent;
 }
 
-/* Clawd hareketleri: kısa, seyrek, adım adım (piksel hissi) */
-.clawd {
-  display: block;
-  overflow: visible;
-}
-.clawd--idle .clawd__all {
-  animation: clawd-bob 7s steps(1) infinite;
-}
-.clawd__eyes {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: clawd-blink 5.5s steps(1) infinite;
-}
-.clawd--nod .clawd__all {
-  animation: clawd-nod 0.7s steps(1) 1;
-}
-.clawd--hop .clawd__all {
-  animation: clawd-hop 0.9s steps(1) 2;
-}
-.clawd--wiggle .clawd__all {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  animation: clawd-wiggle 0.6s steps(1) 1;
-}
-.clawd[data-mood='celebrate'] .clawd__extras {
-  animation: clawd-sparkle 1.2s steps(2) infinite;
-}
-@keyframes clawd-bob {
-  0%, 90%, 100% { transform: translateY(0); }
-  92%, 96% { transform: translateY(-1px); }
-}
-@keyframes clawd-blink {
-  0%, 94%, 100% { transform: scaleY(1); }
-  95%, 97% { transform: scaleY(0.15); }
-}
-@keyframes clawd-nod {
-  0%, 100% { transform: translateY(0); }
-  25%, 65% { transform: translateY(1px); }
-  45% { transform: translateY(-1px); }
-}
-@keyframes clawd-hop {
-  0%, 100% { transform: translateY(0); }
-  30% { transform: translateY(-3px); }
-  60% { transform: translateY(-1px); }
-}
-@keyframes clawd-wiggle {
-  0%, 100% { transform: rotate(0); }
-  20%, 60% { transform: rotate(-4deg); }
-  40%, 80% { transform: rotate(4deg); }
-}
-@keyframes clawd-sparkle {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
-}
+/* Clawd hareketleri: src/clawd/clawd.css */
 @media (prefers-reduced-motion: reduce) {
-  .clawd *,
-  .clawd .clawd__all,
-  .clawd .clawd__eyes,
-  .clawd .clawd__extras {
-    animation: none !important;
-  }
   .sheet,
   .toast,
   .sheet-backdrop {
