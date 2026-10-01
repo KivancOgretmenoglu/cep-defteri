@@ -16,7 +16,7 @@ export function DueRow({ o, today, accounts, reserved }: { o: Occurrence; today:
         <span className="due-list__main">
           <span className="due-list__title">
             {o.plan.title}
-            {n && <span className="tag">{n}/{o.plan.installments}</span>}
+            {n && <> <span className="tag">{n}/{o.plan.installments}</span></>}
           </span>
           <span className="due-list__sub">
             {shortDate(o.due, today)} · {dueLabel(o.due, today)}

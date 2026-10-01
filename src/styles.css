@@ -668,16 +668,13 @@ kbd {
   font-weight: 800;
 }
 .receipt__note {
-  display: flex;
-  gap: 6px;
-  align-items: baseline;
+  display: block;
   font-size: 14px;
   color: var(--ink-2);
-  flex-wrap: wrap;
 }
-.receipt__note svg {
-  flex: none;
-  transform: translateY(2px);
+.receipt__note > svg {
+  vertical-align: -2px;
+  margin-right: 4px;
 }
 
 /* ───────── Ay özeti kutuları ───────── */
@@ -2296,7 +2293,8 @@ fieldset.block {
 .bchart {
   position: relative;
   margin: 0;
-  padding: 0 0 22px 44px;
+  /* üstteki boşluk dokunma bilgisinin yeri: çizginin ya da kontrollerin üstüne binmez */
+  padding: 54px 0 22px 44px;
 }
 .bchart--compact {
   padding: 0;
@@ -2344,7 +2342,7 @@ fieldset.block {
 }
 .bchart__dots {
   position: absolute;
-  inset: 0 0 22px 44px;
+  inset: 54px 0 22px 44px;
   pointer-events: none;
 }
 .bchart--compact .bchart__dots {
@@ -2366,7 +2364,7 @@ fieldset.block {
 .bchart__yl {
   position: absolute;
   left: 0;
-  top: 0;
+  top: 54px;
   bottom: 22px;
   width: 40px;
   pointer-events: none;
@@ -2400,8 +2398,8 @@ fieldset.block {
 }
 .bchart__tip {
   position: absolute;
-  top: -6px;
-  transform: translate(-50%, -100%);
+  top: 0;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   gap: 1px;
