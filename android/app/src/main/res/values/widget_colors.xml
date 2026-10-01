@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ana ekran aracı renkleri (açık tema: kâğıt zemin, mürekkep metin, mercan vurgu). -->
+<resources>
+    <color name="widget_bg">#F4EFE6</color>
+    <color name="widget_line">#E2D9C8</color>
+    <color name="widget_ink">#23201B</color>
+    <color name="widget_ink_2">#5B5448</color>
+    <color name="widget_accent">#C4542F</color>
+    <color name="widget_accent_ink">#FFFFFF</color>
+</resources>

@@ -12,6 +12,10 @@ export interface LockPrefs {
   biometric: boolean;
   /** Uygulama arka plandayken bu kadar saniye geçince yeniden kilitlenir. */
   relockAfterSec: number;
+  /** Üst üste yanlış PIN denemesi (yeniden başlatınca sıfırlanmasın diye burada). */
+  failed: number;
+  /** Bu zamana (ms) kadar yeni deneme kabul edilmez. */
+  blockedUntil: number | null;
 }
 
 export interface NotificationPrefs {
@@ -32,6 +36,8 @@ export interface AutoBackupPrefs {
   lastAt: number | null;
   /** Son otomatik yedeğin yeri (kullanıcıya gösterim için). */
   lastPath: string | null;
+  /** Son denemede sorun olduysa kısa açıklaması (ör. izin yok). */
+  lastError: string | null;
 }
 
 export interface DevicePrefs {
@@ -40,12 +46,13 @@ export interface DevicePrefs {
   autoBackup: AutoBackupPrefs;
 }
 
-const KEY = 'cep-defteri:device';
+export const DEVICE_KEY = 'cep-defteri:device';
+const KEY = DEVICE_KEY;
 
 export const DEFAULT_DEVICE: DevicePrefs = {
-  lock: { pinHash: null, salt: null, biometric: false, relockAfterSec: 60 },
+  lock: { pinHash: null, salt: null, biometric: false, relockAfterSec: 60, failed: 0, blockedUntil: null },
   notifications: { enabled: false, payments: true, income: true, dailyReminder: true, reminderHour: 21 },
-  autoBackup: { enabled: true, lastAt: null, lastPath: null },
+  autoBackup: { enabled: true, lastAt: null, lastPath: null, lastError: null },
 };
 
 function read(): DevicePrefs {

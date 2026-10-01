@@ -11,6 +11,8 @@ const config: CapacitorConfig = {
   plugins: {
     // Kenardan kenara görünüm: durum/gezinme çubuğu boşlukları --safe-area-inset-* CSS değişkenleriyle gelir.
     SystemBars: { insetsHandling: 'css', initialViewportFitValueHint: 'cover' },
+    // Hatırlatmalar: bildirim çubuğunda tek renkli defter simgesi, mercan vurgu (src/native/notifications.ts).
+    LocalNotifications: { smallIcon: 'ic_stat_cep', iconColor: '#C4542F' },
   },
 };
 

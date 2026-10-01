@@ -12,6 +12,19 @@
 
 **Yedek:** *Ayarlar → Yedek indir* Android paylaşım ekranını açar; Drive'a, Dosyalar'a ya da kendine mesaj olarak kaydedebilirsin. Geri yüklerken *Yedekten geri yükle* ile o dosyayı seç.
 
+### Uygulamaya özel özellikler
+
+**Uygulama kilidi** (*Ayarlar → Uygulama kilidi*; tarayıcıda da çalışır): 4–6 haneli PIN. PIN yalnız tuzlu PBKDF2-SHA256 özeti olarak bu cihazda tutulur, yedek dosyasına girmez. Uygulama açılırken ve arka planda seçilen süreden (hemen / 1 / 5 / 15 dk) uzun kaldıktan sonra sorulur. Telefonda parmak izi / yüz ile açma eklenebilir (cihazda tanımlıysa). Üst üste 5 yanlış denemeden sonra bekleme süresi artar (30 sn → 15 dk). PIN'i değiştirmek ya da kapatmak için mevcut PIN gerekir.
+Kilit bir **gizlilik perdesidir**, kayıtlar şifrelenmez. PIN unutulursa: parmak izi açıksa onunla açılır; değilse kilit ekranındaki *PIN'i unuttum → Kilidi kaldır ve verileri sil* her şeyi siler. Sonra *Yedekten geri yükle* ile otomatik yedeğe dönülür.
+
+**Bildirimler** (yalnız APK; *Ayarlar → Bildirimler*): açınca Android 13+ izin sorar. Yaklaşan ödeme ve planlı yatırım aktarımı için bir gün önce 10:00'da ("Yarın: Yurt ödemesi 4.500 TL"), beklenen gelir için o gün 12:00'de ("Burs geldi mi?"), isteğe bağlı her akşam seçilen saatte "Bugünkü harcamalarını girdin mi?" (o gün kayıt varsa atlanır). En fazla 30 gün ileri ve 60 bildirim planlanır; veri değişince ve uygulamaya dönünce yeniden hesaplanır. Hatırlatma saati geçmiş ama vadesi gelmemiş bir kalem bir kez hemen bildirilir. Bildirime dokununca ilgili "Ödendi / Geldi" sayfası ya da yeni kayıt sayfası açılır. Örnek veri modunda bildirim gönderilmez.
+
+**Ana ekran aracı (widget)**: ana ekranda boş yere uzun bas → *Araçlar* → *Cep Defteri – Kullanılabilir para*. Kullanılabilir tutarı ve dönemi ("Ekim sonuna kadar") gösterir; *Toplamları gizle* açıksa "•••• TL", örnek veri modunda "örnek veri" yazar. Tutara dokununca uygulama, **+ Ekle**'ye dokununca doğrudan yeni kayıt sayfası açılır (`io.github.kivancogretmenoglu.cepdefteri://add`). Araç, uygulama her açıldığında ve veri değiştiğinde güncellenir.
+
+**Otomatik yedek** (*Ayarlar → Otomatik yedek*, varsayılan açık): her gün bir kopya `Belgeler/CepDefteri/cep-defteri-otomatik-YYYY-AA-GG.json` dosyasına yazılır (gün içinde veri değişirse o günün dosyası güncellenir), son 7 gün tutulur. Bu klasör **uygulamayı silsen de kalır**: yeniden kurunca *Ayarlar → Yedekten geri yükle* ile oradaki en yeni dosyayı seç. Örnek veri ve boş veri yedeklenmez. Android 10 ve öncesinde ilk seferde dosya izni istenebilir (*Şimdi yedekle*). Tarayıcı sürümünde son 5 günün kopyası tarayıcının kendi deposunda tutulur ve aynı karttan geri yüklenir; 14 gündür yedek dosyası indirilmediyse nazik bir hatırlatma çıkar.
+
+Kod: `src/lock/` (kilit), `src/native/` (bildirim planı, araç köprüsü, otomatik yedek, eşitleme), `android/app/src/main/java/.../CepWidgetProvider.java` ve `WidgetBridgePlugin.java` (araç ve JS köprüsü). Araç görselleri `drawable-nodpi/widget_clawd.png` ve `widget_preview.png` Clawd bileşeninden Playwright ile üretildi.
+
 ### APK nasıl üretiliyor?
 
 `.github/workflows/android.yml` her gönderimde testleri çalıştırır, web uygulamasını derler, Capacitor ile Android projesine gömer ve `assembleRelease` ile APK üretir. Varsayılan daldaki her derleme *Releases* sayfasına `v1.0.<çalıştırma no>` olarak eklenir.
