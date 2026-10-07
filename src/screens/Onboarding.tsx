@@ -12,7 +12,7 @@ const zeroOk = (raw: string) => (raw.trim() === '' || /^0+([.,]0*)?$/.test(raw.t
 /** İlk açılış: paranın şu an nerede olduğunu birkaç alanla sorar. */
 export function Onboarding() {
   const today = useStore((s) => s.today);
-  const body = useStore((s) => s.data.settings.clawd.body);
+  const body = useStore(() => 'coral');
   const [bank, setBank] = useState('');
   const [cash, setCash] = useState('');
   const [hasInv, setHasInv] = useState(false);

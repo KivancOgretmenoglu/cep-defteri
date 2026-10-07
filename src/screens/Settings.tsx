@@ -9,11 +9,10 @@ import { formatMoney } from '../domain/money';
 import { cashBalance, investmentState } from '../domain/ledger';
 import { commit, getState, replaceData, setMode, showToast, useStore } from '../store/store';
 import * as storage from '../store/storage';
-import { Chip, SectionHead, Segmented } from '../ui/kit';
+import { SectionHead, Segmented } from '../ui/kit';
 import { go, openSheet } from '../ui/nav';
 import { useData } from '../ui/hooks';
 import { CatIcon, ACCOUNT_ICONS } from '../ui/icons';
-import { Clawd, BODY_COLORS, HOME_OUTFITS, OUTFITS } from '../clawd/Clawd';
 import { isNative, saveFile } from '../platform';
 import { SecuritySettings, NotificationSettings, AutoBackupSettings } from '../native/NativeSettings';
 
@@ -155,23 +154,9 @@ export function Settings() {
         <section className="card" aria-labelledby="s-clawd">
           <SectionHead id="s-clawd" title="Clawd’ın dolabı" />
           <p className="muted">Ana ekranda Clawd’ın ne giyeceğini seç. Diğer ekranlarda işine uygun kıyafetini kendisi giyer.</p>
-          <div className="wardrobe" role="radiogroup" aria-label="Kıyafet">
-            {HOME_OUTFITS.map((o) => (
-              <button key={o} role="radio" aria-checked={data.settings.clawd.homeOutfit === o} className={`wardrobe__item ${data.settings.clawd.homeOutfit === o ? 'is-on' : ''}`} onClick={() => commit((d) => A.updateSettings(d, { clawd: { ...d.settings.clawd, homeOutfit: o } }))}>
-                <Clawd mood="happy" outfit={o} body={data.settings.clawd.body} size={72} idle={false} />
-                <span>{OUTFITS[o].name}</span>
-              </button>
-            ))}
-          </div>
-          <div className="chip-row" role="radiogroup" aria-label="Gövde rengi">
-            {Object.entries(BODY_COLORS).map(([k, v]) => (
-              <Chip key={k} on={data.settings.clawd.body === k} onClick={() => commit((d) => A.updateSettings(d, { clawd: { ...d.settings.clawd, body: k } }))}>
-                <i className="dot" style={{ background: v.base }} /> {v.name}
-              </Chip>
-            ))}
-          </div>
+          {/* MASKOT_AYARLARI: maskot seçimi, adı ve dolabı (src/mascot/MascotSettings.tsx) buraya gelecek */}
           <label className="check-row">
-            <input type="checkbox" checked={data.settings.clawdQuips} onChange={(e) => commit((d) => A.updateSettings(d, { clawdQuips: e.target.checked }))} />
+            <input type="checkbox" checked={data.settings.quips} onChange={(e) => commit((d) => A.updateSettings(d, { quips: e.target.checked }))} />
             <span>Clawd ara sıra espri yapsın<small>Kayıttan sonra kısa, yargılamayan şakalar ve ipuçları</small></span>
           </label>
           <details className="details">

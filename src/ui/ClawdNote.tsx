@@ -32,9 +32,9 @@ function Announce({ lv }: { lv: Lively }) {
 
 /** Clawd + kısa durum notu. "Neden?" ile kuralın açıklaması görünür. */
 export function ClawdNote({ mood, text, why, outfit, size = 92, action, compact = false }: { mood: Mood; text: string; why?: string; outfit: string; size?: number; action?: React.ReactNode; compact?: boolean }) {
-  const body = useStore((s) => s.data.settings.clawd.body);
+  const body = useStore(() => 'coral');
   const pulse = useStore((s) => s.pulse);
-  const quips = useStore((s) => s.data.settings.clawdQuips) !== false;
+  const quips = useStore((s) => s.data.settings.quips) !== false;
   const hideTotals = useStore((s) => !!s.data.settings.hideTotals);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLButtonElement>(null);
@@ -80,8 +80,8 @@ export function ClawdNote({ mood, text, why, outfit, size = 92, action, compact 
 
 /** Boş durumlar için Clawd. */
 export function EmptyState({ outfit, mood = 'curious', title, children, action }: { outfit: string; mood?: Mood; title: string; children?: React.ReactNode; action?: React.ReactNode }) {
-  const body = useStore((s) => s.data.settings.clawd.body);
-  const quips = useStore((s) => s.data.settings.clawdQuips) !== false;
+  const body = useStore(() => 'coral');
+  const quips = useStore((s) => s.data.settings.quips) !== false;
   const ref = useRef<HTMLButtonElement>(null);
   const lv = useLively({ mood, outfit, quips, priority: 2, ref });
   return (

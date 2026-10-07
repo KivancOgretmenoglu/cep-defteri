@@ -27,11 +27,14 @@ export const DEFAULT_SETTINGS: Settings = {
   reserve: 0,
   periodMode: 'month',
   theme: 'system',
-  clawd: { body: 'coral', homeOutfit: 'hoodie' },
+  mascot: { key: 'fistik', name: null, outfit: 'plain' },
+  lang: 'tr',
+  appIconFollows: null,
+  examUntil: null,
   lastAccountId: null,
   lastBackupAt: null,
   hideTotals: false,
-  clawdQuips: true,
+  quips: true,
   reportCardSeen: null,
 };
 
@@ -44,7 +47,7 @@ export function emptyData(): Data {
     valuations: [],
     plans: [],
     goals: [],
-    settings: { ...DEFAULT_SETTINGS, clawd: { ...DEFAULT_SETTINGS.clawd } },
+    settings: { ...DEFAULT_SETTINGS, mascot: { ...DEFAULT_SETTINGS.mascot } },
     nextSeq: 1,
   };
 }

@@ -81,7 +81,7 @@ export function Home() {
         mood={mood.mood}
         text={mood.text}
         why={mood.why}
-        outfit={hide ? 'spy' : data.settings.clawd.homeOutfit}
+        outfit={hide ? 'spy' : data.settings.mascot.outfit}
         action={
           mood.focus === 'accounts' ? <button className="link link--small" onClick={() => openSheet({ kind: 'account' })}>Hesap ekle</button>
           : mood.focus === 'add' ? <button className="link link--small" onClick={() => openSheet({ kind: 'add' })}>İlk kaydı gir</button>

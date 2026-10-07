@@ -16,7 +16,7 @@ import { shareImage } from '../platform';
 export function ReportCardSheet({ month }: { month: string }) {
   const { data, today } = useData();
   const { cats } = useLookups(data);
-  const body = useStore((s) => s.data.settings.clawd.body);
+  const body = useStore(() => 'coral');
   const r = useMemo(() => monthReport(data, month, today), [data, month, today]);
   const clawdRef = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);

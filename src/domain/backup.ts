@@ -97,10 +97,16 @@ export function parseBackup(text: string): Result {
   if (s.reserve !== undefined && (!isMoney(s.reserve) || (s.reserve as number) < 0)) return err('birikim payı ayarı.');
   if (s.periodMode !== undefined && !['month', 'days30'].includes(s.periodMode as string)) return err('dönem ayarı.');
   if (s.theme !== undefined && !['system', 'light', 'dark'].includes(s.theme as string)) return err('tema ayarı.');
+  if (s.lang !== undefined && !['tr', 'en'].includes(s.lang as string)) return err('dil ayarı.');
+  if (s.examUntil != null && !isISODate(s.examUntil)) return err('sınav haftası ayarı.');
+  // Eski sürümden kalan Clawd ayarları taşınmaz.
+  const { clawd: _oldClawd, clawdQuips: _oldQuips, ...rest } = s;
   const settings = {
     ...DEFAULT_SETTINGS,
-    ...s,
-    clawd: { ...DEFAULT_SETTINGS.clawd, ...(isObj(s.clawd) ? s.clawd : {}) },
+    ...rest,
+    mascot: { ...DEFAULT_SETTINGS.mascot, ...(isObj(s.mascot) ? s.mascot : {}) },
+    // Eski sürümden: Clawd espri ayarı
+    quips: typeof s.quips === 'boolean' ? s.quips : typeof s.clawdQuips === 'boolean' ? s.clawdQuips : DEFAULT_SETTINGS.quips,
   };
   const data = { ...(d as unknown as Data), settings, nextSeq: Math.max(d.nextSeq as number, maxSeq + 1) };
   return { ok: true, data, exportedAt: isStr(raw.exportedAt) ? raw.exportedAt : null };

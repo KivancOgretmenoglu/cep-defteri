@@ -121,10 +121,16 @@ export interface Goal {
 export type PeriodMode = 'month' | 'days30';
 export type ThemePref = 'system' | 'light' | 'dark';
 
-export interface ClawdPrefs {
-  body: string; // gövde rengi anahtarı
-  homeOutfit: string; // ana ekran kıyafeti anahtarı
+export interface MascotPrefs {
+  /** Seçili maskot (src/mascot/characters.ts) */
+  key: string;
+  /** Kullanıcının verdiği isim; null = karakterin kendi adı */
+  name: string | null;
+  /** Ana ekran kıyafeti */
+  outfit: string;
 }
+
+export type Lang = 'tr' | 'en';
 
 export interface Settings {
   /** Genel aylık harcama bütçesi; null = tanımlı değil. */
@@ -133,14 +139,20 @@ export interface Settings {
   reserve: Money;
   periodMode: PeriodMode;
   theme: ThemePref;
-  clawd: ClawdPrefs;
+  mascot: MascotPrefs;
+  /** Arayüz dili */
+  lang: Lang;
+  /** Android simgesi seçili maskotu izlesin mi; null = henüz sorulmadı */
+  appIconFollows: boolean | null;
+  /** Sınav haftası modu bitiş günü (dahil); null = kapalı */
+  examUntil: string | null;
   lastAccountId: ID | null;
   /** Son dışa aktarma zamanı (yedek hatırlatması için). */
   lastBackupAt: number | null;
   /** Toplam bakiyeleri gizle (işlem tutarları görünür kalır). */
   hideTotals: boolean;
-  /** Clawd ara sıra espri yapsın. */
-  clawdQuips: boolean;
+  /** Maskot ara sıra espri yapsın. */
+  quips: boolean;
   /** Ay sonu karnesinin görüldüğü son ay. */
   reportCardSeen: string | null;
 }
