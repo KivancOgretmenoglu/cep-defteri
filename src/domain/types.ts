@@ -155,6 +155,8 @@ export interface Settings {
   quips: boolean;
   /** Ay sonu karnesinin görüldüğü son ay. */
   reportCardSeen: string | null;
+  /** Bağlamsal ipuçlarından görülenlerin anahtarları (her ipucu bir kez gösterilir). */
+  hintsSeen: string[];
 }
 
 export interface Data {

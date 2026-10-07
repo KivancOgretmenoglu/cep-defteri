@@ -17,6 +17,7 @@ import { daysInMonth, dayOfMonth, diffDays, monthOf, shortDate, type ISODate } f
 import { availability, budgetStatus, goalProgress, isDaily, monthSummary, upcomingOutflows } from './ledger';
 import { categoryName } from './defaults';
 import { translator } from '../i18n/core';
+import { spendingImprovement } from './rings';
 
 export type Mood = 'curious' | 'calm' | 'happy' | 'thoughtful' | 'celebrate';
 export type MoodFocus = 'accounts' | 'add' | 'available' | 'upcoming' | 'budget' | 'goal' | 'none';
@@ -125,6 +126,16 @@ export function mascotMood(data: Data, today: ISODate, lang: Lang = 'tr'): MoodR
       text: t('mood.near.text', { goal: near.goal.title, pct: p(near.pct, 'locYou'), left: tl(near.goal.target - near.current) }),
       why: t('mood.near.why'),
       focus: 'goal',
+    };
+  }
+  // Gerçek iyileşme: geçen ayın aynı noktasına göre belirgin biçimde daha az harcama (yargısız, gerekçeli).
+  const better = spendingImprovement(data, today);
+  if (better) {
+    return {
+      mood: 'happy',
+      text: data.settings.hideTotals ? t('mood.better.textHidden') : t('mood.better.text', { amount: tl(better.lessBy) }),
+      why: t('mood.better.why'),
+      focus: 'none',
     };
   }
   if (budget.state === 'on-track' && budget.flexUsedPct !== null) {

@@ -1,8 +1,11 @@
 /** English texts. Type-checked against the Turkish dictionary: every key must exist, no extras. */
 import type { Dict } from './core';
 import { plural } from './grammar';
+import { hintsEn } from './hints.en';
+import { ringsEn } from './rings.en';
 
 export const en: Dict = {
+  ...hintsEn,
   'err.validDate': "Pick a valid date.",
   'err.futureDate': "You can't log something in the future. Add a plan for upcoming payments instead.",
   'err.pickAccount': "Pick an account.",
@@ -990,5 +993,6 @@ export const en: Dict = {
   'note.why': "Why?",
   'note.hide': "Hide",
   'note.poke': "Poke (hold for a tip)",
+  ...ringsEn,
   // @end
 };

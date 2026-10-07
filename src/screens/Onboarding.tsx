@@ -7,6 +7,8 @@ import { commit, useStore } from '../store/store';
 import { Mascot } from '../mascot/Mascot';
 import { LiveMascot, useMascot } from '../mascot/MascotNote';
 import { MascotPicker } from '../mascot/MascotPicker';
+import { Tour } from '../mascot/Tour';
+import { tourText } from '../mascot/tourLines';
 import { characterOf } from '../mascot/characters';
 import { appIconSupported, setAppIcon } from '../native/appIcon';
 import { Chip, FormError, MoneyInput } from '../ui/kit';
@@ -21,9 +23,10 @@ const zeroOk = (raw: string) => (raw.trim() === '' || /^0+([.,]0*)?$/.test(raw.t
  * İlk açılış, adım adım:
  *  1) 'lang'    — Dil / Language
  *  2) 'mascot'  — maskot seçimi; Android'de uygulama simgesinin maskotla değişip değişmeyeceği
- *  3) 'balance' — paranın şu an nerede olduğu (başlangıç bakiyeleri)
+ *  3) 'tour'    — seçilen maskotun ağzından kısa, atlanabilir rehber (bakiyeden önce: hesap oluşunca bu ekran kapanır)
+ *  4) 'balance' — paranın şu an nerede olduğu (başlangıç bakiyeleri)
  */
-type Step = 'lang' | 'mascot' | 'balance';
+type Step = 'lang' | 'mascot' | 'tour' | 'balance';
 
 export function Onboarding() {
   const [step, setStep] = useState<Step>('lang');
@@ -31,10 +34,11 @@ export function Onboarding() {
   if (step === 'mascot') {
     return (
       <div className="onboard">
-        <MascotPicker onDone={() => setStep('balance')} iconQuestion={appIconSupported() ? <IconQuestion /> : undefined} />
+        <MascotPicker onDone={() => setStep('tour')} iconQuestion={appIconSupported() ? <IconQuestion /> : undefined} />
       </div>
     );
   }
+  if (step === 'tour') return <TourStep onDone={() => setStep('balance')} />;
   return <BalanceStep onBack={() => setStep('mascot')} />;
 }
 
@@ -80,6 +84,12 @@ function LangStep({ onNext }: { onNext: () => void }) {
   );
 }
 
+/** 3) Maskot rehberi; son kartın düğmesi bakiye adımına geçer. */
+function TourStep({ onDone }: { onDone: () => void }) {
+  const lang = useStore((s) => s.data.settings.lang ?? 'tr');
+  return <Tour onDone={onDone} last={tourText('start', lang)} />;
+}
+
 /** 2b) Android: uygulama simgesi seçilen maskotla değişsin mi? Yanıt Ayarlar'dan değiştirilebilir. */
 function IconQuestion() {
   const t = useT();
@@ -101,7 +111,7 @@ function IconQuestion() {
   );
 }
 
-/** 3) Paranın şu an nerede olduğunu birkaç alanla sorar. */
+/** 4) Paranın şu an nerede olduğunu birkaç alanla sorar. */
 function BalanceStep({ onBack }: { onBack: () => void }) {
   const t = useT();
   const today = useStore((s) => s.today);

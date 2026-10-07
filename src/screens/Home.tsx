@@ -15,6 +15,7 @@ import { mascotMood } from '../domain/mood';
 import { addDays } from '../domain/dates';
 import { Amount, Progress, SectionHead } from '../ui/kit';
 import { MascotNote } from '../mascot/MascotNote';
+import { Rings } from '../ui/Rings';
 import { TxRow } from '../ui/TxRow';
 import { go, openSheet } from '../ui/nav';
 import { useData, useLookups } from '../ui/hooks';
@@ -96,6 +97,7 @@ export function Home() {
       />
 
       <div className="home-grid">
+        <Rings />
         <section className="card receipt" aria-labelledby="avail-h">
           <div className="receipt__top">
             <h2 id="avail-h" className="label">{t('home.available')}</h2>

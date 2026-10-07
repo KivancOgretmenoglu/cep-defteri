@@ -3,8 +3,12 @@
  * Değer bir metin ("{ad}" yer tutuculu) ya da dil bilgisi gerektiren yerlerde küçük bir işlevdir.
  */
 import type { Entry } from './core';
+import { hintsTr } from './hints.tr';
+
+import { ringsTr } from './rings.tr';
 
 export const tr = {
+  ...hintsTr,
   'err.validDate': "Geçerli bir tarih seç.",
   'err.futureDate': "Gelecek tarihli kayıt girilemez. Yaklaşan ödemeler için plan ekleyebilirsin.",
   'err.pickAccount': "Bir hesap seç.",
@@ -992,5 +996,6 @@ export const tr = {
   'note.why': "Neden böyle?",
   'note.hide': "Gizle",
   'note.poke': "Dürt (basılı tut: ipucu)",
+  ...ringsTr,
   // @end
 } satisfies Record<string, Entry>;

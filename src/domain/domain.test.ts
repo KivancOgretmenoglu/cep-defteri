@@ -594,3 +594,33 @@ describe('ikinci paket: borç/alacak, taksit, plan iptali, etiket, bakiye geçmi
     expect(L.pendingReportCard(d, TODAY)).toBeNull();
   });
 });
+
+describe('tamamlanma halkaları', () => {
+  it('veri yoksa halka yok; bütçe ve hedef varsa değerleri defterden gelir', async () => {
+    const { ringValues, spendingImprovement } = await import('./rings');
+    let { d, bank, inv } = setup();
+    expect(ringValues(d, TODAY)).toEqual([]);
+    d = A.updateSettings(d, { monthlyBudget: TL(1000) });
+    d = add(d, { type: 'expense', amount: TL(250), date: TODAY, accountId: bank, categoryId: 'e-food' }).data;
+    const r = ringValues(d, TODAY);
+    expect(r.map((x) => x.kind)).toEqual(['elapsed', 'budget']);
+    expect(r[1]).toMatchObject({ pct: 25, state: 'normal', value: 0.25 });
+    // Aşımda halka dolu kalır, yüzde 100'ü geçebilir.
+    d = add(d, { type: 'expense', amount: TL(1000), date: TODAY, accountId: bank, categoryId: 'e-food' }).data;
+    expect(ringValues(d, TODAY)[1]).toMatchObject({ value: 1, state: 'over' });
+    // Hedef: net katkıya göre.
+    d = A.addGoal(d, { title: 'Tatil', target: TL(1000), accountId: inv }).data;
+    d = add(d, { type: 'transfer', amount: TL(500), date: TODAY, accountId: bank, toAccountId: inv }).data;
+    expect(ringValues(d, TODAY).find((x) => x.kind === 'goal')).toMatchObject({ pct: 50, state: 'normal', title: 'Tatil' });
+    expect(spendingImprovement(emptyData(), TODAY)).toBeNull();
+  });
+  it('geçen ayın aynı noktasına göre daha az harcama gerçek iyileşme sayılır', async () => {
+    const { spendingImprovement } = await import('./rings');
+    let { d, bank } = setup();
+    d = add(d, { type: 'expense', amount: TL(1000), date: '2026-09-05', accountId: bank, categoryId: 'e-food' }).data;
+    d = add(d, { type: 'expense', amount: TL(400), date: '2026-10-05', accountId: bank, categoryId: 'e-food' }).data;
+    const imp = spendingImprovement(d, TODAY);
+    expect(imp?.lessBy).toBe(TL(600));
+    expect(mascotMood(d, TODAY).why).toContain('geçen ay');
+  });
+});

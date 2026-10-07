@@ -1,4 +1,6 @@
 import { useEffect } from 'react';
+import { HintHost } from './mascot/hints';
+import { resumeTxDraft } from './sheets/txDraft';
 import { Plus, House, ListOrdered, CalendarRange, ChartColumn, Sprout, Settings as Gear, AlertTriangle, FlaskConical, Undo2, X, HandCoins } from 'lucide-react';
 import { dismissWarning, hideToast, setMode, undo, useStore } from './store/store';
 import { go, openSheet, useNav, closeSheet, type Screen } from './ui/nav';
@@ -61,6 +63,10 @@ function useHtmlLang(lang: string) {
 
 function SheetHost() {
   const { sheet } = useNav();
+  // Kategori/hesap sayfası kapanınca, ondan önce açık olan işlem sayfası taslağıyla geri gelir.
+  useEffect(() => {
+    if (!sheet) resumeTxDraft();
+  }, [sheet]);
   if (!sheet) return null;
   switch (sheet.kind) {
     case 'add':
@@ -216,6 +222,7 @@ export function App() {
       )}
       <SheetHost />
       <Toast />
+      <HintHost />
     </div>
     </LockGate>
   );

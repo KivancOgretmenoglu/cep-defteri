@@ -19,6 +19,8 @@ import { isNative, saveFile } from '../platform';
 import { SecuritySettings, NotificationSettings, AutoBackupSettings } from '../native/NativeSettings';
 import { appIconSupported, setAppIcon } from '../native/appIcon';
 import { MascotSettings } from '../mascot/MascotSettings';
+import { Tour } from '../mascot/Tour';
+import { tourText } from '../mascot/tourLines';
 import { characterOf } from '../mascot/characters';
 
 async function download(name: string, content: string, type: string): Promise<boolean> {
@@ -162,6 +164,7 @@ export function Settings() {
         </section>
 
         <MascotSettings iconRow={appIconSupported() ? <IconFollowRow /> : undefined}>
+          <TourReplay />
           <details className="details">
             <summary>{t('set.rulesTitle')}</summary>
             <ul className="rules">
@@ -289,5 +292,17 @@ function IconFollowRow() {
       />
       <span>{t('icon.setting')}<small>{t('icon.hint')}</small></span>
     </label>
+  );
+}
+
+/** Ayarlar > Maskot: ilk açılış rehberini tam ekran yeniden açar; bitince/geçince kapanır. */
+function TourReplay() {
+  const lang = useStore((s) => s.data.settings.lang ?? 'tr');
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button type="button" className="btn btn--secondary" onClick={() => setOpen(true)}>{tourText('replay', lang)}</button>
+      {open && <div className="tour-overlay"><Tour onDone={() => setOpen(false)} /></div>}
+    </>
   );
 }

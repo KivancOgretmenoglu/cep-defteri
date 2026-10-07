@@ -77,6 +77,7 @@ export const DEFAULT_SETTINGS: Settings = {
   hideTotals: false,
   quips: true,
   reportCardSeen: null,
+  hintsSeen: [],
 };
 
 export function emptyData(): Data {

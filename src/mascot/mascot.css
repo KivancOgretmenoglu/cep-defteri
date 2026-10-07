@@ -336,3 +336,150 @@
     fill: #d9cfc0;
   }
 }
+
+/* İlk açılış rehberi (Tour.tsx) */
+.tour {
+  max-width: 640px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  padding: calc(12px + var(--safe-t)) 16px calc(16px + var(--safe-b));
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.tour__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tour__top .eyebrow {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tour__stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-width: 0;
+  animation: mascot-quip-in 0.2s steps(2) 1;
+}
+.tour__bubble {
+  position: relative;
+  margin: 0;
+  max-width: 100%;
+  padding: 14px 16px;
+  border-radius: 18px 18px 18px 6px;
+  border: 1px solid var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.tour-mock {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 12px;
+  border-radius: var(--radius);
+  border: 1px dashed var(--line-strong);
+  background: var(--surface);
+}
+.tour-mock__chip {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-2);
+  font-size: 14px;
+  font-weight: 600;
+}
+.tour-mock__chip--on {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.tour-mock__chip--link {
+  border: 0;
+  background: none;
+  color: var(--accent);
+  text-decoration: underline;
+}
+.tour-mock__arrow {
+  color: var(--ink-3);
+}
+.tour-mock__plus {
+  flex-basis: 100%;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin: 4px auto 0;
+  border-radius: 16px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  animation: tour-tap 1.6s ease-in-out infinite;
+}
+@keyframes tour-tap {
+  0%, 60%, 100% { transform: scale(1); }
+  75% { transform: scale(0.88); }
+}
+.tour__dots {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+.tour__dot {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+.tour__dot::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+.tour__dot.is-on::before {
+  background: var(--accent);
+  width: 18px;
+  border-radius: 5px;
+}
+.tour__nav {
+  display: flex;
+  gap: 8px;
+}
+.tour__next {
+  flex: 1;
+  min-width: 0;
+}
+/* Ayarlar'dan açılınca tüm ekranı kaplar */
+.tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  overflow-y: auto;
+  background: var(--paper);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tour__stage,
+  .tour-mock__plus {
+    animation: none;
+  }
+}

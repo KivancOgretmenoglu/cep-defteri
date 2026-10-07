@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Trash2, RotateCcw, CalendarClock, Repeat, UserRound, Split, Tag, X } from 'lucide-react';
 import type { ID, PlanRef, Tx } from '../domain/types';
 import * as A from '../domain/actions';
@@ -9,7 +9,8 @@ import type { Key } from '../i18n/core';
 import { allTags, cashBalance, isInvestment, isPerson, occurrences, planIsInflow, planIsOutflow, transferKind } from '../domain/ledger';
 import { mascotEvent, type MascotEvent } from '../mascot/events';
 import { commit } from '../store/store';
-import { closeSheet, openSheet } from '../ui/nav';
+import { closeSheet, openSheet, type SheetState } from '../ui/nav';
+import { discardTxDraft, stashTxDraft, takeTxDraft, type TxSnap } from './txDraft';
 import { Chip, FormError, MoneyInput, Segmented, Sheet, inputFromMoney } from '../ui/kit';
 import { CatIcon, ACCOUNT_ICONS } from '../ui/icons';
 import { dailyAccounts, frequentTemplates, recentCategories, useData, useLookups } from '../ui/hooks';
@@ -42,11 +43,19 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
   const defaultAcc = (preset?.accountId && accounts.get(preset.accountId) && !isInvestment(accounts.get(preset.accountId)) ? preset.accountId : null)
     ?? (data.settings.lastAccountId && daily.some((d) => d.account.id === data.settings.lastAccountId) ? data.settings.lastAccountId : daily[0]?.account.id ?? '');
 
+  // "+ Yeni kategori/hesap"tan dönüşse yazılanlar geri yüklenir; yeni oluşturulan kayıt seçilir.
+  const [rs] = useState(takeTxDraft);
+  useEffect(() => { discardTxDraft(); }, []);
+  const newCat = rs ? data.categories.find((c) => !rs.catIds.includes(c.id)) : undefined;
+  const newAcc = rs ? data.accounts.find((a) => !rs.accIds.includes(a.id)) : undefined;
+  const newDaily = newAcc && daily.some((d) => d.account.id === newAcc.id) ? newAcc.id : undefined;
+  const pick = <K extends keyof TxSnap>(k: K, orig: TxSnap[K]): TxSnap[K] => (rs ? rs[k] : orig);
+
   const init = editing ? tabOf(editing, accounts) : { tab: ((preset?.type === 'invest' ? 'invest' : preset?.type) as Tab) ?? 'expense', dir: preset?.direction ?? 'in' };
-  const [tab, setTab] = useState<Tab>(init.tab);
-  const [dir, setDir] = useState<'in' | 'out'>(init.dir);
-  const [amount, setAmount] = useState(editing ? inputFromMoney(editing.amount) : '');
-  const [categoryId, setCategoryId] = useState<ID | null>(editing?.categoryId ?? null);
+  const [tab, setTab] = useState<Tab>(pick('tab', init.tab) as Tab);
+  const [dir, setDir] = useState<'in' | 'out'>(pick('dir', init.dir));
+  const [amount, setAmount] = useState(pick('amount', editing ? inputFromMoney(editing.amount) : ''));
+  const [categoryId, setCategoryId] = useState<ID | null>(newCat && newCat.kind === (pick('tab', '') === 'income' ? 'income' : 'expense') ? newCat.id : pick('categoryId', editing?.categoryId ?? null));
   const initDaily = editing
     ? (init.tab === 'invest' && init.dir === 'out') || (init.tab === 'debt' && init.dir === 'in')
       ? editing.toAccountId!
@@ -54,28 +63,40 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
     : preset?.paidByPerson && preset.personId
       ? preset.personId
       : defaultAcc;
+  const newPerson = newAcc && isPerson(newAcc) ? newAcc.id : undefined;
   const [personId, setPersonId] = useState<ID>(
-    editing && init.tab === 'debt' ? (init.dir === 'out' ? editing.toAccountId! : editing.accountId) : preset?.personId ?? persons[0]?.id ?? '',
+    (rs?.target !== 'splitPerson' && newPerson) ||
+      pick('personId', editing && init.tab === 'debt' ? (init.dir === 'out' ? editing.toAccountId! : editing.accountId) : preset?.personId ?? persons[0]?.id ?? ''),
   );
-  const [split, setSplit] = useState(false);
-  const [splitPerson, setSplitPerson] = useState<ID>(persons[0]?.id ?? '');
-  const [splitShare, setSplitShare] = useState('');
-  const [tags, setTags] = useState<string[]>(editing?.tags ?? []);
-  const [tagInput, setTagInput] = useState('');
-  const [accountId, setAccountId] = useState<ID>(initDaily);
+  const [split, setSplit] = useState(pick('split', false));
+  const [splitPerson, setSplitPerson] = useState<ID>((rs?.target === 'splitPerson' && newPerson) || pick('splitPerson', persons[0]?.id ?? ''));
+  const [splitShare, setSplitShare] = useState(pick('splitShare', ''));
+  const [tags, setTags] = useState<string[]>(pick('tags', editing?.tags ?? []));
+  const [tagInput, setTagInput] = useState(pick('tagInput', ''));
+  const [accountId, setAccountId] = useState<ID>((newDaily && rs?.target !== 'toAccountId' && rs?.target !== 'invId' ? newDaily : undefined) ?? pick('accountId', initDaily));
   const otherDaily = daily.find((d) => d.account.id !== defaultAcc)?.account.id ?? '';
-  const [toAccountId, setToAccountId] = useState<ID>(editing?.type === 'transfer' && init.tab === 'transfer' ? editing.toAccountId! : otherDaily);
+  const [toAccountId, setToAccountId] = useState<ID>((newDaily && rs?.target === 'toAccountId' ? newDaily : undefined) ?? pick('toAccountId', editing?.type === 'transfer' && init.tab === 'transfer' ? editing.toAccountId! : otherDaily));
   const [invId, setInvId] = useState<ID>(
-    editing && init.tab === 'invest' ? (init.dir === 'in' ? editing.toAccountId! : editing.accountId) : preset?.accountId && isInvestment(accounts.get(preset.accountId)) ? preset.accountId : invAccounts[0]?.id ?? '',
+    (newAcc && isInvestment(newAcc) ? newAcc.id : undefined) ?? pick('invId', editing && init.tab === 'invest' ? (init.dir === 'in' ? editing.toAccountId! : editing.accountId) : preset?.accountId && isInvestment(accounts.get(preset.accountId)) ? preset.accountId : invAccounts[0]?.id ?? ''),
   );
-  const [date, setDate] = useState<ISODate>(editing?.date ?? today);
-  const [note, setNote] = useState(editing?.note ?? '');
-  const [showNote, setShowNote] = useState(!!editing?.note || !!editing?.tags?.length);
-  const [planRef, setPlanRef] = useState<PlanRef | undefined>(editing?.planRef);
+  const [date, setDate] = useState<ISODate>(pick('date', editing?.date ?? today) as ISODate);
+  const [note, setNote] = useState(pick('note', editing?.note ?? ''));
+  const [showNote, setShowNote] = useState(pick('showNote', !!editing?.note || !!editing?.tags?.length));
+  const [planRef, setPlanRef] = useState<PlanRef | undefined>(pick('planRef', editing?.planRef));
   const [showAllCats, setShowAllCats] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
   const catKind = tab === 'income' ? 'income' : 'expense';
+
+  // Yeni kategori/hesap sayfasını aç; form kaybolmasın diye önce taslağa kaydedilir.
+  function openNew(next: SheetState, target: TxSnap['target'] = 'accountId') {
+    const back: SheetState = editing ? { kind: 'edit', txId: editing.id } : { kind: 'add', preset: preset as Extract<SheetState, { kind: 'add' }>['preset'] };
+    stashTxDraft(
+      { tab, dir, amount, categoryId, personId, split, splitPerson, splitShare, tags, tagInput, accountId, toAccountId, invId, date, note, showNote, planRef, target, catIds: data.categories.map((c) => c.id), accIds: data.accounts.map((a) => a.id) },
+      back,
+      next,
+    );
+  }
   const catList = useMemo(() => {
     const recent = recentCategories(data, catKind);
     const all = data.categories.filter((c) => c.kind === catKind && (!c.archived || c.id === editing?.categoryId));
@@ -232,7 +253,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
     );
   }
 
-  const accountChips = (value: ID, set: (id: ID) => void, exclude?: ID, label = T('csv.account')) => (
+  const accountChips = (value: ID, set: (id: ID) => void, exclude?: ID, label = T('csv.account'), target: TxSnap['target'] = 'accountId') => (
     <div className="chip-row" role="group" aria-label={label}>
       {daily
         .filter((d) => d.account.id !== exclude)
@@ -247,10 +268,11 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
       {editing && !daily.some((d) => d.account.id === value) && accounts.get(value) && (
         <Chip on>{accounts.get(value)!.name} {T('home.archivedTag')}</Chip>
       )}
+      <Chip onClick={() => openNew({ kind: 'account' }, target)}>+ {T('hint.newAccount')}</Chip>
     </div>
   );
 
-  const personChips = (value: ID, set: (id: ID) => void, label = T('people.person')) => (
+  const personChips = (value: ID, set: (id: ID) => void, label = T('people.person'), target: TxSnap['target'] = 'personId') => (
     <div className="chip-row" role="group" aria-label={label}>
       {persons.map((p) => {
         const b = cashBalance(data, p.id);
@@ -261,7 +283,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
           </Chip>
         );
       })}
-      <Chip onClick={() => openSheet({ kind: 'account', kindPreset: 'person' })}>+ {T('people.person')}</Chip>
+      <Chip onClick={() => openNew({ kind: 'account', kindPreset: 'person' }, target)}>+ {T('people.person')}</Chip>
     </div>
   );
 
@@ -376,6 +398,9 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
                 <span className="cat-btn__name">{catName(c)}</span>
               </button>
             ))}
+            <button type="button" className="cat-btn cat-btn--more" onClick={() => openNew({ kind: 'category', catKind })}>
+              <span className="cat-btn__name">+ {T('hint.newCategory')}</span>
+            </button>
             {catList.length > 8 && (
               <button type="button" className="cat-btn cat-btn--more" onClick={() => setShowAllCats(!showAllCats)}>
                 <span className="cat-btn__name">{showAllCats ? T('txs.less') : T('txs.more', { n: catList.length - 8 })}</span>
@@ -419,10 +444,10 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
           </button>
           {split && (
             persons.length === 0 ? (
-              <p className="note-line">{T('txs.addPersonFirst')} <button type="button" className="link link--small" onClick={() => openSheet({ kind: 'account', kindPreset: 'person' })}>{T('people.addPerson')}</button></p>
+              <p className="note-line">{T('txs.addPersonFirst')} <button type="button" className="link link--small" onClick={() => openNew({ kind: 'account', kindPreset: 'person' }, 'splitPerson')}>{T('people.addPerson')}</button></p>
             ) : (
               <div className="split__body">
-                {personChips(splitPerson, setSplitPerson, T('txs.splitWith'))}
+                {personChips(splitPerson, setSplitPerson, T('txs.splitWith'), 'splitPerson')}
                 <MoneyInput label={T('txs.theirShare')} value={splitShare} onChange={setSplitShare} />
                 {(() => {
                   const total = parseMoney(amount), share = parseMoney(splitShare);
@@ -471,7 +496,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
       {tab === 'transfer' && (
         <>
           {daily.length < 2 && !editing ? (
-            <p className="muted">{T('txs.needTwo')} <button className="link" onClick={() => openSheet({ kind: 'account' })}>{T('home.addAccount')}</button></p>
+            <p className="muted">{T('txs.needTwo')} <button className="link" onClick={() => openNew({ kind: 'account' })}>{T('home.addAccount')}</button></p>
           ) : (
             <>
               <fieldset className="block">
@@ -483,7 +508,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
               </fieldset>
               <fieldset className="block">
                 <legend>{T('txs.to')}</legend>
-                {accountChips(toAccountId, setToAccountId, accountId)}
+                {accountChips(toAccountId, setToAccountId, accountId, undefined, 'toAccountId')}
               </fieldset>
               <p className="note-line">{T('txs.transferNote')}</p>
             </>
@@ -496,7 +521,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
           {invAccounts.length === 0 ? (
             <div className="empty-inline">
               <p>{T('txs.noInv')}</p>
-              <button className="btn btn--secondary" onClick={() => openSheet({ kind: 'account', kindPreset: 'investment' })}>{T('home.addInvestAccount')}</button>
+              <button className="btn btn--secondary" onClick={() => openNew({ kind: 'account', kindPreset: 'investment' }, 'invId')}>{T('home.addInvestAccount')}</button>
             </div>
           ) : (
             <>
@@ -504,16 +529,15 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
                 <legend>{dir === 'in' ? T('txs.whichAccountSent') : T('txs.whichAccountIn')}</legend>
                 {accountChips(accountId, setAccountId)}
               </fieldset>
-              {invAccounts.length > 1 && (
-                <fieldset className="block">
-                  <legend>{T('csv.invAccount')}</legend>
-                  <div className="chip-row">
-                    {invAccounts.map((a) => (
-                      <Chip key={a.id} on={invId === a.id} onClick={() => setInvId(a.id)}>{a.name}</Chip>
-                    ))}
-                  </div>
-                </fieldset>
-              )}
+              <fieldset className="block">
+                <legend>{T('csv.invAccount')}</legend>
+                <div className="chip-row">
+                  {invAccounts.map((a) => (
+                    <Chip key={a.id} on={invId === a.id} onClick={() => setInvId(a.id)}>{a.name}</Chip>
+                  ))}
+                  <Chip onClick={() => openNew({ kind: 'account', kindPreset: 'investment' }, 'invId')}>+ {T('hint.newAccount')}</Chip>
+                </div>
+              </fieldset>
               <p className="note-line">
                 {dir === 'in'
                   ? T('txs.investInNote', { name: accounts.get(invId)?.name ?? T('acc.kind.investment') })
@@ -558,7 +582,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
                   className="tag-input__field"
                   value={tagInput}
                   maxLength={24}
-                  placeholder={tags.length ? '' : T('txs.tagsPh')}
+                  placeholder={tags.length ? T('hint.tagMore') : T('hint.tagPh')}
                   aria-label={T('txs.addTag')}
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={(e) => {

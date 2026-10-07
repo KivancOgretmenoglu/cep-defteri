@@ -1,0 +1,40 @@
+/* Maskot ipucu balonu: tab çubuğunun üstünde, + düğmesini kapatmaz */
+.hint-region {
+  position: fixed;
+  z-index: 55;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--tabbar-h) + var(--safe-b) + 76px);
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  padding: 0 12px;
+}
+@media (min-width: 768px) {
+  .hint-region {
+    bottom: 88px;
+    left: 228px;
+  }
+}
+.hint {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 460px;
+  padding: 8px 8px 8px 12px;
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.35);
+  font-size: 14px;
+  font-weight: 600;
+  animation: sheet-up 0.2s ease-out;
+}
+.hint p {
+  margin: 0;
+}
+.hint svg:first-child {
+  flex: none;
+}
