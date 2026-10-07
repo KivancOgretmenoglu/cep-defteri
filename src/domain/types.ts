@@ -157,6 +157,8 @@ export interface Settings {
   reportCardSeen: string | null;
   /** Bağlamsal ipuçlarından görülenlerin anahtarları (her ipucu bir kez gösterilir). */
   hintsSeen: string[];
+  /** Misafir maskot sahneleri ara sıra görünsün. */
+  cameos: boolean;
 }
 
 export interface Data {

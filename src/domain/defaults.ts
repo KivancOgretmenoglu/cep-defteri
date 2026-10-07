@@ -78,6 +78,7 @@ export const DEFAULT_SETTINGS: Settings = {
   quips: true,
   reportCardSeen: null,
   hintsSeen: [],
+  cameos: true,
 };
 
 export function emptyData(): Data {
