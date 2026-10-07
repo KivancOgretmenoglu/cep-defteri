@@ -465,18 +465,18 @@ kbd {
 }
 
 /* ───────── Clawd notu ───────── */
-.clawd-note {
+.mascot-note {
   display: flex;
   align-items: flex-end;
   gap: 4px;
 }
-.clawd-note__avatar {
+.mascot-note__avatar {
   flex: none;
   border-radius: 14px;
   padding: 2px;
   margin-bottom: -4px;
 }
-.clawd-note__bubble {
+.mascot-note__bubble {
   position: relative;
   flex: 1;
   min-width: 0;
@@ -487,7 +487,7 @@ kbd {
   box-shadow: var(--shadow);
   font-size: 15.5px;
 }
-.clawd-note__bubble::before {
+.mascot-note__bubble::before {
   content: '';
   position: absolute;
   left: -7px;
@@ -500,36 +500,36 @@ kbd {
   transform: rotate(45deg);
   clip-path: polygon(0 0, 0 100%, 100% 100%);
 }
-.clawd-note[data-mood='thoughtful'] .clawd-note__bubble {
+.mascot-note[data-mood='thoughtful'] .mascot-note__bubble {
   border-color: color-mix(in srgb, var(--warn) 45%, var(--line));
   background: color-mix(in srgb, var(--warn-soft) 45%, var(--surface));
 }
-.clawd-note[data-mood='thoughtful'] .clawd-note__bubble::before {
+.mascot-note[data-mood='thoughtful'] .mascot-note__bubble::before {
   background: color-mix(in srgb, var(--warn-soft) 45%, var(--surface));
   border-color: color-mix(in srgb, var(--warn) 45%, var(--line));
 }
-.clawd-note__foot {
+.mascot-note__foot {
   display: flex;
   gap: 14px;
   flex-wrap: wrap;
   margin-top: 6px;
 }
-.clawd-note__why {
+.mascot-note__why {
   margin-top: 8px;
   padding-top: 8px;
   border-top: 1px dashed var(--line-strong);
   font-size: 14px;
   color: var(--ink-2);
 }
-.clawd-note--compact {
+.mascot-note--compact {
   margin-top: 4px;
 }
-.clawd-note--compact .clawd-note__bubble {
+.mascot-note--compact .mascot-note__bubble {
   box-shadow: none;
   background: var(--surface-2);
   border-color: transparent;
 }
-.clawd-note--compact .clawd-note__bubble::before {
+.mascot-note--compact .mascot-note__bubble::before {
   background: var(--surface-2);
   border-color: transparent;
 }

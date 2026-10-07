@@ -62,6 +62,8 @@ export interface Character {
   intro: L10n;
   traits: L10n;
   palette: Palette;
+  /** Patilerin/kanatların rengi (kaldırılmış patiler çizilirken) */
+  fur: string;
   /** Espri olasılığı (0–1): kişiliğe göre */
   quipChance: number;
   /** Sürpriz havuzunda daha sık görülen imza hareketleri */
@@ -111,6 +113,7 @@ function shadeEdge(g: Grid, color: string, dark: string): Grid {
 export const CHARACTERS: Record<MascotKey, Character> = {
   fistik: {
     key: 'fistik',
+    fur: '#E9893C',
     name: { tr: 'Fıstık', en: 'Peanut' },
     species: { tr: 'Sokak kedisi', en: 'Street cat' },
     intro: { tr: 'Selam! Ben Fıstık. Kahve paramı da ben tutarım, seninkini de.', en: "Hi! I'm Peanut. I keep track of my coffee money, and yours too." },
@@ -141,6 +144,7 @@ export const CHARACTERS: Record<MascotKey, Character> = {
   },
   bilge: {
     key: 'bilge',
+    fur: '#3E4A8C',
     name: { tr: 'Bilge', en: 'Sage' },
     species: { tr: 'Baykuş', en: 'Owl' },
     intro: { tr: 'Merhaba, ben Bilge. Rakamlar konuşur, ben de onları dinlerim.', en: "Hello, I'm Sage. Numbers talk, and I listen." },
@@ -171,6 +175,7 @@ export const CHARACTERS: Record<MascotKey, Character> = {
   },
   ceviz: {
     key: 'ceviz',
+    fur: '#A8683A',
     name: { tr: 'Ceviz', en: 'Walnut' },
     species: { tr: 'Sincap', en: 'Squirrel' },
     intro: { tr: 'Ben Ceviz! Her kuruşu bir ceviz gibi saklarım. Kış gelir, biliyorsun.', en: "I'm Walnut! I stash every coin like a nut. Winter's coming, you know." },
@@ -201,6 +206,7 @@ export const CHARACTERS: Record<MascotKey, Character> = {
   },
   diken: {
     key: 'diken',
+    fur: '#F2DCC0',
     name: { tr: 'Diken', en: 'Spike' },
     species: { tr: 'Kirpi', en: 'Hedgehog' },
     intro: { tr: 'Diken ben. Gereksizse alma, gerekliyse yaz. Bu kadar.', en: "Spike here. If you don't need it, skip it. If you buy it, log it. That's it." },
@@ -231,6 +237,7 @@ export const CHARACTERS: Record<MascotKey, Character> = {
   },
   karamel: {
     key: 'karamel',
+    fur: '#E2A75A',
     name: { tr: 'Karamel', en: 'Caramel' },
     species: { tr: 'Sokak köpeği', en: 'Street dog' },
     intro: { tr: 'Hav! Ben Karamel. Hesabı bölüşürüz, borcu unutmayız, söz!', en: "Woof! I'm Caramel. We split the bill and never forget who owes what. Promise!" },
