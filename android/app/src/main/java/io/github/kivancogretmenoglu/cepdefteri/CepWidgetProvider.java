@@ -13,8 +13,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Ana ekran aracı: "Kullanılabilir" tutar, dönem etiketi, Clawd ve "+ Ekle" düğmesi.
- * Metinler web katmanında biçimlendirilip WidgetBridgePlugin ile SharedPreferences'a yazılır.
+ * Ana ekran aracı: "Kullanılabilir" tutar, dönem etiketi, seçili maskot ve "+ Ekle" düğmesi.
+ * Metinler (dil dahil) web katmanında biçimlendirilip WidgetBridgePlugin ile SharedPreferences'a yazılır
+ * (src/native/widgetPayload.ts).
  */
 public class CepWidgetProvider extends AppWidgetProvider {
 
@@ -46,7 +47,10 @@ public class CepWidgetProvider extends AppWidgetProvider {
 
         String amount = "—";
         String label = context.getString(R.string.widget_waiting);
+        String title = context.getString(R.string.widget_title);
+        String addText = context.getString(R.string.widget_add);
         String note = "";
+        String mascot = "fistik";
         boolean negative = false;
         String json = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, null);
         if (json != null) {
@@ -54,15 +58,21 @@ public class CepWidgetProvider extends AppWidgetProvider {
                 JSONObject o = new JSONObject(json);
                 amount = o.optString("amount", amount);
                 label = o.optString("label", label);
+                title = o.optString("title", title);
+                addText = o.optString("add", addText);
                 note = o.optString("note", "");
+                mascot = o.optString("mascot", mascot);
                 negative = o.optBoolean("negative", false);
             } catch (JSONException ignored) {
                 // Bozuk veri: varsayılan metinler kalır.
             }
         }
 
+        views.setImageViewResource(R.id.widget_mascot, mascotDrawable(mascot));
+        views.setTextViewText(R.id.widget_title, title);
         views.setTextViewText(R.id.widget_amount, amount);
         views.setTextViewText(R.id.widget_label, label);
+        views.setTextViewText(R.id.widget_add, addText);
         views.setTextViewText(R.id.widget_note, note);
         views.setViewVisibility(R.id.widget_note, note.isEmpty() ? View.GONE : View.VISIBLE);
         if (negative) {
@@ -71,10 +81,14 @@ public class CepWidgetProvider extends AppWidgetProvider {
 
         int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
 
-        // Araca (tutara) dokununca uygulama açılır.
-        Intent open = new Intent(context, MainActivity.class);
-        open.setAction(Intent.ACTION_MAIN);
-        open.addCategory(Intent.CATEGORY_LAUNCHER);
+        // Araca (tutara) dokununca uygulama açılır: başlatıcıdaki etkin simgenin (activity-alias) niyetiyle,
+        // böylece uygulama simgesinden açılmışla aynı görev öne gelir.
+        Intent open = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+        if (open == null) {
+            open = new Intent(context, MainActivity.class);
+            open.setAction(Intent.ACTION_MAIN);
+            open.addCategory(Intent.CATEGORY_LAUNCHER);
+        }
         open.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent openPi = PendingIntent.getActivity(context, 0, open, flags);
         views.setOnClickPendingIntent(R.id.widget_root, openPi);
@@ -86,5 +100,21 @@ public class CepWidgetProvider extends AppWidgetProvider {
         views.setOnClickPendingIntent(R.id.widget_add, addPi);
 
         return views;
+    }
+
+    /** Maskot anahtarı → araç görseli (bilinmeyen anahtar: Fıstık). */
+    static int mascotDrawable(String key) {
+        switch (key == null ? "" : key) {
+            case "bilge":
+                return R.drawable.widget_mascot_bilge;
+            case "ceviz":
+                return R.drawable.widget_mascot_ceviz;
+            case "diken":
+                return R.drawable.widget_mascot_diken;
+            case "karamel":
+                return R.drawable.widget_mascot_karamel;
+            default:
+                return R.drawable.widget_mascot_fistik;
+        }
     }
 }

@@ -18,10 +18,7 @@
             android:launchMode="singleTask"
             android:exported="true">
 
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            <!-- Başlatıcı girişi aşağıdaki activity-alias'larda (seçilen maskota göre simge). -->
 
             <!-- Derin bağlantı: io.github.kivancogretmenoglu.cepdefteri://add → ekleme sayfası (ana ekran aracındaki "+ Ekle"). -->
             <intent-filter>
@@ -32,6 +29,80 @@
             </intent-filter>
 
         </activity>
+
+        <!--
+            Uygulama simgesi = seçilen maskot (AppIconPlugin.java). Her maskot için bir takma ad; aynı anda yalnız biri
+            etkindir. Varsayılan: Fıstık. Adlar AppIconPlugin.KEYS ile aynı olmalı (".Icon_<anahtar>").
+        -->
+        <activity-alias
+            android:name=".Icon_fistik"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_fistik"
+            android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher_fistik_round"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".Icon_bilge"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_bilge"
+            android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher_bilge_round"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".Icon_ceviz"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_ceviz"
+            android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher_ceviz_round"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".Icon_diken"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_diken"
+            android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher_diken_round"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".Icon_karamel"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_karamel"
+            android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher_karamel_round"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
 
         <!-- Ana ekran aracı: kullanılabilir para + "+ Ekle" -->
         <receiver

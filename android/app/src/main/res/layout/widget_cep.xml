@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Ana ekran aracı: Clawd + "Kullanılabilir" tutar + dönem etiketi + "+ Ekle". RemoteViews uyumlu görünümler. -->
+<!-- Ana ekran aracı: maskot + "Kullanılabilir" tutar + dönem etiketi + "+ Ekle". RemoteViews uyumlu görünümler. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
@@ -10,12 +10,12 @@
     android:padding="14dp">
 
     <ImageView
-        android:id="@+id/widget_clawd"
+        android:id="@+id/widget_mascot"
         android:layout_width="44dp"
         android:layout_height="44dp"
-        android:contentDescription="@string/widget_clawd_desc"
+        android:contentDescription="@string/widget_mascot_desc"
         android:scaleType="fitCenter"
-        android:src="@drawable/widget_clawd" />
+        android:src="@drawable/widget_mascot_fistik" />
 
     <LinearLayout
         android:id="@+id/widget_body"
@@ -27,6 +27,7 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/widget_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/widget_title"

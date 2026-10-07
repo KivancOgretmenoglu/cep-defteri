@@ -19,11 +19,28 @@ Kilit bir **gizlilik perdesidir**, kayıtlar şifrelenmez. PIN unutulursa: parma
 
 **Bildirimler** (yalnız APK; *Ayarlar → Bildirimler*): açınca Android 13+ izin sorar. Yaklaşan ödeme ve planlı yatırım aktarımı için bir gün önce 10:00'da ("Yarın: Yurt ödemesi 4.500 TL"), beklenen gelir için o gün 12:00'de ("Burs geldi mi?"), isteğe bağlı her akşam seçilen saatte "Bugünkü harcamalarını girdin mi?" (o gün kayıt varsa atlanır). En fazla 30 gün ileri ve 60 bildirim planlanır; veri değişince ve uygulamaya dönünce yeniden hesaplanır. Hatırlatma saati geçmiş ama vadesi gelmemiş bir kalem bir kez hemen bildirilir. Bildirime dokununca ilgili "Ödendi / Geldi" sayfası ya da yeni kayıt sayfası açılır. Örnek veri modunda bildirim gönderilmez.
 
-**Ana ekran aracı (widget)**: ana ekranda boş yere uzun bas → *Araçlar* → *Cep Defteri – Kullanılabilir para*. Kullanılabilir tutarı ve dönemi ("Ekim sonuna kadar") gösterir; *Toplamları gizle* açıksa "•••• TL", örnek veri modunda "örnek veri" yazar. Tutara dokununca uygulama, **+ Ekle**'ye dokununca doğrudan yeni kayıt sayfası açılır (`io.github.kivancogretmenoglu.cepdefteri://add`). Araç, uygulama her açıldığında ve veri değiştiğinde güncellenir.
+**Ana ekran aracı (widget)**: ana ekranda boş yere uzun bas → *Araçlar* → *Cep Defteri – Kullanılabilir para*. Seçili maskotu, kullanılabilir tutarı ve dönemi ("Ekim sonuna kadar") gösterir; *Toplamları gizle* açıksa "•••• TL", örnek veri modunda "örnek veri" yazar. Metinler uygulamada seçilen dili izler (Türkçe / English: "Available", "until end of October", "+ Add", "demo data"). Tutara dokununca uygulama, **+ Ekle**'ye dokununca doğrudan yeni kayıt sayfası açılır (`io.github.kivancogretmenoglu.cepdefteri://add`). Araç, uygulama her açıldığında ve veri değiştiğinde güncellenir (metinler ve maskot anahtarı `src/native/widgetPayload.ts`'te hazırlanır).
+
+**Uygulama simgesi = maskot**: simge seçilen maskotu (Fıstık, Bilge, Ceviz, Diken, Karamel) izleyebilir. Manifest'te her maskot için bir `<activity-alias>` (`.Icon_<anahtar>`) vardır; yalnız biri etkindir (varsayılan Fıstık). `AppIconPlugin.java` seçileni etkinleştirip diğerlerini kapatır (`PackageManager.setComponentEnabledSetting`, `DONT_KILL_APP`); JS tarafı `src/native/appIcon.ts` (`appIconSupported()`, `setAppIcon(key)`, `getAppIcon()`; tarayıcıda hiçbir şey yapmaz). Bilinen kısıtlar:
+- Bazı başlatıcılar yeni simgeyi birkaç saniye (bazen telefonu yeniden başlatana kadar) geç gösterir.
+- Bazı başlatıcılar (ör. Samsung One UI, bazı Xiaomi sürümleri) değişiklikte **ana ekrandaki kısayolu kaldırır**; uygulama çekmecesinden yeniden sürüklemek gerekir. Ana ekran aracı etkilenmez.
+- Değişiklik anında açık olan görev bazı sürümlerde kapanabilir; veri kaybı olmaz (her şey cihaza yazılmıştır).
+- Tarayıcı / PWA sürümünde simge değiştirilemez; web simgesi her zaman Fıstık'tır.
+Bildirime dokunma, ana ekran aracı ve `://add` derin bağlantısı takma adlardan bağımsız çalışır: derin bağlantı doğrudan `MainActivity`'ye gider, araç ve bildirimler etkin takma adın başlatma niyetini kullanır.
+
+**Titreşim**: `src/native/haptics.ts` → `haptic('light' | 'success' | 'warning')` (`@capacitor/haptics`); yalnız uygulamada çalışır, hata vermez.
 
 **Otomatik yedek** (*Ayarlar → Otomatik yedek*, varsayılan açık): her gün bir kopya `Belgeler/CepDefteri/cep-defteri-otomatik-YYYY-AA-GG.json` dosyasına yazılır (gün içinde veri değişirse o günün dosyası güncellenir), son 7 gün tutulur. Bu klasör **uygulamayı silsen de kalır**: yeniden kurunca *Ayarlar → Yedekten geri yükle* ile oradaki en yeni dosyayı seç. Örnek veri ve boş veri yedeklenmez. Android 10 ve öncesinde ilk seferde dosya izni istenebilir (*Şimdi yedekle*). Tarayıcı sürümünde son 5 günün kopyası tarayıcının kendi deposunda tutulur ve aynı karttan geri yüklenir; 14 gündür yedek dosyası indirilmediyse nazik bir hatırlatma çıkar.
 
-Kod: `src/lock/` (kilit), `src/native/` (bildirim planı, araç köprüsü, otomatik yedek, eşitleme), `android/app/src/main/java/.../CepWidgetProvider.java` ve `WidgetBridgePlugin.java` (araç ve JS köprüsü). Araç görselleri `drawable-nodpi/widget_clawd.png` ve `widget_preview.png` Clawd bileşeninden Playwright ile üretildi.
+Kod: `src/lock/` (kilit), `src/native/` (bildirim planı, araç köprüsü, otomatik yedek, eşitleme), `android/app/src/main/java/.../CepWidgetProvider.java` ve `WidgetBridgePlugin.java` (araç ve JS köprüsü), `AppIconPlugin.java` (simge).
+
+**Simgeler ve görseller** maskot tanımlarından (`src/mascot/characters.ts`) üretilir: başlatıcı simgeleri (her maskot için kare, yuvarlak ve uyarlanabilir; zemin `palette.iconBg`), varsayılan `ic_launcher*` ve açılış ekranı (Fıstık, kâğıt zemin `#F4EFE6`), araç görselleri `drawable-nodpi/widget_mascot_<anahtar>.png` + `widget_preview.png` ve web simgeleri `public/icon*.png`, `public/icon.svg`. Maskot değişince yeniden üret:
+
+```bash
+npx tsx scripts/gen-android-icons.ts
+```
+
+Betik tarayıcı gerektirmez (PNG'yi kendisi kodlar); maskot pikselleri keskin kalır ve uyarlanabilir simgenin güvenli bölgesinin (66 dp daire) içinde durur.
 
 ### APK nasıl üretiliyor?
 
