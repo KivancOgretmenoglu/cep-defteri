@@ -50,34 +50,58 @@ export const inRange = (d: ISODate, from: ISODate, to: ISODate) => d >= from && 
 export const minDate = (a: ISODate, b: ISODate) => (a < b ? a : b);
 export const maxDate = (a: ISODate, b: ISODate) => (a > b ? a : b);
 
-const MONTHS = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-const MONTHS_SHORT = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
-const WEEKDAYS = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+/** Biçimlendirme dili ('tr' varsayılan). */
+export type DateLang = 'tr' | 'en';
 
-export const monthName = (m: MonthKey) => MONTHS[Number(m.slice(5, 7)) - 1];
-export const monthLabel = (m: MonthKey) => `${monthName(m)} ${m.slice(0, 4)}`;
-export const monthShort = (m: MonthKey) => MONTHS_SHORT[Number(m.slice(5, 7)) - 1];
-export const weekday = (d: ISODate) => WEEKDAYS[new Date(toUTC(d)).getUTCDay()];
+const MONTHS = {
+  tr: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+  en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+};
+const MONTHS_SHORT = {
+  tr: ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'],
+  en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+};
+const WEEKDAYS = {
+  tr: ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'],
+  en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+};
 
-/** "3 Eki" veya yıl farklıysa "3 Eki 2025" */
-export function shortDate(d: ISODate, today?: ISODate): string {
-  const s = `${dayOfMonth(d)} ${MONTHS_SHORT[Number(d.slice(5, 7)) - 1]}`;
-  return today && today.slice(0, 4) !== d.slice(0, 4) ? `${s} ${d.slice(0, 4)}` : s;
+export const monthName = (m: MonthKey, lang: DateLang = 'tr') => MONTHS[lang][Number(m.slice(5, 7)) - 1];
+export const monthLabel = (m: MonthKey, lang: DateLang = 'tr') => `${monthName(m, lang)} ${m.slice(0, 4)}`;
+export const monthShort = (m: MonthKey, lang: DateLang = 'tr') => MONTHS_SHORT[lang][Number(m.slice(5, 7)) - 1];
+export const weekday = (d: ISODate, lang: DateLang = 'tr') => WEEKDAYS[lang][new Date(toUTC(d)).getUTCDay()];
+
+/** "3 Eki" veya yıl farklıysa "3 Eki 2025" (en: "Oct 3", "Oct 3, 2025") */
+export function shortDate(d: ISODate, today?: ISODate, lang: DateLang = 'tr'): string {
+  const mon = MONTHS_SHORT[lang][Number(d.slice(5, 7)) - 1];
+  const otherYear = !!today && today.slice(0, 4) !== d.slice(0, 4);
+  if (lang === 'en') return `${mon} ${dayOfMonth(d)}${otherYear ? `, ${d.slice(0, 4)}` : ''}`;
+  const s = `${dayOfMonth(d)} ${mon}`;
+  return otherYear ? `${s} ${d.slice(0, 4)}` : s;
 }
 
-/** Gün başlığı: "Bugün", "Dün", "Yarın" veya "3 Ekim, Cuma" */
-export function relativeDay(d: ISODate, today: ISODate): string {
+/** Gün başlığı: "Bugün", "Dün", "Yarın" veya "3 Ekim, Cuma" (en: "Today", "Friday, October 3") */
+export function relativeDay(d: ISODate, today: ISODate, lang: DateLang = 'tr'): string {
   const diff = diffDays(d, today);
-  if (diff === 0) return 'Bugün';
-  if (diff === -1) return 'Dün';
-  if (diff === 1) return 'Yarın';
-  const y = d.slice(0, 4) !== today.slice(0, 4) ? ` ${d.slice(0, 4)}` : '';
+  const en = lang === 'en';
+  if (diff === 0) return en ? 'Today' : 'Bugün';
+  if (diff === -1) return en ? 'Yesterday' : 'Dün';
+  if (diff === 1) return en ? 'Tomorrow' : 'Yarın';
+  const otherYear = d.slice(0, 4) !== today.slice(0, 4);
+  if (en) return `${weekday(d, lang)}, ${monthName(monthOf(d), lang)} ${dayOfMonth(d)}${otherYear ? `, ${d.slice(0, 4)}` : ''}`;
+  const y = otherYear ? ` ${d.slice(0, 4)}` : '';
   return `${dayOfMonth(d)} ${monthName(monthOf(d))}${y}, ${weekday(d)}`;
 }
 
-/** "3 gün sonra", "bugün", "2 gün gecikti" */
-export function dueLabel(d: ISODate, today: ISODate): string {
+/** "3 gün sonra", "bugün", "2 gün gecikti" (en: "in 3 days", "today", "2 days overdue") */
+export function dueLabel(d: ISODate, today: ISODate, lang: DateLang = 'tr'): string {
   const diff = diffDays(d, today);
+  if (lang === 'en') {
+    if (diff === 0) return 'today';
+    if (diff === 1) return 'tomorrow';
+    if (diff > 1) return `in ${diff} days`;
+    return -diff === 1 ? '1 day overdue' : `${-diff} days overdue`;
+  }
   if (diff === 0) return 'bugün';
   if (diff === 1) return 'yarın';
   if (diff > 1) return `${diff} gün sonra`;

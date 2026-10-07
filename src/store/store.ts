@@ -7,6 +7,10 @@ import type { Data } from '../domain/types';
 import { todayISO, type ISODate } from '../domain/dates';
 import { ActionError } from '../domain/actions';
 import * as storage from './storage';
+import { translate, type Key } from '../i18n/core';
+
+/** Depodaki o anki dil (i18n/lang.ts bu dosyaya bağlı olduğundan burada doğrudan okunur). */
+const curLang = () => state.data.settings.lang ?? 'tr';
 
 export interface Toast {
   id: number;
@@ -19,7 +23,8 @@ interface State {
   data: Data;
   mode: storage.Mode;
   today: ISODate;
-  warning: string | null;
+  /** Uyarının sözlük anahtarı (arayüzde çevrilir) */
+  warning: Key | null;
   saveFailed: boolean;
   toast: Toast | null;
   /** Clawd'ın kısa onay hareketi için sayaç */
@@ -87,9 +92,9 @@ export function commit(fn: (d: Data, today: ISODate) => Data, message?: string, 
   try {
     next = fn(prev, state.today);
   } catch (e) {
-    if (e instanceof ActionError) return e.message;
+    if (e instanceof ActionError) return e.localize(curLang());
     console.error(e);
-    return 'Beklenmeyen bir hata oluştu; kayıt yapılmadı.';
+    return translate(curLang(), 'store.unexpected');
   }
   const ok = persist(next);
   emit({ data: next, saveFailed: !ok, pulse: opts.pulse ? state.pulse + 1 : state.pulse, isNew: false });
@@ -106,7 +111,7 @@ export function undo() {
   undoPrev = null;
   const ok = persist(prev);
   emit({ data: prev, saveFailed: !ok });
-  showToast('Geri alındı');
+  showToast(translate(curLang(), 'store.undone'));
 }
 
 /** Gün değişimini yakalar (gece yarısını geçen açık uygulama için). */

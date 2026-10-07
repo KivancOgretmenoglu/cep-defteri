@@ -5,9 +5,10 @@
  */
 import { useMemo, useRef, useState } from 'react';
 import type { BalancePoint } from '../domain/ledger';
-import { formatMoney, type Money } from '../domain/money';
-import { relativeDay, shortDate, type ISODate } from '../domain/dates';
-import { HIDDEN } from './kit';
+import type { Money } from '../domain/money';
+import type { ISODate } from '../domain/dates';
+import { formatMoney, hiddenMoney, relativeDay, shortDate } from '../i18n/format';
+import { useT } from '../i18n';
 
 interface Props {
   history: BalancePoint[];
@@ -35,6 +36,7 @@ function niceTicks(min: number, max: number, count = 4): number[] {
 }
 
 export function BalanceChart({ history, projection = [], today, hide = false, txCount, height = 220, compact = false, label }: Props) {
+  const tt = useT();
   const H = height;
   const pad = compact ? { l: 2, r: 2, t: 6, b: 6 } : { l: 8, r: 8, t: 14, b: 26 };
   const all = useMemo(() => [...history, ...projection.slice(1)], [history, projection]);
@@ -56,7 +58,7 @@ export function BalanceChart({ history, projection = [], today, hide = false, tx
     };
   }, [all, H, pad.l, pad.r, pad.t, pad.b, compact]);
 
-  if (all.length < 2) return <p className="muted">Grafik için en az iki günlük kayıt gerekiyor.</p>;
+  if (all.length < 2) return <p className="muted">{tt('chart.needTwoDays')}</p>;
 
   const histPath = history.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.balance).toFixed(1)}`).join('');
   const off = history.length - 1;
@@ -75,7 +77,7 @@ export function BalanceChart({ history, projection = [], today, hide = false, tx
   }
   const hp = hover !== null ? all[hover] : null;
   const isProj = hover !== null && hover > off;
-  const money = (v: Money) => (hide ? `${HIDDEN} TL` : formatMoney(v));
+  const money = (v: Money) => (hide ? hiddenMoney() : formatMoney(v));
 
   return (
     <figure className={`bchart ${compact ? 'bchart--compact' : ''}`}>
@@ -85,7 +87,7 @@ export function BalanceChart({ history, projection = [], today, hide = false, tx
         preserveAspectRatio="none"
         className="bchart__svg"
         role="img"
-        aria-label={`${label}. Son değer ${relativeDay(last.date, today)}: ${money(last.balance)}${projection.length > 1 ? `; ${shortDate(projection[projection.length - 1].date)} tahmini ${money(projection[projection.length - 1].balance)}` : ''}.`}
+        aria-label={`${label}. ${tt('chart.lastValue', { day: relativeDay(last.date, today), amount: money(last.balance) })}${projection.length > 1 ? `; ${tt('chart.projectedOn', { date: shortDate(projection[projection.length - 1].date), amount: money(projection[projection.length - 1].balance) })}` : ''}.`}
         tabIndex={compact ? -1 : 0}
         onPointerMove={(e) => !compact && pick(e.clientX)}
         onPointerDown={(e) => !compact && pick(e.clientX)}
@@ -122,7 +124,7 @@ export function BalanceChart({ history, projection = [], today, hide = false, tx
       {!compact && (
         <div className="bchart__xl" aria-hidden>
           <span>{shortDate(all[0].date, today)}</span>
-          {projection.length > 1 && <span style={{ left: `${(x(off) / W) * 100}%` }} className="bchart__today">bugün</span>}
+          {projection.length > 1 && <span style={{ left: `${(x(off) / W) * 100}%` }} className="bchart__today">{tt('chart.today')}</span>}
           <span>{shortDate(all[all.length - 1].date, today)}</span>
         </div>
       )}
@@ -131,10 +133,10 @@ export function BalanceChart({ history, projection = [], today, hide = false, tx
           <b>{relativeDay(hp.date, today)}</b>
           <span>
             <i className={`bchart__key ${isProj ? 'is-proj' : ''}`} />
-            {isProj ? 'Tahmini ' : ''}
+            {isProj ? tt('chart.projectedPrefix') : ''}
             {money(hp.balance)}
           </span>
-          {!isProj && txCount && <small>{txCount.get(hp.date) ?? 0} işlem</small>}
+          {!isProj && txCount && <small>{tt('chart.txCount', { n: txCount.get(hp.date) ?? 0 })}</small>}
         </div>
       )}
     </figure>

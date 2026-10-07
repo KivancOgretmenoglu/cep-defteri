@@ -8,6 +8,7 @@ import { isNative } from '../platform';
 import { useDevice } from '../store/device';
 import { remainingBlock, startLockWatch, tryPin, unlock, useLocked, wipeAllAppData } from './lockState';
 import { biometricInfo, verifyBiometric } from './biometric';
+import { t as tNow, useT } from '../i18n';
 import './lock.css';
 
 export function LockGate({ children }: { children: ReactNode }) {
@@ -27,10 +28,11 @@ export function LockGate({ children }: { children: ReactNode }) {
 
 const fmtWait = (ms: number) => {
   const s = Math.ceil(ms / 1000);
-  return s >= 60 ? `${Math.floor(s / 60)} dk ${String(s % 60).padStart(2, '0')} sn` : `${s} sn`;
+  return s >= 60 ? tNow('lock.minSec', { m: Math.floor(s / 60), s: String(s % 60).padStart(2, '0') }) : tNow('lock.sec', { s });
 };
 
 function LockScreen() {
+  const t = useT();
   const bioEnabled = useDevice((p) => p.lock.biometric);
   const [pin, setPin] = useState('');
   const [msg, setMsg] = useState<string | null>(null);
@@ -78,7 +80,7 @@ function LockScreen() {
       setPin('');
       setShake((n) => n + 1);
       setWait(r.waitMs);
-      setMsg(r.waitMs > 0 ? 'Çok fazla yanlış deneme.' : r.error);
+      setMsg(r.waitMs > 0 ? t('lock.tooMany') : r.error);
     },
     [busy],
   );
@@ -120,13 +122,13 @@ function LockScreen() {
           <span className="lock__z lock__z--2">z</span>
         </div>
         <h1 id="lock-title" className="lock__title">
-          <LockKeyhole size={18} aria-hidden /> Cep Defteri kilitli
+          <LockKeyhole size={18} aria-hidden /> {t('lock.title')}
         </h1>
 
         {!forgot ? (
           <>
-            <p className="lock__sub">{wait > 0 ? `Tekrar denemek için ${fmtWait(wait)} bekle.` : 'Devam etmek için PIN’ini gir.'}</p>
-            <div className={`lock__dots ${shake ? 'is-shake' : ''}`} key={shake} aria-label={`${pin.length} hane girildi`} role="status">
+            <p className="lock__sub">{wait > 0 ? t('lock.waitFor', { time: fmtWait(wait) }) : t('lock.enterPin')}</p>
+            <div className={`lock__dots ${shake ? 'is-shake' : ''}`} key={shake} aria-label={t('lock.digits', { n: pin.length })} role="status">
               {Array.from({ length: Math.max(4, pin.length) }, (_, i) => (
                 <i key={i} className={i < pin.length ? 'is-on' : ''} />
               ))}
@@ -139,7 +141,7 @@ function LockScreen() {
                 </button>
               ))}
               {canBio ? (
-                <button type="button" className="lock__key lock__key--fn" onClick={tryBio} aria-label={`${bio.label} ile aç`}>
+                <button type="button" className="lock__key lock__key--fn" onClick={tryBio} aria-label={t('lock.bioOpen', { label: bio.label })}>
                   <Fingerprint size={24} />
                 </button>
               ) : (
@@ -148,15 +150,15 @@ function LockScreen() {
               <button type="button" className="lock__key" onClick={() => press('0')} disabled={wait > 0}>
                 0
               </button>
-              <button type="button" className="lock__key lock__key--fn" onClick={() => press('del')} aria-label="Sil" disabled={!pin}>
+              <button type="button" className="lock__key lock__key--fn" onClick={() => press('del')} aria-label={t('common.delete')} disabled={!pin}>
                 <Delete size={22} />
               </button>
             </div>
             <button type="button" className="btn btn--primary btn--block lock__ok" onClick={() => press('ok')} disabled={pin.length < 4 || wait > 0 || busy}>
-              {busy ? 'Kontrol ediliyor…' : 'Aç'}
+              {busy ? t('lock.checking') : t('lock.open')}
             </button>
             <button type="button" className="link lock__forgot" onClick={() => setForgot(true)}>
-              PIN’i unuttum
+              {t('lock.forgot')}
             </button>
           </>
         ) : (
@@ -168,45 +170,45 @@ function LockScreen() {
 }
 
 function Forgot({ canBio, bioLabel, onBio, onBack }: { canBio: boolean; bioLabel: string; onBio: () => void; onBack: () => void }) {
+  const t = useT();
   const [confirm, setConfirm] = useState('');
   const native = isNative();
   return (
     <div className="lock__forgot-panel">
       <p>
-        Dürüst olalım: bu kilit bir <b>gizlilik perdesi</b>. Kayıtların şifreli değil, ama PIN’i başka bir yoldan sıfırlamanın güvenli bir yolu da yok;
-        olsaydı kilidi herkes açabilirdi.
+        {t('lock.honestPre')} <b>{t('lock.curtain')}</b>{t('lock.honestPost')}
       </p>
       {canBio && (
         <>
-          <p>{bioLabel} ile açabilirsin; sonra Ayarlar → Güvenlik’ten yeni bir PIN belirle.</p>
+          <p>{t('lock.bioThenReset', { label: bioLabel })}</p>
           <button type="button" className="btn btn--primary btn--block" onClick={onBio}>
-            <Fingerprint size={18} /> {bioLabel} ile aç
+            <Fingerprint size={18} /> {t('lock.bioOpen', { label: bioLabel })}
           </button>
         </>
       )}
       <div className="callout">
         <p>
-          <b>Kilidi kaldır ve verileri sil:</b> bu cihazdaki tüm kayıtlar, ayarlar ve PIN silinir; uygulama ilk günkü hâline döner.
+          <b>{t('lock.wipeTitle')}</b> {t('lock.wipeBody')}
         </p>
         {native ? (
           <p className="small">
-            Telefonun <b>Belgeler/CepDefteri</b> klasöründeki otomatik yedekler silinmez. Sonra <b>Ayarlar → Yedekten geri yükle</b> ile en yeni dosyayı seçerek kayıtlarına dönebilirsin.
+            {t('lock.nativePre')} <b>{t('ns.docsFolder')}</b> {t('lock.nativeMid')} <b>{t('lock.restorePath')}</b> {t('lock.nativePost')}
           </p>
         ) : (
           <p className="small">
-            Tarayıcıdaki otomatik yedekler de silinir. Daha önce indirdiğin bir yedek dosyası varsa, sonra <b>Ayarlar → Yedekten geri yükle</b> ile kayıtlarına dönebilirsin.
+            {t('lock.webPre')} <b>{t('lock.restorePath')}</b> {t('lock.webPost')}
           </p>
         )}
         <label className="field">
-          <span className="field__label">Onaylamak için SİL yaz</span>
+          <span className="field__label">{t('set.wipeConfirmLabel')}</span>
           <input className="input" value={confirm} onChange={(e) => setConfirm(e.target.value)} autoComplete="off" />
         </label>
-        <button type="button" className="btn btn--danger btn--block" disabled={confirm.trim().toLocaleUpperCase('tr') !== 'SİL'} onClick={wipeAllAppData}>
-          Kilidi kaldır ve verileri sil
+        <button type="button" className="btn btn--danger btn--block" disabled={confirm.trim().toLocaleUpperCase(t.lang === 'en' ? 'en' : 'tr') !== t('set.wipeWord')} onClick={wipeAllAppData}>
+          {t('lock.wipeBtn')}
         </button>
       </div>
       <button type="button" className="link lock__forgot" onClick={onBack}>
-        PIN girmeye dön
+        {t('lock.backToPin')}
       </button>
     </div>
   );

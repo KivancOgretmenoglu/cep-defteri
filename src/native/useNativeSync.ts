@@ -13,6 +13,7 @@ import { updateWidget } from './widget';
 import { runAutoBackup } from './autoBackup';
 import { backedUpToday, backupNudgeDue } from './backupPlan';
 import { todayISO } from '../domain/dates';
+import { t } from '../i18n';
 import type { NotifExtra } from './schedule';
 
 export const DEEP_LINK_SCHEME = 'io.github.kivancogretmenoglu.cepdefteri';
@@ -49,7 +50,7 @@ function maybeNudge() {
   } catch {
     return;
   }
-  setTimeout(() => showToast('Son yedek dosyan 14 günden eski. Ayarlar → Yedek indir ile bir kopya almaya ne dersin?', { ms: 7000 }), 2500);
+  setTimeout(() => showToast(t('sync.nudge'), { ms: 7000 }), 2500);
 }
 
 let setupDone = false;

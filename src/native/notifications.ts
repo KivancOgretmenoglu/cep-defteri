@@ -4,6 +4,7 @@ import { isNative } from '../platform';
 import { getDevice } from '../store/device';
 import { computeSchedule, NOTIF_ID_BASE, NOTIF_ID_MAX, updateSent, type NotifExtra, type PlannedNotification } from './schedule';
 import type { ISODate } from '../domain/dates';
+import { t } from '../i18n';
 
 const SENT_KEY = 'cep-defteri:notif-sent';
 const CHANNEL = 'cep-hatirlatma';
@@ -72,7 +73,7 @@ async function doReschedule(data: Data, today: ISODate, mode: 'real' | 'demo'): 
   if (!prefs.enabled || mode !== 'real') return [];
   if ((await LN.checkPermissions()).display !== 'granted') return [];
   if (!channelReady) {
-    await LN.createChannel({ id: CHANNEL, name: 'Hatırlatmalar', description: 'Yaklaşan ödemeler, beklenen gelirler ve günlük kayıt hatırlatması', importance: 4, visibility: 0 }).catch(() => undefined);
+    await LN.createChannel({ id: CHANNEL, name: t('notif.channel'), description: t('notif.channelDesc'), importance: 4, visibility: 0 }).catch(() => undefined);
     channelReady = true;
   }
   const now = new Date();

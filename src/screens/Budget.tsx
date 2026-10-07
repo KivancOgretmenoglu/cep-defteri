@@ -1,9 +1,10 @@
-import { pct } from '../domain/tr';
 import { useMemo, useState } from 'react';
 import { Plus, Pencil, Repeat } from 'lucide-react';
 import type { Plan } from '../domain/types';
-import { formatMoney, parseMoney } from '../domain/money';
-import { addDays, daysInMonth, dayOfMonth, monthLabel, monthOf, shortDate } from '../domain/dates';
+import { addDays, daysInMonth, dayOfMonth, monthOf } from '../domain/dates';
+import { catName, formatMoney, monthLabel, moneyUnit, parseMoney, pctForm, pctPlain, shortDate } from '../i18n/format';
+import { t as tNow, useT } from '../i18n';
+import type { Key } from '../i18n/core';
 import { accountIndex, availability, budgetStatus, occurrences, pendingUntil, type BudgetState } from '../domain/ledger';
 import * as A from '../domain/actions';
 import { commit } from '../store/store';
@@ -15,20 +16,21 @@ import { CatIcon } from '../ui/icons';
 import { DueRow } from '../ui/DueRow';
 import type { Mood } from '../domain/mood';
 
-const FREQ_LABEL = { once: 'Bir kez', weekly: 'Her hafta', monthly: 'Her ay', yearly: 'Her yıl' } as const;
+export const FREQ_LABEL: Record<Plan['freq'], Key> = { once: 'freq.once', weekly: 'freq.weekly', monthly: 'freq.monthly', yearly: 'freq.yearly' };
 
-const STATE_TEXT: Record<BudgetState, { label: string; mood: Mood }> = {
-  none: { label: '', mood: 'calm' },
-  'on-track': { label: 'Yolunda', mood: 'happy' },
-  watch: { label: 'Biraz önden gidiyor', mood: 'calm' },
-  tight: { label: 'Sıkışıyor', mood: 'thoughtful' },
-  over: { label: 'Bütçe aşıldı', mood: 'thoughtful' },
-  'planned-full': { label: 'Planlı ödemeler bütçeyi dolduruyor', mood: 'calm' },
-  'closed-within': { label: 'Bütçe içinde kapandı', mood: 'happy' },
-  future: { label: '', mood: 'calm' },
+const STATE_TEXT: Record<BudgetState, { label: Key | null; mood: Mood }> = {
+  none: { label: null, mood: 'calm' },
+  'on-track': { label: 'bud.state.onTrack', mood: 'happy' },
+  watch: { label: 'bud.state.watch', mood: 'calm' },
+  tight: { label: 'bud.state.tight', mood: 'thoughtful' },
+  over: { label: 'bud.state.over', mood: 'thoughtful' },
+  'planned-full': { label: 'bud.state.plannedFull', mood: 'calm' },
+  'closed-within': { label: 'bud.state.closedWithin', mood: 'happy' },
+  future: { label: null, mood: 'calm' },
 };
 
 export function Budget() {
+  const t = useT();
   const { data, today } = useData();
   const { accounts, cats } = useLookups(data);
   const month = monthOf(today);
@@ -49,10 +51,10 @@ export function Budget() {
       <button className="plan-row" onClick={() => openSheet({ kind: 'plan', planId: p.id })}>
         <Repeat size={16} aria-hidden />
         <span className="plan-row__main">
-          <span>{p.title}{p.installments ? <span className="tag">{p.installments} taksit</span> : null}</span>
+          <span>{p.title}{p.installments ? <span className="tag">{t('bud.installmentsTag', { n: p.installments })}</span> : null}</span>
           <small>
-            {FREQ_LABEL[p.freq]} · {p.kind === 'transfer' ? `${accounts.get(p.accountId)?.name} → ${accounts.get(p.toAccountId!)?.name}` : `${cats.get(p.categoryId!)?.name ?? ''} · ${accounts.get(p.accountId)?.name ?? ''}`}
-            {p.endDate ? (p.endDate < today ? ` · ${shortDate(p.endDate, today)} tarihinde bitti` : ` · son vade ${shortDate(p.endDate, today)}`) : ''}
+            {t(FREQ_LABEL[p.freq])} · {p.kind === 'transfer' ? `${accounts.get(p.accountId)?.name} → ${accounts.get(p.toAccountId!)?.name}` : `${catName(cats.get(p.categoryId!))} · ${accounts.get(p.accountId)?.name ?? ''}`}
+            {p.endDate ? (p.endDate < today ? ` · ${t('bud.endedOn', { date: shortDate(p.endDate, today) })}` : ` · ${t('bud.lastDue', { date: shortDate(p.endDate, today) })}`) : ''}
           </small>
         </span>
         <span className={p.kind === 'income' ? 'tone-pos' : p.kind === 'transfer' ? 'tone-invest' : ''}>{p.kind === 'income' ? '+' : ''}{formatMoney(p.amount)}</span>
@@ -66,13 +68,13 @@ export function Budget() {
     if (b.state === 'on-track' || b.state === 'watch' || b.state === 'tight')
       note = {
         mood: st.mood,
-        text: `Ayın ${pct(b.elapsedPct, 'poss')} geçti; planlı ödemeler dışındaki payın ${pct(b.flexUsedPct ?? 0, 'acc')} kullandın. ${b.remaining !== null && b.remaining > 0 ? `Bu ay için ${formatMoney(b.remaining)} kaldı, günde ~${formatMoney(Math.floor(b.remaining / left))}.` : ''}`,
-        why: 'Planlı ödemeler (yurt, abonelik vb.) bütçeden önce ayrılır; tempo yalnız geri kalan harcamalarla ölçülür. Yatırım katkıları ve transferler bütçeye girmez.',
+        text: `${t('bud.note.pace', { elapsed: pctForm(b.elapsedPct, 'poss'), used: pctForm(b.flexUsedPct ?? 0, 'acc') })} ${b.remaining !== null && b.remaining > 0 ? t('bud.note.left', { amount: formatMoney(b.remaining), perDay: formatMoney(Math.floor(b.remaining / left)) }) : ''}`,
+        why: t('bud.note.paceWhy'),
       };
     else if (b.state === 'over')
-      note = { mood: 'thoughtful', text: `Bu ay bütçeyi ${formatMoney(b.spent - b.budget)} aştın. Olur böyle aylar; kalan günlerde neyin ertelenebileceğine birlikte bakabiliriz.`, why: `Tüketim harcaması ${formatMoney(b.spent)}, bütçe ${formatMoney(b.budget)}.` };
+      note = { mood: 'thoughtful', text: t('bud.note.over', { amount: formatMoney(b.spent - b.budget) }), why: t('bud.note.overWhy', { spent: formatMoney(b.spent), budget: formatMoney(b.budget) }) };
     else if (b.state === 'planned-full')
-      note = { mood: 'calm', text: 'Bu ayki planlı ödemeler bütçenin tamamını kaplıyor. Bütçeyi biraz yükseltmek daha gerçekçi olabilir.', why: `Planlı ödemeler: ${formatMoney(b.plannedSpent + b.plannedPending)}, bütçe: ${formatMoney(b.budget)}.` };
+      note = { mood: 'calm', text: t('bud.note.full'), why: t('bud.note.fullWhy', { planned: formatMoney(b.plannedSpent + b.plannedPending), budget: formatMoney(b.budget) }) };
   }
 
   return (
@@ -80,40 +82,40 @@ export function Budget() {
       <header className="screen-head">
         <div>
           <p className="eyebrow">{monthLabel(month)}</p>
-          <h1>Bütçe ve planlar</h1>
+          <h1>{t('bud.title')}</h1>
         </div>
       </header>
 
       {b.budget === null ? (
         <section className="card">
-          <EmptyState outfit="planner" mood="calm" title="Bütçe zorunlu değil" action={<button className="btn btn--primary" onClick={() => openSheet({ kind: 'budget' })}>Aylık bütçe belirle</button>}>
-            Bir aylık harcama sınırı koyarsan gidişatını ayın akışına göre gösteririm. Koymazsan yalnızca kayıtları özetlerim, yargılamam. Kategori limitleri de isteğe bağlı.
+          <EmptyState outfit="planner" mood="calm" title={t('bud.emptyTitle')} action={<button className="btn btn--primary" onClick={() => openSheet({ kind: 'budget' })}>{t('bud.setBudget')}</button>}>
+            {t('bud.emptyBody')}
           </EmptyState>
         </section>
       ) : (
         <section className="card budget-card" aria-labelledby="budget-h">
-          <SectionHead id="budget-h" title="Aylık bütçe" action={<button className="link" onClick={() => openSheet({ kind: 'budget' })}><Pencil size={15} /> Düzenle</button>} />
+          <SectionHead id="budget-h" title={t('bud.monthly')} action={<button className="link" onClick={() => openSheet({ kind: 'budget' })}><Pencil size={15} /> {t('common.edit')}</button>} />
           <div className="budget-head">
             <span className="budget-head__spent">{formatMoney(b.spent)}</span>
             <span className="budget-head__of">/ {formatMoney(b.budget)}</span>
-            {STATE_TEXT[b.state].label && <span className={`badge badge--${b.state}`}>{STATE_TEXT[b.state].label}</span>}
+            {STATE_TEXT[b.state].label && <span className={`badge badge--${b.state}`}>{t(STATE_TEXT[b.state].label!)}</span>}
           </div>
           <BudgetBar spentPlanned={b.plannedSpent} spentFlex={Math.max(b.flexibleSpent, 0)} pending={b.plannedPending} budget={b.budget} elapsed={b.elapsedPct} />
           <dl className="legend">
-            <div><dt><i className="sw sw--planned" />Planlı (ödendi)</dt><dd>{formatMoney(b.plannedSpent)}</dd></div>
-            <div><dt><i className="sw sw--pending" />Planlı (bekliyor)</dt><dd>{formatMoney(b.plannedPending)}</dd></div>
-            <div><dt><i className="sw sw--flex" />Diğer harcamalar</dt><dd>{formatMoney(b.flexibleSpent)}</dd></div>
-            <div><dt><i className="sw sw--left" />Kalan</dt><dd>{formatMoney(Math.max(b.remaining ?? 0, 0))}</dd></div>
+            <div><dt><i className="sw sw--planned" />{t('bud.plannedPaid')}</dt><dd>{formatMoney(b.plannedSpent)}</dd></div>
+            <div><dt><i className="sw sw--pending" />{t('bud.plannedPending')}</dt><dd>{formatMoney(b.plannedPending)}</dd></div>
+            <div><dt><i className="sw sw--flex" />{t('bud.otherSpending')}</dt><dd>{formatMoney(b.flexibleSpent)}</dd></div>
+            <div><dt><i className="sw sw--left" />{t('bud.remaining')}</dt><dd>{formatMoney(Math.max(b.remaining ?? 0, 0))}</dd></div>
           </dl>
-          <p className="note-line">Çizgi, ayın geçen kısmını gösterir (%{b.elapsedPct}).</p>
+          <p className="note-line">{t('bud.lineNote', { pct: pctPlain(b.elapsedPct) })}</p>
           {note && <ClawdNote compact mood={note.mood} text={note.text} why={note.why} outfit="planner" size={64} />}
         </section>
       )}
 
       <section className="card" aria-labelledby="lim-h">
-        <SectionHead id="lim-h" title="Kategori limitleri" action={<button className="link" onClick={() => openSheet({ kind: 'limit' })}><Plus size={16} /> Limit</button>} />
+        <SectionHead id="lim-h" title={t('bud.limits')} action={<button className="link" onClick={() => openSheet({ kind: 'limit' })}><Plus size={16} /> {t('bud.limit')}</button>} />
         {b.categories.length === 0 ? (
-          <p className="muted">İstersen sık harcadığın bir kategoriye (ör. yemek) aylık limit koy. Zorunlu değil.</p>
+          <p className="muted">{t('bud.limitsEmpty')}</p>
         ) : (
           <ul className="limit-list">
             {b.categories.map((c) => (
@@ -121,16 +123,16 @@ export function Budget() {
                 <button className="limit-row" onClick={() => openSheet({ kind: 'limit', categoryId: c.category.id })}>
                   <span className="limit-row__head">
                     <span className="limit-row__name" style={{ '--cat': c.category.color } as React.CSSProperties}>
-                      <CatIcon icon={c.category.icon} size={16} /> {c.category.name}
+                      <CatIcon icon={c.category.icon} size={16} /> {catName(c.category)}
                     </span>
                     <span className="limit-row__nums">{formatMoney(c.used)} / {formatMoney(c.limit)}</span>
                   </span>
-                  <Progress value={c.used} max={c.limit} label={`${c.category.name} limiti`} tone={c.level === 'over' ? 'warn' : c.level === 'near' ? 'warn' : 'accent'} marker={b.elapsedPct} />
+                  <Progress value={c.used} max={c.limit} label={t('bud.limitOf', { cat: catName(c.category) })} tone={c.level === 'over' ? 'warn' : c.level === 'near' ? 'warn' : 'accent'} marker={b.elapsedPct} />
                   {c.level !== 'ok' && (
                     <span className={`limit-row__alert ${c.level === 'over' ? 'is-over' : ''}`}>
                       {c.level === 'over'
-                        ? `${c.category.name} limitini ${formatMoney(c.used - c.limit)} aştın (%${c.pct}).`
-                        : `${c.category.name} limitinin ${pct(c.pct, 'acc')} kullandın; ${formatMoney(c.limit - c.used)} kaldı.`}
+                        ? t('bud.limitOver', { cat: catName(c.category), amount: formatMoney(c.used - c.limit), pct: pctPlain(c.pct) })
+                        : t('bud.limitNear', { cat: catName(c.category), pct: pctForm(c.pct, 'acc'), left: formatMoney(c.limit - c.used) })}
                     </span>
                   )}
                 </button>
@@ -141,9 +143,9 @@ export function Budget() {
       </section>
 
       <section className="card" aria-labelledby="plans-h">
-        <SectionHead id="plans-h" title="Yaklaşan ödemeler ve beklenen gelirler" action={<button className="link" onClick={() => openSheet({ kind: 'plan' })}><Plus size={16} /> Plan</button>} />
+        <SectionHead id="plans-h" title={t('bud.upcomingTitle')} action={<button className="link" onClick={() => openSheet({ kind: 'plan' })}><Plus size={16} /> {t('bud.plan')}</button>} />
         {upcoming.length === 0 ? (
-          <p className="muted">45 gün içinde bekleyen plan yok. Yurt, abonelik, burs gibi düzenli kalemleri ekleyince kullanılabilir paran daha gerçekçi olur.</p>
+          <p className="muted">{t('bud.upcomingEmpty')}</p>
         ) : (
           <ul className="due-list">
             {upcoming.map((o) => <DueRow key={o.plan.id + o.due} o={o} today={today} accounts={accIdx} reserved={o.due <= av.periodEnd} />)}
@@ -151,19 +153,19 @@ export function Budget() {
         )}
         {doneThisMonth.length > 0 && (
           <details className="details">
-            <summary>Bu ay tamamlananlar ({doneThisMonth.length})</summary>
+            <summary>{t('bud.doneThisMonth', { n: doneThisMonth.length })}</summary>
             <ul className="due-list due-list--done">
               {doneThisMonth.map((o) => (
                 <li key={o.plan.id + o.due}>
                   <span className="due-list__main">
                     <span className="due-list__title">{o.plan.title}</span>
-                    <span className="due-list__sub">{shortDate(o.due)} · {o.status === 'done' ? `gerçekleşti${o.tx && o.tx.amount !== o.plan.amount ? ` (plan ${formatMoney(o.plan.amount)})` : ''}` : 'atlandı'}</span>
+                    <span className="due-list__sub">{shortDate(o.due)} · {o.status === 'done' ? `${t('bud.done')}${o.tx && o.tx.amount !== o.plan.amount ? ` (${t('bud.planAmount', { amount: formatMoney(o.plan.amount) })})` : ''}` : t('bud.skipped')}</span>
                   </span>
                   <span className="due-list__amt">{o.status === 'done' ? formatMoney(o.amount) : '—'}</span>
                   {o.status === 'skipped' ? (
-                    <button className="btn btn--small btn--ghost" onClick={() => commit((d) => A.skipOccurrence(d, o.plan.id, o.due, false), 'Atlama geri alındı')}>Geri al</button>
+                    <button className="btn btn--small btn--ghost" onClick={() => commit((d) => A.skipOccurrence(d, o.plan.id, o.due, false), t('bud.unskipped'))}>{t('common.undo')}</button>
                   ) : (
-                    <button className="btn btn--small btn--ghost" onClick={() => o.tx && openSheet({ kind: 'edit', txId: o.tx.id })}>Kayıt</button>
+                    <button className="btn btn--small btn--ghost" onClick={() => o.tx && openSheet({ kind: 'edit', txId: o.tx.id })}>{t('bud.entry')}</button>
                   )}
                 </li>
               ))}
@@ -173,13 +175,13 @@ export function Budget() {
       </section>
 
       <section className="card" aria-labelledby="allplans-h">
-        <SectionHead id="allplans-h" title="Tüm planlar" />
+        <SectionHead id="allplans-h" title={t('bud.allPlans')} />
         {data.plans.length === 0 ? (
           <div className="chip-row">
-            <Chip onClick={() => openSheet({ kind: 'plan', preset: 'expense' })}><Plus size={14} /> Yurt / kira</Chip>
-            <Chip onClick={() => openSheet({ kind: 'plan', preset: 'expense' })}><Plus size={14} /> Abonelik</Chip>
-            <Chip onClick={() => openSheet({ kind: 'plan', preset: 'income' })}><Plus size={14} /> Burs</Chip>
-            <Chip onClick={() => openSheet({ kind: 'plan', preset: 'transfer' })}><Plus size={14} /> Aylık yatırım</Chip>
+            <Chip onClick={() => openSheet({ kind: 'plan', preset: 'expense' })}><Plus size={14} /> {t('bud.chipRent')}</Chip>
+            <Chip onClick={() => openSheet({ kind: 'plan', preset: 'expense' })}><Plus size={14} /> {t('bud.chipSub')}</Chip>
+            <Chip onClick={() => openSheet({ kind: 'plan', preset: 'income' })}><Plus size={14} /> {t('bud.chipScholarship')}</Chip>
+            <Chip onClick={() => openSheet({ kind: 'plan', preset: 'transfer' })}><Plus size={14} /> {t('bud.chipInvest')}</Chip>
           </div>
         ) : (
           <>
@@ -188,7 +190,7 @@ export function Budget() {
             </ul>
             {endedPlans.length > 0 && (
               <details className="details">
-                <summary>Biten / iptal edilen planlar ({endedPlans.length})</summary>
+                <summary>{t('bud.endedPlans', { n: endedPlans.length })}</summary>
                 <ul className="plan-list plan-list--ended">
                   {endedPlans.map((p) => <PlanRow key={p.id} p={p} />)}
                 </ul>
@@ -199,37 +201,38 @@ export function Budget() {
       </section>
 
       <section className="card" aria-labelledby="avail-set-h">
-        <SectionHead id="avail-set-h" title="Kullanılabilir para nasıl hesaplanıyor?" />
+        <SectionHead id="avail-set-h" title={t('bud.howTitle')} />
         <p className="muted">
-          Günlük hesaplarındaki para − dönem sonuna kadar bekleyen ödemeler (gecikmişler dahil) − planlı yatırım aktarımları − kenarda tuttuğun birikim payı. Beklenen gelir, gelene kadar eklenmez. Yatırım hesabındaki para hiç sayılmaz.
+          {t('bud.howBody')}
         </p>
         <div className="setting-row">
-          <span>Dönem</span>
+          <span>{t('bud.period')}</span>
           <Segmented
             size="sm"
-            label="Dönem"
+            label={t('bud.period')}
             value={data.settings.periodMode}
             onChange={(v) => commit((d) => A.updateSettings(d, { periodMode: v }))}
             options={[
-              { value: 'month', label: 'Ay sonuna kadar' },
-              { value: 'days30', label: '30 gün' },
+              { value: 'month', label: t('bud.periodMonth') },
+              { value: 'days30', label: t('bud.period30') },
             ]}
           />
         </div>
         <ReserveRow />
-        <button className="link" onClick={() => go('home')}>Özete dön</button>
+        <button className="link" onClick={() => go('home')}>{t('common.backHome')}</button>
       </section>
     </div>
   );
 }
 
 function ReserveRow() {
+  const t = useT();
   const { data } = useData();
   return (
     <div className="setting-row">
       <span>
-        Birikim payı
-        <small>Günlük hesapta dokunmadan tuttuğun tutar</small>
+        {t('bud.reserve')}
+        <small>{t('bud.reserveHint')}</small>
       </span>
       <ReserveInput key={data.settings.reserve} value={data.settings.reserve} />
     </div>
@@ -243,12 +246,12 @@ function ReserveInput({ value }: { value: number }) {
     const v = raw.trim() ? parseMoney(raw) : 0;
     if (v === null) return setErr(true);
     setErr(false);
-    if (v !== value) commit((d) => A.updateSettings(d, { reserve: v }), v ? `Birikim payı ${formatMoney(v)}` : 'Birikim payı kaldırıldı');
+    if (v !== value) commit((d) => A.updateSettings(d, { reserve: v }), v ? tNow('bud.reserveSet', { amount: formatMoney(v) }) : tNow('bud.reserveRemoved'));
   };
   return (
     <span className="inline-money">
-      <input className={`input input--small ${err ? 'is-invalid' : ''}`} inputMode="decimal" value={raw} placeholder="0" onChange={(e) => setRaw(e.target.value.replace(/[^\d.,]/g, ''))} onBlur={save} onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()} aria-label="Birikim payı (TL)" />
-      <span>TL</span>
+      <input className={`input input--small ${err ? 'is-invalid' : ''}`} inputMode="decimal" value={raw} placeholder="0" onChange={(e) => setRaw(e.target.value.replace(/[^\d.,]/g, ''))} onBlur={save} onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()} aria-label={tNow('bud.reserveAria', { unit: moneyUnit() })} />
+      <span>{moneyUnit()}</span>
     </span>
   );
 }
@@ -257,7 +260,7 @@ function BudgetBar({ spentPlanned, spentFlex, pending, budget, elapsed }: { spen
   const total = Math.max(budget, spentPlanned + spentFlex + pending);
   const w = (v: number) => `${(v / total) * 100}%`;
   return (
-    <div className="budget-bar" role="img" aria-label={`Planlı ödenen ${formatMoney(spentPlanned)}, planlı bekleyen ${formatMoney(pending)}, diğer harcama ${formatMoney(spentFlex)}, bütçe ${formatMoney(budget)}`}>
+    <div className="budget-bar" role="img" aria-label={tNow('bud.barAria', { paid: formatMoney(spentPlanned), pending: formatMoney(pending), other: formatMoney(spentFlex), budget: formatMoney(budget) })}>
       <span className="budget-bar__seg sw--planned" style={{ width: w(spentPlanned) }} />
       <span className="budget-bar__seg sw--flex" style={{ width: w(spentFlex) }} />
       <span className="budget-bar__seg sw--pending" style={{ width: w(pending) }} />

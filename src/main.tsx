@@ -8,6 +8,10 @@ import { requestPersistence } from './store/storage';
 import { isNative, setupBackButton } from './platform';
 import { closeSheet, getNav, go } from './ui/nav';
 import { isLocked } from './lock/lockState';
+import { getLang } from './i18n/lang';
+
+// <html lang> ilk çizimden önce kayıtlı dile ayarlanır; sonra App dil değişince günceller.
+document.documentElement.lang = getLang();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

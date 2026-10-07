@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import type { ID } from '../domain/types';
-import { formatMoney } from '../domain/money';
-import { addDays, monthEnd, monthOf, shortDate, type ISODate } from '../domain/dates';
+import { addDays, monthEnd, monthOf, type ISODate } from '../domain/dates';
+import { formatMoney, hiddenMoney, shortDate } from '../i18n/format';
+import { useT } from '../i18n';
+import type { Key } from '../i18n/core';
 import { balanceProjection, balanceSeries, isDaily, periodEndFor, trackingStart } from '../domain/ledger';
 import * as A from '../domain/actions';
 import { commit } from '../store/store';
@@ -14,14 +16,15 @@ import { useData } from '../ui/hooks';
 import { EmptyState } from '../ui/ClawdNote';
 
 type Range = '1m' | '3m' | '6m' | 'all';
-const RANGES: { v: Range; label: string; days: number | null }[] = [
-  { v: '1m', label: '1 ay', days: 30 },
-  { v: '3m', label: '3 ay', days: 91 },
-  { v: '6m', label: '6 ay', days: 182 },
-  { v: 'all', label: 'Tümü', days: null },
+const RANGES: { v: Range; label: Key; days: number | null }[] = [
+  { v: '1m', label: 'bal.1m', days: 30 },
+  { v: '3m', label: 'bal.3m', days: 91 },
+  { v: '6m', label: 'bal.6m', days: 182 },
+  { v: 'all', label: 'common.all', days: null },
 ];
 
 export function Balance() {
+  const t = useT();
   const { data, today } = useData();
   const hide = data.settings.hideTotals;
   const daily = data.accounts.filter(isDaily);
@@ -50,9 +53,9 @@ export function Balance() {
   if (!view || daily.length === 0) {
     return (
       <div className="screen">
-        <header className="screen-head"><h1>Bakiye geçmişi</h1></header>
+        <header className="screen-head"><h1>{t('balance.title')}</h1></header>
         <section className="card">
-          <EmptyState outfit="scholar" title="Henüz grafik yok">Bir hesap ekleyip kayıt girince bakiyenin günden güne nasıl değiştiğini burada göreceksin.</EmptyState>
+          <EmptyState outfit="scholar" title={t('bal.emptyTitle')}>{t('bal.emptyBody')}</EmptyState>
         </section>
       </div>
     );
@@ -60,7 +63,7 @@ export function Balance() {
   const first = view.history[0], last = view.history[view.history.length - 1];
   const change = last.balance - first.balance;
   const projEnd = view.projection[view.projection.length - 1];
-  const money = (v: number, sign = false) => (hide ? `${HIDDEN} TL` : formatMoney(v, { sign }));
+  const money = (v: number, sign = false) => (hide ? hiddenMoney() : formatMoney(v, { sign }));
   // Tablo görünümü: haftalık örnekler + son gün
   const rows = view.history.filter((_, i) => i % 7 === 0 || i === view.history.length - 1);
 
@@ -68,13 +71,13 @@ export function Balance() {
     <div className="screen">
       <header className="screen-head">
         <div className="head-with-back">
-          <button className="icon-btn" onClick={() => go('home')} aria-label="Özete dön"><ArrowLeft size={20} /></button>
-          <h1>Bakiye geçmişi</h1>
+          <button className="icon-btn" onClick={() => go('home')} aria-label={t('common.backHome')}><ArrowLeft size={20} /></button>
+          <h1>{t('balance.title')}</h1>
         </div>
         <button
           className="icon-btn"
           aria-pressed={hide}
-          aria-label={hide ? 'Bakiyeleri göster' : 'Bakiyeleri gizle'}
+          aria-label={hide ? t('home.showBalances') : t('home.hideBalances')}
           onClick={() => {
             commit((d) => A.updateSettings(d, { hideTotals: !hide }));
             clawdEvent({ type: 'hide-totals', hidden: !hide });
@@ -84,8 +87,8 @@ export function Balance() {
         </button>
       </header>
 
-      <div className="chip-row" role="group" aria-label="Hesap">
-        <Chip on={acc === 'all'} onClick={() => setAcc('all')}>Tüm günlük hesaplar</Chip>
+      <div className="chip-row" role="group" aria-label={t('csv.account')}>
+        <Chip on={acc === 'all'} onClick={() => setAcc('all')}>{t('bal.allDaily')}</Chip>
         {daily.map((a) => (
           <Chip key={a.id} on={acc === a.id} onClick={() => setAcc(a.id)}>{a.name}</Chip>
         ))}
@@ -94,16 +97,16 @@ export function Balance() {
       <section className="card">
         <div className="bal-head">
           <div>
-            <p className="label">{acc === 'all' ? 'Günlük hesaplar' : daily.find((a) => a.id === acc)?.name} · bugün</p>
+            <p className="label">{acc === 'all' ? t('bal.daily') : daily.find((a) => a.id === acc)?.name} · {t('chart.today')}</p>
             <p className="bal-head__now">{money(last.balance)}</p>
             <p className="note-line">
-              {shortDate(first.date, today)} tarihinden bu yana {hide ? HIDDEN : formatMoney(change, { sign: true })}
+              {t('bal.since', { date: shortDate(first.date, today), amount: hide ? HIDDEN : formatMoney(change, { sign: true }) })}
             </p>
           </div>
-          <div className="segmented segmented--sm bal-range" role="radiogroup" aria-label="Zaman aralığı">
+          <div className="segmented segmented--sm bal-range" role="radiogroup" aria-label={t('bal.range')}>
             {RANGES.map((r) => (
               <button key={r.v} role="radio" aria-checked={range === r.v} className={range === r.v ? 'is-on' : ''} onClick={() => setRange(r.v)}>
-                {r.label}
+                {t(r.label)}
               </button>
             ))}
           </div>
@@ -114,29 +117,29 @@ export function Balance() {
           today={today}
           hide={hide}
           txCount={view.txCount}
-          label="Günlük bakiye grafiği"
+          label={t('bal.chartLabel')}
         />
         <div className="bal-legend">
-          <span><i className="bchart__key" /> Gerçekleşen bakiye</span>
+          <span><i className="bchart__key" /> {t('bal.actual')}</span>
           <label className="bal-legend__toggle">
             <input type="checkbox" checked={showProj} onChange={(e) => setShowProj(e.target.checked)} />
-            <i className="bchart__key is-proj" /> Tahmin (son gün {shortDate(view.end, today)})
+            <i className="bchart__key is-proj" /> {t('bal.projection', { date: shortDate(view.end, today) })}
           </label>
         </div>
         <dl className="kv">
-          <div><dt>Bu aralıktaki en düşük</dt><dd>{money(view.low.balance)} <small className="muted">{shortDate(view.low.date, today)}</small></dd></div>
+          <div><dt>{t('bal.lowest')}</dt><dd>{money(view.low.balance)} <small className="muted">{shortDate(view.low.date, today)}</small></dd></div>
           {showProj && view.projection.length > 1 && (
             <>
-              <div><dt>Dönem sonu tahmini <small>bekleyen ödemeler ve beklenen gelirlerle</small></dt><dd>{money(projEnd.balance)}</dd></div>
-              <div><dt>Tahmindeki en düşük nokta</dt><dd>{money(view.projLow.balance)} <small className="muted">{shortDate(view.projLow.date, today)}</small></dd></div>
+              <div><dt>{t('bal.periodEnd')} <small>{t('bal.periodEndHint')}</small></dt><dd>{money(projEnd.balance)}</dd></div>
+              <div><dt>{t('bal.projLowest')}</dt><dd>{money(view.projLow.balance)} <small className="muted">{shortDate(view.projLow.date, today)}</small></dd></div>
             </>
           )}
         </dl>
-        <p className="note-line">Kesik çizgi bir tahmindir: henüz gerçekleşmemiş planlı ödemeleri ve beklenen gelirleri vadelerinde uygular. Gerçek kayıtları değiştirmez.</p>
+        <p className="note-line">{t('bal.dashedNote')}</p>
         <details className="details">
-          <summary>Tablo olarak göster</summary>
+          <summary>{t('bal.asTable')}</summary>
           <table className="cmp-table">
-            <thead><tr><th scope="col">Tarih</th><th scope="col">Bakiye</th></tr></thead>
+            <thead><tr><th scope="col">{t('csv.date')}</th><th scope="col">{t('bal.balance')}</th></tr></thead>
             <tbody>
               {rows.map((r) => (
                 <tr key={r.date}><th scope="row">{shortDate(r.date, today)}</th><td>{money(r.balance)}</td></tr>

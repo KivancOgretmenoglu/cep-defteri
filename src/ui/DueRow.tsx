@@ -1,17 +1,19 @@
 import { CalendarClock } from 'lucide-react';
 import type { Account, ID } from '../domain/types';
-import { formatMoney } from '../domain/money';
-import { dueLabel, shortDate, type ISODate } from '../domain/dates';
+import type { ISODate } from '../domain/dates';
+import { dueLabel, formatMoney, shortDate } from '../i18n/format';
+import { useT } from '../i18n';
 import { installmentNo, planIsInflow, type Occurrence } from '../domain/ledger';
 import { openSheet } from './nav';
 
 /** Bekleyen planlı kalem satırı. Satıra dokununca menü (gerçekleşti/atla/düzenle/iptal), düğme hızlı onay. */
 export function DueRow({ o, today, accounts, reserved }: { o: Occurrence; today: ISODate; accounts: Map<ID, Account>; reserved?: boolean }) {
+  const t = useT();
   const inflow = planIsInflow(o.plan, accounts);
   const n = installmentNo(o.plan, o.due);
   return (
     <li className={o.due < today ? 'is-overdue' : ''}>
-      <button className="due-list__open" onClick={() => openSheet({ kind: 'occurrence', planId: o.plan.id, due: o.due })} aria-label={`${o.plan.title}, ${shortDate(o.due, today)}: seçenekler`}>
+      <button className="due-list__open" onClick={() => openSheet({ kind: 'occurrence', planId: o.plan.id, due: o.due })} aria-label={`${o.plan.title}, ${shortDate(o.due, today)}: ${t('due.options')}`}>
         <CalendarClock size={18} aria-hidden />
         <span className="due-list__main">
           <span className="due-list__title">
@@ -20,8 +22,8 @@ export function DueRow({ o, today, accounts, reserved }: { o: Occurrence; today:
           </span>
           <span className="due-list__sub">
             {shortDate(o.due, today)} · {dueLabel(o.due, today)}
-            {inflow ? ' · beklenen' : o.plan.kind === 'transfer' ? ' · aktarım' : ''}
-            {reserved && !inflow ? ' · ayrıldı' : ''}
+            {inflow ? ` · ${t('due.expected')}` : o.plan.kind === 'transfer' ? ` · ${t('due.transfer')}` : ''}
+            {reserved && !inflow ? ` · ${t('due.reserved')}` : ''}
           </span>
         </span>
         <span className={`due-list__amt ${inflow ? 'tone-pos' : o.plan.kind === 'transfer' ? 'tone-invest' : ''}`}>
@@ -30,7 +32,7 @@ export function DueRow({ o, today, accounts, reserved }: { o: Occurrence; today:
         </span>
       </button>
       <button className="btn btn--small btn--secondary" onClick={() => openSheet({ kind: 'confirm', planId: o.plan.id, due: o.due })}>
-        {o.plan.kind === 'income' ? 'Geldi' : o.plan.kind === 'transfer' ? 'Aktarıldı' : 'Ödendi'}
+        {o.plan.kind === 'income' ? t('due.received') : o.plan.kind === 'transfer' ? t('due.moved') : t('due.paid')}
       </button>
     </li>
   );

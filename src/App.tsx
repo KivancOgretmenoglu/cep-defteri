@@ -16,16 +16,18 @@ import { ReportCardSheet } from './sheets/ReportCardSheet';
 import { LockGate } from './lock/LockGate';
 import { useNativeSync } from './native/useNativeSync';
 import { TxSheet, RefundSheet, ConfirmSheet } from './sheets/TxSheet';
+import { useT } from './i18n';
+import type { Key } from './i18n/core';
 import { AccountSheet, BudgetSheet, CategorySheet, GoalSheet, LimitSheet, PlanSheet, ValuationSheet } from './sheets/OtherSheets';
 
-const NAV: { screen: Screen; label: string; icon: typeof House; phone: boolean }[] = [
-  { screen: 'home', label: 'Özet', icon: House, phone: true },
-  { screen: 'tx', label: 'İşlemler', icon: ListOrdered, phone: true },
-  { screen: 'budget', label: 'Bütçe', icon: CalendarRange, phone: true },
-  { screen: 'invest', label: 'Yatırım', icon: Sprout, phone: false },
-  { screen: 'people', label: 'Borçlar', icon: HandCoins, phone: false },
-  { screen: 'reports', label: 'Raporlar', icon: ChartColumn, phone: true },
-  { screen: 'settings', label: 'Ayarlar', icon: Gear, phone: false },
+const NAV: { screen: Screen; label: Key; icon: typeof House; phone: boolean }[] = [
+  { screen: 'home', label: 'nav.home', icon: House, phone: true },
+  { screen: 'tx', label: 'nav.tx', icon: ListOrdered, phone: true },
+  { screen: 'budget', label: 'nav.budget', icon: CalendarRange, phone: true },
+  { screen: 'invest', label: 'nav.invest', icon: Sprout, phone: false },
+  { screen: 'people', label: 'nav.people', icon: HandCoins, phone: false },
+  { screen: 'reports', label: 'nav.reports', icon: ChartColumn, phone: true },
+  { screen: 'settings', label: 'nav.settings', icon: Gear, phone: false },
 ];
 
 function useTheme() {
@@ -37,6 +39,13 @@ function useTheme() {
     const dark = theme === 'dark' || (theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#1C1A17' : '#F4EFE6');
   }, [theme]);
+}
+
+/** <html lang> dil değişince güncellenir. */
+function useHtmlLang(lang: string) {
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
 }
 
 function SheetHost() {
@@ -75,6 +84,7 @@ function SheetHost() {
 }
 
 function Toast() {
+  const t = useT();
   const toast = useStore((s) => s.toast);
   if (!toast) return <div className="toast-region" aria-live="polite" />;
   return (
@@ -83,17 +93,19 @@ function Toast() {
         <span>{toast.text}</span>
         {toast.undo && (
           <button className="toast__undo" onClick={undo}>
-            <Undo2 size={16} /> Geri al
+            <Undo2 size={16} /> {t('common.undo')}
           </button>
         )}
-        <button className="icon-btn icon-btn--small" onClick={hideToast} aria-label="Kapat"><X size={16} /></button>
+        <button className="icon-btn icon-btn--small" onClick={hideToast} aria-label={t('common.close')}><X size={16} /></button>
       </div>
     </div>
   );
 }
 
 export function App() {
+  const t = useT();
   useTheme();
+  useHtmlLang(t.lang);
   useNativeSync();
   const { screen, sheet } = useNav();
   const mode = useStore((s) => s.mode);
@@ -121,9 +133,9 @@ export function App() {
   return (
     <LockGate>
     <div className={`app ${showOnboarding ? 'app--onboarding' : ''}`}>
-      <a className="skip" href="#main">İçeriğe geç</a>
+      <a className="skip" href="#main">{t('app.skip')}</a>
       {!showOnboarding && (
-        <nav className="rail" aria-label="Ana gezinme">
+        <nav className="rail" aria-label={t('app.mainNav')}>
           <div className="rail__brand">
             <span className="rail__logo" aria-hidden>
               <svg viewBox="0 0 16 10" width="28" shapeRendering="crispEdges"><rect x="2" y="0" width="12" height="7" fill="#D97757" /><rect x="0" y="3" width="2" height="2" fill="#D97757" /><rect x="14" y="3" width="2" height="2" fill="#D97757" /><rect x="5" y="2" width="1" height="2" fill="#2A1E1A" /><rect x="10" y="2" width="1" height="2" fill="#2A1E1A" /><rect x="3" y="7" width="1" height="2" fill="#B8603F" /><rect x="5" y="7" width="1" height="2" fill="#B8603F" /><rect x="10" y="7" width="1" height="2" fill="#B8603F" /><rect x="12" y="7" width="1" height="2" fill="#B8603F" /></svg>
@@ -131,18 +143,18 @@ export function App() {
             Cep Defteri
           </div>
           <button className="btn btn--primary rail__add" onClick={() => openSheet({ kind: 'add' })}>
-            <Plus size={20} /> İşlem ekle
+            <Plus size={20} /> {t('app.addTx')}
           </button>
           <ul>
             {NAV.map((n) => (
               <li key={n.screen}>
                 <button className={`rail__item ${screen === n.screen ? 'is-on' : ''}`} aria-current={screen === n.screen ? 'page' : undefined} onClick={() => go(n.screen)}>
-                  <n.icon size={20} aria-hidden /> {n.label}
+                  <n.icon size={20} aria-hidden /> {t(n.label)}
                 </button>
               </li>
             ))}
           </ul>
-          <p className="rail__hint">Kısayol: <kbd>N</kbd> yeni işlem</p>
+          <p className="rail__hint">{t('app.shortcut')} <kbd>N</kbd> {t('app.shortcutNew')}</p>
         </nav>
       )}
 
@@ -150,41 +162,41 @@ export function App() {
         {mode === 'demo' && (
           <div className="banner banner--demo" role="status">
             <FlaskConical size={18} aria-hidden />
-            <span><b>Örnek veri</b> — gerçek kayıtların değil. Değişiklikler gerçek verine dokunmaz.</span>
-            <button className="btn btn--small btn--secondary" onClick={() => { setMode('real'); go('home'); }}>Örnekten çık</button>
+            <span><b>{t('app.demoTitle')}</b> — {t('app.demoBody')}</span>
+            <button className="btn btn--small btn--secondary" onClick={() => { setMode('real'); go('home'); }}>{t('app.demoExit')}</button>
           </div>
         )}
         {warning && (
           <div className="banner banner--warn" role="alert">
             <AlertTriangle size={18} aria-hidden />
-            <span>{warning}</span>
-            <button className="icon-btn icon-btn--small" onClick={dismissWarning} aria-label="Kapat"><X size={16} /></button>
+            <span>{t(warning)}</span>
+            <button className="icon-btn icon-btn--small" onClick={dismissWarning} aria-label={t('common.close')}><X size={16} /></button>
           </div>
         )}
         {saveFailed && (
           <div className="banner banner--warn" role="alert">
             <AlertTriangle size={18} aria-hidden />
-            <span>Son değişiklik cihaza kaydedilemedi (depolama dolu ya da engelli olabilir). Sayfayı kapatmadan önce Ayarlar’dan yedek indir.</span>
+            <span>{t('app.saveFailed')}</span>
           </div>
         )}
         {showOnboarding ? <Onboarding /> : <Main />}
       </main>
 
       {!showOnboarding && (
-        <nav className="tabbar" aria-label="Alt gezinme">
+        <nav className="tabbar" aria-label={t('app.bottomNav')}>
           {NAV.filter((n) => n.phone).slice(0, 2).map((n) => (
             <button key={n.screen} className={`tabbar__item ${screen === n.screen ? 'is-on' : ''}`} aria-current={screen === n.screen ? 'page' : undefined} onClick={() => go(n.screen)}>
               <n.icon size={22} aria-hidden />
-              <span>{n.label}</span>
+              <span>{t(n.label)}</span>
             </button>
           ))}
-          <button className="tabbar__add" onClick={() => openSheet({ kind: 'add' })} aria-label="İşlem ekle">
+          <button className="tabbar__add" onClick={() => openSheet({ kind: 'add' })} aria-label={t('app.addTx')}>
             <Plus size={28} strokeWidth={2.5} />
           </button>
           {NAV.filter((n) => n.phone).slice(2).map((n) => (
             <button key={n.screen} className={`tabbar__item ${screen === n.screen ? 'is-on' : ''}`} aria-current={screen === n.screen ? 'page' : undefined} onClick={() => go(n.screen)}>
               <n.icon size={22} aria-hidden />
-              <span>{n.label}</span>
+              <span>{t(n.label)}</span>
             </button>
           ))}
         </nav>

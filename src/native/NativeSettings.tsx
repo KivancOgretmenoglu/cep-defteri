@@ -18,12 +18,14 @@ import { computeSchedule } from './schedule';
 import { loadSent, notificationPermission, requestNotificationPermission, type NotifPermission } from './notifications';
 import { listAutoBackups, requestStoragePermission, runAutoBackup, type AutoBackupEntry } from './autoBackup';
 import { backupNudgeDue, NUDGE_DAYS } from './backupPlan';
+import { intlLocale } from '../i18n/format';
+import { t as tNow, useT } from '../i18n';
 import './native.css';
 
 type OnOff = 'on' | 'off';
-const ONOFF = [
-  { value: 'off' as OnOff, label: 'Kapalı' },
-  { value: 'on' as OnOff, label: 'Açık' },
+const onOff = () => [
+  { value: 'off' as OnOff, label: tNow('ns.off') },
+  { value: 'on' as OnOff, label: tNow('ns.on') },
 ];
 
 function Row({ title, hint, children }: { title: ReactNode; hint?: ReactNode; children: ReactNode }) {
@@ -38,13 +40,15 @@ function Row({ title, hint, children }: { title: ReactNode; hint?: ReactNode; ch
   );
 }
 
-const fmtTime = (ms: number) => new Date(ms).toLocaleString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+const fmtTime = (ms: number) => new Date(ms).toLocaleString(intlLocale(), { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
 
 // ───────────────────────── Güvenlik ─────────────────────────
 
 type PinMode = null | 'set' | 'change' | 'disable';
 
 export function SecuritySettings() {
+  const t = useT();
+  const ONOFF = onOff();
   const lock = useDevice((p) => p.lock);
   const hasPin = !!lock.pinHash;
   const [mode, setPinMode] = useState<PinMode>(null);
@@ -55,53 +59,53 @@ export function SecuritySettings() {
 
   async function toggleBio(v: OnOff) {
     if (v === 'off') return setDevice((p) => ({ ...p, lock: { ...p.lock, biometric: false } }));
-    if (await verifyBiometric(`${bio.label} ile açmayı etkinleştir`)) {
+    if (await verifyBiometric(t('ns.bioEnable', { label: bio.label }))) {
       setDevice((p) => ({ ...p, lock: { ...p.lock, biometric: true } }));
-      showToast(`${bio.label} ile açma açık`);
+      showToast(t('ns.bioOn', { label: bio.label }));
     }
   }
 
   return (
     <section className="card" aria-labelledby="s-sec">
-      <SectionHead id="s-sec" title="Uygulama kilidi" />
+      <SectionHead id="s-sec" title={t('ns.lockTitle')} />
       {!hasPin && mode !== 'set' && (
         <>
           <p className="muted">
-            Uygulama açılırken 4–6 haneli bir PIN sorulsun. Bu bir <b>gizlilik perdesidir</b>: yanındakiler kayıtlarını görmesin diye. Kayıtlar şifrelenmez; PIN’i unutursan kilidi kaldırmak için verileri silip yedekten dönmen gerekir.
+            {t('ns.lockIntroPre')} <b>{t('ns.privacyCurtain')}</b>{t('ns.lockIntroPost')}
           </p>
           <button className="btn btn--secondary" onClick={() => setPinMode('set')}>
-            <Lock size={17} /> PIN belirle
+            <Lock size={17} /> {t('ns.setPin')}
           </button>
         </>
       )}
       {hasPin && !mode && (
         <>
-          <p className="muted">Uygulama kilidi etkin. PIN bu cihazda yalnız özet olarak tutulur ve yedek dosyasına girmez.</p>
-          <Row title="Arka planda kalınca kilitle">
+          <p className="muted">{t('ns.lockOn')}</p>
+          <Row title={t('ns.relock')}>
             <Segmented
               size="sm"
-              label="Yeniden kilitleme süresi"
+              label={t('ns.relockLabel')}
               value={String(lock.relockAfterSec)}
               onChange={(v) => setDevice((p) => ({ ...p, lock: { ...p.lock, relockAfterSec: Number(v) } }))}
               options={[
-                { value: '0', label: 'Hemen' },
-                { value: '60', label: '1 dk' },
-                { value: '300', label: '5 dk' },
-                { value: '900', label: '15 dk' },
+                { value: '0', label: t('ns.now') },
+                { value: '60', label: t('ns.min', { n: 1 }) },
+                { value: '300', label: t('ns.min', { n: 5 }) },
+                { value: '900', label: t('ns.min', { n: 15 }) },
               ]}
             />
           </Row>
           {isNative() && bio.available && (
-            <Row title={<><Fingerprint size={16} aria-hidden /> {bio.label} ile aç</>} hint="PIN yine de geçerli kalır.">
-              <Segmented<OnOff> size="sm" label={`${bio.label} ile aç`} value={lock.biometric ? 'on' : 'off'} onChange={toggleBio} options={ONOFF} />
+            <Row title={<><Fingerprint size={16} aria-hidden /> {t('lock.bioOpen', { label: bio.label })}</>} hint={t('ns.pinStillWorks')}>
+              <Segmented<OnOff> size="sm" label={t('lock.bioOpen', { label: bio.label })} value={lock.biometric ? 'on' : 'off'} onChange={toggleBio} options={ONOFF} />
             </Row>
           )}
           <div className="btn-row">
             <button className="btn btn--secondary" onClick={lockNow}>
-              <Lock size={17} /> Şimdi kilitle
+              <Lock size={17} /> {t('ns.lockNow')}
             </button>
-            <button className="btn btn--ghost" onClick={() => setPinMode('change')}>PIN’i değiştir</button>
-            <button className="btn btn--ghost" onClick={() => setPinMode('disable')}>Kilidi kapat</button>
+            <button className="btn btn--ghost" onClick={() => setPinMode('change')}>{t('ns.changePin')}</button>
+            <button className="btn btn--ghost" onClick={() => setPinMode('disable')}>{t('ns.disableLock')}</button>
           </div>
         </>
       )}
@@ -111,6 +115,7 @@ export function SecuritySettings() {
 }
 
 function PinForm({ mode, onDone }: { mode: Exclude<PinMode, null>; onDone: () => void }) {
+  const t = useT();
   const [cur, setCur] = useState('');
   const [next, setNext] = useState('');
   const [again, setAgain] = useState('');
@@ -123,22 +128,22 @@ function PinForm({ mode, onDone }: { mode: Exclude<PinMode, null>; onDone: () =>
     e.preventDefault();
     setErr(null);
     if (needNew) {
-      if (!isValidPin(next)) return setErr('PIN 4–6 rakamdan oluşmalı.');
-      if (next !== again) return setErr('İki PIN aynı değil.');
+      if (!isValidPin(next)) return setErr(t('ns.pinDigits'));
+      if (next !== again) return setErr(t('ns.pinMismatch'));
     }
     setBusy(true);
     try {
       if (needCur) {
         const r = await checkCurrentPin(cur);
-        if (!r.ok) return setErr(r.waitMs > 0 ? `PIN yanlış. ${Math.ceil(r.waitMs / 1000)} sn sonra tekrar dene.` : 'Şu anki PIN yanlış.');
+        if (!r.ok) return setErr(r.waitMs > 0 ? t('ns.pinWrongWait', { s: Math.ceil(r.waitMs / 1000) }) : t('ns.curPinWrong'));
       }
       if (mode === 'disable') {
         setDevice((p) => ({ ...p, lock: { ...p.lock, pinHash: null, salt: null, biometric: false, failed: 0, blockedUntil: null } }));
-        showToast('Uygulama kilidi kapatıldı');
+        showToast(t('ns.lockDisabled'));
       } else {
         const h = await hashPin(next);
         setDevice((p) => ({ ...p, lock: { ...p.lock, ...h, failed: 0, blockedUntil: null } }));
-        showToast(mode === 'set' ? 'PIN belirlendi. Uygulama açılırken sorulacak.' : 'PIN değişti');
+        showToast(mode === 'set' ? t('ns.pinSet') : t('ns.pinChanged'));
       }
       onDone();
     } finally {
@@ -164,15 +169,15 @@ function PinForm({ mode, onDone }: { mode: Exclude<PinMode, null>; onDone: () =>
 
   return (
     <form className="nset-form" onSubmit={submit}>
-      {needCur && pinInput('Şu anki PIN', cur, setCur, true)}
-      {needNew && pinInput(mode === 'set' ? 'Yeni PIN (4–6 rakam)' : 'Yeni PIN', next, setNext, !needCur)}
-      {needNew && pinInput('Yeni PIN (tekrar)', again, setAgain)}
-      {mode === 'set' && <p className="muted small">PIN’i unutursan kurtarma yolu yok; ancak verileri silip yedekten dönebilirsin. Otomatik yedeği açık tut.</p>}
+      {needCur && pinInput(t('ns.curPin'), cur, setCur, true)}
+      {needNew && pinInput(mode === 'set' ? t('ns.newPinDigits') : t('ns.newPin'), next, setNext, !needCur)}
+      {needNew && pinInput(t('ns.newPinAgain'), again, setAgain)}
+      {mode === 'set' && <p className="muted small">{t('ns.pinWarn')}</p>}
       {err && <p className="form-error" role="alert">{err}</p>}
       <div className="btn-row">
-        <button type="button" className="btn btn--ghost" onClick={onDone}>Vazgeç</button>
+        <button type="button" className="btn btn--ghost" onClick={onDone}>{t('common.cancel')}</button>
         <button type="submit" className={`btn ${mode === 'disable' ? 'btn--danger' : 'btn--primary'}`} disabled={busy}>
-          {mode === 'set' ? 'PIN’i kaydet' : mode === 'change' ? 'Değiştir' : 'Kilidi kapat'}
+          {mode === 'set' ? t('ns.savePin') : mode === 'change' ? t('ns.change') : t('ns.disableLock')}
         </button>
       </div>
     </form>
@@ -184,6 +189,8 @@ function PinForm({ mode, onDone }: { mode: Exclude<PinMode, null>; onDone: () =>
 const setNotif = (patch: Partial<DevicePrefs['notifications']>) => setDevice((p) => ({ ...p, notifications: { ...p.notifications, ...patch } }));
 
 export function NotificationSettings() {
+  const t = useT();
+  const ONOFF = onOff();
   const n = useDevice((p) => p.notifications);
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
@@ -197,9 +204,9 @@ export function NotificationSettings() {
   if (!isNative()) {
     return (
       <section className="card" aria-labelledby="s-notif">
-        <SectionHead id="s-notif" title="Bildirimler" />
+        <SectionHead id="s-notif" title={t('ns.notifTitle')} />
         <p className="muted">
-          Hatırlatmalar (yaklaşan ödeme, beklenen gelir, akşam “bugünü girdin mi?”) yalnız <b>Android uygulamasında</b> çalışır. Tarayıcı sürümü kapalıyken bildirim gönderemez.
+          {t('ns.webOnlyPre')} <b>{t('ns.androidApp')}</b>{t('ns.webOnlyPost')}
         </p>
       </section>
     );
@@ -210,36 +217,36 @@ export function NotificationSettings() {
     const ok = await requestNotificationPermission();
     setPerm(ok ? 'granted' : 'denied');
     if (!ok) {
-      showToast('Bildirim izni verilmedi. Telefonun Ayarlar → Uygulamalar → Cep Defteri → Bildirimler bölümünden açabilirsin.', { tone: 'error', ms: 6000 });
+      showToast(t('ns.permDenied'), { tone: 'error', ms: 6000 });
       return;
     }
     setNotif({ enabled: true });
-    showToast('Bildirimler açık');
+    showToast(t('ns.notifOn'));
   }
 
   return (
     <section className="card" aria-labelledby="s-notif">
-      <SectionHead id="s-notif" title="Bildirimler" />
-      <Row title={<><Bell size={16} aria-hidden /> Hatırlatmalar</>}>
-        <Segmented<OnOff> size="sm" label="Bildirimler" value={n.enabled ? 'on' : 'off'} onChange={toggle} options={ONOFF} />
+      <SectionHead id="s-notif" title={t('ns.notifTitle')} />
+      <Row title={<><Bell size={16} aria-hidden /> {t('ns.reminders')}</>}>
+        <Segmented<OnOff> size="sm" label={t('ns.notifTitle')} value={n.enabled ? 'on' : 'off'} onChange={toggle} options={ONOFF} />
       </Row>
       {n.enabled && perm === 'denied' && (
-        <p className="form-error" role="alert">Telefon bildirim iznini kapatmış. Ayarlar → Uygulamalar → Cep Defteri → Bildirimler’den açmadıkça hatırlatma gelmez.</p>
+        <p className="form-error" role="alert">{t('ns.permOff')}</p>
       )}
       {n.enabled && (
         <>
-          <Row title="Yaklaşan ödemeler" hint="Ödemeden bir gün önce saat 10:00’da">
-            <Segmented<OnOff> size="sm" label="Yaklaşan ödemeler" value={n.payments ? 'on' : 'off'} onChange={(v) => setNotif({ payments: v === 'on' })} options={ONOFF} />
+          <Row title={t('home.upcomingPayments')} hint={t('ns.payHint')}>
+            <Segmented<OnOff> size="sm" label={t('home.upcomingPayments')} value={n.payments ? 'on' : 'off'} onChange={(v) => setNotif({ payments: v === 'on' })} options={ONOFF} />
           </Row>
-          <Row title="Beklenen gelir" hint="Gelirin günü saat 12:00’de “geldi mi?”">
-            <Segmented<OnOff> size="sm" label="Beklenen gelir" value={n.income ? 'on' : 'off'} onChange={(v) => setNotif({ income: v === 'on' })} options={ONOFF} />
+          <Row title={t('plan.kind.income')} hint={t('ns.incHint')}>
+            <Segmented<OnOff> size="sm" label={t('plan.kind.income')} value={n.income ? 'on' : 'off'} onChange={(v) => setNotif({ income: v === 'on' })} options={ONOFF} />
           </Row>
-          <Row title="Akşam hatırlatması" hint="O gün hiç kayıt yoksa “Bugünkü harcamalarını girdin mi?”">
-            <Segmented<OnOff> size="sm" label="Akşam hatırlatması" value={n.dailyReminder ? 'on' : 'off'} onChange={(v) => setNotif({ dailyReminder: v === 'on' })} options={ONOFF} />
+          <Row title={t('ns.evening')} hint={t('ns.eveningHint')}>
+            <Segmented<OnOff> size="sm" label={t('ns.evening')} value={n.dailyReminder ? 'on' : 'off'} onChange={(v) => setNotif({ dailyReminder: v === 'on' })} options={ONOFF} />
           </Row>
           {n.dailyReminder && (
-            <Row title="Hatırlatma saati">
-              <select className="input input--small nset-select" value={n.reminderHour} onChange={(e) => setNotif({ reminderHour: Number(e.target.value) })} aria-label="Hatırlatma saati">
+            <Row title={t('ns.reminderHour')}>
+              <select className="input input--small nset-select" value={n.reminderHour} onChange={(e) => setNotif({ reminderHour: Number(e.target.value) })} aria-label={t('ns.reminderHour')}>
                 {[17, 18, 19, 20, 21, 22, 23].map((h) => (
                   <option key={h} value={h}>{`${h}:00`}</option>
                 ))}
@@ -247,7 +254,7 @@ export function NotificationSettings() {
             </Row>
           )}
           <p className="muted small">
-            {mode === 'demo' ? 'Örnek veri modunda bildirim gönderilmez.' : count > 0 ? `Önümüzdeki 30 gün için ${count} hatırlatma planlandı.` : 'Önümüzdeki günlerde hatırlatılacak bir şey yok.'}
+            {mode === 'demo' ? t('ns.demoNoNotif') : count > 0 ? t('ns.planned', { n: count }) : t('ns.nothingPlanned')}
           </p>
         </>
       )}
@@ -258,6 +265,8 @@ export function NotificationSettings() {
 // ───────────────────────── Otomatik yedek ─────────────────────────
 
 export function AutoBackupSettings() {
+  const t = useT();
+  const ONOFF = onOff();
   const ab = useDevice((p) => p.autoBackup);
   const data = useStore((s) => s.data);
   const mode = useStore((s) => s.mode);
@@ -273,45 +282,45 @@ export function AutoBackupSettings() {
     setBusy(true);
     if (native && !(await requestStoragePermission())) {
       setBusy(false);
-      return showToast('Dosya izni verilmedi; yedek yazılamadı.', { tone: 'error' });
+      return showToast(t('ns.filePermDenied'), { tone: 'error' });
     }
     const ok = await runAutoBackup(getState().data, getState().mode, { force: true });
     setBusy(false);
-    showToast(ok ? 'Yedek alındı' : getDevice().autoBackup.lastError ?? 'Yedek alınamadı', { tone: ok ? 'ok' : 'error' });
+    showToast(ok ? t('ns.backedUp') : getDevice().autoBackup.lastError ?? t('ns.backupFailed'), { tone: ok ? 'ok' : 'error' });
   }
 
   return (
     <section className="card" aria-labelledby="s-auto">
-      <SectionHead id="s-auto" title="Otomatik yedek" />
-      <Row title={<><HardDriveDownload size={16} aria-hidden /> Her gün yedek al</>}>
-        <Segmented<OnOff> size="sm" label="Otomatik yedek" value={ab.enabled ? 'on' : 'off'} onChange={(v) => setDevice((p) => ({ ...p, autoBackup: { ...p.autoBackup, enabled: v === 'on' } }))} options={ONOFF} />
+      <SectionHead id="s-auto" title={t('ns.autoTitle')} />
+      <Row title={<><HardDriveDownload size={16} aria-hidden /> {t('ns.daily')}</>}>
+        <Segmented<OnOff> size="sm" label={t('ns.autoTitle')} value={ab.enabled ? 'on' : 'off'} onChange={(v) => setDevice((p) => ({ ...p, autoBackup: { ...p.autoBackup, enabled: v === 'on' } }))} options={ONOFF} />
       </Row>
       {native ? (
         <p className="muted small">
-          Her gün bir kopya telefonun <b>Belgeler/CepDefteri</b> klasörüne yazılır; son 7 gün tutulur. Bu klasör uygulamayı silsen de kalır: yeniden kurduktan sonra <b>Yedekten geri yükle</b> ile oradaki en yeni dosyayı seç.
+          {t('ns.nativeInfo1')} <b>{t('ns.docsFolder')}</b> {t('ns.nativeInfo2')} <b>{t('set.restore')}</b> {t('ns.nativeInfo3')}
         </p>
       ) : (
         <p className="muted small">
-          Tarayıcı, son 5 günün kopyasını kendi deposunda tutar. Tarayıcı verileri temizlenirse bu kopyalar da gider; bu yüzden ara sıra <b>Yedek indir</b> ile dosya al.
+          {t('ns.webInfo')} <b>{t('ns.downloadBackup')}</b> {t('ns.webInfo2')}
         </p>
       )}
-      {mode === 'demo' && <p className="muted small">Örnek veri modunda otomatik yedek alınmaz.</p>}
+      {mode === 'demo' && <p className="muted small">{t('ns.demoNoBackup')}</p>}
       {ab.lastAt && (
         <p className="muted small">
-          Son otomatik yedek: {fmtTime(ab.lastAt)}
+          {t('ns.lastAuto')} {fmtTime(ab.lastAt)}
           {ab.lastPath && <> · {ab.lastPath}</>}
         </p>
       )}
       {ab.lastError && <p className="form-error" role="alert">{ab.lastError}</p>}
       {nudge && (
         <div className="callout callout--quiet">
-          Son yedek dosyan {NUDGE_DAYS} günden eski{native ? '' : ' (tarayıcıdaki kopyalar cihaz dışında bir yedek sayılmaz)'}. <b>Yedek indir</b> ile bir kopya almaya ne dersin?
+          {t('ns.nudge', { n: NUDGE_DAYS })}{native ? '' : t('ns.nudgeWeb')}. {t('ns.nudgeHowPre')}<b>{t('ns.downloadBackup')}</b>{t('ns.nudgeHowPost')}
         </div>
       )}
       {mode === 'real' && (
         <div className="btn-row">
           <button className="btn btn--ghost" onClick={backupNow} disabled={busy}>
-            <HardDriveDownload size={17} /> Şimdi yedekle
+            <HardDriveDownload size={17} /> {t('ns.backupNow')}
           </button>
         </div>
       )}
@@ -321,6 +330,7 @@ export function AutoBackupSettings() {
 }
 
 function AutoRestoreList({ list }: { list: AutoBackupEntry[] }) {
+  const t = useT();
   const mode = useStore((s) => s.mode);
   const [pending, setPending] = useState<{ entry: AutoBackupEntry; data: Data } | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -328,11 +338,11 @@ function AutoRestoreList({ list }: { list: AutoBackupEntry[] }) {
   async function pick(e: AutoBackupEntry) {
     setErr(null);
     try {
-      const r = parseBackup(await e.read());
+      const r = parseBackup(await e.read(), t.lang);
       if (!r.ok) return setErr(r.error);
       setPending({ entry: e, data: r.data });
     } catch {
-      setErr('Yedek dosyası okunamadı.');
+      setErr(t('ns.readFailed'));
     }
   }
   function apply() {
@@ -340,22 +350,22 @@ function AutoRestoreList({ list }: { list: AutoBackupEntry[] }) {
     if (mode === 'demo') setMode('real');
     replaceData(pending.data, { stash: true });
     setPending(null);
-    showToast('Otomatik yedek geri yüklendi. Önceki verin ayarlardan geri alınabilir.', { ms: 5000 });
+    showToast(t('ns.autoRestored'), { ms: 5000 });
     go('home');
   }
 
   return (
     <details className="details">
-      <summary>Otomatik yedekler ({list.length})</summary>
+      <summary>{t('ns.autoList', { n: list.length })}</summary>
       <ul className="nset-list">
         {list.map((e) => (
           <li key={e.name}>
             <span>
-              <b>{new Date(e.day + 'T12:00:00').toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' })}</b>
-              {e.at && <small className="muted"> · {new Date(e.at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</small>}
+              <b>{new Date(e.day + 'T12:00:00').toLocaleDateString(intlLocale(), { day: 'numeric', month: 'long', weekday: 'long' })}</b>
+              {e.at && <small className="muted"> · {new Date(e.at).toLocaleTimeString(intlLocale(), { hour: '2-digit', minute: '2-digit' })}</small>}
             </span>
             <button className="btn btn--ghost btn--small" onClick={() => pick(e)}>
-              <RotateCcw size={15} /> Geri yükle
+              <RotateCcw size={15} /> {t('set.restoreConfirm')}
             </button>
           </li>
         ))}
@@ -363,12 +373,12 @@ function AutoRestoreList({ list }: { list: AutoBackupEntry[] }) {
       {pending && (
         <div className="callout">
           <p>
-            {pending.data.accounts.length} hesap, {pending.data.txs.length} işlem, {pending.data.plans.length} plan, {pending.data.valuations.length} değer kaydı.
+            {t('set.restoreCounts', { a: pending.data.accounts.length, tx: pending.data.txs.length, p: pending.data.plans.length, v: pending.data.valuations.length })}
           </p>
-          <p>Bu yedek {mode === 'demo' ? 'gerçek verilerinin' : 'şu anki verilerinin'} yerine geçecek. Mevcut veri, geri alabilmen için cihazda saklanır.</p>
+          <p>{mode === 'demo' ? t('set.restoreReplaceReal') : t('set.restoreReplaceCurrent')}</p>
           <div className="btn-row">
-            <button className="btn btn--ghost" onClick={() => setPending(null)}>Vazgeç</button>
-            <button className="btn btn--primary" onClick={apply}>Geri yükle</button>
+            <button className="btn btn--ghost" onClick={() => setPending(null)}>{t('common.cancel')}</button>
+            <button className="btn btn--primary" onClick={apply}>{t('set.restoreConfirm')}</button>
           </div>
         </div>
       )}

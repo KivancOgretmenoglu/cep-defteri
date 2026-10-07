@@ -6,6 +6,7 @@
 import type { Data } from '../domain/types';
 import { emptyData } from '../domain/defaults';
 import { parseBackup, serializeBackup } from '../domain/backup';
+import type { Key } from '../i18n/core';
 
 const PREFIX = 'cep-defteri:v1:';
 export type Mode = 'real' | 'demo';
@@ -38,8 +39,8 @@ function del(k: string) {
 
 export interface Loaded {
   data: Data;
-  /** Kayıtlı veri okunamadıysa uyarı metni */
-  warning: string | null;
+  /** Kayıtlı veri okunamadıysa uyarı metninin sözlük anahtarı */
+  warning: Key | null;
   isNew: boolean;
 }
 
@@ -59,7 +60,7 @@ export function load(mode: Mode): Loaded {
   set(backupKey, raw);
   return {
     data: emptyData(),
-    warning: 'Kayıtlı veriler okunamadı. Bozuk kopya cihazda saklandı; elindeki son yedeği geri yükleyebilirsin.',
+    warning: 'storage.unreadable',
     isNew: true,
   };
 }
