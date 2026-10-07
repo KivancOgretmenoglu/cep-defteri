@@ -4,6 +4,7 @@
  * (Drive'a, Dosyalar'a, WhatsApp'a… kaydedebilirsin). Uygulama içi WebView "indirme" yapamaz.
  */
 import { Capacitor } from '@capacitor/core';
+import { t } from './i18n';
 
 export const isNative = () => Capacitor.isNativePlatform();
 
@@ -24,7 +25,7 @@ export async function saveFile(name: string, content: string, type: string): Pro
   const { Share } = await import('@capacitor/share');
   const res = await Filesystem.writeFile({ path: name, data: content, directory: Directory.Cache, encoding: Encoding.UTF8 });
   try {
-    await Share.share({ title: name, files: [res.uri], dialogTitle: 'Dosyayı kaydet veya gönder' });
+    await Share.share({ title: name, files: [res.uri], dialogTitle: t('platform.shareTitle') });
     return 'shared';
   } catch {
     // Kullanıcı paylaşım ekranını kapattı.

@@ -8,6 +8,7 @@ import type { Data } from '../domain/types';
 import { serializeBackup } from '../domain/backup';
 import { todayISO, type ISODate } from '../domain/dates';
 import { isNative } from '../platform';
+import { t } from '../i18n';
 import { getDevice, setDevice } from '../store/device';
 import { ANDROID_DIR, autoBackupName, filesToDelete, fitSnapshots, hasContent, nextSnapshots, parseAutoBackupName, sortAutoBackups, type WebSnapshot } from './backupPlan';
 
@@ -47,13 +48,13 @@ function webBackup(data: Data, today: ISODate, now: number): boolean {
   const snap: WebSnapshot = { day: today, at: now, json: serializeBackup(data, new Date(now)) };
   const fitted = fitSnapshots(nextSnapshots(loadWebSnapshots(), snap), otherStorageChars());
   if (!fitted || !fitted.some((s) => s.at === now)) {
-    setAB({ lastError: 'Tarayıcı deposu dolmak üzere; otomatik yedek atlandı. Yedek indir ile dosya al.' });
+    setAB({ lastError: t('ab.nearlyFull') });
     return false;
   }
   try {
     localStorage.setItem(WEB_KEY, JSON.stringify(fitted));
   } catch {
-    setAB({ lastError: 'Tarayıcı deposu dolu; otomatik yedek atlandı. Yedek indir ile dosya al.' });
+    setAB({ lastError: t('ab.full') });
     return false;
   }
   setAB({ lastAt: now, lastPath: null, lastError: null });
@@ -88,7 +89,7 @@ export async function requestStoragePermission(): Promise<boolean> {
 async function nativeBackup(data: Data, today: ISODate, now: number): Promise<boolean> {
   const { Filesystem, Directory, Encoding } = await fsMod();
   if (!(await storagePermissionGranted())) {
-    setAB({ lastError: 'Dosyalara yazma izni gerekiyor.' });
+    setAB({ lastError: t('ab.needPerm') });
     return false;
   }
   const json = serializeBackup(data, new Date(now));
@@ -110,7 +111,7 @@ async function nativeBackup(data: Data, today: ISODate, now: number): Promise<bo
     }
   }
   if (!written) {
-    setAB({ lastError: `Yedek dosyası yazılamadı${lastErr ? ` (${lastErr})` : ''}.` });
+    setAB({ lastError: t('ab.writeFailed', { detail: lastErr ? ` (${lastErr})` : '' }) });
     return false;
   }
   setAB({ lastAt: now, lastPath: `Belgeler/${ANDROID_DIR}/${written}`, lastError: null });
@@ -140,7 +141,7 @@ export function runAutoBackup(data: Data, mode: 'real' | 'demo', opts: { force?:
     try {
       return isNative() ? await nativeBackup(data, today, now) : webBackup(data, today, now);
     } catch (e) {
-      setAB({ lastError: `Otomatik yedek alınamadı (${e instanceof Error ? e.message : String(e)}).` });
+      setAB({ lastError: t('ab.failed', { detail: e instanceof Error ? e.message : String(e) }) });
       return false;
     }
   };

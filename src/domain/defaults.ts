@@ -1,4 +1,4 @@
-import type { Category, Data, Settings } from './types';
+import type { Category, Data, Lang, Settings } from './types';
 
 /** Varsayılan kategoriler. Simge adları ui/icons.tsx içindeki eşlemeyle çözülür. */
 export const DEFAULT_CATEGORIES: Category[] = [
@@ -21,6 +21,47 @@ export const DEFAULT_CATEGORIES: Category[] = [
   { id: 'i-gift', kind: 'income', name: 'Hediye', icon: 'gift', color: '#B5884A' },
   { id: 'i-other', kind: 'income', name: 'Diğer gelir', icon: 'dots', color: '#8A857C' },
 ];
+
+/** Varsayılan kategorilerin İngilizce adları (kimliğe göre). */
+const DEFAULT_CATEGORY_NAMES_EN: Record<string, string> = {
+  'e-food': 'Food & coffee',
+  'e-market': 'Groceries',
+  'e-transport': 'Transport',
+  'e-housing': 'Dorm & rent',
+  'e-bills': 'Bills',
+  'e-subs': 'Subscriptions',
+  'e-phone': 'Phone & internet',
+  'e-school': 'School & books',
+  'e-fun': 'Fun',
+  'e-clothes': 'Clothes',
+  'e-health': 'Health & care',
+  'e-gift': 'Gifts',
+  'e-other': 'Other',
+  'i-scholarship': 'Scholarship',
+  'i-family': 'Family support',
+  'i-job': 'Job income',
+  'i-gift': 'Gifts',
+  'i-other': 'Other income',
+};
+const DEFAULT_CATEGORY_NAMES_TR = new Map(DEFAULT_CATEGORIES.map((c) => [c.id, c.name]));
+
+/**
+ * Kategorinin gösterilecek adı. Varsayılan bir kategori, kullanıcı adını değiştirmediyse
+ * (ad hâlâ Türkçe varsayılana eşitse) seçili dilde gösterilir; aksi hâlde kullanıcının verdiği ad.
+ */
+export function categoryName(cat: Pick<Category, 'id' | 'name'>, lang: Lang = 'tr'): string {
+  if (lang === 'tr') return cat.name;
+  const trDefault = DEFAULT_CATEGORY_NAMES_TR.get(cat.id);
+  if (trDefault !== undefined && trDefault === cat.name) return DEFAULT_CATEGORY_NAMES_EN[cat.id] ?? cat.name;
+  return cat.name;
+}
+
+/** İlk açılışta ve örnek veride oluşturulan hesap adları. */
+export function defaultAccountNames(lang: Lang = 'tr') {
+  return lang === 'en'
+    ? { bank: 'Bank', cash: 'Cash', investment: 'Investments', fund: 'Investment fund' }
+    : { bank: 'Banka', cash: 'Nakit', investment: 'Yatırım', fund: 'Yatırım fonu' };
+}
 
 export const DEFAULT_SETTINGS: Settings = {
   monthlyBudget: null,

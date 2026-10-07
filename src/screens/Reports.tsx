@@ -1,9 +1,10 @@
-import { pct } from '../domain/tr';
 import { useMemo } from 'react';
 import { Download, ChevronRight, ScrollText } from 'lucide-react';
 import type { Data, ID } from '../domain/types';
-import { formatMoney, type Money } from '../domain/money';
-import { addMonths, dayOfMonth, monthLabel, monthName, monthOf, monthShort, shortDate, type MonthKey } from '../domain/dates';
+import type { Money } from '../domain/money';
+import { addMonths, dayOfMonth, monthOf, type MonthKey } from '../domain/dates';
+import { catName as catLabel, formatMoney, monthLabel, monthName, monthShort, pctForm, pctPlain, shortDate } from '../i18n/format';
+import { t as T, useT } from '../i18n';
 import { allTags, budgetStatus, compareMonth, monthTrend, tagSummary, type Comparison } from '../domain/ledger';
 import { monthEnd, monthStart } from '../domain/dates';
 import { MonthSwitcher, SectionHead } from '../ui/kit';
@@ -16,21 +17,21 @@ import type { Mood } from '../domain/mood';
 
 function rangeText(c: Comparison['current']) {
   const a = dayOfMonth(c.from), b = dayOfMonth(c.to);
-  return `${a}–${b} ${monthShort(monthOf(c.from))}`;
+  return T('rep.range', { a, b, mon: monthShort(monthOf(c.from)) });
 }
 
 /** Rapor yorumu: yalnızca gerçek kayıtlardan; karşılaştırma anlamlı değilse söylemez. */
 function reportComment(data: Data, month: MonthKey, today: string, c: Comparison, catName: (id: ID) => string): { mood: Mood; text: string; why: string } {
-  if (c.current.txCount === 0) return { mood: 'curious', text: 'Bu dönemde kayıt yok; yorum yapacak bir şey bulamadım.', why: 'Yorumlar yalnızca girilen kayıtlardan üretilir.' };
+  if (c.current.txCount === 0) return { mood: 'curious', text: T('rep.c.empty'), why: T('rep.c.emptyWhy') };
   const lines: string[] = [];
   const whys: string[] = [];
   if (!c.meaningful) {
-    lines.push(c.previousComplete ? `Önceki dönemde kayıt olmadığı için karşılaştırma yapmıyorum.` : `Takip ${monthName(addMonths(month, -1))} başından önce başlamadığı için önceki ayla karşılaştırmıyorum; eksik bir dönemden sonuç çıkarmak yanıltıcı olur.`);
+    lines.push(c.previousComplete ? T('rep.c.noPrev') : T('rep.c.partialPrev', { month: monthName(addMonths(month, -1)) }));
   } else {
     const d = c.current.spending - c.previous.spending;
     if (c.previous.spending > 0) {
       const ch = Math.round((Math.abs(d) / c.previous.spending) * 100);
-      lines.push(d === 0 ? 'Harcaman önceki dönemle aynı.' : `Harcaman ${rangeText(c.previous)} dönemine göre %${ch} ${d < 0 ? 'daha az' : 'daha fazla'} (${formatMoney(c.previous.spending)} → ${formatMoney(c.current.spending)}).`);
+      lines.push(d === 0 ? T('rep.c.same') : T(d < 0 ? 'rep.c.less' : 'rep.c.more', { range: rangeText(c.previous), pct: pctPlain(ch), from: formatMoney(c.previous.spending), to: formatMoney(c.current.spending) }));
     }
     // En çok değişen kategori
     const ids = new Set([...c.current.spendingByCategory.keys(), ...c.previous.spendingByCategory.keys()]);
@@ -39,22 +40,23 @@ function reportComment(data: Data, month: MonthKey, today: string, c: Comparison
       const diff = (c.current.spendingByCategory.get(id) ?? 0) - (c.previous.spendingByCategory.get(id) ?? 0);
       if (!best || Math.abs(diff) > Math.abs(best.diff)) best = { id, diff };
     }
-    if (best && Math.abs(best.diff) >= 5000) lines.push(`En büyük fark ${catName(best.id)} kategorisinde: ${formatMoney(best.diff, { sign: true })}.`);
-    whys.push(`Karşılaştırılan aralıklar: ${rangeText(c.current)} ve ${rangeText(c.previous)}${c.partial ? ' (devam eden ay, önceki ayın aynı günleriyle)' : ''}.`);
+    if (best && Math.abs(best.diff) >= 5000) lines.push(T('rep.c.biggest', { cat: catName(best.id), amount: formatMoney(best.diff, { sign: true }) }));
+    whys.push(T('rep.c.ranges', { a: rangeText(c.current), b: rangeText(c.previous), partial: c.partial ? T('rep.c.rangesPartial') : '' }));
   }
   const b = budgetStatus(data, month, today);
   let mood: Mood = 'calm';
   if (b.budget !== null && b.usedPct !== null) {
-    if (c.partial) lines.push(`Bütçenin ${pct(b.usedPct, 'poss')} kullanıldı, ayın ${pct(b.elapsedPct, 'poss')} geçti.`);
-    else lines.push(b.spent <= b.budget ? `Ay, bütçenin ${formatMoney(b.budget - b.spent)} altında kapandı.` : `Ay, bütçeyi ${formatMoney(b.spent - b.budget)} aşarak kapandı.`);
+    if (c.partial) lines.push(T('rep.c.budgetPace', { used: pctForm(b.usedPct, 'poss'), elapsed: pctForm(b.elapsedPct, 'poss') }));
+    else lines.push(b.spent <= b.budget ? T('rep.c.closedUnder', { amount: formatMoney(b.budget - b.spent) }) : T('rep.c.closedOver', { amount: formatMoney(b.spent - b.budget) }));
     if (b.state === 'on-track' || b.state === 'closed-within') mood = 'happy';
     if (b.state === 'over' || b.state === 'tight') mood = 'thoughtful';
-    whys.push('İyi/kötü değerlendirmesi yalnızca senin koyduğun bütçeye göre yapılır.');
-  } else whys.push('Bütçe tanımlı olmadığı için iyileşme ya da kötüleşme yorumu yapmıyorum, yalnızca farkları gösteriyorum.');
+    whys.push(T('rep.c.budgetWhy'));
+  } else whys.push(T('rep.c.noBudgetWhy'));
   return { mood, text: lines.join(' '), why: whys.join(' ') };
 }
 
 export function Reports() {
+  const t = useT();
   const { data, today } = useData();
   const { cats } = useLookups(data);
   const nav = useNav();
@@ -63,7 +65,7 @@ export function Reports() {
   const setMonth = (m: MonthKey) => go('reports', { reportMonth: m });
   const c = useMemo(() => compareMonth(data, month, today), [data, month, today]);
   const trend = useMemo(() => monthTrend(data, month, 6), [data, month]);
-  const catName = (id: ID) => cats.get(id)?.name ?? 'Kategorisiz';
+  const catName = (id: ID) => (cats.get(id) ? catLabel(cats.get(id)) : t('rep.uncategorized'));
   const comment = reportComment(data, month, today, c, catName);
   const s = c.current;
 
@@ -80,9 +82,9 @@ export function Reports() {
   if (data.txs.length === 0) {
     return (
       <div className="screen">
-        <header className="screen-head"><h1>Raporlar</h1></header>
+        <header className="screen-head"><h1>{t('nav.reports')}</h1></header>
         <section className="card">
-          <EmptyState outfit="scholar" title="İnceleyecek kayıt yok">Birkaç işlem girince paranın nereden gelip nereye gittiğini burada göstereceğim.</EmptyState>
+          <EmptyState outfit="scholar" title={t('rep.emptyTitle')}>{t('rep.emptyBody')}</EmptyState>
         </section>
       </div>
     );
@@ -91,7 +93,7 @@ export function Reports() {
   return (
     <div className="screen">
       <header className="screen-head">
-        <h1>Raporlar</h1>
+        <h1>{t('nav.reports')}</h1>
         <MonthSwitcher month={month} onChange={setMonth} max={current} />
       </header>
 
@@ -99,7 +101,7 @@ export function Reports() {
       {month < current && (
         <button className="report-prompt" onClick={() => openSheet({ kind: 'reportCard', month })}>
           <ScrollText size={20} aria-hidden />
-          <span><b>{monthLabel(month)} karnesi</b><small>Ayın özeti, paylaşılabilir resim</small></span>
+          <span><b>{t('rep.cardTitle', { month: monthLabel(month) })}</b><small>{t('rep.cardSub')}</small></span>
           <ChevronRight size={18} aria-hidden />
         </button>
       )}
@@ -111,24 +113,24 @@ export function Reports() {
             <thead>
               <tr>
                 <th scope="col"></th>
-                <th scope="col">Bu dönem<small>{rangeText(c.current)}</small></th>
-                <th scope="col">Önceki<small>{rangeText(c.previous)}</small></th>
+                <th scope="col">{t('rep.thisPeriod')}<small>{rangeText(c.current)}</small></th>
+                <th scope="col">{t('rep.previous')}<small>{rangeText(c.previous)}</small></th>
               </tr>
             </thead>
             <tbody>
-              <tr><th scope="row">Gelir</th><td className="tone-pos">{formatMoney(s.income)}</td><td>{c.previousComplete ? formatMoney(c.previous.income) : '—'}</td></tr>
-              <tr><th scope="row">Harcama</th><td>{formatMoney(s.spending)}</td><td>{c.previousComplete ? formatMoney(c.previous.spending) : '—'}</td></tr>
-              <tr><th scope="row">Yatırıma aktarılan</th><td className="tone-invest">{formatMoney(s.contributions)}</td><td>{c.previousComplete ? formatMoney(c.previous.contributions) : '—'}</td></tr>
-              <tr><th scope="row">Gelir − harcama</th><td>{formatMoney(s.income - s.spending, { sign: true })}</td><td>{c.previousComplete ? formatMoney(c.previous.income - c.previous.spending, { sign: true }) : '—'}</td></tr>
+              <tr><th scope="row">{t('tx.income')}</th><td className="tone-pos">{formatMoney(s.income)}</td><td>{c.previousComplete ? formatMoney(c.previous.income) : '—'}</td></tr>
+              <tr><th scope="row">{t('txs.spending')}</th><td>{formatMoney(s.spending)}</td><td>{c.previousComplete ? formatMoney(c.previous.spending) : '—'}</td></tr>
+              <tr><th scope="row">{t('home.statInvest')}</th><td className="tone-invest">{formatMoney(s.contributions)}</td><td>{c.previousComplete ? formatMoney(c.previous.contributions) : '—'}</td></tr>
+              <tr><th scope="row">{t('rep.net')}</th><td>{formatMoney(s.income - s.spending, { sign: true })}</td><td>{c.previousComplete ? formatMoney(c.previous.income - c.previous.spending, { sign: true }) : '—'}</td></tr>
             </tbody>
           </table>
-          {!c.previousComplete && <p className="note-line">Önceki dönem takip başlangıcından önce kaldığı için gösterilmiyor.</p>}
-          {c.partial && <p className="note-line">Ay devam ediyor: önceki ayın yalnızca aynı günleri ({rangeText(c.previous)}) karşılaştırılıyor.</p>}
+          {!c.previousComplete && <p className="note-line">{t('rep.prevHidden')}</p>}
+          {c.partial && <p className="note-line">{t('rep.partialNote', { range: rangeText(c.previous) })}</p>}
         </section>
 
         <section className="card" aria-labelledby="cat-h">
-          <SectionHead id="cat-h" title="Harcama kategorileri" />
-          {spendRows.length === 0 ? <p className="muted">Bu dönemde harcama yok.</p> : (
+          <SectionHead id="cat-h" title={t('rep.spendCats')} />
+          {spendRows.length === 0 ? <p className="muted">{t('rep.noSpend')}</p> : (
             <ul className="bars">
               {spendRows.map(([id, v]) => {
                 const cat = cats.get(id);
@@ -142,7 +144,7 @@ export function Reports() {
                         </span>
                         <span className="bar-row__val">
                           {formatMoney(v)}
-                          {c.meaningful && <small className="bar-row__delta">{prev === 0 ? 'önceki: 0' : `${formatMoney(v - prev, { sign: true })}`}</small>}
+                          {c.meaningful && <small className="bar-row__delta">{prev === 0 ? t('rep.prevZero') : `${formatMoney(v - prev, { sign: true })}`}</small>}
                         </span>
                       </span>
                       <span className="bar"><span className="bar__fill" style={{ width: `${(Math.max(v, 0) / maxSpend) * 100}%`, background: cat?.color }} /></span>
@@ -153,12 +155,12 @@ export function Reports() {
               })}
             </ul>
           )}
-          {s.refunds > 0 && <p className="note-line">{formatMoney(s.refunds)} iade ilgili kategorilerden düşüldü.</p>}
+          {s.refunds > 0 && <p className="note-line">{t('rep.refundsNote', { amount: formatMoney(s.refunds) })}</p>}
         </section>
 
         <section className="card" aria-labelledby="inc-h">
-          <SectionHead id="inc-h" title="Gelir kaynakları" />
-          {incomeRows.length === 0 ? <p className="muted">Bu dönemde gerçekleşmiş gelir yok.</p> : (
+          <SectionHead id="inc-h" title={t('rep.incomeSources')} />
+          {incomeRows.length === 0 ? <p className="muted">{t('rep.noIncome')}</p> : (
             <ul className="bars">
               {incomeRows.map(([id, v]) => {
                 const cat = cats.get(id);
@@ -177,12 +179,12 @@ export function Reports() {
               })}
             </ul>
           )}
-          <p className="note-line">Transferler, yatırımdan çekimler, iadeler ve açılış bakiyeleri gelir sayılmaz.</p>
+          <p className="note-line">{t('rep.incomeNote')}</p>
         </section>
 
         {tagRows.length > 0 && (
           <section className="card" aria-labelledby="tag-h">
-            <SectionHead id="tag-h" title="Etiketler" />
+            <SectionHead id="tag-h" title={t('csv.tags')} />
             <ul className="bars">
               {tagRows.map((r) => (
                 <li key={r.tag}>
@@ -191,7 +193,7 @@ export function Reports() {
                       <span className="bar-row__name">#{r.tag}</span>
                       <span className="bar-row__val">
                         {formatMoney(r.month.spending)}
-                        <small className="bar-row__delta">tüm zamanlar {formatMoney(r.all.spending)}</small>
+                        <small className="bar-row__delta">{t('rep.allTime', { amount: formatMoney(r.all.spending) })}</small>
                       </span>
                     </span>
                     <ChevronRight size={16} className="bar-row__chev" aria-hidden />
@@ -199,19 +201,19 @@ export function Reports() {
                 </li>
               ))}
             </ul>
-            <p className="note-line">Bu ayki harcama ve etiketin tüm zamanlardaki toplamı (iadeler düşülmüş). Bir etiket birden çok kategoriye yayılabilir.</p>
+            <p className="note-line">{t('rep.tagsNote')}</p>
           </section>
         )}
 
         <section className="card" aria-labelledby="trend-h">
-          <SectionHead id="trend-h" title="Son 6 ay" />
+          <SectionHead id="trend-h" title={t('rep.last6')} />
           <Trend trend={trend} current={current} onPick={setMonth} selected={month} />
         </section>
 
         <section className="card card--span">
-          <SectionHead title="Dışa aktar" />
-          <p className="muted">Tüm işlemleri Excel’de açılabilen CSV dosyası olarak indir.</p>
-          <button className="btn btn--secondary" onClick={() => downloadCSV(data)}><Download size={17} /> İşlemler (CSV)</button>
+          <SectionHead title={t('rep.export')} />
+          <p className="muted">{t('rep.exportBody')}</p>
+          <button className="btn btn--secondary" onClick={() => downloadCSV(data)}><Download size={17} /> {t('rep.exportBtn')}</button>
         </section>
       </div>
     </div>
@@ -219,12 +221,13 @@ export function Reports() {
 }
 
 function Trend({ trend, current, onPick, selected }: { trend: ReturnType<typeof monthTrend>; current: MonthKey; onPick: (m: MonthKey) => void; selected: MonthKey }) {
+  const tt = useT();
   const max = Math.max(1, ...trend.map((t) => Math.max(t.summary.income, t.summary.spending, t.summary.contributions)));
   return (
     <>
       <div className="trend" role="list">
         {trend.map((t) => (
-          <button key={t.month} role="listitem" className={`trend__col ${t.month === selected ? 'is-on' : ''}`} onClick={() => onPick(t.month)} aria-label={`${monthLabel(t.month)}: gelir ${formatMoney(t.summary.income)}, harcama ${formatMoney(t.summary.spending)}, yatırım ${formatMoney(t.summary.contributions)}${!t.tracked ? ', takip yok' : ''}`}>
+          <button key={t.month} role="listitem" className={`trend__col ${t.month === selected ? 'is-on' : ''}`} onClick={() => onPick(t.month)} aria-label={`${monthLabel(t.month)}: ${tt('rep.trendAria', { inc: formatMoney(t.summary.income), sp: formatMoney(t.summary.spending), inv: formatMoney(t.summary.contributions) })}${!t.tracked ? tt('rep.trendNoTrack') : ''}`}>
             <span className="trend__bars">
               {t.tracked ? (
                 <>
@@ -239,11 +242,11 @@ function Trend({ trend, current, onPick, selected }: { trend: ReturnType<typeof 
         ))}
       </div>
       <div className="trend-legend">
-        <span><i className="sw sw--inc" /> Gelir</span>
-        <span><i className="sw sw--sp" /> Harcama</span>
-        <span><i className="sw sw--inv" /> Yatırım</span>
+        <span><i className="sw sw--inc" /> {tt('tx.income')}</span>
+        <span><i className="sw sw--sp" /> {tt('txs.spending')}</span>
+        <span><i className="sw sw--inv" /> {tt('txs.kindInvest')}</span>
       </div>
-      <p className="note-line">* devam eden ay · ° takip ay ortasında başladı · — takip yok</p>
+      <p className="note-line">{tt('rep.trendNote')}</p>
     </>
   );
 }

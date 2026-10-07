@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Trash2, Archive, ArchiveRestore, Ban, RotateCw } from 'lucide-react';
 import type { AccountKind, Freq, ID, PlanKind } from '../domain/types';
 import * as A from '../domain/actions';
-import { formatMoney, parseMoney } from '../domain/money';
-import { shortDate } from '../domain/dates';
+import { catName, formatMoney, moneyUnit, parseMoney, shortDate } from '../i18n/format';
+import { useT } from '../i18n';
+import type { Key } from '../i18n/core';
 import { cashBalance, installmentEnd, investmentState, isDaily, isInvestment } from '../domain/ledger';
 import { commit } from '../store/store';
 import { closeSheet, openSheet } from '../ui/nav';
@@ -21,10 +22,11 @@ const parseSigned = (raw: string) => {
 
 // ───────────────────────── Hesap ─────────────────────────
 export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPreset?: 'investment' | 'person' }) {
+  const T = useT();
   const { data, today } = useData();
   const acc = accountId ? data.accounts.find((a) => a.id === accountId) : undefined;
   const used = acc ? A.isAccountUsed(data, acc.id) : false;
-  const [name, setName] = useState(acc?.name ?? (kindPreset === 'investment' ? 'Yatırım hesabı' : ''));
+  const [name, setName] = useState(acc?.name ?? (kindPreset === 'investment' ? T('acc.defaultInvName') : ''));
   const [kind, setKind] = useState<AccountKind>(acc?.kind ?? kindPreset ?? 'bank');
   const [opening, setOpening] = useState(acc ? inputFromMoney(Math.abs(acc.openingBalance)) : '');
   // Kişi hesabında açılış yönü: + o bana borçlu, − ben ona borçluyum
@@ -36,26 +38,26 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
 
   function save() {
     let ob = parseSigned(opening);
-    if (ob === null) return setErr('Tutarı 1.250,50 gibi yaz.');
+    if (ob === null) return setErr(T('kit.amountFormat'));
     if (kind === 'person') ob = owesDir === 'none' ? 0 : owesDir === 'they' ? Math.abs(ob) : -Math.abs(ob);
     let pc: number | null = null;
     if (kind === 'investment' && priorKnown) {
       pc = prior.trim() ? parseSigned(prior) : 0;
-      if (pc === null || pc < 0) return setErr('Önceki katkıyı 1.250,50 gibi yaz.');
+      if (pc === null || pc < 0) return setErr(T('acc.priorFormat'));
     }
     const draft: A.AccountDraft = { name, kind, openingBalance: ob, openingDate, priorContribution: pc };
-    const e = acc ? commit((d) => A.updateAccount(d, acc.id, draft), 'Hesap güncellendi') : commit((d) => A.addAccount(d, draft).data, `${name.trim()} eklendi`);
+    const e = acc ? commit((d) => A.updateAccount(d, acc.id, draft), T('acc.updated')) : commit((d) => A.addAccount(d, draft).data, T('acc.added', { name: name.trim() }));
     if (e) setErr(e);
     else closeSheet();
   }
   function archive() {
     if (!acc) return;
-    commit((d) => A.setAccountArchived(d, acc.id, !acc.archived), acc.archived ? 'Hesap arşivden çıkarıldı' : 'Hesap arşivlendi');
+    commit((d) => A.setAccountArchived(d, acc.id, !acc.archived), acc.archived ? T('acc.unarchived') : T('acc.archivedToast'));
     closeSheet();
   }
   function remove() {
     if (!acc) return;
-    const e = commit((d) => A.deleteAccount(d, acc.id), 'Hesap silindi');
+    const e = commit((d) => A.deleteAccount(d, acc.id), T('acc.deleted'));
     if (e) setErr(e);
     else closeSheet();
   }
@@ -63,78 +65,78 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
 
   return (
     <Sheet
-      title={acc ? (kind === 'person' ? 'Kişiyi düzenle' : 'Hesabı düzenle') : kind === 'investment' ? 'Yatırım hesabı ekle' : kind === 'person' ? 'Kişi ekle' : 'Hesap ekle'}
+      title={acc ? (kind === 'person' ? T('acc.editPerson') : T('inv.editAccount')) : kind === 'investment' ? T('home.addInvestAccount') : kind === 'person' ? T('people.addPerson') : T('home.addAccount')}
       onClose={closeSheet}
       footer={
         <div className="sheet-actions">
           {acc && !used && (
             <button className="btn btn--ghost btn--danger" onClick={remove}>
-              <Trash2 size={18} /> Sil
+              <Trash2 size={18} /> {T('common.delete')}
             </button>
           )}
           {acc && used && (
             <button className="btn btn--ghost" onClick={archive}>
-              {acc.archived ? <ArchiveRestore size={18} /> : <Archive size={18} />} {acc.archived ? 'Arşivden çıkar' : 'Arşivle'}
+              {acc.archived ? <ArchiveRestore size={18} /> : <Archive size={18} />} {acc.archived ? T('acc.unarchive') : T('acc.archive')}
             </button>
           )}
-          <button className="btn btn--primary btn--grow" onClick={save}>Kaydet</button>
+          <button className="btn btn--primary btn--grow" onClick={save}>{T('common.save')}</button>
         </div>
       }
     >
       {!(acc && used) && (
         <Segmented<AccountKind>
-          label="Hesap türü"
+          label={T('acc.kindLabel')}
           value={kind}
           onChange={setKind}
           options={[
-            { value: 'bank', label: 'Banka' },
-            { value: 'cash', label: 'Nakit' },
-            { value: 'investment', label: 'Yatırım' },
-            { value: 'person', label: 'Kişi' },
+            { value: 'bank', label: T('acc.kind.bank') },
+            { value: 'cash', label: T('acc.kind.cash') },
+            { value: 'investment', label: T('acc.kind.investment') },
+            { value: 'person', label: T('people.person') },
           ]}
         />
       )}
-      <Field label={kind === 'person' ? 'Kişinin adı' : 'Hesap adı'}>
-        <input className="input" value={name} maxLength={40} onChange={(e) => setName(e.target.value)} placeholder={kind === 'cash' ? 'Cüzdan' : kind === 'bank' ? 'ör. Banka kartı' : kind === 'person' ? 'ör. Ali' : 'ör. Fon hesabı'} />
+      <Field label={kind === 'person' ? T('acc.personName') : T('acc.name')}>
+        <input className="input" value={name} maxLength={40} onChange={(e) => setName(e.target.value)} placeholder={kind === 'cash' ? T('acc.ph.cash') : kind === 'bank' ? T('acc.ph.bank') : kind === 'person' ? T('acc.ph.person') : T('acc.ph.inv')} />
       </Field>
       {kind === 'person' ? (
         <div className="callout">
-          <p><b>Şu an aranızda borç var mı?</b> Bu bir başlangıç durumudur; gelir ya da gider sayılmaz.</p>
-          <Segmented size="sm" label="Borç durumu" value={owesDir} onChange={setOwesDir} options={[{ value: 'none', label: 'Yok' }, { value: 'they', label: 'O bana borçlu' }, { value: 'me', label: 'Ben borçluyum' }]} />
-          {owesDir !== 'none' && <MoneyInput label="Tutar" value={opening} onChange={setOpening} />}
+          <p><b>{T('acc.debtQ')}</b> {T('acc.debtQHint')}</p>
+          <Segmented size="sm" label={T('acc.debtState')} value={owesDir} onChange={setOwesDir} options={[{ value: 'none', label: T('acc.debtNone') }, { value: 'they', label: T('acc.debtThey') }, { value: 'me', label: T('acc.debtMe') }]} />
+          {owesDir !== 'none' && <MoneyInput label={T('csv.amount')} value={opening} onChange={setOpening} />}
         </div>
       ) : (
       <MoneyInput
-        label={kind === 'investment' ? 'Takibe başladığın gün hesabın değeri' : 'Takibe başladığın gün hesaptaki para'}
+        label={kind === 'investment' ? T('acc.openingInv') : T('acc.opening')}
         value={opening}
         onChange={(v) => setOpening(v)}
         allowZero
         placeholder="0"
       />
       )}
-      <Field label="Takip başlangıcı" hint="Bu tarihten önceki hareketler girilmez; açılış tutarı gelir sayılmaz.">
+      <Field label={T('acc.trackStart')} hint={T('acc.trackStartHint')}>
         <input className="input" type="date" value={openingDate} max={today} onChange={(e) => e.target.value && setOpeningDate(e.target.value)} />
       </Field>
       {kind === 'investment' && (
         <div className="callout">
           <p>
-            <b>Takipten önce bu hesaba toplam ne kadar para koymuştun?</b> Bilirsen, değer farkını (kâr/zarar) gösterebilirim. Bilmiyorsan boş bırak; uydurma bir getiri göstermem.
+            <b>{T('acc.priorQ')}</b> {T('acc.priorQHint')}
           </p>
           <div className="chip-row">
-            <Chip on={!priorKnown} onClick={() => setPriorKnown(false)}>Bilmiyorum</Chip>
-            <Chip on={priorKnown} onClick={() => setPriorKnown(true)}>Biliyorum</Chip>
+            <Chip on={!priorKnown} onClick={() => setPriorKnown(false)}>{T('onb.dontKnow')}</Chip>
+            <Chip on={priorKnown} onClick={() => setPriorKnown(true)}>{T('onb.know')}</Chip>
           </div>
-          {priorKnown && <MoneyInput label="Takip öncesi net katkı" value={prior} onChange={setPrior} allowZero />}
+          {priorKnown && <MoneyInput label={T('acc.priorLabel')} value={prior} onChange={setPrior} allowZero />}
         </div>
       )}
       {acc?.kind === 'person' && (() => {
         const b = cashBalance(data, acc.id);
-        return <p className="note-line">Şu anki durum: {b === 0 ? 'hesap kapalı' : b > 0 ? `sana ${formatMoney(b)} borçlu` : `ona ${formatMoney(-b)} borçlusun`}. Hesap kapanınca arşivleyebilirsin.</p>;
+        return <p className="note-line">{T('acc.personState', { state: b === 0 ? T('people.settled') : b > 0 ? T('acc.owesYouAmt', { amount: formatMoney(b) }) : T('acc.youOweAmt', { amount: formatMoney(-b) }) })}</p>;
       })()}
       {balanceNow !== null && (
-        <p className="note-line">Güncel bakiye: {formatMoney(balanceNow)} (açılış + tüm hareketler)</p>
+        <p className="note-line">{T('acc.balanceNow', { amount: formatMoney(balanceNow) })}</p>
       )}
-      {acc?.archived && <p className="note-line">Bu hesap arşivde: yeni kayıtlarda görünmez ama geçmişi ve bakiyesi korunur.</p>}
+      {acc?.archived && <p className="note-line">{T('acc.archivedNote')}</p>}
       <FormError msg={err} />
     </Sheet>
   );
@@ -142,6 +144,7 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
 
 // ───────────────────────── Yatırım değeri ─────────────────────────
 export function ValuationSheet({ accountId }: { accountId: ID }) {
+  const T = useT();
   const { data, today } = useData();
   const st = investmentState(data, accountId);
   const [value, setValue] = useState('');
@@ -151,39 +154,40 @@ export function ValuationSheet({ accountId }: { accountId: ID }) {
   if (!st) return null;
   function save() {
     const v = parseSigned(value);
-    if (v === null || v < 0 || !value.trim()) return setErr('Değeri 12.500,00 gibi yaz.');
-    const e = commit((d, t) => A.addValuation(d, { accountId, date, value: v, note }, t).data, 'Güncel değer kaydedildi', { pulse: true });
+    if (v === null || v < 0 || !value.trim()) return setErr(T('val.format'));
+    const e = commit((d, t) => A.addValuation(d, { accountId, date, value: v, note }, t).data, T('val.saved'), { pulse: true });
     if (e) setErr(e);
     else closeSheet();
   }
   return (
-    <Sheet title="Güncel değeri gir" onClose={closeSheet} footer={<button className="btn btn--primary btn--block" onClick={save}>Kaydet</button>}>
+    <Sheet title={T('val.title')} onClose={closeSheet} footer={<button className="btn btn--primary btn--block" onClick={save}>{T('common.save')}</button>}>
       <p className="muted">
-        {st.account.name} şu an kaç TL ediyor? Uygulamadaki tahmini değer: <b>{formatMoney(st.currentValue)}</b> (son değer {shortDate(st.lastValuation.date, today)}
-        {st.flowsSinceValuation !== 0 && `, sonrasında ${formatMoney(st.flowsSinceValuation, { sign: true })} hareket`}).
+        {T('val.q', { name: st.account.name, unit: moneyUnit() })} {T('val.estimate')} <b>{formatMoney(st.currentValue)}</b> ({T('val.lastValue', { date: shortDate(st.lastValuation.date, today) })}
+        {st.flowsSinceValuation !== 0 && T('val.flowsSince', { amount: formatMoney(st.flowsSinceValuation, { sign: true }) })}).
       </p>
-      <MoneyInput big label="Güncel değer" value={value} onChange={setValue} autoFocus allowZero onEnter={save} />
-      <Field label="Değer tarihi" hint="Bu tarihe kadar girdiğin katkı ve çekimlerin bu değere dahil olduğu kabul edilir.">
+      <MoneyInput big label={T('csv.value')} value={value} onChange={setValue} autoFocus allowZero onEnter={save} />
+      <Field label={T('val.date')} hint={T('val.dateHint')}>
         <input className="input" type="date" value={date} min={st.account.openingDate} max={today} onChange={(e) => e.target.value && setDate(e.target.value)} />
       </Field>
-      <Field label="Not (isteğe bağlı)">
+      <Field label={T('txs.noteOpt')}>
         <input className="input" value={note} maxLength={200} onChange={(e) => setNote(e.target.value)} />
       </Field>
-      <p className="note-line">Değer güncellemesi para hareketi değildir: katkı toplamını, gelirini ve günlük bakiyeni değiştirmez.</p>
+      <p className="note-line">{T('val.note')}</p>
       <FormError msg={err} />
     </Sheet>
   );
 }
 
 // ───────────────────────── Plan ─────────────────────────
-const FREQ: { value: Freq; label: string }[] = [
-  { value: 'monthly', label: 'Her ay' },
-  { value: 'weekly', label: 'Her hafta' },
-  { value: 'yearly', label: 'Her yıl' },
-  { value: 'once', label: 'Bir kez' },
+const FREQ: { value: Freq; label: Key }[] = [
+  { value: 'monthly', label: 'freq.monthly' },
+  { value: 'weekly', label: 'freq.weekly' },
+  { value: 'yearly', label: 'freq.yearly' },
+  { value: 'once', label: 'freq.once' },
 ];
 
 export function PlanSheet({ planId, preset }: { planId?: ID; preset?: PlanKind }) {
+  const T = useT();
   const { data, today } = useData();
   const plan = planId ? data.plans.find((p) => p.id === planId) : undefined;
   const history = plan ? A.planHasHistory(data, plan.id) : false;
@@ -207,18 +211,18 @@ export function PlanSheet({ planId, preset }: { planId?: ID; preset?: PlanKind }
 
   function save() {
     const amt = parseMoney(amount);
-    if (!amt) return setErr('Tutarı yaz.');
+    if (!amt) return setErr(T('txs.typeAmount'));
     const n = Number(instN);
     const useInst = canInstall && instOn;
-    if (useInst && (!Number.isInteger(n) || n < 2 || n > 60)) return setErr('Taksit sayısı 2 ile 60 arasında olmalı.');
+    if (useInst && (!Number.isInteger(n) || n < 2 || n > 60)) return setErr(T('err.installmentsRange'));
     const draft: A.PlanDraft = { kind, title, amount: amt, accountId, categoryId, toAccountId, freq, startDate, endDate: useInst ? null : endDate || null, installments: useInst ? n : null };
-    const e = plan ? commit((d) => A.updatePlan(d, plan.id, draft), 'Plan güncellendi') : commit((d) => A.addPlan(d, draft).data, 'Plan eklendi');
+    const e = plan ? commit((d) => A.updatePlan(d, plan.id, draft), T('plan.updated')) : commit((d) => A.addPlan(d, draft).data, T('plan.added'));
     if (e) setErr(e);
     else closeSheet();
   }
   function remove() {
     if (!plan) return;
-    commit((d) => A.deletePlan(d, plan.id), history ? 'Plan silindi (gerçekleşmiş kayıtlar duruyor)' : 'Plan silindi');
+    commit((d) => A.deletePlan(d, plan.id), history ? T('plan.deletedKeep') : T('plan.deleted'));
     closeSheet();
   }
   const cats = data.categories.filter((c) => c.kind === (kind === 'income' ? 'income' : 'expense') && (!c.archived || c.id === categoryId));
@@ -226,39 +230,39 @@ export function PlanSheet({ planId, preset }: { planId?: ID; preset?: PlanKind }
 
   return (
     <Sheet
-      title={plan ? (ended ? 'Biten plan' : 'Planı düzenle') : 'Plan ekle'}
+      title={plan ? (ended ? T('plan.endedTitle') : T('plan.editTitle')) : T('home.addPlan')}
       onClose={closeSheet}
       footer={
         <div className="sheet-actions">
           {plan && (
-            <button className="btn btn--ghost btn--danger icon-only-phone" onClick={remove} aria-label="Planı sil">
-              <Trash2 size={18} /> <span>Sil</span>
+            <button className="btn btn--ghost btn--danger icon-only-phone" onClick={remove} aria-label={T('plan.delete')}>
+              <Trash2 size={18} /> <span>{T('common.delete')}</span>
             </button>
           )}
           {plan && !ended && (
             <button className="btn btn--ghost" onClick={() => openSheet({ kind: 'cancelPlan', planId: plan.id })}>
-              <Ban size={18} /> İptal et
+              <Ban size={18} /> {T('plan.cancel')}
             </button>
           )}
           {plan && ended && (
             <button
               className="btn btn--ghost"
               onClick={() => {
-                const e = commit((d, t) => A.restartPlan(d, plan.id, t).data, `${plan.title} bugünden yeniden başladı`);
+                const e = commit((d, t) => A.restartPlan(d, plan.id, t).data, T('plan.restarted', { title: plan.title }));
                 if (e) setErr(e);
                 else closeSheet();
               }}
             >
-              <RotateCw size={18} /> Yeniden başlat
+              <RotateCw size={18} /> {T('plan.restart')}
             </button>
           )}
-          <button className="btn btn--primary btn--grow" onClick={save}>Kaydet</button>
+          <button className="btn btn--primary btn--grow" onClick={save}>{T('common.save')}</button>
         </div>
       }
     >
       {!history && (
         <Segmented<PlanKind>
-          label="Plan türü"
+          label={T('plan.kindLabel')}
           value={kind}
           onChange={(k) => {
             setKind(k);
@@ -266,30 +270,30 @@ export function PlanSheet({ planId, preset }: { planId?: ID; preset?: PlanKind }
             if (k === 'transfer' && !inv.length) setToAccountId(daily.find((d) => d.account.id !== accountId)?.account.id ?? '');
           }}
           options={[
-            { value: 'expense', label: 'Ödeme' },
-            { value: 'income', label: 'Beklenen gelir' },
-            { value: 'transfer', label: 'Aktarım' },
+            { value: 'expense', label: T('plan.kind.expense') },
+            { value: 'income', label: T('plan.kind.income') },
+            { value: 'transfer', label: T('plan.kind.transfer') },
           ]}
         />
       )}
-      <Field label="Ad">
-        <input className="input" value={title} maxLength={60} onChange={(e) => setTitle(e.target.value)} placeholder={kind === 'income' ? 'ör. KYK bursu' : kind === 'transfer' ? 'ör. Aylık yatırım' : 'ör. Yurt ödemesi'} />
+      <Field label={T('plan.name')}>
+        <input className="input" value={title} maxLength={60} onChange={(e) => setTitle(e.target.value)} placeholder={kind === 'income' ? T('plan.ph.income') : kind === 'transfer' ? T('plan.ph.transfer') : T('plan.ph.expense')} />
       </Field>
-      <MoneyInput label="Tutar" value={amount} onChange={setAmount} />
+      <MoneyInput label={T('csv.amount')} value={amount} onChange={setAmount} />
       {kind !== 'transfer' && (
         <fieldset className="block">
-          <legend>{kind === 'income' ? 'Kaynak' : 'Kategori'}</legend>
+          <legend>{kind === 'income' ? T('txs.source') : T('csv.category')}</legend>
           <div className="chip-row">
             {cats.map((c) => (
               <Chip key={c.id} on={categoryId === c.id} onClick={() => setCategoryId(c.id)} color={c.color}>
-                <CatIcon icon={c.icon} size={15} /> {c.name}
+                <CatIcon icon={c.icon} size={15} /> {catName(c)}
               </Chip>
             ))}
           </div>
         </fieldset>
       )}
       <fieldset className="block">
-        <legend>{kind === 'transfer' ? 'Nereden' : kind === 'income' ? 'Hangi hesaba gelecek?' : 'Hangi hesaptan?'}</legend>
+        <legend>{kind === 'transfer' ? T('txs.from') : kind === 'income' ? T('plan.whichAccountIn') : T('txs.whichAccountOut')}</legend>
         <div className="chip-row">
           {(kind === 'transfer' ? allAccounts : daily.map((d) => d.account)).map((a) => (
             <Chip key={a.id} on={accountId === a.id} onClick={() => setAccountId(a.id)}>{a.name}</Chip>
@@ -298,25 +302,25 @@ export function PlanSheet({ planId, preset }: { planId?: ID; preset?: PlanKind }
       </fieldset>
       {kind === 'transfer' && (
         <fieldset className="block">
-          <legend>Nereye</legend>
+          <legend>{T('txs.to')}</legend>
           <div className="chip-row">
             {allAccounts.filter((a) => a.id !== accountId).map((a) => (
               <Chip key={a.id} on={toAccountId === a.id} onClick={() => setToAccountId(a.id)}>{a.name}</Chip>
             ))}
           </div>
-          {isDaily(accounts.get(accountId)) && isInvestment(accounts.get(toAccountId)) && <span className="field__hint">Planlı yatırım katkısı: kullanılabilir paradan önceden ayrılır, harcama sayılmaz.</span>}
+          {isDaily(accounts.get(accountId)) && isInvestment(accounts.get(toAccountId)) && <span className="field__hint">{T('plan.investHint')}</span>}
         </fieldset>
       )}
       <fieldset className="block">
-        <legend>Sıklık</legend>
-        {history ? <p className="muted">{FREQ.find((f) => f.value === freq)?.label} (gerçekleşmiş kaydı olduğu için değiştirilemez)</p> : <Segmented<Freq> size="sm" label="Sıklık" value={freq} onChange={setFreq} options={FREQ} />}
+        <legend>{T('plan.freq')}</legend>
+        {history ? <p className="muted">{T(FREQ.find((f) => f.value === freq)!.label)} {T('plan.freqLocked')}</p> : <Segmented<Freq> size="sm" label={T('plan.freq')} value={freq} onChange={setFreq} options={FREQ.map((f) => ({ value: f.value, label: T(f.label) }))} />}
       </fieldset>
       <div className="two-col">
-        <Field label={freq === 'once' ? 'Tarih' : 'İlk vade'}>
+        <Field label={freq === 'once' ? T('csv.date') : T('plan.firstDue')}>
           <input className="input" type="date" value={startDate} onChange={(e) => e.target.value && setStartDate(e.target.value)} />
         </Field>
         {freq !== 'once' && !(canInstall && instOn) && (
-          <Field label="Bitiş (isteğe bağlı)">
+          <Field label={T('plan.endOpt')}>
             <input className="input" type="date" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} />
           </Field>
         )}
@@ -324,26 +328,26 @@ export function PlanSheet({ planId, preset }: { planId?: ID; preset?: PlanKind }
       {canInstall && (
         <div className="callout">
           <div className="chip-row">
-            <Chip on={instOn} onClick={() => setInstOn(!instOn)}>{instOn ? '✓ ' : ''}Taksitli ödeme</Chip>
+            <Chip on={instOn} onClick={() => setInstOn(!instOn)}>{instOn ? '✓ ' : ''}{T('plan.installment')}</Chip>
           </div>
           {instOn && (
             <>
-              <Field label="Taksit sayısı">
+              <Field label={T('plan.installmentCount')}>
                 <input className="input input--small" inputMode="numeric" value={instN} onChange={(e) => setInstN(e.target.value.replace(/\D/g, '').slice(0, 2))} />
               </Field>
               {(() => {
                 const a = parseMoney(amount), n = Number(instN);
-                return a && n >= 2 && n <= 60 ? <p className="note-line">Aylık {formatMoney(a)} × {n} taksit = toplam <b>{formatMoney(a * n)}</b>. Son taksit {shortDate(installmentEnd(startDate, n), today)}.</p> : null;
+                return a && n >= 2 && n <= 60 ? <p className="note-line">{T('plan.instCalc', { a: formatMoney(a), n })} <b>{formatMoney(a * n)}</b>. {T('plan.instLast', { date: shortDate(installmentEnd(startDate, n), today) })}</p> : null;
               })()}
-              <p className="note-line">Tutar alanına <b>bir taksitin</b> tutarını yaz. Her taksit vadesinde ayrı ayrı “Ödendi” ile kaydedilir.</p>
+              <p className="note-line">{T('plan.instHintPre')} <b>{T('plan.instHintBold')}</b>{T('plan.instHintPost')}</p>
             </>
           )}
         </div>
       )}
-      {ended && <p className="note-line">Bu plan {shortDate(plan!.endDate!, today)} tarihinde bitti/iptal edildi. Geçmiş kayıtları duruyor.</p>}
+      {ended && <p className="note-line">{T('plan.endedNote', { date: shortDate(plan!.endDate!, today) })}</p>}
       <p className="note-line">
-        Vadesi gelince kendiliğinden gerçekleşmez; “{kind === 'income' ? 'Geldi' : kind === 'transfer' ? 'Aktarıldı' : 'Ödendi'}” deyip tutarı düzeltebilirsin.
-        {kind === 'income' && ' Beklenen gelir, gelene kadar bakiyeye ve kullanılabilir paraya eklenmez.'}
+        {T('plan.notAuto', { verb: kind === 'income' ? T('due.received') : kind === 'transfer' ? T('due.moved') : T('due.paid') })}
+        {kind === 'income' && T('plan.incomeNote')}
       </p>
       <FormError msg={err} />
     </Sheet>
@@ -352,6 +356,7 @@ export function PlanSheet({ planId, preset }: { planId?: ID; preset?: PlanKind }
 
 // ───────────────────────── Hedef ─────────────────────────
 export function GoalSheet({ goalId, accountId }: { goalId?: ID; accountId?: ID }) {
+  const T = useT();
   const { data } = useData();
   const goal = goalId ? data.goals.find((g) => g.id === goalId) : undefined;
   const inv = data.accounts.filter(isInvestment);
@@ -361,39 +366,39 @@ export function GoalSheet({ goalId, accountId }: { goalId?: ID; accountId?: ID }
   const [err, setErr] = useState<string | null>(null);
   function save() {
     const t = parseMoney(target);
-    if (!t) return setErr('Hedef tutarını yaz.');
-    const e = goal ? commit((d) => A.updateGoal(d, goal.id, { title, target: t }), 'Hedef güncellendi') : commit((d) => A.addGoal(d, { title, target: t, accountId: acc }).data, 'Hedef eklendi');
+    if (!t) return setErr(T('goal.typeAmount'));
+    const e = goal ? commit((d) => A.updateGoal(d, goal.id, { title, target: t }), T('goal.updated')) : commit((d) => A.addGoal(d, { title, target: t, accountId: acc }).data, T('goal.added'));
     if (e) setErr(e);
     else closeSheet();
   }
   return (
     <Sheet
-      title={goal ? 'Hedefi düzenle' : 'Birikim hedefi'}
+      title={goal ? T('goal.editTitle') : T('goal.newTitle')}
       onClose={closeSheet}
       footer={
         <div className="sheet-actions">
           {goal && (
-            <button className="btn btn--ghost btn--danger" onClick={() => { commit((d) => A.deleteGoal(d, goal.id), 'Hedef silindi'); closeSheet(); }}>
-              <Trash2 size={18} /> Sil
+            <button className="btn btn--ghost btn--danger" onClick={() => { commit((d) => A.deleteGoal(d, goal.id), T('goal.deleted')); closeSheet(); }}>
+              <Trash2 size={18} /> {T('common.delete')}
             </button>
           )}
-          <button className="btn btn--primary btn--grow" onClick={save}>Kaydet</button>
+          <button className="btn btn--primary btn--grow" onClick={save}>{T('common.save')}</button>
         </div>
       }
     >
-      <Field label="Hedefin adı">
-        <input className="input" value={title} maxLength={60} onChange={(e) => setTitle(e.target.value)} placeholder="ör. Yaz okulu, acil durum fonu" />
+      <Field label={T('goal.name')}>
+        <input className="input" value={title} maxLength={60} onChange={(e) => setTitle(e.target.value)} placeholder={T('goal.ph')} />
       </Field>
-      <MoneyInput label="Hedef: net katkı" value={target} onChange={setTarget} />
+      <MoneyInput label={T('goal.target')} value={target} onChange={setTarget} />
       {!goal && inv.length > 1 && (
         <fieldset className="block">
-          <legend>Yatırım hesabı</legend>
+          <legend>{T('csv.invAccount')}</legend>
           <div className="chip-row">
             {inv.map((a) => <Chip key={a.id} on={acc === a.id} onClick={() => setAcc(a.id)}>{a.name}</Chip>)}
           </div>
         </fieldset>
       )}
-      <p className="note-line">İlerleme, piyasa değerine göre değil, bu hesaba senin koyduğun net paraya (katkı − çekim) göre ölçülür. Böylece fiyat dalgalanması hedefini geri götürmez.</p>
+      <p className="note-line">{T('goal.note')}</p>
       <FormError msg={err} />
     </Sheet>
   );
@@ -401,45 +406,49 @@ export function GoalSheet({ goalId, accountId }: { goalId?: ID; accountId?: ID }
 
 // ───────────────────────── Kategori ─────────────────────────
 export function CategorySheet({ categoryId, catKind }: { categoryId?: ID; catKind?: 'expense' | 'income' }) {
+  const T = useT();
   const { data } = useData();
   const cat = categoryId ? data.categories.find((c) => c.id === categoryId) : undefined;
   const kind = cat?.kind ?? catKind ?? 'expense';
-  const [name, setName] = useState(cat?.name ?? '');
+  // Varsayılan kategori seçili dilde gösterilir; ad değiştirilmezse kayıttaki (Türkçe) ad korunur.
+  const shownName = cat ? catName(cat) : '';
+  const [name, setName] = useState(shownName);
   const [icon, setIcon] = useState(cat?.icon ?? 'dots');
   const [color, setColor] = useState(cat?.color ?? CATEGORY_COLORS[0]);
   const [err, setErr] = useState<string | null>(null);
   const used = cat ? A.isCategoryUsed(data, cat.id) : false;
   function save() {
-    const e = cat ? commit((d) => A.updateCategory(d, cat.id, { name, icon, color }), 'Kategori güncellendi') : commit((d) => A.addCategory(d, { kind, name, icon, color }).data, 'Kategori eklendi');
+    const finalName = cat && name.trim() === shownName ? cat.name : name;
+    const e = cat ? commit((d) => A.updateCategory(d, cat.id, { name: finalName, icon, color }), T('cat.updated')) : commit((d) => A.addCategory(d, { kind, name, icon, color }).data, T('cat.added'));
     if (e) setErr(e);
     else closeSheet();
   }
   function remove() {
     if (!cat) return;
-    if (cat.archived) commit((d) => A.updateCategory(d, cat.id, { archived: false }), 'Kategori geri getirildi');
-    else commit((d) => A.removeCategory(d, cat.id), used ? 'Kategori arşivlendi (geçmiş kayıtlar korunuyor)' : 'Kategori silindi');
+    if (cat.archived) commit((d) => A.updateCategory(d, cat.id, { archived: false }), T('cat.restored'));
+    else commit((d) => A.removeCategory(d, cat.id), used ? T('cat.archivedToast') : T('cat.deleted'));
     closeSheet();
   }
   return (
     <Sheet
-      title={cat ? 'Kategoriyi düzenle' : kind === 'income' ? 'Gelir kaynağı ekle' : 'Kategori ekle'}
+      title={cat ? T('cat.editTitle') : kind === 'income' ? T('cat.addIncome') : T('cat.addTitle')}
       onClose={closeSheet}
       footer={
         <div className="sheet-actions">
           {cat && (
             <button className="btn btn--ghost" onClick={remove}>
-              {cat.archived ? <ArchiveRestore size={18} /> : used ? <Archive size={18} /> : <Trash2 size={18} />} {cat.archived ? 'Geri getir' : used ? 'Arşivle' : 'Sil'}
+              {cat.archived ? <ArchiveRestore size={18} /> : used ? <Archive size={18} /> : <Trash2 size={18} />} {cat.archived ? T('cat.restore') : used ? T('acc.archive') : T('common.delete')}
             </button>
           )}
-          <button className="btn btn--primary btn--grow" onClick={save}>Kaydet</button>
+          <button className="btn btn--primary btn--grow" onClick={save}>{T('common.save')}</button>
         </div>
       }
     >
-      <Field label="Ad">
+      <Field label={T('plan.name')}>
         <input className="input" value={name} maxLength={40} onChange={(e) => setName(e.target.value)} />
       </Field>
       <fieldset className="block">
-        <legend>Simge</legend>
+        <legend>{T('cat.icon')}</legend>
         <div className="icon-grid">
           {Object.keys(CATEGORY_ICONS).map((k) => (
             <button type="button" key={k} className={`icon-pick ${icon === k ? 'is-on' : ''}`} aria-pressed={icon === k} aria-label={k} onClick={() => setIcon(k)} style={{ '--cat': color } as React.CSSProperties}>
@@ -449,10 +458,10 @@ export function CategorySheet({ categoryId, catKind }: { categoryId?: ID; catKin
         </div>
       </fieldset>
       <fieldset className="block">
-        <legend>Renk</legend>
+        <legend>{T('cat.color')}</legend>
         <div className="swatches">
           {CATEGORY_COLORS.map((c) => (
-            <button type="button" key={c} className={`swatch ${color === c ? 'is-on' : ''}`} style={{ background: c }} aria-label={`Renk ${c}`} aria-pressed={color === c} onClick={() => setColor(c)} />
+            <button type="button" key={c} className={`swatch ${color === c ? 'is-on' : ''}`} style={{ background: c }} aria-label={T('cat.colorAria', { c })} aria-pressed={color === c} onClick={() => setColor(c)} />
           ))}
         </div>
       </fieldset>
@@ -463,39 +472,41 @@ export function CategorySheet({ categoryId, catKind }: { categoryId?: ID; catKin
 
 // ───────────────────────── Bütçe ve limit ─────────────────────────
 export function BudgetSheet() {
+  const T = useT();
   const { data } = useData();
   const [raw, setRaw] = useState(inputFromMoney(data.settings.monthlyBudget));
   const [err, setErr] = useState<string | null>(null);
   function save() {
     const v = raw.trim() ? parseMoney(raw) : null;
-    if (raw.trim() && !v) return setErr('Tutarı 9.000 gibi yaz.');
-    const e = commit((d) => A.updateSettings(d, { monthlyBudget: v }), v ? 'Aylık bütçe kaydedildi' : 'Aylık bütçe kaldırıldı');
+    if (raw.trim() && !v) return setErr(T('bs.format'));
+    const e = commit((d) => A.updateSettings(d, { monthlyBudget: v }), v ? T('bs.saved') : T('bs.removed'));
     if (e) setErr(e);
     else closeSheet();
   }
   return (
     <Sheet
-      title="Aylık harcama bütçesi"
+      title={T('bs.title')}
       onClose={closeSheet}
       footer={
         <div className="sheet-actions">
           {data.settings.monthlyBudget && (
-            <button className="btn btn--ghost" onClick={() => { commit((d) => A.updateSettings(d, { monthlyBudget: null }), 'Aylık bütçe kaldırıldı'); closeSheet(); }}>
-              Bütçeyi kaldır
+            <button className="btn btn--ghost" onClick={() => { commit((d) => A.updateSettings(d, { monthlyBudget: null }), T('bs.removed')); closeSheet(); }}>
+              {T('bs.remove')}
             </button>
           )}
-          <button className="btn btn--primary btn--grow" onClick={save}>Kaydet</button>
+          <button className="btn btn--primary btn--grow" onClick={save}>{T('common.save')}</button>
         </div>
       }
     >
-      <MoneyInput big label="Bir ayda en fazla ne kadar harcamak istersin?" value={raw} onChange={setRaw} autoFocus onEnter={save} />
-      <p className="note-line">Planlı ödemeler (yurt, abonelik) de bütçeye dahildir, ama Clawd onları “fazla harcama” saymaz; temponu planlı olmayan harcamalara göre ölçer. Yatırım katkıları ve transferler bütçeyi etkilemez.</p>
+      <MoneyInput big label={T('bs.q')} value={raw} onChange={setRaw} autoFocus onEnter={save} />
+      <p className="note-line">{T('bs.note')}</p>
       <FormError msg={err} />
     </Sheet>
   );
 }
 
 export function LimitSheet({ categoryId }: { categoryId?: ID }) {
+  const T = useT();
   const { data } = useData();
   const cats = data.categories.filter((c) => c.kind === 'expense' && !c.archived);
   const [cat, setCat] = useState<ID | undefined>(categoryId);
@@ -503,42 +514,42 @@ export function LimitSheet({ categoryId }: { categoryId?: ID }) {
   const [raw, setRaw] = useState(inputFromMoney(current?.limit));
   const [err, setErr] = useState<string | null>(null);
   function save() {
-    if (!cat) return setErr('Bir kategori seç.');
+    if (!cat) return setErr(T('err.pickCategory'));
     const v = parseMoney(raw);
-    if (!v) return setErr('Limit tutarını yaz.');
-    const e = commit((d) => A.updateCategory(d, cat, { limit: v }), 'Limit kaydedildi');
+    if (!v) return setErr(T('lim.typeAmount'));
+    const e = commit((d) => A.updateCategory(d, cat, { limit: v }), T('lim.saved'));
     if (e) setErr(e);
     else closeSheet();
   }
   return (
     <Sheet
-      title="Kategori limiti"
+      title={T('lim.title')}
       onClose={closeSheet}
       footer={
         <div className="sheet-actions">
           {current?.limit && (
-            <button className="btn btn--ghost" onClick={() => { commit((d) => A.updateCategory(d, cat!, { limit: null }), 'Limit kaldırıldı'); closeSheet(); }}>
-              Limiti kaldır
+            <button className="btn btn--ghost" onClick={() => { commit((d) => A.updateCategory(d, cat!, { limit: null }), T('lim.removed')); closeSheet(); }}>
+              {T('lim.remove')}
             </button>
           )}
-          <button className="btn btn--primary btn--grow" onClick={save}>Kaydet</button>
+          <button className="btn btn--primary btn--grow" onClick={save}>{T('common.save')}</button>
         </div>
       }
     >
       {!categoryId && (
         <fieldset className="block">
-          <legend>Kategori</legend>
+          <legend>{T('csv.category')}</legend>
           <div className="chip-row">
             {cats.map((c) => (
               <Chip key={c.id} on={cat === c.id} color={c.color} onClick={() => { setCat(c.id); setRaw(inputFromMoney(c.limit)); }}>
-                <CatIcon icon={c.icon} size={15} /> {c.name}
+                <CatIcon icon={c.icon} size={15} /> {catName(c)}
               </Chip>
             ))}
           </div>
         </fieldset>
       )}
-      <MoneyInput label={current ? `${current.name} için aylık limit` : 'Aylık limit'} value={raw} onChange={setRaw} onEnter={save} />
-      <p className="note-line">%70'e ve %100'e ulaşınca nedenini ve tutarını gösteren bir not çıkar. Limitler isteğe bağlıdır.</p>
+      <MoneyInput label={current ? T('lim.forCat', { cat: catName(current) }) : T('lim.monthly')} value={raw} onChange={setRaw} onEnter={save} />
+      <p className="note-line">{T('lim.note')}</p>
       <FormError msg={err} />
     </Sheet>
   );

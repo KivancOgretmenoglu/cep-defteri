@@ -7,6 +7,7 @@ import type { NotificationPrefs } from '../store/device';
 import { accountIndex, pendingUntil, planIsOutflow } from '../domain/ledger';
 import { addDays, type ISODate } from '../domain/dates';
 import { formatMoney } from '../domain/money';
+import { translator } from '../i18n/core';
 
 /** Bizim bildirimlerimiz bu aralıktaki kimlikleri kullanır; yeniden planlarken yalnız bunlar iptal edilir. */
 export const NOTIF_ID_BASE = 71_000;
@@ -51,6 +52,9 @@ export function computeSchedule(
   sent: Readonly<Record<string, number>> = {},
 ): PlannedNotification[] {
   if (!prefs.enabled) return [];
+  // Bildirim metinleri verideki dilde (settings.lang).
+  const lang = data.settings.lang ?? 'tr';
+  const t = translator(lang);
   const nowMs = now.getTime();
   const horizon = addDays(today, HORIZON_DAYS);
   const out: Omit<PlannedNotification, 'id'>[] = [];
@@ -68,17 +72,17 @@ export function computeSchedule(
     // Vadesi geçmişler bildirilmez; bugünden ufka kadar bekleyenler.
     const pend = pendingUntil(data, horizon).filter((o) => o.due >= today);
     for (const o of pend) {
-      const money = formatMoney(o.amount);
+      const money = formatMoney(o.amount, { lang });
       if (prefs.payments && planIsOutflow(o.plan, accounts)) {
         const key = `pay|${o.plan.id}|${o.due}`;
         const p = place(key, localAt(addDays(o.due, -1), PAYMENT_HOUR));
         if (!p) continue;
-        const when = o.due === today ? 'Bugün' : 'Yarın';
+        const when = o.due === today ? t('notif.today') : t('notif.tomorrow');
         out.push({
           key,
           ...p,
           title: `${when}: ${o.plan.title} ${money}`,
-          body: o.plan.kind === 'transfer' ? 'Aktarımı yapınca Cep Defteri’nde onayla.' : 'Ödeyince Cep Defteri’nde “Ödendi” ile kaydet.',
+          body: o.plan.kind === 'transfer' ? t('notif.transferBody') : t('notif.payBody'),
           extra: { open: 'confirm', planId: o.plan.id, due: o.due },
         });
       } else if (prefs.income && o.plan.kind === 'income') {
@@ -88,8 +92,8 @@ export function computeSchedule(
         out.push({
           key,
           ...p,
-          title: `${o.plan.title} geldi mi?`,
-          body: `Beklenen ${money}. Gelince kaydet.`,
+          title: t('notif.incomeTitle', { title: o.plan.title }),
+          body: t('notif.incomeBody', { amount: money }),
           extra: { open: 'confirm', planId: o.plan.id, due: o.due },
         });
       }
@@ -104,7 +108,7 @@ export function computeSchedule(
       if (txDays.has(d)) continue;
       const at = localAt(d, hour);
       if (at.getTime() <= nowMs) continue;
-      out.push({ key: `rem|${d}`, at, title: 'Bugünkü harcamalarını girdin mi?', body: 'Bir dakikanı alır; Clawd defteri açık tutuyor.', extra: { open: 'add' } });
+      out.push({ key: `rem|${d}`, at, title: t('notif.remTitle'), body: t('notif.remBody'), extra: { open: 'add' } });
     }
   }
 

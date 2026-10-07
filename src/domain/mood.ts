@@ -1,4 +1,4 @@
-import { pct } from './tr';
+import { pct, type PctForm } from './tr';
 /**
  * Clawd'ın duygu hâli: kayıtlardan türetilen, açıklanabilir ve deterministik kurallar.
  * Aynı kayıtlar ve aynı gün → aynı duygu ve aynı gerekçe. Rastgelelik yok.
@@ -8,11 +8,15 @@ import { pct } from './tr';
  *  - Planlı ödemeler ve yatırım katkıları "kötü harcama" sayılmaz (bütçe temposundan ayrı tutulur).
  *  - Yatırım değerinin düşmesi kullanıcıya yorum olarak yansıtılmaz.
  *  - Ton yargılamayan ve destekleyicidir.
+ *
+ * Metinler src/i18n sözlüklerindedir (mood.*); dil `lang` ile verilir (varsayılan Türkçe).
  */
-import type { Data } from './types';
-import { formatMoney } from './money';
+import type { Data, Lang } from './types';
+import { formatMoney, hiddenMoney } from './money';
 import { daysInMonth, dayOfMonth, diffDays, monthOf, shortDate, type ISODate } from './dates';
 import { availability, budgetStatus, goalProgress, isDaily, monthSummary, upcomingOutflows } from './ledger';
+import { categoryName } from './defaults';
+import { translator } from '../i18n/core';
 
 export type Mood = 'curious' | 'calm' | 'happy' | 'thoughtful' | 'celebrate';
 export type MoodFocus = 'accounts' | 'add' | 'available' | 'upcoming' | 'budget' | 'goal' | 'none';
@@ -26,30 +30,24 @@ export interface MoodResult {
   focus: MoodFocus;
 }
 
-const tl = (k: number) => formatMoney(k);
+export function clawdMood(data: Data, today: ISODate, lang: Lang = 'tr'): MoodResult {
+  const t = translator(lang);
+  const tl = (k: number) => formatMoney(k, { lang });
+  const sd = (d: ISODate) => shortDate(d, undefined, lang);
+  /** Yüzde: Türkçede ekli ("%55'i"), İngilizcede "55%". */
+  const p = (n: number, form: PctForm) => (lang === 'tr' ? pct(n, form) : `${n}%`);
 
-export function clawdMood(data: Data, today: ISODate): MoodResult {
   if (!data.accounts.some(isDaily)) {
-    return {
-      mood: 'curious',
-      text: 'Merhaba, ben Clawd! Önce paranın durduğu bir hesap ekleyelim; banka ya da nakit olabilir.',
-      why: 'Henüz günlük hesap yok, yorum yapacak veri yok.',
-      focus: 'accounts',
-    };
+    return { mood: 'curious', text: t('mood.noAccount.text'), why: t('mood.noAccount.why'), focus: 'accounts' };
   }
   if (data.txs.length === 0) {
-    return {
-      mood: 'curious',
-      text: 'Hesabın hazır. İlk gelirini ya da harcamanı girince durumu birlikte izlemeye başlarız.',
-      why: 'Henüz hiç işlem kaydı yok; bu yüzden olumlu ya da olumsuz bir yorum yapmıyorum.',
-      focus: 'add',
-    };
+    return { mood: 'curious', text: t('mood.noTx.text'), why: t('mood.noTx.why'), focus: 'add' };
   }
 
   const month = monthOf(today);
   const av = availability(data, today);
   // Bakiye gizliyken toplam bakiyeden türeyen tutarlar notta da gizlenir.
-  const tlb = (k: number) => (data.settings.hideTotals ? '••••• TL' : tl(k));
+  const tlb = (k: number) => (data.settings.hideTotals ? hiddenMoney(lang) : tl(k));
   const budget = budgetStatus(data, month, today);
   const goals = data.goals.map((g) => goalProgress(data, g)).filter((g) => g !== null);
 
@@ -59,8 +57,8 @@ export function clawdMood(data: Data, today: ISODate): MoodResult {
     const commitments = av.paymentsTotal + av.reserve + av.debtsOwed;
     return {
       mood: 'thoughtful',
-      text: `${shortDate(av.periodEnd)} tarihine kadar ayrılması gereken ${tl(commitments)} var, hesaplarında ${tlb(av.dailyBalance)} bulunuyor. Aradaki ${tlb(commitments - av.dailyBalance)} için yaklaşan ödemelere birlikte bakalım.`,
-      why: `Kural: günlük hesap bakiyesi, dönem sonuna kadarki bekleyen ödemeler${av.reserve ? ', birikim payı' : ''}${av.debtsOwed ? ', arkadaşlara borcun' : ''} toplamından az. Bu bir uyarı, suçlama değil.`,
+      text: t('mood.short.text', { date: sd(av.periodEnd), need: tl(commitments), have: tlb(av.dailyBalance), gap: tlb(commitments - av.dailyBalance) }),
+      why: t('mood.short.why', { extra: (av.reserve ? t('mood.short.whyReserve') : '') + (av.debtsOwed ? t('mood.short.whyDebts') : '') }),
       focus: 'upcoming',
     };
   }
@@ -70,8 +68,8 @@ export function clawdMood(data: Data, today: ISODate): MoodResult {
   if (fresh) {
     return {
       mood: 'celebrate',
-      text: `"${fresh.goal.title}" hedefine ulaştın: ${tl(fresh.current)} net katkı! Tebrikler.`,
-      why: `Kural: bir birikim hedefi son 7 gün içinde tamamlandı (${shortDate(fresh.reachedAt!)}).`,
+      text: t('mood.goalReached.text', { goal: fresh.goal.title, amount: tl(fresh.current) }),
+      why: t('mood.goalReached.why', { date: sd(fresh.reachedAt!) }),
       focus: 'goal',
     };
   }
@@ -81,16 +79,16 @@ export function clawdMood(data: Data, today: ISODate): MoodResult {
     const left = daysInMonth(month) - dayOfMonth(today);
     return {
       mood: 'thoughtful',
-      text: `Bu ay harcama bütçeyi ${tl(budget.spent - budget.budget)} geçti. ${left > 0 ? `Ayın bitmesine ${left} gün var; ` : ''}gelecek ay bütçeyi gözden geçirmek iyi olabilir.`,
-      why: `Kural: bu ayki tüketim harcaması (${tl(budget.spent)}) aylık bütçeden (${tl(budget.budget)}) fazla. Yatırım katkıları ve transferler sayılmaz.`,
+      text: t('mood.over.text', { amount: tl(budget.spent - budget.budget), left: left > 0 ? t('mood.over.daysLeft', { n: left }) : '' }),
+      why: t('mood.over.why', { spent: tl(budget.spent), budget: tl(budget.budget) }),
       focus: 'budget',
     };
   }
   if (budget.state === 'tight' && budget.flexUsedPct !== null) {
     return {
       mood: 'thoughtful',
-      text: `Planlı ödemeler dışındaki bütçenin ${pct(budget.flexUsedPct, 'acc')} kullandın; ayın ${pct(budget.elapsedPct, 'poss')} geçti. Kalan günlerde biraz yavaşlamak rahatlatır.`,
-      why: `Kural: esnek harcama, ayın geçen kısmından 25 puandan fazla önde ya da esnek pay aşıldı. Planlı ödemeler (yurt, abonelik vb.) bu hesaba katılmaz.`,
+      text: t('mood.tight.text', { used: p(budget.flexUsedPct, 'acc'), elapsed: p(budget.elapsedPct, 'poss') }),
+      why: t('mood.tight.why'),
       focus: 'budget',
     };
   }
@@ -98,8 +96,8 @@ export function clawdMood(data: Data, today: ISODate): MoodResult {
   if (over) {
     return {
       mood: 'thoughtful',
-      text: `${over.category.name} için koyduğun ${tl(over.limit)} limit ${tl(over.used - over.limit)} aşıldı.`,
-      why: `Kural: bir kategori, senin belirlediğin aylık limitin %100'ünü geçti.`,
+      text: t('mood.catOver.text', { cat: categoryName(over.category, lang), limit: tl(over.limit), amount: tl(over.used - over.limit) }),
+      why: t('mood.catOver.why'),
       focus: 'budget',
     };
   }
@@ -112,8 +110,8 @@ export function clawdMood(data: Data, today: ISODate): MoodResult {
       const up = upcomingOutflows(data, today, 7);
       return {
         mood: 'thoughtful',
-        text: `Yaklaşan ${tl(av.paymentsTotal)} ödeme ayrılınca günde yaklaşık ${tlb(av.perDay)} kalıyor; bütçen günde ${tl(typicalDaily)} öngörüyor.${up.total > 0 ? ` Önümüzdeki 7 günde ${tl(up.total)} ödeme var.` : ''}`,
-        why: 'Kural: bekleyen ödemeler ayrıldıktan sonra günlük kullanılabilir pay, aylık bütçenin günlük payının yarısının altında.',
+        text: t('mood.squeeze.text', { payments: tl(av.paymentsTotal), perDay: tlb(av.perDay), typical: tl(typicalDaily) }) + (up.total > 0 ? t('mood.squeeze.next7', { amount: tl(up.total) }) : ''),
+        why: t('mood.squeeze.why'),
         focus: 'available',
       };
     }
@@ -124,46 +122,39 @@ export function clawdMood(data: Data, today: ISODate): MoodResult {
   if (near) {
     return {
       mood: 'happy',
-      text: `"${near.goal.title}" hedefinin ${pct(near.pct, 'locYou')}; ${tl(near.goal.target - near.current)} kaldı.`,
-      why: 'Kural: bir birikim hedefinde %80 ve üzerine ulaşıldı (net katkıya göre).',
+      text: t('mood.near.text', { goal: near.goal.title, pct: p(near.pct, 'locYou'), left: tl(near.goal.target - near.current) }),
+      why: t('mood.near.why'),
       focus: 'goal',
     };
   }
   if (budget.state === 'on-track' && budget.flexUsedPct !== null) {
     return {
       mood: 'happy',
-      text: `Bütçe yolunda: planlı ödemeler dışındaki payın ${pct(budget.flexUsedPct, 'acc')} kullandın, ayın ${pct(budget.elapsedPct, 'poss')} geçti.`,
-      why: 'Kural: esnek harcama, ayın geçen kısmının en fazla 10 puan önünde.',
+      text: t('mood.onTrack.text', { used: p(budget.flexUsedPct, 'acc'), elapsed: p(budget.elapsedPct, 'poss') }),
+      why: t('mood.onTrack.why'),
       focus: 'budget',
     };
   }
   if (budget.state === 'watch' && budget.flexUsedPct !== null) {
     return {
       mood: 'calm',
-      text: `Esnek bütçenin ${pct(budget.flexUsedPct, 'acc')} kullandın, ayın ${pct(budget.elapsedPct, 'poss')} geçti; biraz önden gidiyorsun, sorun değil.`,
-      why: 'Kural: esnek harcama, ayın geçen kısmının 10–25 puan önünde.',
+      text: t('mood.watch.text', { used: p(budget.flexUsedPct, 'acc'), elapsed: p(budget.elapsedPct, 'poss') }),
+      why: t('mood.watch.why'),
       focus: 'budget',
     };
   }
   if (budget.state === 'planned-full') {
-    return {
-      mood: 'calm',
-      text: 'Bu ayın planlı ödemeleri bütçenin tamamını kaplıyor. Bütçeyi güncellemek isteyebilirsin.',
-      why: 'Kural: planlı ödemeler toplamı aylık bütçeye eşit veya fazla. Bu bir hata değil, bilgi.',
-      focus: 'budget',
-    };
+    return { mood: 'calm', text: t('mood.plannedFull.text'), why: t('mood.plannedFull.why'), focus: 'budget' };
   }
 
   // 6) Bütçe yoksa: yargısız, olgusal özet.
   const s = monthSummary(data, month);
-  const parts = [`Bu ay ${tl(s.income)} gelir`, `${tl(s.spending)} harcama`];
-  if (s.contributions) parts.push(`${tl(s.contributions)} yatırım katkısı`);
+  const parts = [t('mood.summary.income', { amount: tl(s.income) }), t('mood.summary.spending', { amount: tl(s.spending) })];
+  if (s.contributions) parts.push(t('mood.summary.contrib', { amount: tl(s.contributions) }));
   return {
     mood: 'calm',
-    text: `${parts.join(', ')} kaydettin.${budget.budget === null ? ' İstersen bir aylık bütçe belirle, gidişatı birlikte izleyelim.' : ''}`,
-    why: budget.budget === null
-      ? 'Bütçe tanımlı olmadığı için iyi/kötü yorumu yapmıyorum; yalnızca kayıtları özetliyorum.'
-      : 'Belirgin bir durum yok; kayıtları özetliyorum.',
+    text: t('mood.summary.text', { parts: parts.join(', ') }) + (budget.budget === null ? t('mood.summary.noBudget') : ''),
+    why: budget.budget === null ? t('mood.summary.whyNoBudget') : t('mood.summary.why'),
     focus: 'none',
   };
 }

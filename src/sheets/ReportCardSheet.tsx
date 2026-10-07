@@ -1,10 +1,9 @@
 import { useMemo, useRef, useState } from 'react';
 import { Share2 } from 'lucide-react';
-import { formatMoney } from '../domain/money';
-import { monthLabel, monthName, shortDate } from '../domain/dates';
+import { catName, formatMoney, monthLabel, monthName, pctForm, shortDate } from '../i18n/format';
+import { useT } from '../i18n';
 import { monthReport } from '../domain/ledger';
 import * as A from '../domain/actions';
-import { pct } from '../domain/tr';
 import { commit, showToast, useStore } from '../store/store';
 import { Clawd } from '../clawd/Clawd';
 import { closeSheet, go } from '../ui/nav';
@@ -14,6 +13,7 @@ import { shareImage } from '../platform';
 
 /** Biten ayın kısa karnesi: yalnızca o ayın kayıtlarından; yorum bütçe tanımlıysa bütçeye göre. */
 export function ReportCardSheet({ month }: { month: string }) {
+  const t = useT();
   const { data, today } = useData();
   const { cats } = useLookups(data);
   const body = useStore(() => 'coral');
@@ -26,22 +26,22 @@ export function ReportCardSheet({ month }: { month: string }) {
   const mood = b.budget === null ? 'calm' : within ? 'celebrate' : 'thoughtful';
 
   const lines: [string, string][] = [
-    ['Gelir', formatMoney(s.income)],
-    ['Harcama', formatMoney(s.spending)],
-    ['Gelir − harcama', formatMoney(r.net, { sign: true })],
+    [t('tx.income'), formatMoney(s.income)],
+    [t('txs.spending'), formatMoney(s.spending)],
+    [t('rep.net'), formatMoney(r.net, { sign: true })],
   ];
-  if (s.contributions) lines.push(['Yatırıma aktarılan', formatMoney(s.contributions)]);
-  if (b.budget !== null) lines.push(['Bütçe', `${formatMoney(b.spent)} / ${formatMoney(b.budget)}`]);
-  if (r.topCategory) lines.push(['En çok', `${cats.get(r.topCategory.id)?.name ?? '—'} · ${formatMoney(r.topCategory.amount)}`]);
-  if (r.spendingChange !== null) lines.push(['Önceki aya göre harcama', formatMoney(r.spendingChange, { sign: true })]);
-  lines.push(['Kayıt girilen gün', `${r.activeDays} gün`]);
+  if (s.contributions) lines.push([t('home.statInvest'), formatMoney(s.contributions)]);
+  if (b.budget !== null) lines.push([t('nav.budget'), `${formatMoney(b.spent)} / ${formatMoney(b.budget)}`]);
+  if (r.topCategory) lines.push([t('rc.top'), `${cats.get(r.topCategory.id) ? catName(cats.get(r.topCategory.id)) : '—'} · ${formatMoney(r.topCategory.amount)}`]);
+  if (r.spendingChange !== null) lines.push([t('rc.vsPrev'), formatMoney(r.spendingChange, { sign: true })]);
+  lines.push([t('rc.activeDays'), t('common.days', { n: r.activeDays })]);
 
   const comment =
     b.budget === null
-      ? `${monthName(month)} ayında ${s.txCount} kayıt girdin. Bütçe koymadığın için not vermiyorum; özet burada.`
+      ? t('rc.noBudget', { month: monthName(month), n: s.txCount })
       : within
-        ? `${monthName(month)} bütçenin ${formatMoney(b.budget - b.spent)} altında kapandı. Tebrikler!`
-        : `${monthName(month)} bütçeyi ${formatMoney(b.spent - b.budget)} aştı. Yeni ayda birlikte bakarız.`;
+        ? t('rc.within', { month: monthName(month), amount: formatMoney(b.budget - b.spent) })
+        : t('rc.over', { month: monthName(month), amount: formatMoney(b.spent - b.budget) });
 
   async function share() {
     setBusy(true);
@@ -59,7 +59,7 @@ export function ReportCardSheet({ month }: { month: string }) {
       g.fill();
       g.fillStyle = '#7D7567';
       g.font = '700 34px "Atkinson Hyperlegible Next Variable", system-ui, sans-serif';
-      g.fillText('CEP DEFTERİ · AY KARNESİ', 120, 160);
+      g.fillText(t('rc.imageHeader'), 120, 160);
       g.fillStyle = '#23201B';
       g.font = '800 84px "Bricolage Grotesque Variable", system-ui, sans-serif';
       g.fillText(monthLabel(month), 120, 260);
@@ -99,9 +99,9 @@ export function ReportCardSheet({ month }: { month: string }) {
       wrap(g, `Clawd: ${comment}`, 120, Math.min(y + 30, H - 220), W - 240, 48);
       const blob = await new Promise<Blob>((res, rej) => c.toBlob((x) => (x ? res(x) : rej(new Error('png'))), 'image/png'));
       const r2 = await shareImage(`cep-defteri-karne-${month}.png`, blob);
-      if (r2 === 'downloaded') showToast('Karne resmi indirildi');
+      if (r2 === 'downloaded') showToast(t('rc.downloaded'));
     } catch {
-      showToast('Resim oluşturulamadı.', { tone: 'error' });
+      showToast(t('rc.imageFailed'), { tone: 'error' });
     } finally {
       setBusy(false);
     }
@@ -109,15 +109,15 @@ export function ReportCardSheet({ month }: { month: string }) {
 
   return (
     <Sheet
-      title={`${monthLabel(month)} karnesi`}
+      title={t('rep.cardTitle', { month: monthLabel(month) })}
       onClose={() => {
         commit((d) => A.updateSettings(d, { reportCardSeen: d.settings.reportCardSeen && d.settings.reportCardSeen > month ? d.settings.reportCardSeen : month }));
         closeSheet();
       }}
       footer={
         <div className="sheet-actions">
-          <button className="btn btn--ghost" onClick={() => { closeSheet(); go('reports', { reportMonth: month }); }}>Raporu aç</button>
-          <button className="btn btn--primary btn--grow" onClick={share} disabled={busy}><Share2 size={18} /> Resim olarak paylaş</button>
+          <button className="btn btn--ghost" onClick={() => { closeSheet(); go('reports', { reportMonth: month }); }}>{t('rc.openReport')}</button>
+          <button className="btn btn--primary btn--grow" onClick={share} disabled={busy}><Share2 size={18} /> {t('rc.share')}</button>
         </div>
       }
     >
@@ -131,9 +131,9 @@ export function ReportCardSheet({ month }: { month: string }) {
             <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
           ))}
         </dl>
-        {b.budget !== null && b.usedPct !== null && <p className="note-line">Bütçenin {pct(b.usedPct, 'acc')} kullandın.</p>}
-        {r.biggestExpense && <p className="note-line">Ayın en büyük harcaması: {r.biggestExpense.note || cats.get(r.biggestExpense.categoryId ?? '')?.name} · {formatMoney(r.biggestExpense.amount)} ({shortDate(r.biggestExpense.date)})</p>}
-        <p className="note-line">Bu karne yalnızca {monthLabel(month)} kayıtlarından hazırlandı.</p>
+        {b.budget !== null && b.usedPct !== null && <p className="note-line">{t('rc.usedPct', { pct: pctForm(b.usedPct, 'acc') })}</p>}
+        {r.biggestExpense && <p className="note-line">{t('rc.biggest')} {r.biggestExpense.note || catName(cats.get(r.biggestExpense.categoryId ?? ''))} · {formatMoney(r.biggestExpense.amount)} ({shortDate(r.biggestExpense.date)})</p>}
+        <p className="note-line">{t('rc.basis', { month: monthLabel(month) })}</p>
       </div>
     </Sheet>
   );

@@ -2,8 +2,10 @@ import { useMemo, useState } from 'react';
 import { Trash2, RotateCcw, CalendarClock, Repeat, UserRound, Split, Tag, X } from 'lucide-react';
 import type { ID, PlanRef, Tx } from '../domain/types';
 import * as A from '../domain/actions';
-import { formatMoney, parseMoney } from '../domain/money';
-import { addDays, diffDays, dueLabel, shortDate, type ISODate } from '../domain/dates';
+import { addDays, diffDays, type ISODate } from '../domain/dates';
+import { catName, dueLabel, formatMoney, lower, parseMoney, shortDate } from '../i18n/format';
+import { useT } from '../i18n';
+import type { Key } from '../i18n/core';
 import { allTags, cashBalance, isInvestment, isPerson, occurrences, planIsInflow, planIsOutflow, transferKind } from '../domain/ledger';
 import { clawdEvent, type ClawdEvent } from '../clawd/events';
 import { commit } from '../store/store';
@@ -14,7 +16,7 @@ import { dailyAccounts, frequentTemplates, recentCategories, useData, useLookups
 
 type Tab = 'expense' | 'income' | 'transfer' | 'invest' | 'debt';
 
-const TAB_LABEL: Record<Tab, string> = { expense: 'Gider', income: 'Gelir', transfer: 'Transfer', invest: 'Yatırım', debt: 'Borç' };
+const TAB_LABEL: Record<Tab, Key> = { expense: 'tx.expense', income: 'tx.income', transfer: 'tx.transfer', invest: 'txs.kindInvest', debt: 'txs.kindDebt' };
 
 function tabOf(tx: Tx, accounts: Map<ID, import('../domain/types').Account>): { tab: Tab; dir: 'in' | 'out' } {
   if (tx.type === 'transfer') {
@@ -29,6 +31,7 @@ function tabOf(tx: Tx, accounts: Map<ID, import('../domain/types').Account>): { 
 }
 
 export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string; direction?: 'in' | 'out'; accountId?: ID; personId?: ID; paidByPerson?: boolean } }) {
+  const T = useT();
   const { data, today } = useData();
   const { accounts, cats } = useLookups(data);
   const editing = txId ? data.txs.find((t) => t.id === txId) : undefined;
@@ -140,20 +143,20 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
 
   function buildDraft(): A.TxDraft | string {
     const amt = parseMoney(amount);
-    if (!amt) return 'Tutarı yaz.';
+    if (!amt) return T('txs.typeAmount');
     if (tab === 'expense' || tab === 'income') {
-      if (!categoryId) return 'Bir kategori seç.';
-      if (!accountId) return 'Bir hesap seç.';
+      if (!categoryId) return T('err.pickCategory');
+      if (!accountId) return T('err.pickAccount');
       return { type: tab, amount: amt, date, accountId, categoryId, note, planRef, tags };
     }
     if (tab === 'transfer') return { type: 'transfer', amount: amt, date, accountId, toAccountId, note, planRef, tags };
     if (tab === 'debt') {
-      if (!personId) return 'Bir kişi seç ya da ekle.';
+      if (!personId) return T('txs.pickPerson');
       return dir === 'out'
         ? { type: 'transfer', amount: amt, date, accountId, toAccountId: personId, note, tags }
         : { type: 'transfer', amount: amt, date, accountId: personId, toAccountId: accountId, note, tags };
     }
-    if (!invId) return 'Önce bir yatırım hesabı ekle.';
+    if (!invId) return T('txs.addInvFirst');
     return dir === 'in'
       ? { type: 'transfer', amount: amt, date, accountId, toAccountId: invId, note, planRef, tags }
       : { type: 'transfer', amount: amt, date, accountId: invId, toAccountId: accountId, note, planRef, tags };
@@ -179,26 +182,26 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
     const built = buildDraft();
     if (typeof built === 'string') return setErr(built);
     const draft: A.TxDraft = { ...built, tags: A.normalizeTags([...(built.tags ?? []), ...tagInput.split(',')]) };
-    const label = tab === 'invest' ? (dir === 'in' ? 'Yatırıma aktarıldı' : 'Yatırımdan çekildi') : tab === 'transfer' ? 'Transfer kaydedildi' : tab === 'debt' ? 'Borç kaydedildi' : 'Kaydedildi';
+    const label = tab === 'invest' ? (dir === 'in' ? T('txs.savedInvestIn') : T('txs.savedInvestOut')) : tab === 'transfer' ? T('txs.savedTransfer') : tab === 'debt' ? T('txs.savedDebt') : T('txs.saved');
     let e: string | null;
     if (!editing && split && tab === 'expense') {
       // Hesabı bölüş: toplamdan arkadaşın payı alacak olarak ayrılır, kalanı senin giderindir.
       const share = parseMoney(splitShare);
-      if (!splitPerson) return setErr('Bölüşeceğin kişiyi seç.');
-      if (!share || share >= draft.amount) return setErr('Arkadaşının payı, toplam tutardan az olmalı.');
-      if (isPerson(accounts.get(draft.accountId))) return setErr('Bölüşme, senin ödediğin bir hesap için yapılır.');
+      if (!splitPerson) return setErr(T('txs.splitPickPerson'));
+      if (!share || share >= draft.amount) return setErr(T('txs.splitShareTooBig'));
+      if (isPerson(accounts.get(draft.accountId))) return setErr(T('txs.splitOwnOnly'));
       const who = accounts.get(splitPerson)?.name ?? '';
       e = commit(
         (d, t) => {
           const mine = A.addTx(d, { ...draft, amount: draft.amount - share, note: draft.note || undefined }, t).data;
-          return A.addTx(mine, { type: 'transfer', amount: share, date: draft.date, accountId: draft.accountId, toAccountId: splitPerson, note: `${draft.note?.trim() || 'Bölüşülen hesap'} · ${who} payı`, tags: draft.tags }, t).data;
+          return A.addTx(mine, { type: 'transfer', amount: share, date: draft.date, accountId: draft.accountId, toAccountId: splitPerson, note: `${draft.note?.trim() || T('txs.splitBill')} · ${T('txs.splitShareOf', { name: who })}`, tags: draft.tags }, t).data;
         },
-        `Bölüşüldü · senin payın ${formatMoney(draft.amount - share)}, ${who} ${formatMoney(share)} borçlu`,
+        T('txs.splitDone', { mine: formatMoney(draft.amount - share), name: who, share: formatMoney(share) }),
         { pulse: true },
       );
     } else
       e = editing
-        ? commit((d, t) => A.updateTx(d, editing.id, draft, t), 'Değişiklik kaydedildi', { pulse: true })
+        ? commit((d, t) => A.updateTx(d, editing.id, draft, t), T('txs.changesSaved'), { pulse: true })
         : commit((d, t) => A.addTx(d, draft, t).data, `${label} · ${formatMoney(draft.amount)}`, { pulse: true });
     if (e) setErr(e);
     else {
@@ -210,7 +213,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
   function remove() {
     if (!editing) return;
     const refunds = data.txs.filter((t) => t.refundOf === editing.id).length;
-    const e = commit((d) => A.deleteTx(d, editing.id).data, refunds ? `Silindi (bağlı ${refunds} iade ile)` : 'Silindi');
+    const e = commit((d) => A.deleteTx(d, editing.id).data, refunds ? T('txs.deletedWithRefunds', { n: refunds }) : T('txs.deleted'));
     if (e) setErr(e);
     else {
       clawdEvent({ type: 'deleted' });
@@ -222,14 +225,14 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
 
   if (daily.length === 0 && !editing) {
     return (
-      <Sheet title="İşlem ekle" onClose={closeSheet}>
-        <p className="muted">Önce paranın durduğu bir hesap ekle (banka ya da nakit).</p>
-        <button className="btn btn--primary" onClick={() => openSheet({ kind: 'account' })}>Hesap ekle</button>
+      <Sheet title={T('app.addTx')} onClose={closeSheet}>
+        <p className="muted">{T('txs.needAccount')}</p>
+        <button className="btn btn--primary" onClick={() => openSheet({ kind: 'account' })}>{T('home.addAccount')}</button>
       </Sheet>
     );
   }
 
-  const accountChips = (value: ID, set: (id: ID) => void, exclude?: ID, label = 'Hesap') => (
+  const accountChips = (value: ID, set: (id: ID) => void, exclude?: ID, label = T('csv.account')) => (
     <div className="chip-row" role="group" aria-label={label}>
       {daily
         .filter((d) => d.account.id !== exclude)
@@ -242,28 +245,28 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
           );
         })}
       {editing && !daily.some((d) => d.account.id === value) && accounts.get(value) && (
-        <Chip on>{accounts.get(value)!.name} (arşiv)</Chip>
+        <Chip on>{accounts.get(value)!.name} {T('home.archivedTag')}</Chip>
       )}
     </div>
   );
 
-  const personChips = (value: ID, set: (id: ID) => void, label = 'Kişi') => (
+  const personChips = (value: ID, set: (id: ID) => void, label = T('people.person')) => (
     <div className="chip-row" role="group" aria-label={label}>
       {persons.map((p) => {
         const b = cashBalance(data, p.id);
         return (
           <Chip key={p.id} on={value === p.id} onClick={() => set(p.id)}>
             <UserRound size={15} aria-hidden /> {p.name}
-            {b !== 0 && <span className="chip__meta">{b > 0 ? `sana ${formatMoney(b)}` : `sen ${formatMoney(-b)}`}</span>}
+            {b !== 0 && <span className="chip__meta">{b > 0 ? T('txs.chipOwesYou', { amount: formatMoney(b) }) : T('txs.chipYouOwe', { amount: formatMoney(-b) })}</span>}
           </Chip>
         );
       })}
-      <Chip onClick={() => openSheet({ kind: 'account', kindPreset: 'person' })}>+ Kişi</Chip>
+      <Chip onClick={() => openSheet({ kind: 'account', kindPreset: 'person' })}>+ {T('people.person')}</Chip>
     </div>
   );
 
-  const title = editing ? 'İşlemi düzenle' : 'Yeni işlem';
-  const saveLabel = editing ? 'Kaydet' : tab === 'invest' ? (dir === 'in' ? 'Yatırıma aktar' : 'Yatırımdan çek') : 'Kaydet';
+  const title = editing ? T('txs.editTitle') : T('txs.newTitle');
+  const saveLabel = editing ? T('common.save') : tab === 'invest' ? (dir === 'in' ? T('txs.investIn') : T('txs.investOut')) : T('common.save');
 
   return (
     <Sheet
@@ -273,12 +276,12 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
         <div className="sheet-actions">
           {editing && (
             <button className="btn btn--ghost btn--danger" onClick={remove}>
-              <Trash2 size={18} /> Sil
+              <Trash2 size={18} /> {T('common.delete')}
             </button>
           )}
           {editing && editing.type === 'expense' && refundable > 0 && (
             <button className="btn btn--ghost" onClick={() => openSheet({ kind: 'refund', txId: editing.id })}>
-              <RotateCcw size={18} /> İade ekle
+              <RotateCcw size={18} /> {T('txs.addRefund')}
             </button>
           )}
           <button className="btn btn--primary btn--grow" onClick={save}>
@@ -289,33 +292,33 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
     >
       {!(editing && editing.planRef) && (
         <Segmented<Tab>
-          label="İşlem türü"
+          label={T('txs.typeLabel')}
           value={tab}
           onChange={switchTab}
-          options={(['expense', 'income', 'transfer', 'invest', 'debt'] as Tab[]).map((t) => ({ value: t, label: TAB_LABEL[t] }))}
+          options={(['expense', 'income', 'transfer', 'invest', 'debt'] as Tab[]).map((t) => ({ value: t, label: T(TAB_LABEL[t]) }))}
         />
       )}
 
       {tab === 'invest' && (
         <Segmented
           size="sm"
-          label="Yön"
+          label={T('txs.direction')}
           value={dir}
           onChange={(v) => {
             setDir(v);
             setPlanRef(undefined);
           }}
           options={[
-            { value: 'in', label: 'Yatırıma aktar' },
-            { value: 'out', label: 'Yatırımdan çek' },
+            { value: 'in', label: T('txs.investIn') },
+            { value: 'out', label: T('txs.investOut') },
           ]}
         />
       )}
 
-      <MoneyInput big label="Tutar" value={amount} onChange={setAmount} autoFocus={!editing} onEnter={save} />
+      <MoneyInput big label={T('csv.amount')} value={amount} onChange={setAmount} autoFocus={!editing} onEnter={save} />
 
       {templates.length > 0 && (
-        <div className="chip-row chip-row--scroll" role="group" aria-label="Sık işlemler">
+        <div className="chip-row chip-row--scroll" role="group" aria-label={T('txs.frequent')}>
           {templates.map((t) => (
             <Chip
               key={t.key}
@@ -328,7 +331,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
                 if (t.note) setShowNote(true);
               }}
             >
-              <Repeat size={14} aria-hidden /> {t.note ?? cats.get(t.categoryId)?.name} · {formatMoney(t.amount)}
+              <Repeat size={14} aria-hidden /> {t.note ?? catName(cats.get(t.categoryId))} · {formatMoney(t.amount)}
             </Chip>
           ))}
         </div>
@@ -337,7 +340,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
       {planMatches.length > 0 && (
         <div className="plan-match">
           <span className="plan-match__label">
-            <CalendarClock size={15} aria-hidden /> Planlı bir kalemi mi ödüyorsun?
+            <CalendarClock size={15} aria-hidden /> {T('txs.planMatchQ')}
           </span>
           <div className="chip-row">
             {planMatches.map((o) => (
@@ -350,13 +353,13 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
       )}
       {linkedPlan && planRef && (
         <p className="note-line">
-          Bu kayıt <b>{linkedPlan.title}</b> ({shortDate(planRef.due)}) planına bağlı; o vade artık bekleyen sayılmaz.
+          {T('txs.linkedPre')} <b>{linkedPlan.title}</b> ({shortDate(planRef.due)}){T('txs.linkedPost')}
         </p>
       )}
 
       {(tab === 'expense' || tab === 'income') && (
         <fieldset className="block">
-          <legend>{tab === 'income' ? 'Kaynak' : 'Kategori'}</legend>
+          <legend>{tab === 'income' ? T('txs.source') : T('csv.category')}</legend>
           <div className="cat-grid">
             {visibleCats.map((c) => (
               <button
@@ -370,12 +373,12 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
                 <span className="cat-btn__icon">
                   <CatIcon icon={c.icon} size={18} />
                 </span>
-                <span className="cat-btn__name">{c.name}</span>
+                <span className="cat-btn__name">{catName(c)}</span>
               </button>
             ))}
             {catList.length > 8 && (
               <button type="button" className="cat-btn cat-btn--more" onClick={() => setShowAllCats(!showAllCats)}>
-                <span className="cat-btn__name">{showAllCats ? 'Daha az' : `+${catList.length - 8} daha`}</span>
+                <span className="cat-btn__name">{showAllCats ? T('txs.less') : T('txs.more', { n: catList.length - 8 })}</span>
               </button>
             )}
           </div>
@@ -384,22 +387,22 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
 
       {(tab === 'expense' || tab === 'income') && (
         <fieldset className="block">
-          <legend>{tab === 'income' ? 'Hangi hesaba geldi?' : 'Hangi hesaptan?'}</legend>
+          <legend>{tab === 'income' ? T('txs.whichAccountIn') : T('txs.whichAccountOut')}</legend>
           {accountChips(accountId, setAccountId)}
           {tab === 'expense' && persons.length > 0 && !planRef && (
             <div className="paid-by">
-              <span className="paid-by__label">ya da başkası ödedi:</span>
+              <span className="paid-by__label">{T('txs.orSomeoneElse')}</span>
               <div className="chip-row">
                 {persons.map((p) => (
                   <Chip key={p.id} on={accountId === p.id} onClick={() => { setAccountId(p.id); setSplit(false); }}>
-                    <UserRound size={15} aria-hidden /> {p.name} ödedi
+                    <UserRound size={15} aria-hidden /> {T('tx.paidBy', { name: p.name })}
                   </Chip>
                 ))}
               </div>
             </div>
           )}
           {tab === 'expense' && isPerson(accounts.get(accountId)) && (
-            <p className="note-line">Harcama sana yazılır; {accounts.get(accountId)!.name} kişisine bu tutar kadar borçlanırsın. Ödediğinde “Borç” sekmesinden “Ben verdim” ile kapatırsın.</p>
+            <p className="note-line">{T('txs.paidByNote', { name: accounts.get(accountId)!.name })}</p>
           )}
         </fieldset>
       )}
@@ -412,19 +415,19 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
             const amt = parseMoney(amount);
             if (next && amt && !splitShare) setSplitShare(inputFromMoney(Math.floor(amt / 2)));
           }}>
-            <Split size={15} aria-hidden /> Hesabı bölüş
+            <Split size={15} aria-hidden /> {T('txs.split')}
           </button>
           {split && (
             persons.length === 0 ? (
-              <p className="note-line">Önce bir kişi ekle. <button type="button" className="link link--small" onClick={() => openSheet({ kind: 'account', kindPreset: 'person' })}>Kişi ekle</button></p>
+              <p className="note-line">{T('txs.addPersonFirst')} <button type="button" className="link link--small" onClick={() => openSheet({ kind: 'account', kindPreset: 'person' })}>{T('people.addPerson')}</button></p>
             ) : (
               <div className="split__body">
-                {personChips(splitPerson, setSplitPerson, 'Kiminle bölüştün?')}
-                <MoneyInput label="Onun payı" value={splitShare} onChange={setSplitShare} />
+                {personChips(splitPerson, setSplitPerson, T('txs.splitWith'))}
+                <MoneyInput label={T('txs.theirShare')} value={splitShare} onChange={setSplitShare} />
                 {(() => {
                   const total = parseMoney(amount), share = parseMoney(splitShare);
                   return total && share && share < total ? (
-                    <p className="note-line">Senin harcaman <b>{formatMoney(total - share)}</b> olarak yazılır; {accounts.get(splitPerson)?.name} sana <b>{formatMoney(share)}</b> borçlu olur. Toplam {formatMoney(total)} hesabından çıkar.</p>
+                    <p className="note-line">{T('txs.splitNote1')} <b>{formatMoney(total - share)}</b>{T('txs.splitNote2', { name: accounts.get(splitPerson)?.name ?? '' })} <b>{formatMoney(share)}</b>{T('txs.splitNote3', { total: formatMoney(total) })}</p>
                   ) : null;
                 })()}
               </div>
@@ -437,29 +440,29 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
         <>
           <Segmented
             size="sm"
-            label="Yön"
+            label={T('txs.direction')}
             value={dir}
             onChange={setDir}
             options={[
-              { value: 'out', label: 'Ben verdim / ödedim' },
-              { value: 'in', label: 'Ben aldım / o ödedi' },
+              { value: 'out', label: T('txs.debtOut') },
+              { value: 'in', label: T('txs.debtIn') },
             ]}
           />
           <fieldset className="block">
-            <legend>Kiminle?</legend>
+            <legend>{T('txs.withWhom')}</legend>
             {personChips(personId, setPersonId)}
           </fieldset>
           <fieldset className="block">
-            <legend>{dir === 'out' ? 'Hangi hesaptan verdin?' : 'Hangi hesaba geldi?'}</legend>
+            <legend>{dir === 'out' ? T('txs.whichAccountGave') : T('txs.whichAccountIn')}</legend>
             {accountChips(accountId, setAccountId)}
           </fieldset>
           <p className="note-line">
             {dir === 'out'
-              ? 'Ona borç verdin ya da ona olan borcunu ödedin. Gider sayılmaz.'
-              : 'Ondan borç aldın ya da sana olan borcunu ödedi. Gelir sayılmaz.'}
+              ? T('txs.debtOutNote')
+              : T('txs.debtInNote')}
             {personId && (() => {
               const b = cashBalance(data, personId);
-              return b !== 0 ? ` Şu an ${b > 0 ? `sana ${formatMoney(b)} borçlu` : `ona ${formatMoney(-b)} borçlusun`}.` : '';
+              return b !== 0 ? ' ' + (b > 0 ? T('txs.nowOwesYou', { amount: formatMoney(b) }) : T('txs.nowYouOwe', { amount: formatMoney(-b) })) : '';
             })()}
           </p>
         </>
@@ -468,21 +471,21 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
       {tab === 'transfer' && (
         <>
           {daily.length < 2 && !editing ? (
-            <p className="muted">Transfer için en az iki günlük hesap gerekir. <button className="link" onClick={() => openSheet({ kind: 'account' })}>Hesap ekle</button></p>
+            <p className="muted">{T('txs.needTwo')} <button className="link" onClick={() => openSheet({ kind: 'account' })}>{T('home.addAccount')}</button></p>
           ) : (
             <>
               <fieldset className="block">
-                <legend>Nereden</legend>
+                <legend>{T('txs.from')}</legend>
                 {accountChips(accountId, (id) => {
                   setAccountId(id);
                   if (id === toAccountId) setToAccountId(daily.find((d) => d.account.id !== id)?.account.id ?? '');
                 })}
               </fieldset>
               <fieldset className="block">
-                <legend>Nereye</legend>
+                <legend>{T('txs.to')}</legend>
                 {accountChips(toAccountId, setToAccountId, accountId)}
               </fieldset>
-              <p className="note-line">Kendi hesapların arasındaki para hareketi gelir ya da gider sayılmaz.</p>
+              <p className="note-line">{T('txs.transferNote')}</p>
             </>
           )}
         </>
@@ -492,18 +495,18 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
         <>
           {invAccounts.length === 0 ? (
             <div className="empty-inline">
-              <p>Henüz yatırım hesabın yok.</p>
-              <button className="btn btn--secondary" onClick={() => openSheet({ kind: 'account', kindPreset: 'investment' })}>Yatırım hesabı ekle</button>
+              <p>{T('txs.noInv')}</p>
+              <button className="btn btn--secondary" onClick={() => openSheet({ kind: 'account', kindPreset: 'investment' })}>{T('home.addInvestAccount')}</button>
             </div>
           ) : (
             <>
               <fieldset className="block">
-                <legend>{dir === 'in' ? 'Hangi hesaptan gönderdin?' : 'Hangi hesaba geldi?'}</legend>
+                <legend>{dir === 'in' ? T('txs.whichAccountSent') : T('txs.whichAccountIn')}</legend>
                 {accountChips(accountId, setAccountId)}
               </fieldset>
               {invAccounts.length > 1 && (
                 <fieldset className="block">
-                  <legend>Yatırım hesabı</legend>
+                  <legend>{T('csv.invAccount')}</legend>
                   <div className="chip-row">
                     {invAccounts.map((a) => (
                       <Chip key={a.id} on={invId === a.id} onClick={() => setInvId(a.id)}>{a.name}</Chip>
@@ -513,8 +516,8 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
               )}
               <p className="note-line">
                 {dir === 'in'
-                  ? `${accounts.get(invId)?.name ?? 'Yatırım'} hesabına katkı olarak kaydedilir. Harcama sayılmaz.`
-                  : 'Günlük hesabına geri döner. Yeni gelir sayılmaz; net katkın azalır.'}
+                  ? T('txs.investInNote', { name: accounts.get(invId)?.name ?? T('acc.kind.investment') })
+                  : T('txs.investOutNote')}
               </p>
             </>
           )}
@@ -522,31 +525,31 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
       )}
 
       <div className="row-wrap">
-        <div className="chip-row" role="group" aria-label="Tarih">
-          <Chip on={date === today} onClick={() => setDate(today)}>Bugün</Chip>
-          <Chip on={date === addDays(today, -1)} onClick={() => setDate(addDays(today, -1))}>Dün</Chip>
+        <div className="chip-row" role="group" aria-label={T('csv.date')}>
+          <Chip on={date === today} onClick={() => setDate(today)}>{T('txs.today')}</Chip>
+          <Chip on={date === addDays(today, -1)} onClick={() => setDate(addDays(today, -1))}>{T('txs.yesterday')}</Chip>
           <label className={`chip chip--date ${date !== today && date !== addDays(today, -1) ? 'is-on' : ''}`}>
-            <span>{date !== today && date !== addDays(today, -1) ? shortDate(date, today) : 'Tarih seç'}</span>
-            <input type="date" value={date} max={today} onChange={(e) => e.target.value && setDate(e.target.value)} aria-label="Tarih seç" />
+            <span>{date !== today && date !== addDays(today, -1) ? shortDate(date, today) : T('txs.pickDate')}</span>
+            <input type="date" value={date} max={today} onChange={(e) => e.target.value && setDate(e.target.value)} aria-label={T('txs.pickDate')} />
           </label>
         </div>
         {!showNote && (
           <button type="button" className="link" onClick={() => setShowNote(true)}>
-            + Not / etiket
+            + {T('txs.noteTag')}
           </button>
         )}
       </div>
       {showNote && (
         <>
           <label className="field">
-            <span className="field__label">Not (isteğe bağlı)</span>
-            <input className="input" value={note} maxLength={200} onChange={(e) => setNote(e.target.value)} placeholder="ör. kafeterya, kitap" onKeyDown={(e) => e.key === 'Enter' && save()} />
+            <span className="field__label">{T('txs.noteOpt')}</span>
+            <input className="input" value={note} maxLength={200} onChange={(e) => setNote(e.target.value)} placeholder={T('txs.notePh')} onKeyDown={(e) => e.key === 'Enter' && save()} />
           </label>
           <div className="field">
-            <span className="field__label"><Tag size={14} aria-hidden /> Etiketler (isteğe bağlı)</span>
+            <span className="field__label"><Tag size={14} aria-hidden /> {T('txs.tagsOpt')}</span>
             <div className="tag-input">
               {tags.map((t) => (
-                <button type="button" key={t} className="tag-pill" onClick={() => setTags(tags.filter((x) => x !== t))} aria-label={`${t} etiketini kaldır`}>
+                <button type="button" key={t} className="tag-pill" onClick={() => setTags(tags.filter((x) => x !== t))} aria-label={T('txs.removeTag', { tag: t })}>
                   #{t} <X size={12} aria-hidden />
                 </button>
               ))}
@@ -555,8 +558,8 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
                   className="tag-input__field"
                   value={tagInput}
                   maxLength={24}
-                  placeholder={tags.length ? '' : 'ör. erasmus, tatil'}
-                  aria-label="Etiket ekle"
+                  placeholder={tags.length ? '' : T('txs.tagsPh')}
+                  aria-label={T('txs.addTag')}
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ',') {
@@ -569,7 +572,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
               )}
             </div>
             {(() => {
-              const sugg = allTags(data).map((x) => x.tag).filter((t) => !tags.includes(t) && (!tagInput || t.startsWith(tagInput.toLocaleLowerCase('tr')))).slice(0, 6);
+              const sugg = allTags(data).map((x) => x.tag).filter((t) => !tags.includes(t) && (!tagInput || t.startsWith(lower(tagInput)))).slice(0, 6);
               return sugg.length ? (
                 <div className="chip-row">
                   {sugg.map((t) => <Chip key={t} className="chip--small" onClick={() => { setTags(A.normalizeTags([...tags, t])); setTagInput(''); }}>#{t}</Chip>)}
@@ -579,7 +582,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
           </div>
         </>
       )}
-      {date < today && diffDays(today, date) > 1 && <p className="note-line">Tarih: {shortDate(date, today)}</p>}
+      {date < today && diffDays(today, date) > 1 && <p className="note-line">{T('txs.dateLine', { date: shortDate(date, today) })}</p>}
       <FormError msg={err} />
     </Sheet>
   );
@@ -588,6 +591,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
 // ───────────────────────── İade ─────────────────────────
 
 export function RefundSheet({ txId }: { txId: ID }) {
+  const T = useT();
   const { data, today } = useData();
   const { cats } = useLookups(data);
   const orig = data.txs.find((t) => t.id === txId);
@@ -606,32 +610,32 @@ export function RefundSheet({ txId }: { txId: ID }) {
 
   function save() {
     const amt = parseMoney(amount);
-    if (!amt) return setErr('Tutarı yaz.');
+    if (!amt) return setErr(T('txs.typeAmount'));
     const draft: A.TxDraft = { type: 'refund', amount: amt, date, accountId, categoryId: base!.categoryId, refundOf: base!.id, note, tags: base!.tags };
     const e = editingRefund
-      ? commit((d, t) => A.updateTx(d, editingRefund.id, draft, t), 'İade güncellendi', { pulse: true })
-      : commit((d, t) => A.addTx(d, draft, t).data, `İade kaydedildi · ${formatMoney(amt)}`, { pulse: true });
+      ? commit((d, t) => A.updateTx(d, editingRefund.id, draft, t), T('ref.updated'), { pulse: true })
+      : commit((d, t) => A.addTx(d, draft, t).data, T('ref.saved', { amount: formatMoney(amt) }), { pulse: true });
     if (e) setErr(e);
     else closeSheet();
   }
   function remove() {
     if (!editingRefund) return;
-    commit((d) => A.deleteTx(d, editingRefund.id).data, 'İade silindi');
+    commit((d) => A.deleteTx(d, editingRefund.id).data, T('ref.deleted'));
     closeSheet();
   }
 
   return (
     <Sheet
-      title={editingRefund ? 'İadeyi düzenle' : 'İade kaydet'}
+      title={editingRefund ? T('ref.editTitle') : T('ref.newTitle')}
       onClose={closeSheet}
       footer={
         <div className="sheet-actions">
           {editingRefund && (
             <button className="btn btn--ghost btn--danger" onClick={remove}>
-              <Trash2 size={18} /> Sil
+              <Trash2 size={18} /> {T('common.delete')}
             </button>
           )}
-          <button className="btn btn--primary btn--grow" onClick={save}>Kaydet</button>
+          <button className="btn btn--primary btn--grow" onClick={save}>{T('common.save')}</button>
         </div>
       }
     >
@@ -640,29 +644,29 @@ export function RefundSheet({ txId }: { txId: ID }) {
           <CatIcon icon={cat?.icon ?? 'dots'} />
         </span>
         <span>
-          <b>{base.note || cat?.name}</b>
+          <b>{base.note || catName(cat)}</b>
           <small>
             {shortDate(base.date, today)} · {formatMoney(base.amount)}
-            {already > 0 && ` · önceden ${formatMoney(already)} iade`}
+            {already > 0 && ` · ${T('ref.already', { amount: formatMoney(already) })}`}
           </small>
         </span>
       </div>
-      <MoneyInput big label={`İade tutarı (en fazla ${formatMoney(max)})`} value={amount} onChange={setAmount} autoFocus onEnter={save} />
+      <MoneyInput big label={T('ref.amount', { max: formatMoney(max) })} value={amount} onChange={setAmount} autoFocus onEnter={save} />
       <fieldset className="block">
-        <legend>Hangi hesaba döndü?</legend>
+        <legend>{T('ref.whichAccount')}</legend>
         <div className="chip-row">
           {daily.map(({ account }) => (
             <Chip key={account.id} on={accountId === account.id} onClick={() => setAccountId(account.id)}>{account.name}</Chip>
           ))}
         </div>
       </fieldset>
-      <Field2 label="Tarih">
+      <Field2 label={T('csv.date')}>
         <input className="input" type="date" value={date} min={base.date} max={today} onChange={(e) => e.target.value && setDate(e.target.value)} />
       </Field2>
-      <Field2 label="Not (isteğe bağlı)">
+      <Field2 label={T('txs.noteOpt')}>
         <input className="input" value={note} maxLength={200} onChange={(e) => setNote(e.target.value)} />
       </Field2>
-      <p className="note-line">İade, “{cat?.name}” harcamasını azaltır; gelir olarak sayılmaz.</p>
+      <p className="note-line">{T('ref.note', { cat: catName(cat) })}</p>
       <FormError msg={err} />
     </Sheet>
   );
@@ -680,6 +684,7 @@ function Field2({ label, children }: { label: string; children: React.ReactNode 
 // ───────────────────────── Planlı kalemi onayla ─────────────────────────
 
 export function ConfirmSheet({ planId, due }: { planId: ID; due: ISODate }) {
+  const T = useT();
   const { data, today } = useData();
   const { accounts, cats } = useLookups(data);
   const plan = data.plans.find((p) => p.id === planId);
@@ -691,17 +696,18 @@ export function ConfirmSheet({ planId, due }: { planId: ID; due: ISODate }) {
   if (!plan) return null;
   const occ = occurrences(data, due, due, [plan])[0];
   const skipped = occ?.status === 'skipped';
-  const verb = plan.kind === 'income' ? 'Geldi' : plan.kind === 'transfer' ? 'Aktarıldı' : 'Ödendi';
+  const verb = plan.kind === 'income' ? T('due.received') : plan.kind === 'transfer' ? T('due.moved') : T('due.paid');
+  const verbLower = plan.kind === 'income' ? T('conf.receivedLower') : plan.kind === 'transfer' ? T('conf.movedLower') : T('conf.paidLower');
 
   function save() {
     const amt = parseMoney(amount);
-    if (!amt) return setErr('Tutarı yaz.');
-    const e = commit((d, t) => A.confirmOccurrence(d, planId, due, { amount: amt, date, accountId: plan!.kind === 'transfer' ? undefined : accountId }, t).data, `${plan!.title}: ${verb.toLocaleLowerCase('tr')} olarak kaydedildi`, { pulse: true });
+    if (!amt) return setErr(T('txs.typeAmount'));
+    const e = commit((d, t) => A.confirmOccurrence(d, planId, due, { amount: amt, date, accountId: plan!.kind === 'transfer' ? undefined : accountId }, t).data, T('conf.saved', { title: plan!.title, verb: verbLower }), { pulse: true });
     if (e) setErr(e);
     else closeSheet();
   }
   function skip() {
-    commit((d) => A.skipOccurrence(d, planId, due, !skipped), skipped ? 'Atlama geri alındı' : `${plan!.title} (${shortDate(due)}) bu sefer atlandı`);
+    commit((d) => A.skipOccurrence(d, planId, due, !skipped), skipped ? T('bud.unskipped') : T('conf.skipped', { title: plan!.title, date: shortDate(due) }));
     closeSheet();
   }
   const cat = plan.categoryId ? cats.get(plan.categoryId) : undefined;
@@ -712,19 +718,19 @@ export function ConfirmSheet({ planId, due }: { planId: ID; due: ISODate }) {
       onClose={closeSheet}
       footer={
         <div className="sheet-actions">
-          <button className="btn btn--ghost" onClick={skip}>{skipped ? 'Atlamayı geri al' : 'Bu sefer atla'}</button>
-          <button className="btn btn--primary btn--grow" onClick={save}>{verb}, kaydet</button>
+          <button className="btn btn--ghost" onClick={skip}>{skipped ? T('conf.unskip') : T('conf.skip')}</button>
+          <button className="btn btn--primary btn--grow" onClick={save}>{T('conf.verbSave', { verb })}</button>
         </div>
       }
     >
       <p className="muted">
-        Vade: {shortDate(due, today)} ({dueLabel(due, today)}){cat ? ` · ${cat.name}` : ''}
+        {T('conf.due')} {shortDate(due, today)} ({dueLabel(due, today)}){cat ? ` · ${catName(cat)}` : ''}
         {plan.kind === 'transfer' && ` · ${accounts.get(plan.accountId)?.name} → ${accounts.get(plan.toAccountId!)?.name}`}
       </p>
-      <MoneyInput big label="Gerçekleşen tutar" value={amount} onChange={setAmount} autoFocus onEnter={save} />
+      <MoneyInput big label={T('conf.actualAmount')} value={amount} onChange={setAmount} autoFocus onEnter={save} />
       {plan.kind !== 'transfer' && (
         <fieldset className="block">
-          <legend>Hesap</legend>
+          <legend>{T('csv.account')}</legend>
           <div className="chip-row">
             {daily.map(({ account }) => (
               <Chip key={account.id} on={accountId === account.id} onClick={() => setAccountId(account.id)}>{account.name}</Chip>
@@ -732,11 +738,11 @@ export function ConfirmSheet({ planId, due }: { planId: ID; due: ISODate }) {
           </div>
         </fieldset>
       )}
-      <Field2 label="Gerçekleşme tarihi">
+      <Field2 label={T('conf.actualDate')}>
         <input className="input" type="date" value={date} max={today} onChange={(e) => e.target.value && setDate(e.target.value)} />
       </Field2>
       <p className="note-line">
-        Kaydedince gerçek bir {plan.kind === 'income' ? 'gelir' : plan.kind === 'transfer' ? 'aktarım' : 'gider'} oluşur ve bu vade “bekleyen” listesinden çıkar; kullanılabilir paradan ikinci kez düşülmez.
+        {T(plan.kind === 'income' ? 'conf.noteIncome' : plan.kind === 'transfer' ? 'conf.noteTransfer' : 'conf.noteExpense')}
       </p>
       <FormError msg={err} />
     </Sheet>

@@ -6,6 +6,7 @@ import { useSyncExternalStore } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { getDevice, setDevice } from '../store/device';
 import { lockoutMs, verifyPin } from './pin';
+import { t } from '../i18n';
 
 let locked = !!getDevice().lock.pinHash;
 let hiddenAt: number | null = null;
@@ -76,7 +77,7 @@ export function remainingBlock(now = Date.now()): number {
 /** PIN denemesi: hız sınırı ve sayaç burada tutulur (uygulama yeniden açılınca da geçerli). */
 export async function tryPin(pin: string): Promise<PinResult> {
   const wait = remainingBlock();
-  if (wait > 0) return { ok: false, waitMs: wait, error: 'Biraz bekle.' };
+  if (wait > 0) return { ok: false, waitMs: wait, error: t('lock.wait') };
   const { pinHash, salt } = getDevice().lock;
   if (await verifyPin(pin, pinHash, salt)) {
     setDevice((p) => ({ ...p, lock: { ...p.lock, failed: 0, blockedUntil: null } }));
@@ -85,7 +86,7 @@ export async function tryPin(pin: string): Promise<PinResult> {
   const failed = getDevice().lock.failed + 1;
   const ms = lockoutMs(failed);
   setDevice((p) => ({ ...p, lock: { ...p.lock, failed, blockedUntil: ms ? Date.now() + ms : null } }));
-  return { ok: false, waitMs: ms, error: 'PIN yanlış.' };
+  return { ok: false, waitMs: ms, error: t('lock.wrong') };
 }
 
 /** PIN değişikliği ya da kapatma öncesi doğrulama (sayaç ve bekleme aynı kurala tabidir). */

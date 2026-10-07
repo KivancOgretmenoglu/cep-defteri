@@ -1,19 +1,24 @@
 import { useEffect, useId, useRef, useState, type ReactNode, type InputHTMLAttributes } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { formatMoney, moneyParts, moneyToInput, parseMoney, type Money } from '../domain/money';
-import { addMonths, monthLabel, type MonthKey } from '../domain/dates';
+import type { Money } from '../domain/money';
+import { addMonths, type MonthKey } from '../domain/dates';
+import { decimalSep, formatMoney, moneyParts, moneyToInput, moneyUnit, parseMoney, monthLabel } from '../i18n/format';
+import { useT } from '../i18n';
 
 // ── Tutar gösterimi ────────────────────────────────────
 /** Gizli tutar gösterimi (bakiye gizleme açıkken). */
 export const HIDDEN = '•••••';
 
 export function Amount({ value, size = 'md', sign = false, tone, className = '', hide = false }: { value: Money; size?: 'sm' | 'md' | 'lg' | 'xl'; sign?: boolean; tone?: 'pos' | 'neg' | 'invest' | 'muted'; className?: string; hide?: boolean }) {
+  const t = useT();
+  const en = t.lang === 'en';
   if (hide)
     return (
-      <span className={`amount amount--${size} amount--hidden ${tone ? 'tone-' + tone : ''} ${className}`} aria-label="gizli tutar">
+      <span className={`amount amount--${size} amount--hidden ${tone ? 'tone-' + tone : ''} ${className}`} aria-label={t('kit.hiddenAmount')}>
+        {en && '₺'}
         {HIDDEN}
-        {(size === 'xl' || size === 'lg') && <span className="amount__unit"> TL</span>}
-        {size !== 'xl' && size !== 'lg' && ' TL'}
+        {!en && (size === 'xl' || size === 'lg') && <span className="amount__unit"> TL</span>}
+        {!en && size !== 'xl' && size !== 'lg' && ' TL'}
       </span>
     );
   if (size === 'xl' || size === 'lg') {
@@ -23,9 +28,10 @@ export function Amount({ value, size = 'md', sign = false, tone, className = '',
       <span className={`amount amount--${size} ${tone ? 'tone-' + tone : ''} ${className}`}>
         {plus}
         {p.sign}
+        {en && '₺'}
         {p.lira}
-        <span className="amount__kurus">,{p.kurus}</span>
-        <span className="amount__unit"> TL</span>
+        <span className="amount__kurus">{decimalSep()}{p.kurus}</span>
+        {!en && <span className="amount__unit"> TL</span>}
       </span>
     );
   }
@@ -47,6 +53,7 @@ export function MoneyInput({
   onEnter?: () => void;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'>) {
   const auto = useId();
+  const t = useT();
   const ref = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (autoFocus) {
@@ -79,9 +86,9 @@ export function MoneyInput({
           aria-invalid={invalid}
           {...rest}
         />
-        <span className="money-input__unit">TL</span>
+        <span className="money-input__unit">{moneyUnit()}</span>
       </span>
-      {invalid && <span className="field-error">Tutarı 1.250,50 gibi yaz.</span>}
+      {invalid && <span className="field-error">{t('kit.amountFormat')}</span>}
     </label>
   );
 }
@@ -91,6 +98,7 @@ export const inputFromMoney = (m: Money | null | undefined) => (m ? moneyToInput
 export function Sheet({ title, onClose, children, footer, wide = false, labelledBy }: { title: ReactNode; onClose: () => void; children: ReactNode; footer?: ReactNode; wide?: boolean; labelledBy?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const tid = useId();
+  const t = useT();
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null;
     const onKey = (e: KeyboardEvent) => {
@@ -126,7 +134,7 @@ export function Sheet({ title, onClose, children, footer, wide = false, labelled
         <div className="sheet__grip" aria-hidden />
         <header className="sheet__head">
           <h2 id={tid}>{title}</h2>
-          <button className="icon-btn" onClick={onClose} aria-label="Kapat">
+          <button className="icon-btn" onClick={onClose} aria-label={t('common.close')}>
             <X size={20} />
           </button>
         </header>
@@ -189,15 +197,16 @@ export function Progress({ value, max, tone = 'accent', label, marker }: { value
 }
 
 export function MonthSwitcher({ month, onChange, max }: { month: MonthKey; onChange: (m: MonthKey) => void; max?: MonthKey }) {
+  const t = useT();
   return (
     <div className="month-switch">
-      <button className="icon-btn" onClick={() => onChange(addMonths(month, -1))} aria-label="Önceki ay">
+      <button className="icon-btn" onClick={() => onChange(addMonths(month, -1))} aria-label={t('kit.prevMonth')}>
         <ChevronLeft size={20} />
       </button>
       <span className="month-switch__label" aria-live="polite">
         {monthLabel(month)}
       </span>
-      <button className="icon-btn" onClick={() => onChange(addMonths(month, 1))} aria-label="Sonraki ay" disabled={!!max && month >= max}>
+      <button className="icon-btn" onClick={() => onChange(addMonths(month, 1))} aria-label={t('kit.nextMonth')} disabled={!!max && month >= max}>
         <ChevronRight size={20} />
       </button>
     </div>

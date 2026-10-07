@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Download, Upload, Plus, ChevronRight, ShieldCheck, FlaskConical, RotateCcw, Trash2, FileSpreadsheet } from 'lucide-react';
-import type { Data, ThemePref } from '../domain/types';
+import type { Data, Lang, ThemePref } from '../domain/types';
 import { emptyData } from '../domain/defaults';
 import { buildDemo } from '../domain/demo';
 import { parseBackup, serializeBackup, transactionsCSV, valuationsCSV } from '../domain/backup';
 import * as A from '../domain/actions';
-import { formatMoney } from '../domain/money';
+import { catName, formatMoney, hiddenMoney, intlLocale } from '../i18n/format';
+import { t as tNow, useT } from '../i18n';
+import { getLang } from '../i18n/lang';
 import { cashBalance, investmentState } from '../domain/ledger';
 import { commit, getState, replaceData, setMode, showToast, useStore } from '../store/store';
 import * as storage from '../store/storage';
@@ -21,14 +23,14 @@ async function download(name: string, content: string, type: string): Promise<bo
     const r = await saveFile(name, content, type);
     return r !== 'cancelled';
   } catch {
-    showToast('Dosya kaydedilemedi.', { tone: 'error' });
+    showToast(tNow('set.fileSaveFailed'), { tone: 'error' });
     return false;
   }
 }
 const stamp = (today: string) => today;
 
 export function downloadCSV(data: Data) {
-  download(`cep-defteri-islemler-${stamp(getState().today)}.csv`, transactionsCSV(data), 'text/csv;charset=utf-8');
+  download(`cep-defteri-islemler-${stamp(getState().today)}.csv`, transactionsCSV(data, getLang()), 'text/csv;charset=utf-8');
 }
 
 export async function downloadBackup() {
@@ -36,7 +38,7 @@ export async function downloadBackup() {
   const ok = await download(`cep-defteri-yedek-${mode === 'demo' ? 'ORNEK-' : ''}${stamp(today)}.json`, serializeBackup(data), 'application/json');
   if (!ok) return;
   if (mode === 'real') commit((d) => A.updateSettings(d, { lastBackupAt: Date.now() }), undefined);
-  showToast(isNative() ? 'Yedek hazır; kaydettiğin yeri unutma' : 'Yedek dosyası indirildi');
+  showToast(isNative() ? tNow('set.backupReadyNative') : tNow('set.backupDownloaded'));
 }
 
 /** Yedek dosyası seçme + önizleme + onay. Ayarlar ve ilk açılış ekranında kullanılır. */
@@ -45,11 +47,12 @@ export function RestorePicker({ compact = false }: { compact?: boolean }) {
   const [pending, setPending] = useState<{ data: Data; exportedAt: string | null; name: string } | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const mode = useStore((s) => s.mode);
+  const t = useT();
   async function onFile(f: File | undefined) {
     setErr(null);
     if (!f) return;
     const text = await f.text();
-    const r = parseBackup(text);
+    const r = parseBackup(text, getLang());
     if (!r.ok) return setErr(r.error);
     setPending({ data: r.data, exportedAt: r.exportedAt, name: f.name });
   }
@@ -58,7 +61,7 @@ export function RestorePicker({ compact = false }: { compact?: boolean }) {
     if (mode === 'demo') setMode('real');
     replaceData(pending.data, { stash: true });
     setPending(null);
-    showToast('Yedek geri yüklendi. Önceki verin ayarlardan geri alınabilir.', { ms: 5000 });
+    showToast(tNow('set.restored'), { ms: 5000 });
     go('home');
   }
   return (
@@ -66,21 +69,21 @@ export function RestorePicker({ compact = false }: { compact?: boolean }) {
       <input ref={ref} type="file" accept="application/json,.json" hidden onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = ''; }} />
       {!pending && (
         <button className={`btn ${compact ? 'btn--ghost' : 'btn--secondary'}`} onClick={() => ref.current?.click()}>
-          <Upload size={17} /> Yedekten geri yükle
+          <Upload size={17} /> {t('set.restore')}
         </button>
       )}
       {pending && (
         <div className="callout">
           <p>
             <b>{pending.name}</b>
-            {pending.exportedAt && <> · {new Date(pending.exportedAt).toLocaleString('tr-TR')}</>}
+            {pending.exportedAt && <> · {new Date(pending.exportedAt).toLocaleString(intlLocale())}</>}
             <br />
-            {pending.data.accounts.length} hesap, {pending.data.txs.length} işlem, {pending.data.plans.length} plan, {pending.data.valuations.length} değer kaydı.
+            {t('set.restoreCounts', { a: pending.data.accounts.length, tx: pending.data.txs.length, p: pending.data.plans.length, v: pending.data.valuations.length })}
           </p>
-          <p>Bu yedek {mode === 'demo' ? 'gerçek verilerinin' : 'şu anki verilerinin'} yerine geçecek. Mevcut veri, geri alabilmen için cihazda saklanır.</p>
+          <p>{mode === 'demo' ? t('set.restoreReplaceReal') : t('set.restoreReplaceCurrent')}</p>
           <div className="btn-row">
-            <button className="btn btn--ghost" onClick={() => setPending(null)}>Vazgeç</button>
-            <button className="btn btn--primary" onClick={apply}>Geri yükle</button>
+            <button className="btn btn--ghost" onClick={() => setPending(null)}>{t('common.cancel')}</button>
+            <button className="btn btn--primary" onClick={apply}>{t('set.restoreConfirm')}</button>
           </div>
         </div>
       )}
@@ -90,12 +93,13 @@ export function RestorePicker({ compact = false }: { compact?: boolean }) {
 }
 
 export function startDemo(today: string) {
-  setMode('demo', buildDemo(today));
-  showToast('Örnek verilerle açıldı. Gerçek kayıtların ayrı ve dokunulmadan duruyor.', { ms: 5000 });
+  setMode('demo', buildDemo(today, getLang()));
+  showToast(tNow('set.demoStarted'), { ms: 5000 });
   go('home');
 }
 
 export function Settings() {
+  const t = useT();
   const { data, today } = useData();
   const mode = useStore((s) => s.mode);
   const [catTab, setCatTab] = useState<'expense' | 'income'>('expense');
@@ -109,10 +113,10 @@ export function Settings() {
 
   return (
     <div className="screen">
-      <header className="screen-head"><h1>Ayarlar</h1></header>
+      <header className="screen-head"><h1>{t('nav.settings')}</h1></header>
       <div className="settings-grid">
         <section className="card" aria-labelledby="s-acc">
-          <SectionHead id="s-acc" title="Hesaplar" action={<button className="link" onClick={() => openSheet({ kind: 'account' })}><Plus size={16} /> Ekle</button>} />
+          <SectionHead id="s-acc" title={t('home.accounts')} action={<button className="link" onClick={() => openSheet({ kind: 'account' })}><Plus size={16} /> {t('common.add')}</button>} />
           <ul className="acc-list">
             {data.accounts.map((a) => {
               const I = ACCOUNT_ICONS[a.kind];
@@ -123,28 +127,28 @@ export function Settings() {
                     <I size={18} aria-hidden />
                     <span className="acc-row__name">
                       {a.name}
-                      <small>{a.kind === 'bank' ? 'Banka' : a.kind === 'cash' ? 'Nakit' : a.kind === 'person' ? (val > 0 ? 'kişi · sana borçlu' : val < 0 ? 'kişi · ona borçlusun' : 'kişi') : 'Yatırım'}{a.archived ? ' · arşivde' : ''}</small>
+                      <small>{a.kind === 'bank' ? t('acc.kind.bank') : a.kind === 'cash' ? t('acc.kind.cash') : a.kind === 'person' ? (val > 0 ? `${t('acc.kind.person')} · ${t('people.owesYou')}` : val < 0 ? `${t('acc.kind.person')} · ${t('people.youOweThem')}` : t('acc.kind.person')) : t('acc.kind.investment')}{a.archived ? ` · ${t('common.archived')}` : ''}</small>
                     </span>
-                    <span className={a.kind === 'investment' ? 'tone-invest' : ''}>{a.kind === 'person' ? formatMoney(Math.abs(val)) : data.settings.hideTotals ? '••••• TL' : formatMoney(val)}</span>
+                    <span className={a.kind === 'investment' ? 'tone-invest' : ''}>{a.kind === 'person' ? formatMoney(Math.abs(val)) : data.settings.hideTotals ? hiddenMoney() : formatMoney(val)}</span>
                     <ChevronRight size={16} aria-hidden />
                   </button>
                 </li>
               );
             })}
           </ul>
-          <p className="note-line">Kredi kartı henüz ayrı bir hesap türü değil. Kartla yaptığın harcamayı, borcu ödediğin banka hesabından gider olarak girmen yeterli; böylece iki kez sayılmaz.</p>
+          <p className="note-line">{t('set.creditCardNote')}</p>
         </section>
 
         <section className="card" aria-labelledby="s-cat">
-          <SectionHead id="s-cat" title="Kategoriler" action={<button className="link" onClick={() => openSheet({ kind: 'category', catKind: catTab })}><Plus size={16} /> Ekle</button>} />
-          <Segmented size="sm" label="Kategori türü" value={catTab} onChange={setCatTab} options={[{ value: 'expense', label: 'Gider' }, { value: 'income', label: 'Gelir kaynağı' }]} />
+          <SectionHead id="s-cat" title={t('set.categories')} action={<button className="link" onClick={() => openSheet({ kind: 'category', catKind: catTab })}><Plus size={16} /> {t('common.add')}</button>} />
+          <Segmented size="sm" label={t('set.catKind')} value={catTab} onChange={setCatTab} options={[{ value: 'expense', label: t('tx.expense') }, { value: 'income', label: t('set.incomeSource') }]} />
           <ul className="cat-list">
             {data.categories.filter((c) => c.kind === catTab).map((c) => (
               <li key={c.id}>
                 <button className={`cat-row ${c.archived ? 'is-archived' : ''}`} onClick={() => openSheet({ kind: 'category', categoryId: c.id })}>
                   <span className="cat-row__icon" style={{ '--cat': c.color } as React.CSSProperties}><CatIcon icon={c.icon} size={16} /></span>
-                  <span>{c.name}{c.archived && <small> · arşivde</small>}</span>
-                  {c.limit ? <small className="muted">limit {formatMoney(c.limit)}</small> : null}
+                  <span>{catName(c)}{c.archived && <small> · {t('common.archived')}</small>}</span>
+                  {c.limit ? <small className="muted">{t('set.limitTag', { amount: formatMoney(c.limit) })}</small> : null}
                 </button>
               </li>
             ))}
@@ -152,50 +156,56 @@ export function Settings() {
         </section>
 
         <section className="card" aria-labelledby="s-clawd">
-          <SectionHead id="s-clawd" title="Clawd’ın dolabı" />
-          <p className="muted">Ana ekranda Clawd’ın ne giyeceğini seç. Diğer ekranlarda işine uygun kıyafetini kendisi giyer.</p>
+          <SectionHead id="s-clawd" title={t('set.wardrobe')} />
+          <p className="muted">{t('set.wardrobeBody')}</p>
           {/* MASKOT_AYARLARI: maskot seçimi, adı ve dolabı (src/mascot/MascotSettings.tsx) buraya gelecek */}
           <label className="check-row">
             <input type="checkbox" checked={data.settings.quips} onChange={(e) => commit((d) => A.updateSettings(d, { quips: e.target.checked }))} />
-            <span>Clawd ara sıra espri yapsın<small>Kayıttan sonra kısa, yargılamayan şakalar ve ipuçları</small></span>
+            <span>{t('set.quips')}<small>{t('set.quipsHint')}</small></span>
           </label>
           <details className="details">
-            <summary>Clawd nasıl karar verir?</summary>
+            <summary>{t('set.rulesTitle')}</summary>
             <ul className="rules">
-              <li><b>Meraklı:</b> henüz hesap ya da kayıt yokken. Veri yokken yorum yapmaz.</li>
-              <li><b>Düşünceli:</b> bekleyen ödemeler bakiyeyi aşınca, bütçe aşılınca, esnek harcama ayın akışının belirgin önüne geçince ya da bir kategori limiti aşılınca. Her zaman nedeni ve tutarı söyler.</li>
-              <li><b>Keyifli:</b> bütçe ayın akışına uygun ilerlerken veya bir hedefin %80’ine gelince.</li>
-              <li><b>Kutlama:</b> bir birikim hedefi son 7 günde tamamlandıysa.</li>
-              <li><b>Sakin:</b> diğer durumlarda; bütçe yoksa yalnızca özetler, yargılamaz.</li>
-              <li>Planlı ödemeler (yurt, abonelik) ve yatırım katkıları “fazla harcama” sayılmaz. Yatırım değerinin düşmesi olumsuz yorum doğurmaz. Aynı kayıtlarla her zaman aynı tepkiyi verir.</li>
+              <li><b>{t('set.rule.curious')}</b> {t('set.rule.curiousBody')}</li>
+              <li><b>{t('set.rule.thoughtful')}</b> {t('set.rule.thoughtfulBody')}</li>
+              <li><b>{t('set.rule.happy')}</b> {t('set.rule.happyBody')}</li>
+              <li><b>{t('set.rule.celebrate')}</b> {t('set.rule.celebrateBody')}</li>
+              <li><b>{t('set.rule.calm')}</b> {t('set.rule.calmBody')}</li>
+              <li>{t('set.rule.note')}</li>
             </ul>
           </details>
         </section>
 
         <section className="card" aria-labelledby="s-look">
-          <SectionHead id="s-look" title="Görünüm" />
-          <Segmented<ThemePref> label="Tema" value={data.settings.theme} onChange={(v) => commit((d) => A.updateSettings(d, { theme: v }))} options={[{ value: 'system', label: 'Sistem' }, { value: 'light', label: 'Açık' }, { value: 'dark', label: 'Koyu' }]} />
+          <SectionHead id="s-look" title={t('set.look')} />
+          <Segmented<ThemePref> label={t('set.theme')} value={data.settings.theme} onChange={(v) => commit((d) => A.updateSettings(d, { theme: v }))} options={[{ value: 'system', label: t('set.themeSystem') }, { value: 'light', label: t('set.themeLight') }, { value: 'dark', label: t('set.themeDark') }]} />
+        </section>
+
+        <section className="card" aria-labelledby="s-lang">
+          <SectionHead id="s-lang" title="Dil / Language" />
+          <Segmented<Lang> label="Dil / Language" value={data.settings.lang ?? 'tr'} onChange={(v) => commit((d) => A.updateSettings(d, { lang: v }))} options={[{ value: 'tr', label: 'Türkçe' }, { value: 'en', label: 'English' }]} />
+          <p className="note-line">{t('set.langNote')}</p>
         </section>
 
         <section className="card card--span" aria-labelledby="s-data">
-          <SectionHead id="s-data" title="Verilerin" />
+          <SectionHead id="s-data" title={t('set.yourData')} />
           <p className="muted">
-            <ShieldCheck size={15} aria-hidden /> Kayıtların yalnızca <b>bu cihazda, bu tarayıcıda</b> saklanır; hiçbir sunucuya gönderilmez. Cihazlar arası eşitleme yok: başka cihaza geçmek için yedek dosyasını indirip orada geri yükle.
-            {persisted === true && ' Tarayıcı bu veriyi kalıcı olarak tutmayı onayladı.'}
-            {persisted === false && ' Tarayıcı, yer darlığında veriyi silebilir; düzenli yedek almanı öneririm.'}
+            <ShieldCheck size={15} aria-hidden /> {t('set.privacyPre')} <b>{t('set.privacyBold')}</b>{t('set.privacyPost')}
+            {persisted === true && t('set.persisted')}
+            {persisted === false && t('set.notPersisted')}
           </p>
-          <p className="muted small">{lastBackup ? `Son yedek: ${new Date(lastBackup).toLocaleDateString('tr-TR')}` : 'Henüz yedek almadın.'}</p>
+          <p className="muted small">{lastBackup ? t('set.lastBackup', { date: new Date(lastBackup).toLocaleDateString(intlLocale()) }) : t('set.noBackup')}</p>
           <div className="btn-row">
-            <button className="btn btn--primary" onClick={downloadBackup}><Download size={17} /> Yedek indir (JSON)</button>
+            <button className="btn btn--primary" onClick={downloadBackup}><Download size={17} /> {t('set.downloadBackup')}</button>
             <RestorePicker />
           </div>
           <div className="btn-row">
-            <button className="btn btn--ghost" onClick={() => downloadCSV(data)}><FileSpreadsheet size={17} /> İşlemler CSV</button>
-            {data.valuations.length > 0 && <button className="btn btn--ghost" onClick={() => download(`cep-defteri-yatirim-degerleri-${today}.csv`, valuationsCSV(data), 'text/csv;charset=utf-8')}><FileSpreadsheet size={17} /> Yatırım değerleri CSV</button>}
+            <button className="btn btn--ghost" onClick={() => downloadCSV(data)}><FileSpreadsheet size={17} /> {t('set.txCsv')}</button>
+            {data.valuations.length > 0 && <button className="btn btn--ghost" onClick={() => download(`cep-defteri-yatirim-degerleri-${today}.csv`, valuationsCSV(data, t.lang), 'text/csv;charset=utf-8')}><FileSpreadsheet size={17} /> {t('set.valCsv')}</button>}
           </div>
           {canUndoRestore && mode === 'real' && (
             <div className="callout callout--quiet">
-              <p>Son geri yüklemeden ya da silmeden önceki veri cihazda duruyor.</p>
+              <p>{t('set.preRestoreNote')}</p>
               <div className="btn-row">
                 <button className="btn btn--ghost" onClick={() => {
                   const prev = storage.takePreRestore();
@@ -203,10 +213,10 @@ export function Settings() {
                     replaceData(prev);
                     storage.dropPreRestore();
                     setCanUndoRestore(false);
-                    showToast('Önceki veriye dönüldü');
+                    showToast(t('set.revertedToast'));
                   }
-                }}><RotateCcw size={17} /> Önceki veriye dön</button>
-                <button className="btn btn--ghost" onClick={() => { storage.dropPreRestore(); setCanUndoRestore(false); }}>Bu kopyayı sil</button>
+                }}><RotateCcw size={17} /> {t('set.revert')}</button>
+                <button className="btn btn--ghost" onClick={() => { storage.dropPreRestore(); setCanUndoRestore(false); }}>{t('set.dropCopy')}</button>
               </div>
             </div>
           )}
@@ -217,45 +227,47 @@ export function Settings() {
         <AutoBackupSettings />
 
         <section className="card" aria-labelledby="s-demo">
-          <SectionHead id="s-demo" title="Örnek veri" />
+          <SectionHead id="s-demo" title={t('app.demoTitle')} />
           {mode === 'demo' ? (
             <>
-              <p className="muted">Şu an örnek verileri görüyorsun. Gerçek kayıtların ayrı tutuluyor ve bu moddaki değişikliklerden etkilenmiyor.</p>
-              <button className="btn btn--primary" onClick={() => { setMode('real'); showToast('Kendi verilerine dönüldü'); go('home'); }}>Örnekten çık</button>
+              <p className="muted">{t('set.demoOn')}</p>
+              <button className="btn btn--primary" onClick={() => { setMode('real'); showToast(t('set.backToReal')); go('home'); }}>{t('app.demoExit')}</button>
             </>
           ) : (
             <>
-              <p className="muted">Uygulamayı kurgusal bir öğrenci bütçesiyle dene. Gerçek kayıtlarına dokunulmaz; çıkınca örnek veriler silinir.</p>
-              <button className="btn btn--secondary" onClick={() => startDemo(today)}><FlaskConical size={17} /> Örnek verilerle dene</button>
+              <p className="muted">{t('set.demoOff')}</p>
+              <button className="btn btn--secondary" onClick={() => startDemo(today)}><FlaskConical size={17} /> {t('set.tryDemo')}</button>
             </>
           )}
         </section>
 
         {mode === 'real' && (
           <section className="card" aria-labelledby="s-wipe">
-            <SectionHead id="s-wipe" title="Baştan başla" />
-            <p className="muted">Tüm hesapları ve kayıtları siler. Silmeden önceki veri bir kez geri alınabilir şekilde cihazda saklanır, yine de önce yedek almanı öneririm.</p>
+            <SectionHead id="s-wipe" title={t('set.startOver')} />
+            <p className="muted">{t('set.wipeBody')}</p>
             <label className="field">
-              <span className="field__label">Onaylamak için SİL yaz</span>
+              <span className="field__label">{t('set.wipeConfirmLabel')}</span>
               <input className="input" value={confirmWipe} onChange={(e) => setConfirmWipe(e.target.value)} autoComplete="off" />
             </label>
             <button
               className="btn btn--danger"
-              disabled={confirmWipe.trim().toLocaleUpperCase('tr') !== 'SİL'}
+              disabled={confirmWipe.trim().toLocaleUpperCase(t.lang === 'en' ? 'en' : 'tr') !== t('set.wipeWord')}
               onClick={() => {
-                replaceData(emptyData(), { stash: true });
+                const fresh = emptyData();
+                // Dil seçimi silmeden sonra da korunur.
+                replaceData({ ...fresh, settings: { ...fresh.settings, lang: data.settings.lang } }, { stash: true });
                 setConfirmWipe('');
                 setCanUndoRestore(true);
-                showToast('Tüm veriler silindi');
+                showToast(t('set.wiped'));
                 go('home');
               }}
             >
-              <Trash2 size={17} /> Tüm verileri sil
+              <Trash2 size={17} /> {t('set.wipeAll')}
             </button>
           </section>
         )}
       </div>
-      <p className="app-foot">Cep Defteri · tutarlar kuruş hassasiyetinde tutulur · Clawd, Claude’un maskotudur.</p>
+      <p className="app-foot">{t('set.foot')}</p>
     </div>
   );
 }
