@@ -10,7 +10,7 @@ import { monthEnd, monthStart } from '../domain/dates';
 import { MonthSwitcher, SectionHead } from '../ui/kit';
 import { go, openSheet, useNav } from '../ui/nav';
 import { useData, useLookups } from '../ui/hooks';
-import { ClawdNote, EmptyState } from '../ui/ClawdNote';
+import { MascotNote, EmptyState } from '../mascot/MascotNote';
 import { CatIcon } from '../ui/icons';
 import { downloadCSV } from './Settings';
 import type { Mood } from '../domain/mood';
@@ -97,7 +97,7 @@ export function Reports() {
         <MonthSwitcher month={month} onChange={setMonth} max={current} />
       </header>
 
-      <ClawdNote mood={comment.mood} text={comment.text} why={comment.why} outfit="scholar" size={84} />
+      <MascotNote mood={comment.mood} text={comment.text} why={comment.why} outfit="scholar" size={84} />
       {month < current && (
         <button className="report-prompt" onClick={() => openSheet({ kind: 'reportCard', month })}>
           <ScrollText size={20} aria-hidden />

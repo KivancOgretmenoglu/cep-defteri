@@ -8,13 +8,13 @@ import {
 } from '../domain/ledger';
 import * as A from '../domain/actions';
 import { commit } from '../store/store';
-import { clawdEvent } from '../clawd/events';
+import { mascotEvent } from '../mascot/events';
 import { BalanceChart } from '../ui/BalanceChart';
 import { DueRow } from '../ui/DueRow';
-import { clawdMood } from '../domain/mood';
+import { mascotMood } from '../domain/mood';
 import { addDays } from '../domain/dates';
 import { Amount, Progress, SectionHead } from '../ui/kit';
-import { ClawdNote } from '../ui/ClawdNote';
+import { MascotNote } from '../mascot/MascotNote';
 import { TxRow } from '../ui/TxRow';
 import { go, openSheet } from '../ui/nav';
 import { useData, useLookups } from '../ui/hooks';
@@ -28,7 +28,7 @@ export function Home() {
   const month = monthOf(today);
   const d = useMemo(() => {
     const av = availability(data, today);
-    const mood = clawdMood(data, today, lang);
+    const mood = mascotMood(data, today, lang);
     const sum = monthSummary(data, month);
     const budget = budgetStatus(data, month, today);
     const up = upcomingOutflows(data, today, 7);
@@ -50,7 +50,7 @@ export function Home() {
   const debts = debtTotals(data);
   const toggleHide = () => {
     commit((x) => A.updateSettings(x, { hideTotals: !hide }));
-    clawdEvent({ type: 'hide-totals', hidden: !hide });
+    mascotEvent({ type: 'hide-totals', hidden: !hide });
   };
   const H = (v: number) => (hide ? hiddenMoney() : formatMoney(v));
   const periodText = data.settings.periodMode === 'days30' ? t('home.periodDays30', { date: shortDate(av.periodEnd) }) : t('home.periodMonth', { month: monthName(month) });
@@ -80,7 +80,7 @@ export function Home() {
         </button>
       )}
 
-      <ClawdNote
+      <MascotNote
         mood={mood.mood}
         text={mood.text}
         why={mood.why}

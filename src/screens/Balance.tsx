@@ -8,12 +8,12 @@ import type { Key } from '../i18n/core';
 import { balanceProjection, balanceSeries, isDaily, periodEndFor, trackingStart } from '../domain/ledger';
 import * as A from '../domain/actions';
 import { commit } from '../store/store';
-import { clawdEvent } from '../clawd/events';
+import { mascotEvent } from '../mascot/events';
 import { BalanceChart } from '../ui/BalanceChart';
 import { Chip, HIDDEN } from '../ui/kit';
 import { go } from '../ui/nav';
 import { useData } from '../ui/hooks';
-import { EmptyState } from '../ui/ClawdNote';
+import { EmptyState } from '../mascot/MascotNote';
 
 type Range = '1m' | '3m' | '6m' | 'all';
 const RANGES: { v: Range; label: Key; days: number | null }[] = [
@@ -80,7 +80,7 @@ export function Balance() {
           aria-label={hide ? t('home.showBalances') : t('home.hideBalances')}
           onClick={() => {
             commit((d) => A.updateSettings(d, { hideTotals: !hide }));
-            clawdEvent({ type: 'hide-totals', hidden: !hide });
+            mascotEvent({ type: 'hide-totals', hidden: !hide });
           }}
         >
           {hide ? <EyeOff size={20} /> : <Eye size={20} />}

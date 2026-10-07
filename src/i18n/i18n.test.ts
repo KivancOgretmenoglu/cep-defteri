@@ -4,7 +4,7 @@ import { en } from './en';
 import { translate, type Key } from './core';
 import { emptyData, categoryName, defaultAccountNames, DEFAULT_CATEGORIES } from '../domain/defaults';
 import * as A from '../domain/actions';
-import { clawdMood } from '../domain/mood';
+import { mascotMood } from '../domain/mood';
 import { formatMoney, hiddenMoney, moneyParts, moneyToInput, parseMoney } from '../domain/money';
 import { dueLabel, monthLabel, relativeDay, shortDate, weekday } from '../domain/dates';
 import { parseBackup, serializeBackup, transactionsCSV, valuationsCSV } from '../domain/backup';
@@ -109,7 +109,7 @@ function setup() {
 }
 
 describe('İngilizce alan metinleri', () => {
-  it('Clawd durum notları ve gerekçeleri İngilizce', () => {
+  it('Maskot durum notları ve gerekçeleri İngilizce', () => {
     const cases: Data[] = [];
     cases.push(emptyData());
     let { d, bank, inv } = setup();
@@ -124,16 +124,16 @@ describe('İngilizce alan metinleri', () => {
     cases.push(g);
     const moods = new Set<string>();
     for (const c of cases) {
-      const m = clawdMood(c, TODAY, 'en');
+      const m = mascotMood(c, TODAY, 'en');
       moods.add(m.mood);
       expect(TURKISH.test(m.text + m.why)).toBe(false);
       // Aynı kural, aynı duygu: dil yalnız metni değiştirir.
-      const t = clawdMood(c, TODAY);
+      const t = mascotMood(c, TODAY);
       expect(t.mood).toBe(m.mood);
       expect(t.focus).toBe(m.focus);
     }
     expect(moods.size).toBeGreaterThanOrEqual(4);
-    const over = clawdMood(cases[4], TODAY, 'en');
+    const over = mascotMood(cases[4], TODAY, 'en');
     expect(over.text).toContain('Fun'); // varsayılan kategori adı çevrildi
   });
 
@@ -141,8 +141,8 @@ describe('İngilizce alan metinleri', () => {
     let { d, bank } = setup();
     d = A.updateSettings(d, { monthlyBudget: TL(30000) });
     d = A.addTx(d, { type: 'expense', amount: TL(9000), date: '2026-10-10', accountId: bank, categoryId: 'e-food' }, TODAY).data;
-    const en = clawdMood(d, TODAY, 'en');
-    const trm = clawdMood(d, TODAY, 'tr');
+    const en = mascotMood(d, TODAY, 'en');
+    const trm = mascotMood(d, TODAY, 'tr');
     expect(en.text).toMatch(/\d+%/);
     expect(trm.text).toMatch(/%\d+'/);
   });

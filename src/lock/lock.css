@@ -1,4 +1,4 @@
-/* Kilit ekranı: kâğıt zemin, ortada uykulu Clawd, büyük tuşlar. */
+/* Kilit ekranı: kâğıt zemin, ortada uykulu maskot, büyük tuşlar. */
 .lock-hidden {
   visibility: hidden;
 }
@@ -21,7 +21,7 @@
   align-items: center;
   gap: 10px;
 }
-.lock__clawd {
+.lock__mascot {
   position: relative;
   margin-bottom: 2px;
 }

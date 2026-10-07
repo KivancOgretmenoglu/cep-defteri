@@ -15,6 +15,9 @@ import { OccurrenceSheet, CancelPlanSheet } from './sheets/PlanSheets';
 import { ReportCardSheet } from './sheets/ReportCardSheet';
 import { LockGate } from './lock/LockGate';
 import { useNativeSync } from './native/useNativeSync';
+import { useMascotTheme } from './mascot/theme';
+import { characterOf } from './mascot/characters';
+import { setAppIcon } from './native/appIcon';
 import { TxSheet, RefundSheet, ConfirmSheet } from './sheets/TxSheet';
 import { useT } from './i18n';
 import type { Key } from './i18n/core';
@@ -36,9 +39,17 @@ function useTheme() {
     const root = document.documentElement;
     if (theme === 'system') root.removeAttribute('data-theme');
     else root.setAttribute('data-theme', theme);
-    const dark = theme === 'dark' || (theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#1C1A17' : '#F4EFE6');
   }, [theme]);
+}
+
+/** Android: "simge maskotu izlesin" açıksa maskot değişince uygulama simgesi de değişir. */
+function useAppIconSync() {
+  const key = useStore((s) => characterOf(s.data.settings.mascot?.key).key);
+  const follows = useStore((s) => s.data.settings.appIconFollows === true);
+  const mode = useStore((s) => s.mode);
+  useEffect(() => {
+    if (follows && mode === 'real') void setAppIcon(key);
+  }, [key, follows, mode]);
 }
 
 /** <html lang> dil değişince güncellenir. */
@@ -105,6 +116,8 @@ function Toast() {
 export function App() {
   const t = useT();
   useTheme();
+  useMascotTheme();
+  useAppIconSync();
   useHtmlLang(t.lang);
   useNativeSync();
   const { screen, sheet } = useNav();

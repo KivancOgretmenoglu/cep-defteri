@@ -3,7 +3,8 @@
  */
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Delete, Fingerprint, LockKeyhole } from 'lucide-react';
-import { Clawd } from '../clawd/Clawd';
+import { Mascot } from '../mascot/Mascot';
+import { useMascot } from '../mascot/MascotNote';
 import { isNative } from '../platform';
 import { useDevice } from '../store/device';
 import { remainingBlock, startLockWatch, tryPin, unlock, useLocked, wipeAllAppData } from './lockState';
@@ -116,8 +117,8 @@ function LockScreen() {
   return (
     <div className="lock" role="dialog" aria-modal="true" aria-labelledby="lock-title">
       <div className="lock__inner">
-        <div className="lock__clawd" aria-hidden>
-          <Clawd mood="calm" outfit="plain" idle={false} size={92} />
+        <div className="lock__mascot" aria-hidden>
+          <LockMascot />
           <span className="lock__z">z</span>
           <span className="lock__z lock__z--2">z</span>
         </div>
@@ -212,4 +213,10 @@ function Forgot({ canBio, bioLabel, onBio, onBack }: { canBio: boolean; bioLabel
       </button>
     </div>
   );
+}
+
+/** Kilit ekranında uyuklayan seçili maskot. */
+function LockMascot() {
+  const m = useMascot();
+  return <Mascot who={m.who} mood="calm" outfit="plain" idle={false} size={92} lang={m.lang} />;
 }

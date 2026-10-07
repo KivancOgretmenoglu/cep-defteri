@@ -10,7 +10,7 @@ import { Chip, MonthSwitcher } from '../ui/kit';
 import { TxRow, txView } from '../ui/TxRow';
 import { setFilter, useNav, openSheet, type TxFilter } from '../ui/nav';
 import { useData, useLookups } from '../ui/hooks';
-import { EmptyState } from '../ui/ClawdNote';
+import { EmptyState } from '../mascot/MascotNote';
 
 const KINDS: { value: NonNullable<TxFilter['kind']>; label: Key }[] = [
   { value: 'all', label: 'common.all' },

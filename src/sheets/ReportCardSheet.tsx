@@ -4,8 +4,9 @@ import { catName, formatMoney, monthLabel, monthName, pctForm, shortDate } from 
 import { useT } from '../i18n';
 import { monthReport } from '../domain/ledger';
 import * as A from '../domain/actions';
-import { commit, showToast, useStore } from '../store/store';
-import { Clawd } from '../clawd/Clawd';
+import { commit, showToast } from '../store/store';
+import { Mascot } from '../mascot/Mascot';
+import { useMascot } from '../mascot/MascotNote';
 import { closeSheet, go } from '../ui/nav';
 import { Sheet } from '../ui/kit';
 import { useData, useLookups } from '../ui/hooks';
@@ -16,9 +17,9 @@ export function ReportCardSheet({ month }: { month: string }) {
   const t = useT();
   const { data, today } = useData();
   const { cats } = useLookups(data);
-  const body = useStore(() => 'coral');
+  const m = useMascot();
   const r = useMemo(() => monthReport(data, month, today), [data, month, today]);
-  const clawdRef = useRef<HTMLDivElement>(null);
+  const mascotRef = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
   const s = r.summary;
   const b = r.budget;
@@ -63,8 +64,8 @@ export function ReportCardSheet({ month }: { month: string }) {
       g.fillStyle = '#23201B';
       g.font = '800 84px "Bricolage Grotesque Variable", system-ui, sans-serif';
       g.fillText(monthLabel(month), 120, 260);
-      // Clawd
-      const svg = clawdRef.current?.querySelector('svg');
+      // Maskot
+      const svg = mascotRef.current?.querySelector('svg');
       if (svg) {
         const xml = new XMLSerializer().serializeToString(svg);
         const img = new Image();
@@ -96,7 +97,7 @@ export function ReportCardSheet({ month }: { month: string }) {
       g.textAlign = 'left';
       g.fillStyle = '#C4542F';
       g.font = '700 36px "Atkinson Hyperlegible Next Variable", system-ui, sans-serif';
-      wrap(g, `Clawd: ${comment}`, 120, Math.min(y + 30, H - 220), W - 240, 48);
+      wrap(g, `${m.name}: ${comment}`, 120, Math.min(y + 30, H - 220), W - 240, 48);
       const blob = await new Promise<Blob>((res, rej) => c.toBlob((x) => (x ? res(x) : rej(new Error('png'))), 'image/png'));
       const r2 = await shareImage(`cep-defteri-karne-${month}.png`, blob);
       if (r2 === 'downloaded') showToast(t('rc.downloaded'));
@@ -122,8 +123,8 @@ export function ReportCardSheet({ month }: { month: string }) {
       }
     >
       <div className="rcard">
-        <div className="rcard__clawd" ref={clawdRef}>
-          <Clawd mood={mood} outfit="scholar" body={body} size={140} idle={false} />
+        <div className="rcard__mascot" ref={mascotRef}>
+          <Mascot who={m.who} mood={mood} outfit="scholar" size={140} idle={false} lang={m.lang} name={m.name} />
         </div>
         <p className="rcard__comment">{comment}</p>
         <dl className="kv">

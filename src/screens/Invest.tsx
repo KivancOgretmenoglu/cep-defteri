@@ -11,7 +11,7 @@ import { commit } from '../store/store';
 import { Amount, Chip, Progress, SectionHead } from '../ui/kit';
 import { openSheet } from '../ui/nav';
 import { useData } from '../ui/hooks';
-import { ClawdNote, EmptyState } from '../ui/ClawdNote';
+import { MascotNote, EmptyState } from '../mascot/MascotNote';
 
 export function Invest() {
   const t = useT();
@@ -95,7 +95,7 @@ export function Invest() {
         <section className="card" aria-labelledby="goal-h">
           <SectionHead id="goal-h" title={t('inv.goals')} action={<button className="link" onClick={() => openSheet({ kind: 'goal', accountId })}><Plus size={16} /> {t('inv.goal')}</button>} />
           {(reached || near) && (
-            <ClawdNote
+            <MascotNote
               compact
               size={64}
               outfit="gardener"

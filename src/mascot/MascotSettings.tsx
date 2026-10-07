@@ -29,7 +29,7 @@ const T = {
   examStop: { tr: 'Kapat', en: 'Turn off' },
 };
 
-export function MascotSettings({ iconRow }: { iconRow?: React.ReactNode }) {
+export function MascotSettings({ iconRow, children }: { iconRow?: React.ReactNode; children?: React.ReactNode }) {
   const lang = useStore((s) => s.data.settings.lang ?? 'tr') as Lang;
   const m = useStore((s) => s.data.settings.mascot);
   const quips = useStore((s) => s.data.settings.quips);
@@ -100,6 +100,7 @@ export function MascotSettings({ iconRow }: { iconRow?: React.ReactNode }) {
           </button>
         )}
       </div>
+      {children}
     </section>
   );
 }

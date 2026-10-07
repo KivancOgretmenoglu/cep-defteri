@@ -1,6 +1,6 @@
 # Cep Defteri
 
-Üniversite hayatı için sade ve hızlı bir kişisel bütçe uygulaması. Paranın nereden gelip nereye gittiğini, yaklaşan ödemelerden sonra ne kadarını rahatça harcayabileceğini ve yatırım hesabına ne kadar para koyduğunu gösterir. Maskotu **Clawd**: duygu hâli kayıtlarından türetilir ve her tepkisinin bir gerekçesi vardır.
+Üniversite hayatı için sade ve hızlı bir kişisel bütçe uygulaması. Paranın nereden gelip nereye gittiğini, yaklaşan ödemelerden sonra ne kadarını rahatça harcayabileceğini ve yatırım hesabına ne kadar para koyduğunu gösterir. Türkçe ve İngilizce çalışır. Beş hayvan maskottan birini seçersin; maskotun duygu hâli kayıtlarından türetilir ve her tepkisinin bir gerekçesi vardır.
 
 ## Çalıştırma
 
@@ -16,6 +16,24 @@ npm run preview    # derlenmiş sürümü yerelde aç
 
 `dist/` klasörü herhangi bir statik barındırmaya konabilir (göreli yollar kullanır). Varsayılan dala gönderildiğinde `.github/workflows/pages.yml`, testleri çalıştırıp GitHub Pages'e yayınlar (depo ayarlarında *Pages → Source: GitHub Actions* seçilmeli). Telefonda tarayıcıdan **Ana ekrana ekle** ile uygulama gibi açılır ve çevrimdışı çalışır.
 
+## Maskotlar ve dil
+
+İlk açılışta sırayla **dil** (Türkçe / English), **maskot** (ve Android'de uygulama simgesinin maskotla değişip değişmeyeceği) ve başlangıç bakiyeleri sorulur. Hepsi sonra Ayarlar'dan değiştirilebilir.
+
+| Maskot | Tür | Kişiliği |
+|---|---|---|
+| Fıstık | Sokak kedisi (varsayılan, mağaza simgesi) | şakacı, biraz ukala ama kalbi altın |
+| Bilge | Baykuş | sakin, meraklı, rakamları sever; az konuşur, çok ipucu verir |
+| Ceviz | Sincap | tutumlu, hareketli, sabırlı; birikim hedeflerine bayılır |
+| Diken | Kirpi | sakin, minimalist, kuru mizahlı; asla telaşlanmaz |
+| Karamel | Sokak köpeği | neşeli, sadık; bölüşme ve arkadaş hesaplarını sever |
+
+- Uygulamanın vurgu renkleri ve zemini seçili maskotun paletine göre değişir (gelir/gider gibi anlam taşıyan renkler sabit kalır).
+- Maskota isim verilebilir. Her maskotun kendi selamları, espri sıklığı ve imza hareketleri vardır.
+- Yılbaşı, bayram ve yaz günlerinde kendiliğinden özel kıyafet giyer.
+- **Sınav haftası**: Ayarlar'dan bir haftalığına açılır; maskot ders çalışır, akşamki "bugün kayıt girdin mi?" bildirimi susar (ödeme hatırlatmaları sürer).
+- Android'de kayıtta hafif titreşim (dokunsal geri bildirim).
+
 ## Kullanım
 
 - **+** düğmesi (masaüstünde `N` kısayolu): tutar → kategori → Kaydet. Hesap son kullanılan, tarih bugün gelir; not isteğe bağlı. Sık tekrarlanan kayıtlar tek dokunuşla doldurulur. Kaydedince 6 saniye boyunca **Geri al** görünür.
@@ -24,8 +42,8 @@ npm run preview    # derlenmiş sürümü yerelde aç
 - **Bütçe**: isteğe bağlı aylık bütçe, isteğe bağlı kategori limitleri, yaklaşan ödemeler/beklenen gelirler (tekrarlayan planlar). Vadesi gelen kalem kendiliğinden gerçekleşmez; **Ödendi/Geldi** ile tutarı düzeltip kaydedersin.
 - **Yatırım**: güncel değer (elle, tarihli), bu ay / toplam yatırılan, çekilen, net katkı, birikim hedefleri.
 - **Raporlar**: kategori ve gelir kaynağı dağılımı, önceki dönemle karşılaştırma (devam eden ayda aynı gün aralığı), son 6 ay. Satıra dokununca o işlemlere gidilir.
-- **Ayarlar**: hesaplar, kategoriler, Clawd'ın dolabı, tema, yedek indir / geri yükle, CSV, örnek veri modu.
-- **Bakiye gizleme**: Özet'teki göz simgesi toplam bakiyeleri (kullanılabilir para, hesap bakiyeleri, yatırım değeri) "•••••" yapar; işlem tutarları görünür kalır. Clawd bu sırada gizli ajan kılığına girer.
+- **Ayarlar**: hesaplar, kategoriler, maskot, adı ve dolabı, sınav haftası, dil, tema, yedek indir / geri yükle, CSV, örnek veri modu.
+- **Bakiye gizleme**: Özet'teki göz simgesi toplam bakiyeleri (kullanılabilir para, hesap bakiyeleri, yatırım değeri) "•••••" yapar; işlem tutarları görünür kalır. Maskot bu sırada gizli ajan kılığına girer.
 - **Bakiye geçmişi**: Özet'teki küçük grafikten açılır. Günlük hesapların gün sonu bakiyesi (1/3/6 ay, tümü; hesap hesap), kesik çizgiyle dönem sonuna kadar tahmin (bekleyen ödemeler ve beklenen gelirler vadelerinde).
 - **Borç ve alacak**: arkadaşlar "kişi" hesabıdır. *Ben verdim / ben aldım* hareketleri gelir/gider sayılmaz. *O ödedi*: harcama sana yazılır, ona borçlanırsın. Gider girerken **Hesabı bölüş** ile arkadaşın payı alacak olarak ayrılır. Borçların kullanılabilir paradan düşülür; alacaklar gelene kadar eklenmez.
 - **Planlar**: yaklaşan bir kaleme dokununca *Ödendi · Bu seferlik atla · Planı düzenle (ad, tutar…) · Planı iptal et*. İptal, seçilen günden sonraki vadeleri kaldırır; geçmiş korunur; biten planlar yeniden başlatılabilir. **Taksitli ödeme**: aylık ödeme + taksit sayısı; vadeler "2/6" diye görünür.
@@ -48,9 +66,9 @@ Tüm hesaplar `src/domain/ledger.ts` içindeki saf fonksiyonlardan gelir; bakiye
 
 Bir planlı kalem gerçekleşince oluşan işlem plana bağlanır ve o vade artık "bekleyen" sayılmaz; böylece aynı ödeme iki kez düşülmez. Eşleşme dönem bazındadır (aylık planda ay), plan günü sonradan değişse de çift sayım olmaz.
 
-### Clawd'ın duyguları (`src/domain/mood.ts`)
+### Maskotun duyguları (`src/domain/mood.ts`)
 
-Öncelik sırasıyla: hesap/kayıt yok → **meraklı**; bekleyen ödemeler bakiyeyi aşıyor → **düşünceli**; son 7 günde hedef tamamlandı → **kutlama**; bütçe aşıldı / esnek harcama ayın akışının belirgin önünde / kategori limiti aşıldı / bekleyen ödemeler sonrası günlük pay çok düşük → **düşünceli**; hedefin %80'i veya bütçe yolunda → **keyifli**; diğerleri → **sakin**. Bütçe yoksa yargı yok. Planlı ödemeler bütçe temposuna, yatırım katkıları harcamaya girmez; yatırım değerindeki düşüş yorum doğurmaz. Clawd'a dokunup "Neden böyle?" ile kuralı görebilirsin.
+Öncelik sırasıyla: hesap/kayıt yok → **meraklı**; bekleyen ödemeler bakiyeyi aşıyor → **düşünceli**; son 7 günde hedef tamamlandı → **kutlama**; bütçe aşıldı / esnek harcama ayın akışının belirgin önünde / kategori limiti aşıldı / bekleyen ödemeler sonrası günlük pay çok düşük → **düşünceli**; hedefin %80'i veya bütçe yolunda → **keyifli**; diğerleri → **sakin**. Bütçe yoksa yargı yok. Planlı ödemeler bütçe temposuna, yatırım katkıları harcamaya girmez; yatırım değerindeki düşüş yorum doğurmaz. Maskotun yanındaki "Neden böyle?" ile kuralı görebilirsin.
 
 ## Veri
 
@@ -59,8 +77,10 @@ Kayıtlar yalnızca bu cihazdaki tarayıcıda (`localStorage`) tutulur; sunucu v
 ## Yapı
 
 ```
-src/domain/   hesaplama, doğrulama, yedek/CSV, Clawd kuralları (+ testler)
-src/clawd/    piksel Clawd: 5 duygu, 10 kıyafet, 5 gövde rengi
+src/domain/   hesaplama, doğrulama, yedek/CSV, maskot duygu kuralları (+ testler)
+src/mascot/   5 piksel maskot: karakterler, çizim, hareketler, espriler, özel günler, tema
+src/i18n/     Türkçe / İngilizce metinler ve biçimlendirme
+src/native/   bildirim, otomatik yedek, ana ekran aracı, uygulama simgesi, titreşim
 src/store/    kalıcı saklama ve geri alma
 src/screens/  Özet, İşlemler, Bütçe, Yatırım, Raporlar, Ayarlar, İlk açılış
 src/sheets/   işlem/iade/plan/hesap/değer formları

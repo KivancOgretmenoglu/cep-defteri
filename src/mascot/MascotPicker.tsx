@@ -9,6 +9,7 @@ import { commit, useStore } from '../store/store';
 import { CHARACTERS, MASCOT_KEYS, characterOf, type Lang, type MascotKey } from './characters';
 import { Mascot } from './Mascot';
 import { LiveMascot } from './MascotNote';
+import { haptic } from '../native/haptics';
 
 const T = {
   title: { tr: 'Yol arkadaşını seç', en: 'Pick your sidekick' },
@@ -31,7 +32,7 @@ export function MascotGrid({ value, onPick, lang, size = 72 }: { value: MascotKe
             aria-checked={on}
             className={`mascot-card ${on ? 'is-on' : ''}`}
             style={{ '--card': c.palette.soft, '--card-accent': c.palette.accent } as React.CSSProperties}
-            onClick={() => onPick(k)}
+            onClick={() => { haptic('light'); onPick(k); }}
           >
             {on && <Check size={16} className="mascot-card__check" aria-hidden />}
             <Mascot who={k} mood={on ? 'happy' : 'calm'} size={size} idle={false} lang={lang} />

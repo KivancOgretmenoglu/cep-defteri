@@ -7,7 +7,7 @@ import { catName, dueLabel, formatMoney, lower, parseMoney, shortDate } from '..
 import { useT } from '../i18n';
 import type { Key } from '../i18n/core';
 import { allTags, cashBalance, isInvestment, isPerson, occurrences, planIsInflow, planIsOutflow, transferKind } from '../domain/ledger';
-import { clawdEvent, type ClawdEvent } from '../clawd/events';
+import { mascotEvent, type MascotEvent } from '../mascot/events';
 import { commit } from '../store/store';
 import { closeSheet, openSheet } from '../ui/nav';
 import { Chip, FormError, MoneyInput, Segmented, Sheet, inputFromMoney } from '../ui/kit';
@@ -162,7 +162,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
       : { type: 'transfer', amount: amt, date, accountId: invId, toAccountId: accountId, note, planRef, tags };
   }
 
-  function eventFor(d: A.TxDraft): ClawdEvent {
+  function eventFor(d: A.TxDraft): MascotEvent {
     if (d.planRef) return { type: 'plan-confirmed', kind: d.type === 'income' ? 'income' : d.type === 'transfer' ? 'transfer' : 'expense', amount: d.amount };
     if (d.type === 'expense') return { type: 'expense', categoryId: d.categoryId, amount: d.amount, note: d.note };
     if (d.type === 'income') return { type: 'income', categoryId: d.categoryId, amount: d.amount };
@@ -205,7 +205,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
         : commit((d, t) => A.addTx(d, draft, t).data, `${label} · ${formatMoney(draft.amount)}`, { pulse: true });
     if (e) setErr(e);
     else {
-      clawdEvent(eventFor(draft));
+      mascotEvent(eventFor(draft));
       closeSheet();
     }
   }
@@ -216,7 +216,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
     const e = commit((d) => A.deleteTx(d, editing.id).data, refunds ? T('txs.deletedWithRefunds', { n: refunds }) : T('txs.deleted'));
     if (e) setErr(e);
     else {
-      clawdEvent({ type: 'deleted' });
+      mascotEvent({ type: 'deleted' });
       closeSheet();
     }
   }

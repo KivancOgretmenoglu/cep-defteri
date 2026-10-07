@@ -11,7 +11,7 @@ import { commit } from '../store/store';
 import { Chip, Progress, SectionHead, Segmented, inputFromMoney } from '../ui/kit';
 import { go, openSheet } from '../ui/nav';
 import { useData, useLookups } from '../ui/hooks';
-import { ClawdNote, EmptyState } from '../ui/ClawdNote';
+import { MascotNote, EmptyState } from '../mascot/MascotNote';
 import { CatIcon } from '../ui/icons';
 import { DueRow } from '../ui/DueRow';
 import type { Mood } from '../domain/mood';
@@ -108,7 +108,7 @@ export function Budget() {
             <div><dt><i className="sw sw--left" />{t('bud.remaining')}</dt><dd>{formatMoney(Math.max(b.remaining ?? 0, 0))}</dd></div>
           </dl>
           <p className="note-line">{t('bud.lineNote', { pct: pctPlain(b.elapsedPct) })}</p>
-          {note && <ClawdNote compact mood={note.mood} text={note.text} why={note.why} outfit="planner" size={64} />}
+          {note && <MascotNote compact mood={note.mood} text={note.text} why={note.why} outfit="planner" size={64} />}
         </section>
       )}
 

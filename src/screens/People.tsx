@@ -6,7 +6,7 @@ import { debtTotals, personBalances } from '../domain/ledger';
 import { Amount, SectionHead } from '../ui/kit';
 import { go, openSheet } from '../ui/nav';
 import { useData, useLookups } from '../ui/hooks';
-import { EmptyState } from '../ui/ClawdNote';
+import { EmptyState } from '../mascot/MascotNote';
 import { TxRow } from '../ui/TxRow';
 
 /** Arkadaşlarla borç/alacak defteri. */

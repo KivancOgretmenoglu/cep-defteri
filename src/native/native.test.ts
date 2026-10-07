@@ -107,6 +107,15 @@ describe('bildirim planı', () => {
     expect(computeSchedule(d, TODAY, prefs, localAt(TODAY, 22))[0].key).toBe('rem|2026-10-16');
   });
 
+  it('sınav haftasında günlük hatırlatma susar, ödeme hatırlatması sürer', () => {
+    const { d } = withPlans();
+    const exam = A.updateSettings(d, { examUntil: '2026-10-21' });
+    const s = computeSchedule(exam, TODAY, { ...PREFS, dailyReminder: true, reminderHour: 21 }, localAt(TODAY, 9));
+    const rem = s.filter((n) => n.key.startsWith('rem|'));
+    expect(rem[0].key).toBe('rem|2026-10-22');
+    expect(s.some((n) => n.key.startsWith('pay|'))).toBe(true);
+  });
+
   it('en fazla 60 bildirim', () => {
     let { d, bank } = setup();
     for (let i = 0; i < 10; i++) d = A.addPlan(d, { kind: 'expense', title: `Haftalık ${i}`, amount: TL(10), accountId: bank, categoryId: 'e-food', freq: 'weekly', startDate: '2026-10-16' }).data;

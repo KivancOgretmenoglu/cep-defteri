@@ -1,6 +1,6 @@
 /* ───────────────── Cep Defteri — görsel dil ─────────────────
    Kâğıt rengi zemin, mürekkep tonunda metin, tek bir mercan vurgu.
-   Renk çeşitliliği Clawd'ın kıyafetlerinde ve kategori noktalarında yaşar.
+   Renk çeşitliliği maskotun kıyafetlerinde ve kategori noktalarında yaşar.
    Giderler kırmızı değil mürekkep rengindedir: harcama bir "hata" değildir. */
 
 :root {
@@ -464,7 +464,7 @@ kbd {
   font-weight: 600;
 }
 
-/* ───────── Clawd notu ───────── */
+/* ───────── Maskot notu ───────── */
 .mascot-note {
   display: flex;
   align-items: flex-end;
@@ -534,7 +534,7 @@ kbd {
   border-color: transparent;
 }
 
-/* Clawd hareketleri: src/clawd/clawd.css */
+/* Maskot hareketleri: src/mascot/mascot.css */
 @media (prefers-reduced-motion: reduce) {
   .sheet,
   .toast,
@@ -2690,7 +2690,7 @@ fieldset.block {
   flex-direction: column;
   gap: 10px;
 }
-.rcard__clawd {
+.rcard__mascot {
   display: flex;
   justify-content: center;
 }

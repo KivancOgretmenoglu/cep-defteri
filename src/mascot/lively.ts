@@ -4,7 +4,7 @@
  *
  * Her şey kozmetiktir; duygu (mood) domain/mood.ts'ten olduğu gibi gelir.
  * Hareket azaltma tercihinde yalnız göz kırpma ve kısa yüz ifadeleri kalır.
- * Sekme gizliyken ya da Clawd ekranda değilken zamanlayıcılar durur.
+ * Sekme gizliyken ya da maskot ekranda değilken zamanlayıcılar durur.
  */
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type RefObject } from 'react';
 import type { Mood } from '../domain/mood';
@@ -26,9 +26,9 @@ export interface LivelyOptions {
   exam?: boolean;
   mood: Mood;
   outfit: string;
-  /** Kullanıcı espri ayarı (settings.clawdQuips) */
+  /** Kullanıcı espri ayarı (settings.quips) */
   quips: boolean;
-  /** Ana ekran Clawd'ı mı (selam, ajan modu) */
+  /** Ana ekran maskotu mu (selam, ajan modu) */
   home?: boolean;
   /** Bakiyeler gizli: ajan kılığı */
   spy?: boolean;
@@ -66,7 +66,7 @@ export interface Lively {
   };
 }
 
-// ── Modül düzeyi: birden çok Clawd aynı anda espri yapmasın ──
+// ── Modül düzeyi: birden çok maskot aynı anda espri yapmasın ──
 const QUIP_GAP = 120_000;
 let lastQuipAt = -Infinity;
 let greeted = false;
@@ -163,7 +163,7 @@ export function useLively({ who, lang, name, season = null, exam = false, mood, 
       const c = cur.current;
       if (!pool || !c.quips || !c.active) return;
       const t = Date.now();
-      // Aynı olay birden çok Clawd'a ulaşır: önemli olaylarda bile yalnız biri konuşsun.
+      // Aynı olay birden çok maskota ulaşır: önemli olaylarda bile yalnız biri konuşsun.
       if (t - lastQuipAt < (ignoreGap ? 1500 : QUIP_GAP)) return;
       if (Math.random() >= chance) return;
       lastQuipAt = t;

@@ -324,3 +324,15 @@
   align-items: flex-end;
   gap: 8px;
 }
+
+/* Koyu temada gövde dışındaki koyu çizgili işaretler (düşünce noktaları, soru işareti, zzz) görünür kalsın. */
+:root[data-theme='dark'] .mascot__extras rect[fill='#2A1E1A'],
+:root[data-theme='dark'] .mascot__zzz rect[fill='#2A1E1A'] {
+  fill: #d9cfc0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .mascot__extras rect[fill='#2A1E1A'],
+  :root:not([data-theme='light']) .mascot__zzz rect[fill='#2A1E1A'] {
+    fill: #d9cfc0;
+  }
+}

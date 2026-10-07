@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { emptyData } from './defaults';
 import * as A from './actions';
 import * as L from './ledger';
-import { clawdMood } from './mood';
+import { mascotMood } from './mood';
 import { parseMoney, formatMoney } from './money';
 import { parseBackup, serializeBackup, transactionsCSV } from './backup';
 import type { Data } from './types';
@@ -283,7 +283,7 @@ describe('bütçe', () => {
     expect(b.flexUsedPct).toBe(40);
     expect(b.elapsedPct).toBe(48);
     expect(b.state).toBe('on-track');
-    expect(clawdMood(d, TODAY).mood).toBe('happy');
+    expect(mascotMood(d, TODAY).mood).toBe('happy');
   });
 
   it('kategori limiti %70 ve %100 eşiklerinde uyarır', () => {
@@ -296,13 +296,13 @@ describe('bütçe', () => {
   });
 });
 
-describe('Clawd', () => {
+describe('Maskot duygusu', () => {
   it('veri yokken meraklı, bütçe yokken yargısız', () => {
-    expect(clawdMood(emptyData(), TODAY).mood).toBe('curious');
+    expect(mascotMood(emptyData(), TODAY).mood).toBe('curious');
     let { d, bank } = setup();
-    expect(clawdMood(d, TODAY).mood).toBe('curious');
+    expect(mascotMood(d, TODAY).mood).toBe('curious');
     d = add(d, { type: 'expense', amount: TL(9000), date: '2026-10-10', accountId: bank, categoryId: 'e-fun' }).data;
-    const m = clawdMood(d, TODAY);
+    const m = mascotMood(d, TODAY);
     expect(m.mood).toBe('calm');
     expect(m.why).toMatch(/Bütçe tanımlı olmadığı/);
   });
@@ -314,7 +314,7 @@ describe('Clawd', () => {
     d = A.confirmOccurrence(yurt.data, yurt.plan.id, '2026-10-03', {}, TODAY).data;
     d = add(d, { type: 'transfer', amount: TL(4000), date: '2026-10-04', accountId: bank, toAccountId: inv }).data;
     d = add(d, { type: 'expense', amount: TL(500), date: '2026-10-05', accountId: bank, categoryId: 'e-food' }).data;
-    const m = clawdMood(d, TODAY);
+    const m = mascotMood(d, TODAY);
     expect(m.mood).not.toBe('thoughtful');
   });
 
@@ -322,24 +322,24 @@ describe('Clawd', () => {
     let { d, bank, inv } = setup();
     d = add(d, { type: 'transfer', amount: TL(3000), date: '2026-10-01', accountId: bank, toAccountId: inv }).data;
     d = A.addValuation(d, { accountId: inv, date: '2026-10-10', value: TL(1500) }, TODAY).data;
-    const a = clawdMood(d, TODAY);
+    const a = mascotMood(d, TODAY);
     expect(a.mood).not.toBe('thoughtful');
-    expect(clawdMood(d, TODAY)).toEqual(a);
+    expect(mascotMood(d, TODAY)).toEqual(a);
   });
 
   it('hedefe yeni ulaşıldığında kutlar', () => {
     let { d, bank, inv } = setup();
     d = A.addGoal(d, { title: 'Acil durum fonu', target: TL(3000), accountId: inv }).data;
     d = add(d, { type: 'transfer', amount: TL(3000), date: '2026-10-12', accountId: bank, toAccountId: inv }).data;
-    expect(clawdMood(d, TODAY).mood).toBe('celebrate');
-    expect(clawdMood(d, '2026-10-25').mood).not.toBe('celebrate');
+    expect(mascotMood(d, TODAY).mood).toBe('celebrate');
+    expect(mascotMood(d, '2026-10-25').mood).not.toBe('celebrate');
   });
 
   it('ödemeler bakiyeyi aşınca düşünceli ve gerekçeli', () => {
     let { d, bank } = setup();
     d = add(d, { type: 'expense', amount: TL(100), date: TODAY, accountId: bank, categoryId: 'e-food' }).data;
     d = A.addPlan(d, { kind: 'expense', title: 'Kurs', amount: TL(12000), accountId: bank, categoryId: 'e-school', freq: 'once', startDate: '2026-10-28' }).data;
-    const m = clawdMood(d, TODAY);
+    const m = mascotMood(d, TODAY);
     expect(m.mood).toBe('thoughtful');
     expect(m.focus).toBe('upcoming');
   });
@@ -418,13 +418,13 @@ describe('Türkçe yüzde ekleri', () => {
 });
 
 describe('bağımsız denetimde bulunan hatalar (regresyon)', () => {
-  it('planlandığı gibi ödenen kira, bütçeyi tek başına aşsa da Clawd’ı olumsuz yapmaz', () => {
+  it('planlandığı gibi ödenen kira, bütçeyi tek başına aşsa da maskotu olumsuz yapmaz', () => {
     let { d, bank } = setup();
     d = A.updateSettings(d, { monthlyBudget: TL(5000) });
     const p = A.addPlan(d, { kind: 'expense', title: 'Kira', amount: TL(6000), accountId: bank, categoryId: 'e-housing', freq: 'monthly', startDate: '2026-10-05' });
     d = A.confirmOccurrence(p.data, p.plan.id, '2026-10-05', {}, TODAY).data;
     expect(L.budgetStatus(d, '2026-10', TODAY).state).toBe('planned-full');
-    expect(clawdMood(d, TODAY).mood).not.toBe('thoughtful');
+    expect(mascotMood(d, TODAY).mood).not.toBe('thoughtful');
   });
 
   it('plan günü değişse de atlama geri alınabilir', () => {
@@ -449,13 +449,13 @@ describe('bağımsız denetimde bulunan hatalar (regresyon)', () => {
     let { d, bank, inv } = setup();
     d = add(d, { type: 'expense', amount: TL(10), date: TODAY, accountId: bank, categoryId: 'e-food' }).data;
     d = A.addPlan(d, { kind: 'transfer', title: 'Yatırım', amount: TL(12000), accountId: bank, toAccountId: inv, freq: 'once', startDate: '2026-10-20' }).data;
-    expect(clawdMood(d, TODAY).mood).not.toBe('thoughtful');
+    expect(mascotMood(d, TODAY).mood).not.toBe('thoughtful');
     let e = emptyData();
     e = A.addAccount(e, { name: 'B', kind: 'bank', openingBalance: TL(100), openingDate: '2026-10-14' }).data;
     const f = A.addAccount(e, { name: 'F', kind: 'investment', openingBalance: TL(6000), openingDate: '2026-10-14', priorContribution: TL(5000) });
     e = A.addGoal(f.data, { title: 'Fon', target: TL(4000), accountId: f.account.id }).data;
     e = add(e, { type: 'expense', amount: TL(10), date: TODAY, accountId: e.accounts[0].id, categoryId: 'e-food' }).data;
-    expect(clawdMood(e, TODAY).mood).not.toBe('celebrate');
+    expect(mascotMood(e, TODAY).mood).not.toBe('celebrate');
   });
 
   it('anlamca bozuk yedekleri reddeder', () => {

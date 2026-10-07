@@ -103,9 +103,12 @@ export function computeSchedule(
   if (prefs.dailyReminder) {
     const hour = Math.min(23, Math.max(0, Math.round(prefs.reminderHour)));
     const txDays = new Set(data.txs.map((t) => t.date));
+    const examUntil = data.settings.examUntil ?? null;
     for (let i = 0; i < REMINDER_DAYS; i++) {
       const d = addDays(today, i);
       if (txDays.has(d)) continue;
+      // Sınav haftasında "bugün kayıt girdin mi?" hatırlatması susar; ödeme hatırlatmaları sürer.
+      if (examUntil && d <= examUntil) continue;
       const at = localAt(d, hour);
       if (at.getTime() <= nowMs) continue;
       out.push({ key: `rem|${d}`, at, title: t('notif.remTitle'), body: t('notif.remBody'), extra: { open: 'add' } });

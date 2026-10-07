@@ -17,6 +17,9 @@ import { useData } from '../ui/hooks';
 import { CatIcon, ACCOUNT_ICONS } from '../ui/icons';
 import { isNative, saveFile } from '../platform';
 import { SecuritySettings, NotificationSettings, AutoBackupSettings } from '../native/NativeSettings';
+import { appIconSupported, setAppIcon } from '../native/appIcon';
+import { MascotSettings } from '../mascot/MascotSettings';
+import { characterOf } from '../mascot/characters';
 
 async function download(name: string, content: string, type: string): Promise<boolean> {
   try {
@@ -93,7 +96,10 @@ export function RestorePicker({ compact = false }: { compact?: boolean }) {
 }
 
 export function startDemo(today: string) {
-  setMode('demo', buildDemo(today, getLang()));
+  // Örnek veride de kullanıcının seçtiği maskot ve tema kalır.
+  const demo = buildDemo(today, getLang());
+  const cur = getState().data.settings;
+  setMode('demo', { ...demo, settings: { ...demo.settings, mascot: cur.mascot, theme: cur.theme } });
   showToast(tNow('set.demoStarted'), { ms: 5000 });
   go('home');
 }
@@ -155,14 +161,7 @@ export function Settings() {
           </ul>
         </section>
 
-        <section className="card" aria-labelledby="s-clawd">
-          <SectionHead id="s-clawd" title={t('set.wardrobe')} />
-          <p className="muted">{t('set.wardrobeBody')}</p>
-          {/* MASKOT_AYARLARI: maskot seçimi, adı ve dolabı (src/mascot/MascotSettings.tsx) buraya gelecek */}
-          <label className="check-row">
-            <input type="checkbox" checked={data.settings.quips} onChange={(e) => commit((d) => A.updateSettings(d, { quips: e.target.checked }))} />
-            <span>{t('set.quips')}<small>{t('set.quipsHint')}</small></span>
-          </label>
+        <MascotSettings iconRow={appIconSupported() ? <IconFollowRow /> : undefined}>
           <details className="details">
             <summary>{t('set.rulesTitle')}</summary>
             <ul className="rules">
@@ -174,7 +173,7 @@ export function Settings() {
               <li>{t('set.rule.note')}</li>
             </ul>
           </details>
-        </section>
+        </MascotSettings>
 
         <section className="card" aria-labelledby="s-look">
           <SectionHead id="s-look" title={t('set.look')} />
@@ -269,5 +268,26 @@ export function Settings() {
       </div>
       <p className="app-foot">{t('set.foot')}</p>
     </div>
+  );
+}
+
+/** Android: uygulama simgesi seçili maskotu izlesin mi. Kapatınca varsayılan (kedi) simgeye döner. */
+function IconFollowRow() {
+  const t = useT();
+  const follows = useStore((s) => s.data.settings.appIconFollows === true);
+  const key = useStore((s) => characterOf(s.data.settings.mascot?.key).key);
+  return (
+    <label className="check-row">
+      <input
+        type="checkbox"
+        checked={follows}
+        onChange={(e) => {
+          const v = e.target.checked;
+          commit((d) => A.updateSettings(d, { appIconFollows: v }));
+          void setAppIcon(v ? key : 'fistik');
+        }}
+      />
+      <span>{t('icon.setting')}<small>{t('icon.hint')}</small></span>
+    </label>
   );
 }

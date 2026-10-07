@@ -7,6 +7,7 @@ import type { Data } from '../domain/types';
 import { todayISO, type ISODate } from '../domain/dates';
 import { ActionError } from '../domain/actions';
 import * as storage from './storage';
+import { haptic } from '../native/haptics';
 import { translate, type Key } from '../i18n/core';
 
 /** Depodaki o anki dil (i18n/lang.ts bu dosyaya bağlı olduğundan burada doğrudan okunur). */
@@ -27,7 +28,7 @@ interface State {
   warning: Key | null;
   saveFailed: boolean;
   toast: Toast | null;
-  /** Clawd'ın kısa onay hareketi için sayaç */
+  /** Maskotun kısa onay hareketi için sayaç */
   pulse: number;
   isNew: boolean;
 }
@@ -98,6 +99,7 @@ export function commit(fn: (d: Data, today: ISODate) => Data, message?: string, 
   }
   const ok = persist(next);
   emit({ data: next, saveFailed: !ok, pulse: opts.pulse ? state.pulse + 1 : state.pulse, isNew: false });
+  if (opts.pulse && ok) haptic('success');
   if (message) {
     undoPrev = opts.undo === false ? null : prev;
     showToast(message, { undo: opts.undo !== false });

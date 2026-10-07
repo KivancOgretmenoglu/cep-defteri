@@ -1,6 +1,6 @@
 import { pct, type PctForm } from './tr';
 /**
- * Clawd'ın duygu hâli: kayıtlardan türetilen, açıklanabilir ve deterministik kurallar.
+ * Maskotun duygu hâli: kayıtlardan türetilen, açıklanabilir ve deterministik kurallar.
  * Aynı kayıtlar ve aynı gün → aynı duygu ve aynı gerekçe. Rastgelelik yok.
  *
  * İlkeler:
@@ -30,7 +30,7 @@ export interface MoodResult {
   focus: MoodFocus;
 }
 
-export function clawdMood(data: Data, today: ISODate, lang: Lang = 'tr'): MoodResult {
+export function mascotMood(data: Data, today: ISODate, lang: Lang = 'tr'): MoodResult {
   const t = translator(lang);
   const tl = (k: number) => formatMoney(k, { lang });
   const sd = (d: ISODate) => shortDate(d, undefined, lang);

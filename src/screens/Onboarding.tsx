@@ -4,7 +4,11 @@ import type { Lang } from '../domain/types';
 import * as A from '../domain/actions';
 import { defaultAccountNames } from '../domain/defaults';
 import { commit, useStore } from '../store/store';
-import { Clawd } from '../clawd/Clawd';
+import { Mascot } from '../mascot/Mascot';
+import { LiveMascot, useMascot } from '../mascot/MascotNote';
+import { MascotPicker } from '../mascot/MascotPicker';
+import { characterOf } from '../mascot/characters';
+import { appIconSupported, setAppIcon } from '../native/appIcon';
 import { Chip, FormError, MoneyInput } from '../ui/kit';
 import { parseMoney } from '../i18n/format';
 import { getLang, suggestLang } from '../i18n/lang';
@@ -16,7 +20,7 @@ const zeroOk = (raw: string) => (raw.trim() === '' || /^0+([.,]0*)?$/.test(raw.t
 /**
  * İlk açılış, adım adım:
  *  1) 'lang'    — Dil / Language
- *  2) 'mascot'  — maskot seçimi ve uygulama simgesi sorusu (yer tutucu; MascotPicker buraya takılacak)
+ *  2) 'mascot'  — maskot seçimi; Android'de uygulama simgesinin maskotla değişip değişmeyeceği
  *  3) 'balance' — paranın şu an nerede olduğu (başlangıç bakiyeleri)
  */
 type Step = 'lang' | 'mascot' | 'balance';
@@ -26,8 +30,9 @@ export function Onboarding() {
   if (step === 'lang') return <LangStep onNext={() => setStep('mascot')} />;
   if (step === 'mascot') {
     return (
-      /* MASKOT_ADIMI: src/mascot/MascotPicker.tsx (maskot seçimi + uygulama simgesi sorusu) buraya gelecek. */
-      <MascotStepPlaceholder onNext={() => setStep('balance')} />
+      <div className="onboard">
+        <MascotPicker onDone={() => setStep('balance')} iconQuestion={appIconSupported() ? <IconQuestion /> : undefined} />
+      </div>
     );
   }
   return <BalanceStep onBack={() => setStep('mascot')} />;
@@ -49,7 +54,11 @@ function LangStep({ onNext }: { onNext: () => void }) {
   return (
     <div className="onboard">
       <div className="onboard__hero">
-        <Clawd mood="curious" outfit="hoodie" body="coral" size={168} />
+        <span className="onboard__trio" aria-hidden>
+          <Mascot who="fistik" mood="happy" size={96} idle={false} />
+          <Mascot who="karamel" mood="curious" size={96} idle={false} />
+          <Mascot who="bilge" mood="calm" size={96} idle={false} />
+        </span>
         <div>
           <p className="eyebrow">Cep Defteri</p>
           <h1>Dil / Language</h1>
@@ -71,15 +80,23 @@ function LangStep({ onNext }: { onNext: () => void }) {
   );
 }
 
-/** 2) Yer tutucu: maskot seçimi ve uygulama simgesi sorusu ana geliştirici tarafından eklenecek. */
-function MascotStepPlaceholder({ onNext }: { onNext: () => void }) {
+/** 2b) Android: uygulama simgesi seçilen maskotla değişsin mi? Yanıt Ayarlar'dan değiştirilebilir. */
+function IconQuestion() {
   const t = useT();
+  const follows = useStore((s) => s.data.settings.appIconFollows);
+  const key = useStore((s) => characterOf(s.data.settings.mascot?.key).key);
+  const answer = (v: boolean) => {
+    commit((d) => A.updateSettings(d, { appIconFollows: v }));
+    void setAppIcon(v ? key : 'fistik');
+  };
   return (
-    <div className="onboard">
-      {/* MASKOT_ADIMI */}
-      <section className="card onboard__form">
-        <button className="btn btn--primary btn--block btn--lg" onClick={onNext}>{t('onb.continue')}</button>
-      </section>
+    <div className="callout">
+      <p><b>{t('icon.q')}</b></p>
+      <p className="small muted">{t('icon.hint')}</p>
+      <div className="chip-row">
+        <Chip on={follows === true} onClick={() => answer(true)}>{follows === true ? '✓ ' : ''}{t('icon.yes')}</Chip>
+        <Chip on={follows === false} onClick={() => answer(false)}>{follows === false ? '✓ ' : ''}{t('icon.no')}</Chip>
+      </div>
     </div>
   );
 }
@@ -88,7 +105,7 @@ function MascotStepPlaceholder({ onNext }: { onNext: () => void }) {
 function BalanceStep({ onBack }: { onBack: () => void }) {
   const t = useT();
   const today = useStore((s) => s.today);
-  const body = useStore(() => 'coral');
+  const m = useMascot();
   const [bank, setBank] = useState('');
   const [cash, setCash] = useState('');
   const [hasInv, setHasInv] = useState(false);
@@ -114,9 +131,9 @@ function BalanceStep({ onBack }: { onBack: () => void }) {
   return (
     <div className="onboard">
       <div className="onboard__hero">
-        <Clawd mood="curious" outfit="hoodie" body={body} size={168} />
+        <LiveMascot who={m.who} mood="curious" size={150} />
         <div>
-          <p className="eyebrow">Cep Defteri</p>
+          <p className="eyebrow">{t('onb.hello', { name: m.name })}</p>
           <h1>{t('onb.title')}</h1>
           <p className="muted">{t('onb.body')}</p>
         </div>
