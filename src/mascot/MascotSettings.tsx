@@ -19,6 +19,8 @@ const T = {
   },
   quips: { tr: 'Ara sıra espri yapsın', en: 'Crack a joke now and then' },
   quipsHint: { tr: 'Kayıttan sonra kısa, yargılamayan şakalar', en: 'Short, never-judging jokes after you log something' },
+  cameos: { tr: 'Misafir maskotlar', en: 'Guest mascots' },
+  cameosHint: { tr: 'Arada bir diğer maskotlar köşeden uğrar, küçük bir şey yapıp gider', en: 'Once in a while another mascot drops by a corner, does something small and leaves' },
   exam: { tr: 'Sınav haftası', en: 'Exam week' },
   examHint: {
     tr: 'Açıkken maskot da ders çalışır ve akşam “bugün kayıt girdin mi?” hatırlatması susar. Ödeme hatırlatmaları devam eder.',
@@ -33,6 +35,7 @@ export function MascotSettings({ iconRow, children }: { iconRow?: React.ReactNod
   const lang = useStore((s) => s.data.settings.lang ?? 'tr') as Lang;
   const m = useStore((s) => s.data.settings.mascot);
   const quips = useStore((s) => s.data.settings.quips);
+  const cameos = useStore((s) => s.data.settings.cameos);
   const examUntil = useStore((s) => s.data.settings.examUntil);
   const today = useStore((s) => s.today);
   const ch = characterOf(m?.key);
@@ -77,6 +80,13 @@ export function MascotSettings({ iconRow, children }: { iconRow?: React.ReactNod
         <span>
           {T.quips[lang]}
           <small>{T.quipsHint[lang]}</small>
+        </span>
+      </label>
+      <label className="check-row">
+        <input type="checkbox" checked={cameos !== false} onChange={(e) => commit((d) => A.updateSettings(d, { cameos: e.target.checked }))} />
+        <span>
+          {T.cameos[lang]}
+          <small>{T.cameosHint[lang]}</small>
         </span>
       </label>
       <div className="exam-row">

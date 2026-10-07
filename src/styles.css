@@ -26,6 +26,16 @@
   --shadow: 0 1px 0 rgba(60, 40, 20, 0.04), 0 8px 24px -12px rgba(60, 40, 20, 0.18);
   --radius: 16px;
   --radius-sm: 11px;
+  /* Maskot katmanı (themeArt.css) bunları karaktere göre değiştirir; varsayılanlar eski değerlerdir. */
+  --radius-card: var(--radius);
+  --radius-btn: 13px;
+  --radius-add: 20px;
+  --radius-sheet: 22px;
+  --radius-toast: 14px;
+  --shadow-card: var(--shadow);
+  --border-card: 1px solid var(--line);
+  --press-scale: 0.98;
+  --press-ease: 0.1s;
   --font-display: 'Bricolage Grotesque Variable', 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
   --font-body: 'Atkinson Hyperlegible Next Variable', 'Atkinson Hyperlegible Next', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --tabbar-h: 68px;
@@ -252,7 +262,7 @@ kbd {
   align-self: center;
   width: 58px;
   height: 58px;
-  border-radius: 20px;
+  border-radius: var(--radius-add);
   background: var(--accent);
   color: var(--accent-ink);
   display: grid;
@@ -363,10 +373,10 @@ kbd {
 /* ───────── Kart ───────── */
 .card {
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border: var(--border-card);
+  border-radius: var(--radius-card);
   padding: 16px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -920,14 +930,14 @@ kbd {
   gap: 8px;
   min-height: 46px;
   padding: 0 18px;
-  border-radius: 13px;
+  border-radius: var(--radius-btn);
   font-weight: 700;
   font-size: 15.5px;
   white-space: nowrap;
-  transition: background 0.15s, transform 0.1s;
+  transition: background 0.15s, transform var(--press-ease);
 }
 .btn:active {
-  transform: scale(0.98);
+  transform: scale(var(--press-scale));
 }
 .btn--primary {
   background: var(--accent);
@@ -1384,7 +1394,7 @@ fieldset.block {
   display: flex;
   flex-direction: column;
   background: var(--surface);
-  border-radius: 22px 22px 0 0;
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
   box-shadow: 0 -10px 40px -10px rgba(0, 0, 0, 0.35);
   outline: none;
   animation: sheet-up 0.22s cubic-bezier(0.2, 0.9, 0.3, 1);
@@ -1479,7 +1489,7 @@ fieldset.block {
   gap: 10px;
   max-width: 560px;
   padding: 8px 8px 8px 16px;
-  border-radius: 14px;
+  border-radius: var(--radius-toast);
   background: var(--ink);
   color: var(--paper);
   box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.45);
