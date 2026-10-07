@@ -8,6 +8,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         // Uygulamaya özel yerel eklentiler, köprü kurulmadan önce kaydedilmeli.
         registerPlugin(WidgetBridgePlugin.class);
+        registerPlugin(AppIconPlugin.class);
         super.onCreate(savedInstanceState);
     }
 }

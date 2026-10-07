@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- scripts/gen-android-icons.ts tarafından üretildi: maskot simgelerinin zemini (palette.iconBg). -->
+<resources>
+    <color name="ic_launcher_bg_fistik">#F8DCC8</color>
+    <color name="ic_launcher_bg_bilge">#DEE2F6</color>
+    <color name="ic_launcher_bg_ceviz">#F1E2C6</color>
+    <color name="ic_launcher_bg_diken">#E4EBCB</color>
+    <color name="ic_launcher_bg_karamel">#D7E6F3</color>
+</resources>

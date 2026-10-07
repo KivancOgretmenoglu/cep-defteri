@@ -12,5 +12,5 @@
     <string name="widget_waiting">Uygulamayı bir kez açınca görünür</string>
     <string name="widget_add">+ Ekle</string>
     <string name="widget_add_desc">Yeni kayıt ekle</string>
-    <string name="widget_clawd_desc">Clawd</string>
+    <string name="widget_mascot_desc">Maskot</string>
 </resources>

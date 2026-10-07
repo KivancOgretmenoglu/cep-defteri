@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- İngilizce cihaz dili için aracın sabit metinleri (araç güncellenince metinler uygulamadaki dil seçimini izler). -->
+<resources>
+    <string name="widget_name">Available money</string>
+    <string name="widget_description">What you can comfortably spend until the end of the period, and one-tap logging.</string>
+    <string name="widget_title">Available</string>
+    <string name="widget_waiting">Open the app once to see it</string>
+    <string name="widget_add">+ Add</string>
+    <string name="widget_add_desc">Add a new entry</string>
+    <string name="widget_mascot_desc">Mascot</string>
+</resources>
