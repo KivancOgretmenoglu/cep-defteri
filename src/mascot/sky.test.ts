@@ -84,7 +84,7 @@ describe('gece pijaması', () => {
     expect(homeOutfit({ ...base, night: true, season: 'summer', exam: true, spy: true })).toBe('spy');
   });
 
-  it('beş karakterde de şapka ve yaka çizilir; esneme pijamayla gelir', () => {
+  it('her karakterde şapka ve yaka çizilir; esneme pijamayla gelir', () => {
     expect(OUTFITS.pajama).toBeDefined();
     for (const k of MASCOT_KEYS) {
       const plain = compose(k, 'calm', 'plain').figure.length;

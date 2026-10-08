@@ -366,6 +366,19 @@ function pawRects(ch: Character, pose: PawPose): R[] {
   }
 }
 
+/** Gövde ızgarasından kulak bölgeleri (yalnız `maxY` satırının üstü), tuval biriminde. */
+function earRects(key: MascotKey, boxes: [number, number, number, number][], maxY: number): R[] {
+  const g = bodyGrid(key);
+  const out: R[] = [];
+  for (const [x0, y0, x1, y1] of boxes)
+    for (let y = y0; y < Math.min(y1, maxY); y++)
+      for (let x = x0; x < x1; x++) {
+        const c = g[y]?.[x];
+        if (c) out.push(at(x, y, 1, 1, c));
+      }
+  return out;
+}
+
 const NIGHT_Z = (x: number, y: number, c: string): R[] => [[x, y, 3, 1, c], [x + 1, y + 1, 1, 1, c], [x, y + 2, 1, 1, c], [x, y + 3, 3, 1, c]];
 
 export interface Scene {
@@ -394,7 +407,11 @@ export function compose(key: MascotKey, mood: Mood, outfitKey: string, L: Mascot
   figure.push(...eyeRects(ch, mood, L.eyes ?? 'mood', L.look).map(shiftUp));
   if (o.face && L.faceDy !== null) figure.push(...faceRects(ch, o.face, L.faceDy ?? 0).map(shiftUp));
   const hat = L.nightcap && !o.hat ? 'nightcap' : o.hat;
-  if (hat) figure.push(...hatRects(ch, hat, !!L.hatLift).map(shiftUp));
+  if (hat) {
+    figure.push(...hatRects(ch, hat, !!L.hatLift).map(shiftUp));
+    // Uzun kulaklar şapkanın önünde kalır (yalnız şapka satırının üstü; kenar kulak dibini örter).
+    if (ch.anchors.ears) figure.push(...earRects(key, ch.anchors.ears, ch.anchors.head.y - 1).map(shiftUp));
+  }
   if (o.hold) figure.push(...itemRects(ch, o.hold.side, o.hold.item));
   if (L.coffee && !(o.hold && o.hold.side === L.coffee)) figure.push(...cup(ch, L.coffee));
   figure.push(...pawRects(ch, L.paws ?? (mood === 'celebrate' ? 'up' : null)));

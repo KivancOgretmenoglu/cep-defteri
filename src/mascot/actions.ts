@@ -21,7 +21,7 @@ export interface Frame extends MascotLive {
 export type ActionName =
   | 'stretch' | 'hop' | 'wave' | 'turn' | 'peek' | 'sneeze' | 'yawn' | 'dance' | 'lookaround'
   | 'glasses' | 'water' | 'write' | 'pages' | 'music' | 'shiver' | 'captip' | 'spylook' | 'glint' | 'psst' | 'study'
-  | 'tailwag' | 'earflap' | 'stash' | 'curl' | 'leaf' | 'tilt'
+  | 'tailwag' | 'earflap' | 'stash' | 'curl' | 'leaf' | 'tilt' | 'bowfix' | 'nibble'
   | 'giggle' | 'jump' | 'spin' | 'hey' | 'dizzy' | 'tickle'
   | 'note' | 'coins' | 'sprout' | 'confetti' | 'wiggle' | 'shrug' | 'disguise' | 'undisguise' | 'nod'
   | CategoryReaction;
@@ -52,6 +52,8 @@ const cloud = (big: boolean): R[] =>
   big
     ? [[6, 5, 20, 20, '#E8E1D4'], [4, 9, 24, 12, '#E8E1D4'], [9, 3, 14, 2, '#E8E1D4'], [8, 8, 3, 3, '#F6F1E8'], [19, 15, 4, 3, '#F6F1E8'], [13, 21, 5, 3, '#D9D0C1']]
     : [[10, 9, 12, 11, '#E8E1D4'], [8, 11, 16, 7, '#E8E1D4'], [12, 10, 3, 2, '#F6F1E8']];
+const BOW = '#E0457B';
+const miniHeart = (x: number, y: number, c = '#E8577A'): R[] => [[x, y, 1, 1, c], [x + 2, y, 1, 1, c], [x, y + 1, 3, 1, c], [x + 1, y + 2, 1, 1, c]];
 const rep = <T,>(n: number, f: (i: number) => T[]): T[] => Array.from({ length: n }, (_, i) => f(i)).flat();
 
 /** Bahçıvan saksısındaki filizin ek pikselleri (seviyeye göre), sol tutma noktasına göre. */
@@ -200,6 +202,38 @@ export function buildAction(name: ActionName, ctx: ActionCtx): Frame[] {
     case 'leaf': {
       const leaf = (dx: number): R[] => [[midX + 3 + dx, headTop - 3, 2, 1, '#7DBA62'], [midX + 2 + dx, headTop - 2, 2, 1, '#5BAA5E']];
       return [{ ms: 160, look: [1, -1] }, { ms: 200, look: [1, -1], props: leaf(1) }, { ms: 200, look: [1, -1], props: leaf(-1) }, { ms: 200, eyes: 'happy' }];
+    }
+    case 'bowfix': {
+      // Kurdelesini düzeltir: pati kulağa, kurdele iki yana kıpırdar, ışıltı ve minik kalp.
+      const bx = midX + 2, by = headTop - 4;
+      const bow = (dx: number): R[] => [
+        [bx + dx, by, 2, 3, BOW], [bx + 5 + dx, by, 2, 3, BOW], [bx + 2 + dx, by + 1, 3, 1, BOW],
+        [bx + dx, by, 1, 1, '#FF9EC4'], [bx + 5 + dx, by, 1, 1, '#FF9EC4'], [bx + 3 + dx, by + 1, 1, 1, '#A92A5A'],
+      ];
+      return [
+        { ms: 160, paws: 'wave2', look: [1, -1] },
+        { ms: 190, paws: 'wave2', look: [1, -1], props: bow(-1) },
+        { ms: 190, paws: 'wave2', look: [1, -1], props: bow(1) },
+        { ms: 220, eyes: 'happy', props: bow(0), over: star(bx + 7, by - 4, '#FFFFFF') },
+        { ms: 320, eyes: 'happy', blush: true, props: bow(0), over: miniHeart(bx + 8, by - 6), pop: P('Kusursuz.', 'Flawless.') },
+      ];
+    }
+    case 'nibble': {
+      // Havuç kemirir: havuç kısalır, kırıntılar düşer.
+      const mx = Math.round((eyeL + eyeR + 2) / 2) - 1, my = eyeY + 4;
+      const carrot = (len: number): R[] => [
+        [mx + 1, my, len, 2, '#F08A3C'], [mx + 2, my + 1, 1, 1, '#C9652A'], ...(len > 3 ? ([[mx + 4, my, 1, 1, '#C9652A']] as R[]) : []),
+        [mx + 1 + len, my - 1, 1, 1, '#7DBA62'], [mx + 2 + len, my - 2, 1, 2, '#5E9E4E'], [mx + 1 + len, my + 1, 2, 1, '#7DBA62'],
+      ];
+      const bits = (k: number): R[] => [[mx + 1 - k, my + 3 + k, 1, 1, '#F08A3C'], [mx + 3 + k, my + 4, 1, 1, '#E5A060']];
+      return [
+        { ms: 150, look: [1, 1], props: carrot(6) },
+        { ms: 150, squash: true, eyes: 'closed', props: carrot(6) },
+        { ms: 150, props: carrot(4), over: bits(0) },
+        { ms: 150, squash: true, eyes: 'closed', props: carrot(4) },
+        { ms: 150, props: carrot(2), over: bits(1) },
+        { ms: 300, eyes: 'happy', blush: true, pop: P('Nom!', 'Nom!') },
+      ];
     }
     case 'tilt':
       return [{ ms: 200, look: [-1, 0], dx: -1 }, { ms: 420, look: [-1, -1], dx: -1, eyes: 'wide' }, { ms: 200, look: [1, 0], dx: 1 }, { ms: 200 }];

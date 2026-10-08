@@ -21,4 +21,8 @@
     <color name="widget_btn_ink_karamel">#2A1A0E</color>
     <color name="widget_soft_karamel">#E6F9E9D2</color>
     <color name="widget_frame_karamel">#B08246</color>
+    <color name="widget_btn_pamuk">#F06A98</color>
+    <color name="widget_btn_ink_pamuk">#2A1A0E</color>
+    <color name="widget_soft_pamuk">#E6FCDCDE</color>
+    <color name="widget_frame_pamuk">#BB5377</color>
 </resources>

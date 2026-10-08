@@ -104,6 +104,20 @@
             </intent-filter>
         </activity-alias>
 
+        <activity-alias
+            android:name=".Icon_pamuk"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_pamuk"
+            android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher_pamuk_round"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
         <!-- Ana ekran aracı: kullanılabilir para, boyuta göre düzen; çiplerden gelen yayınlar (WIDGET_QUICK/WIDGET_REFRESH) açık niyetle gelir. -->
         <receiver
             android:name=".CepWidgetProvider"

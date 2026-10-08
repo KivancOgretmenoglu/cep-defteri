@@ -1,6 +1,6 @@
 # Cep Defteri
 
-Üniversite hayatı için sade ve hızlı bir kişisel bütçe uygulaması. Paranın nereden gelip nereye gittiğini, yaklaşan ödemelerden sonra ne kadarını rahatça harcayabileceğini ve yatırım hesabına ne kadar para koyduğunu gösterir. Türkçe ve İngilizce çalışır. Beş hayvan maskottan birini seçersin; maskotun duygu hâli kayıtlarından türetilir ve her tepkisinin bir gerekçesi vardır.
+Üniversite hayatı için sade ve hızlı bir kişisel bütçe uygulaması. Paranın nereden gelip nereye gittiğini, yaklaşan ödemelerden sonra ne kadarını rahatça harcayabileceğini ve yatırım hesabına ne kadar para koyduğunu gösterir. Türkçe ve İngilizce çalışır. Altı hayvan maskottan birini seçersin; maskotun duygu hâli kayıtlarından türetilir ve her tepkisinin bir gerekçesi vardır.
 
 ## Çalıştırma
 
@@ -27,6 +27,7 @@ npm run preview    # derlenmiş sürümü yerelde aç
 | Ceviz | Sincap | tutumlu, hareketli, sabırlı; birikim hedeflerine bayılır |
 | Diken | Kirpi | sakin, minimalist, kuru mizahlı; asla telaşlanmaz |
 | Karamel | Sokak köpeği | neşeli, sadık; bölüşme ve arkadaş hesaplarını sever |
+| Pamuk | Tavşan | tatlı, şefkatli, biraz dramatik; küçük ödülleri ve kendine bakmayı sever, hep gaza getirir |
 
 - Uygulamanın vurgu renkleri ve zemini seçili maskotun paletine göre değişir (gelir/gider gibi anlam taşıyan renkler sabit kalır).
 - Maskota isim verilebilir. Her maskotun kendi selamları, espri sıklığı ve imza hareketleri vardır.
@@ -83,7 +84,7 @@ Tek ağ isteği altın/döviz fiyatlarıdır: bir altın/döviz hesabı varsa a�
 
 ```
 src/domain/   hesaplama, doğrulama, yedek/CSV, maskot duygu kuralları (+ testler)
-src/mascot/   5 piksel maskot: karakterler, çizim, hareketler, espriler, özel günler, tema
+src/mascot/   6 piksel maskot: karakterler, çizim, hareketler, espriler, özel günler, tema
 src/i18n/     Türkçe / İngilizce metinler ve biçimlendirme
 src/native/   bildirim, otomatik yedek, ana ekran aracı, uygulama simgesi, titreşim
 src/store/    kalıcı saklama ve geri alma

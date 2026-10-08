@@ -276,6 +276,9 @@ body[data-tour='1'] .mascot-quip {
 .widget-mock--karamel {
   background: linear-gradient(transparent 52%, #fff 52% 56%, transparent 56% 60%, #fff 60% 63%, transparent 63%), linear-gradient(#cfe6f7 0 66%, #7cc04f 66%);
 }
+.widget-mock--pamuk {
+  background: linear-gradient(transparent 66%, #e7a9bf 66% 70%, #f3c6d4 70%), radial-gradient(circle at 6px 6px, #f5b8cc 1.6px, transparent 2px) 0 0 / 14px 14px, #fde7ee;
+}
 .widget-mock__mascot {
   position: absolute;
   left: 8px;

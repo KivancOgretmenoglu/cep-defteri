@@ -1,6 +1,7 @@
 /**
- * Rehberin maskot ağzından satırları: adım × 5 karakter × tr+en. Her satır 1–2 kısa cümle.
- * Ton: Fıstık oyuncu, Bilge sakin ve az sözlü, Ceviz tutumlu/telaşlı, Diken kuru ve minimal, Karamel neşeli/sadık.
+ * Rehberin maskot ağzından satırları: adım × 6 karakter × tr+en. Her satır 1–2 kısa cümle.
+ * Ton: Fıstık oyuncu, Bilge sakin ve az sözlü, Ceviz tutumlu/telaşlı, Diken kuru ve minimal, Karamel neşeli/sadık,
+ * Pamuk tatlı, şefkatli ve biraz dramatik.
  */
 import type { Lang, MascotKey } from '../mascot/characters';
 import type { StepId } from './steps';
@@ -73,6 +74,19 @@ export const GUIDE_LINES: Record<MascotKey, Record<StepId, Line>> = {
     widget: L('Beni ana ekranına koy, her gün seni karşılayayım!', 'Put me on your home screen, I’ll greet you every day!'),
     tile: L('Bildirim paneline bir kutucuk ekleyelim, kayıt bir kaydırma uzakta!', 'Let’s add a quick settings tile, logging is one swipe away!'),
     settings: L('Harikaydın! Rehberi Ayarlar’dan, buradan tekrar açabilirsin.', 'You did great! Replay the guide from Settings, right here.'),
+  },
+  pamuk: {
+    add: L('Kayıtlar buradan tatlım! Tutar, kategori, kaydet. Üç dokunuş, sıfır stres.', 'Entries start here, sweetie! Amount, category, save. Three taps, zero stress.'),
+    amount: L('Önce tutarı yaz. Hazır tutarlar da var, çünkü vaktin değerli.', 'Type the amount first. Ready amounts are here too, because your time is precious.'),
+    newCat: L('Aradığın kategori yok mu? “+ Yeni kategori” ile kendine özel bir tane yap.', 'Missing a category? Make one just for you with “+ New category”.'),
+    why: L('Ruh halimi merak edersen “Neden böyle?”ye dokun. Asla sebepsiz drama yapmam. Neredeyse.', 'Curious about my mood? Tap “Why?”. I never do drama without a reason. Almost.'),
+    eye: L('Biri omzundan mı bakıyor? Göze dokun, toplamları saklarım. Kızlar arasında kalsın.', 'Someone peeking? Tap the eye and I hide the totals. Our little secret.'),
+    rings: L('Bu kart ayın özeti: bütçe, hedef, geçen günler. Halkalar dolunca ben de çok gururlanırım.', 'This card is your month at a glance: budget, goals, days gone. When the rings fill, I get so proud.'),
+    floor: L('Buraya bir hedef koy; grafikte plan çizgisini çizerim, altına inersen nazikçe söylerim.', 'Set a target here; I’ll draw a plan line and gently tell you if you dip below.'),
+    invest: L('Yatırımını altın ya da döviz olarak da tutabilirsin; fiyatı ben güncellerim. Işıltılı!', 'Keep investments as gold or currency too; I’ll update the price. Sparkly!'),
+    widget: L('Beni ana ekranına koy! Her baktığında seni gaza getiririm, kayıt da tek dokunuş.', 'Put me on your home screen! I’ll cheer you on every time you look, and entries are one tap.'),
+    tile: L('Bildirim paneline bir kutucuk ekleyelim; kayıt bir kaydırma uzakta. Pratik ve şık.', 'Let’s add a quick settings tile; logging is one swipe away. Practical and chic.'),
+    settings: L('Bitti, harikaydın! Rehberi buradan, Ayarlar’dan istediğin zaman tekrar açabilirsin.', 'Done, you were amazing! Replay the guide from Settings, right here, anytime.'),
   },
 };
 

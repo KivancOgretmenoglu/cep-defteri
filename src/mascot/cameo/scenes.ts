@@ -24,14 +24,14 @@ export interface SceneDef {
 
 export const SCENES: Record<SceneId, SceneDef> = {
   // Uyku: sabah (12'den önce) asla; öğleden sonra geç saatlere kadar
-  sleep: { id: 'sleep', screens: ['reports', 'invest'], hours: [[15, 24]], pref: ['diken', 'bilge', 'ceviz', 'karamel', 'fistik'], guests: 1, place: 'br', w: 78 },
-  cards: { id: 'cards', screens: ['budget'], hours: [[12, 24]], pref: ['fistik', 'karamel', 'ceviz', 'diken', 'bilge'], guests: 2, place: 'br', w: 92 },
-  coins: { id: 'coins', screens: ['invest', 'budget', 'reports'], hours: [[8, 21]], pref: ['bilge', 'ceviz', 'diken', 'karamel', 'fistik'], guests: 1, place: 'bl', w: 84 },
+  sleep: { id: 'sleep', screens: ['reports', 'invest'], hours: [[15, 24]], pref: ['diken', 'bilge', 'pamuk', 'ceviz', 'karamel', 'fistik'], guests: 1, place: 'br', w: 78 },
+  cards: { id: 'cards', screens: ['budget'], hours: [[12, 24]], pref: ['fistik', 'pamuk', 'karamel', 'ceviz', 'diken', 'bilge'], guests: 2, place: 'br', w: 92 },
+  coins: { id: 'coins', screens: ['invest', 'budget', 'reports'], hours: [[8, 21]], pref: ['bilge', 'ceviz', 'diken', 'pamuk', 'karamel', 'fistik'], guests: 1, place: 'bl', w: 84 },
   // Uygun kart yoksa köşede saklanır
-  hide: { id: 'hide', screens: ['home'], hours: [[8, 24]], pref: ['ceviz', 'karamel', 'fistik', 'diken', 'bilge'], guests: 1, place: 'ledge', w: 78 },
-  ball: { id: 'ball', screens: ['tx'], hours: [[6, 24]], pref: ['fistik', 'karamel', 'ceviz', 'diken', 'bilge'], guests: 1, place: 'br', w: 84 },
+  hide: { id: 'hide', screens: ['home'], hours: [[8, 24]], pref: ['ceviz', 'pamuk', 'karamel', 'fistik', 'diken', 'bilge'], guests: 1, place: 'ledge', w: 78 },
+  ball: { id: 'ball', screens: ['tx'], hours: [[6, 24]], pref: ['fistik', 'karamel', 'pamuk', 'ceviz', 'diken', 'bilge'], guests: 1, place: 'br', w: 84 },
   // Kahve: sabah ya da akşam
-  coffee: { id: 'coffee', screens: ['home', 'budget', 'reports', 'invest'], hours: [[6, 10], [17, 21]], pref: ['diken', 'fistik', 'bilge', 'karamel', 'ceviz'], guests: 1, place: 'bl', w: 84 },
+  coffee: { id: 'coffee', screens: ['home', 'budget', 'reports', 'invest'], hours: [[6, 10], [17, 21]], pref: ['diken', 'pamuk', 'fistik', 'bilge', 'karamel', 'ceviz'], guests: 1, place: 'bl', w: 84 },
 };
 /** Sahnelerin çıkabildiği ekranlar */
 export const CAMEO_SCREENS: Screen[] = ['home', 'tx', 'budget', 'reports', 'invest'];
@@ -56,6 +56,7 @@ const TREAT: Record<MascotKey, L2> = {
   fistik: { tr: 'balığı', en: 'the fish' },
   diken: { tr: 'elmayı', en: 'the apple' },
   bilge: { tr: 'tohumu', en: 'the seed' },
+  pamuk: { tr: 'havucu', en: 'the carrot' },
 };
 type L2 = Record<Lang, string>;
 

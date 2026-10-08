@@ -75,6 +75,7 @@ const TREAT_COLORS: Record<MascotKey, [string, string]> = {
   diken: ['#D14B4B', '#9B2F2F'],
   bilge: ['#E6B23C', '#B5862A'],
   ceviz: ['#8A5A2B', '#5C3A17'],
+  pamuk: ['#F08A3C', '#C9652A'],
 };
 
 function Art({ id, g }: { id: SceneId; g: MascotKey[] }) {

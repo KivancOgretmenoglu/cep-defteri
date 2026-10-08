@@ -338,6 +338,7 @@ export const WIDGET_BTN: Record<MascotKey, { btn: string; ink: string }> = {
   ceviz: { btn: '#9A5E33', ink: '#FFFFFF' }, // kahve sincap
   diken: { btn: '#5F7A26', ink: '#FFFFFF' }, // adaçayı yeşili (kirpinin yaprağı)
   karamel: { btn: '#E2A75A', ink: '#2A1A0E' }, // karamel köpek
+  pamuk: { btn: '#F06A98', ink: '#2A1A0E' }, // pembe tavşan (kurdelenin tonu)
 };
 const WIDGET_INK = { light: '#23201B', dark: '#F1EBE0' }; // values(-night)/widget_colors.xml widget_ink
 const SOFT_BASE = { light: '#FFF9F0', dark: '#1F1C18' };
@@ -594,6 +595,88 @@ const SCENES: Record<MascotKey, (p: P, W: number, H: number, G: number) => void>
     p(kx + 4, ky - 1, 2, 1, '#FBF6EC');
     p(kx + 4, ky + 1, 2, 1, '#FBF6EC');
   },
+  // Tavşan: pastel yatak odası; kalpli duvar kâğıdı, perdeli bulutlu pencere, aynalı makyaj masası, çiçekler, kalpli minder, yuvarlak kilim
+  pamuk(p, W, H, G) {
+    p(0, 0, W, G, '#FCE4EC');
+    for (let x = 0; x < W; x += 6) p(x, 0, 2, G, '#F9DAE5');
+    const heart = (x: number, y: number, c: string) => {
+      p(x, y, 1, 1, c);
+      p(x + 2, y, 1, 1, c);
+      p(x, y + 1, 3, 1, c);
+      p(x + 1, y + 2, 1, 1, c);
+    };
+    for (let y = 3, i = 0; y < G - 5; y += 7, i++) for (let x = (i % 2) * 6 + 2; x < W - 2; x += 12) heart(x, y, '#F5BFD1');
+    // pencere: beyaz çerçeve, mavi gök, bulutlar, pembe perdeler ve fırfır
+    const wh = Math.min(16, G - 8), ww = Math.round(wh * 1.25), wx = 5, wy = 2;
+    if (wh >= 6) {
+      p(wx - 1, wy - 1, ww + 2, wh + 2, '#FFFFFF');
+      p(wx, wy, ww, wh, '#D4ECF7');
+      cloud(p, wx + 1, wy + 3, Math.round(ww / 2.4), '#FFFFFF');
+      cloud(p, wx + Math.round(ww / 2), wy + Math.round(wh * 0.6), Math.round(ww / 3), '#FFFFFF');
+      p(wx + (ww >> 1), wy, 1, wh, '#FFFFFF');
+      p(wx, wy + (wh >> 1), ww, 1, '#FFFFFF');
+      p(wx - 3, wy - 1, 3, wh + 3, '#F4A3C0');
+      p(wx + ww, wy - 1, 3, wh + 3, '#F4A3C0');
+      p(wx - 2, wy, 1, wh + 2, '#EE8DB1');
+      p(wx + ww + 1, wy, 1, wh + 2, '#EE8DB1');
+      for (let x = wx - 3; x < wx + ww + 3; x += 2) p(x, wy - 2, 1, 2, '#F4A3C0');
+      p(wx - 3, wy - 2, ww + 6, 1, '#F4A3C0');
+      p(wx - 2, wy + wh + 1, ww + 4, 1, '#FFFFFF');
+    }
+    // makyaj masası + oval ayna (sağda); dar sahnede küçülür
+    const vw = Math.min(16, Math.max(10, Math.round(W * 0.18))), vx = W - vw - 3, vt = G - Math.min(7, Math.max(5, Math.round(G * 0.25)));
+    const mr = Math.min(5, Math.max(2.5, (vt - 3) / 3.2)), mcx = vx + vw / 2, mcy = vt - mr - 1.5;
+    if (mcy - mr >= 0.5) {
+      disk(p, mcx, mcy, mr + 1, '#E7B95A');
+      disk(p, mcx, mcy, mr, '#E6F2F8');
+      p(Math.round(mcx - mr / 2), Math.round(mcy - mr / 2), 1, Math.max(1, Math.round(mr / 2)), '#FFFFFF');
+      p(Math.round(mcx) - 1, Math.round(mcy + mr), 2, Math.max(1, vt - Math.round(mcy + mr)), '#E7B95A');
+    }
+    p(vx, vt, vw, 2, '#FFF6EE');
+    p(vx, vt + 2, vw, 1, '#EBCFC2');
+    p(vx + 1, vt + 3, vw - 2, G - vt - 3, '#FBEDE6');
+    p(vx + 2, vt + 4, Math.max(2, (vw >> 1) - 3), Math.max(1, G - vt - 6), '#F6DCD3');
+    p(vx + (vw >> 1) + 1, vt + 4, Math.max(2, (vw >> 1) - 3), Math.max(1, G - vt - 6), '#F6DCD3');
+    // masadaki şeyler: parfüm, ruj, vazoda çiçek
+    p(vx + 1, vt - 3, 2, 3, '#C9B3E6');
+    p(vx + 1, vt - 4, 2, 1, '#E7B95A');
+    p(vx + 4, vt - 2, 1, 2, '#E0457B');
+    p(vx + 4, vt - 3, 1, 1, '#B5285D');
+    const fx = vx + vw - 4;
+    p(fx, vt - 2, 3, 2, '#9FD3C7');
+    p(fx + 1, vt - 4, 1, 2, '#5E9E4E');
+    p(fx, vt - 5, 1, 1, '#F06A98');
+    p(fx + 2, vt - 5, 1, 1, '#FFFFFF');
+    p(fx + 1, vt - 6, 1, 1, '#F4C95D');
+    // süpürgelik + açık ahşap zemin
+    p(0, G - 2, W, 2, '#FFFFFF');
+    p(0, G - 2, W, 1, '#F3D3DF');
+    p(0, G, W, H - G, '#EDD3C4');
+    for (let y = G + 2; y < H; y += 3) p(0, y, W, 1, '#E3C3B2');
+    for (let y = G, i = 0; y < H; y += 3, i++) for (let x = (i % 2) * 8 + 4; x < W; x += 16) p(x, y, 1, 3, '#DDB9A6');
+    p(0, G, W, 1, '#E3BFAE');
+    // yuvarlak kilim (maskotun altında), fistolu kenar
+    const rw = Math.round(W * 0.5), ry = G + Math.max(2, Math.round((H - G) * 0.3)), rh = Math.max(3, H - ry - 1), rx = 3;
+    p(rx + 1, ry, rw - 2, rh, '#F7BFD2');
+    p(rx, ry + 1, rw, Math.max(1, rh - 2), '#F7BFD2');
+    p(rx + 2, ry + 1, rw - 4, Math.max(1, rh - 2), '#FADCE7');
+    for (let x = rx + 3; x < rx + rw - 3; x += 4) heart(x, ry + Math.max(0, (rh >> 1) - 1), '#F7BFD2');
+    for (let x = rx + 1; x < rx + rw - 1; x += 2) {
+      p(x, ry - 1, 1, 1, '#FFFFFF');
+      if (ry + rh < H) p(x, ry + rh, 1, 1, '#FFFFFF');
+    }
+    // kalpli minder (sağda, zeminde)
+    const cx = Math.min(W - 10, Math.round(W * 0.6)), cy = G + Math.max(1, Math.round((H - G) * 0.25));
+    if (H - G >= 8 && cx > rx + rw + 1) {
+      p(cx, cy, 2, 1, '#E0457B');
+      p(cx + 3, cy, 2, 1, '#E0457B');
+      p(cx - 1, cy + 1, 7, 2, '#E0457B');
+      p(cx, cy + 3, 5, 1, '#E0457B');
+      p(cx + 1, cy + 4, 3, 1, '#C7356B');
+      p(cx + 2, cy + 5, 1, 1, '#C7356B');
+      p(cx, cy + 1, 1, 1, '#FF9EC4');
+    }
+  },
 };
 
 function sceneBg(key: MascotKey, size: SceneSize): Canvas {
@@ -658,6 +741,7 @@ const yarn = (x: number, y: number): R[] => [box(x, y + 1, 3, 1, '#D9566B'), box
 const acorn = (x: number, y: number): R[] => [box(x + 1, y - 1, 1, 1, '#5A3B26'), box(x, y, 3, 1, '#7A4A22'), box(x, y + 1, 3, 2, '#C98B4A'), box(x + 1, y + 3, 1, 1, '#A8703A')];
 const ball = (x: number, y: number): R[] => [box(x, y, 3, 3, '#D2423A'), box(x, y + 1, 3, 1, '#FFFFFF'), box(x, y, 1, 1, '#E86A5F')];
 const crumbs = (x: number, y: number): R[] => [box(x, y, 1, 1, '#C98B4A'), box(x + 2, y + 2, 1, 1, '#A8703A')];
+const carrot = (x: number, y: number): R[] => [box(x, y, 4, 2, '#F08A3C'), box(x + 1, y + 1, 1, 1, '#C9652A'), box(x + 3, y, 1, 1, '#C9652A'), box(x + 4, y - 1, 1, 1, '#7DBA62'), box(x + 5, y - 2, 1, 2, '#5E9E4E'), box(x + 4, y + 1, 2, 1, '#7DBA62')];
 const sniff = (x: number, y: number, n: number): R[] => Array.from({ length: n }, (_, i) => box(x - i * 2, y + (i % 2 ? -1 : 1), 1, 1, '#8A857C'));
 
 /** Maskota özgü döngü: her öğe bir kare. */
@@ -706,6 +790,15 @@ const ANIMS: Record<MascotKey, Live[]> = {
     { look: [1, -1], squash: true, over: ball(29, 20), props: [box(25, 15, 2, 2, '#E2A75A'), box(25, 14, 2, 1, INK), box(27, 15, 1, 2, INK)] },
     { look: [1, 0], eyes: 'happy', over: ball(29, 24) },
     { dx: 1, eyes: 'happy', squash: true, paws: 'wave', over: ball(30, 24) },
+  ],
+  // Tavşan zıplar, kurdelesini düzeltir, havuç kemirir
+  pamuk: [
+    { look: [1, 0] },
+    { squash: true, eyes: 'happy' },
+    { dy: -3, eyes: 'happy', paws: 'up' },
+    { squash: true, eyes: 'happy', blush: true },
+    { paws: 'wave2', look: [1, -1], over: [box(26, 4, 1, 1, '#FFFFFF'), box(25, 5, 3, 1, '#FFFFFF'), box(26, 6, 1, 1, '#FFFFFF'), box(29, 8, 1, 1, '#F06A98')] },
+    { eyes: 'closed', blush: true, props: carrot(16, 17), over: crumbs(14, 22).map((r) => box(r[0], r[1], 1, 1, '#F08A3C')) },
   ],
 };
 

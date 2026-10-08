@@ -58,8 +58,8 @@ function LangStep({ onNext }: { onNext: () => void }) {
       <div className="onboard__hero">
         <span className="onboard__trio" aria-hidden>
           <Mascot who="fistik" mood="happy" size={96} idle={false} />
-          <Mascot who="karamel" mood="curious" size={96} idle={false} />
-          <Mascot who="bilge" mood="calm" size={96} idle={false} />
+          <Mascot who="pamuk" mood="curious" size={96} idle={false} />
+          <Mascot who="karamel" mood="calm" size={96} idle={false} />
         </span>
         <div>
           <p className="eyebrow">Cep Defteri</p>

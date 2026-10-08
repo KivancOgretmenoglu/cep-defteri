@@ -1,12 +1,12 @@
 /**
- * Cep Defteri'nin maskotları: beş özgün hayvan karakter.
+ * Cep Defteri'nin maskotları: altı özgün hayvan karakter.
  * Her biri 24×24 piksellik bir gövde çizimi, yüz ve aksesuarlar için bağlantı noktaları (anchors),
  * renk teması ve kişilik bilgisinden oluşur. Bu dosya saftır (tarayıcıya dokunmaz):
  * uygulama, Android simge üretici ve testler aynı tanımı kullanır.
  */
 
-export type MascotKey = 'fistik' | 'bilge' | 'ceviz' | 'diken' | 'karamel';
-export const MASCOT_KEYS: MascotKey[] = ['fistik', 'bilge', 'ceviz', 'diken', 'karamel'];
+export type MascotKey = 'fistik' | 'bilge' | 'ceviz' | 'diken' | 'karamel' | 'pamuk';
+export const MASCOT_KEYS: MascotKey[] = ['fistik', 'bilge', 'ceviz', 'diken', 'karamel', 'pamuk'];
 export const DEFAULT_MASCOT: MascotKey = 'fistik';
 
 export type Lang = 'tr' | 'en';
@@ -37,6 +37,11 @@ export interface Anchors {
   blush: [number, number][];
   /** Sevinçte dil/ağız pikselleri (isteğe bağlı) */
   smile?: [number, number][];
+  /**
+   * Uzun kulaklar (tavşan): şapkanın üstünden yeniden çizilen gövde bölgeleri [x0, y0, x1, y1) — kulaklar şapkayı
+   * deliyormuş gibi önde kalır. Yalnız şapka satırının (head.y − 1) üstü çizilir; şapkanın kenarı kulak dibini örter.
+   */
+  ears?: [number, number, number, number][];
 }
 
 export interface Palette {
@@ -84,6 +89,9 @@ function rect(g: Grid, x: number, y: number, w: number, h: number, c: string) {
 }
 function px(g: Grid, pts: [number, number][], c: string) {
   for (const [x, y] of pts) if (x >= 0 && y >= 0 && x < S && y < S) g[y][x] = c;
+}
+function disk(g: Grid, cx: number, cy: number, r: number, c: string) {
+  ell(g, cx, cy, r, r, c);
 }
 function ring(g: Grid, cx: number, cy: number, R: number, r: number, c: string) {
   for (let y = 0; y < S; y++)
@@ -265,6 +273,59 @@ export const CHARACTERS: Record<MascotKey, Character> = {
       rect(g, 7, 21, 3, 1, C);
       rect(g, 14, 21, 3, 1, C);
       return shadeEdge(g, Y, D);
+    },
+  },
+  pamuk: {
+    key: 'pamuk',
+    fur: '#F5BCD0',
+    name: { tr: 'Pamuk', en: 'Cotton' },
+    species: { tr: 'Tavşan', en: 'Bunny' },
+    intro: { tr: 'Selam tatlım, ben Pamuk! Kendine küçük bir kahve ısmarlamak serbest, yeter ki deftere yazalım.', en: "Hi sweetie, I'm Cotton! Treating yourself to a little coffee is allowed, as long as we write it down." },
+    traits: { tr: 'Tatlı, şefkatli, biraz dramatik. Küçük ödülleri ve kendine bakmayı sever, seni hep gaza getirir.', en: 'Sweet, caring, a little dramatic. Loves self-care and little treats, always cheering you on.' },
+    palette: { accent: '#B8366A', soft: '#FADCE7', line: '#EDB3C9', paper: '#F8EFF2', darkAccent: '#F28DB4', darkSoft: '#4A2234', darkLine: '#7A3A57', iconBg: '#FADCE7' },
+    quipChance: 0.36,
+    signature: ['bowfix', 'hop', 'nibble'],
+    anchors: {
+      eye: [8, 10],
+      eyeGap: 6,
+      lid: '#E393B1',
+      head: { x: 12, y: 7, w: 8 },
+      neck: { x: 12, y: 15, w: 10 },
+      hold: { l: [3, 16], r: [19, 16] },
+      blush: [[6, 12], [17, 12]],
+      ears: [[3, 0, 11, 6], [15, 0, 22, 6]],
+    },
+    body() {
+      let g = grid();
+      const B = '#F7C9D9', D = '#E8A3BE', C = '#FFF3F7', E = '#F08AAE', RB = '#E0457B', RD = '#A92A5A', RH = '#FF9EC4';
+      disk(g, 19.2, 19.2, 2.2, C); // ponpon kuyruk
+      ell(g, 12, 18.2, 6.6, 4.1, B);
+      ell(g, 12, 11.2, 7.6, 5.3, B);
+      // Kulaklar: uzun, hafif dışa açık
+      const earL: [number, number][] = [[6, 0], [7, 0], [5, 1], [6, 1], [7, 1], [8, 1], [5, 2], [6, 2], [7, 2], [8, 2], [5, 3], [6, 3], [7, 3], [8, 3], [6, 4], [7, 4], [8, 4], [9, 4], [6, 5], [7, 5], [8, 5], [9, 5], [7, 6], [8, 6], [9, 6]];
+      px(g, earL, B);
+      px(g, earL.map(([x, y]): [number, number] => [23 - x, y]), B);
+      // Kurdele (sağ kulakta): iki üçgen ilmek + düğüm; dışa taşan kısmı outline ile konturlanır
+      const bow: [number, number][] = [[14, 3], [15, 3], [19, 3], [20, 3], [14, 4], [15, 4], [16, 4], [17, 4], [18, 4], [19, 4], [20, 4], [14, 5], [15, 5], [19, 5], [20, 5]];
+      px(g, bow, RB);
+      g = outline(g);
+      g = shadeEdge(g, B, D);
+      px(g, [[6, 1], [6, 2], [7, 3], [7, 4], [8, 5]], E);
+      px(g, [[17, 1], [17, 2], [16, 3], [16, 4], [15, 5]], E);
+      // kurdele: ilmeklerin iç kenarı koyu, sol üstleri parlak; düğüm ve iki kısa kuyruk
+      px(g, bow, RB);
+      px(g, [[14, 3], [19, 3]], RH);
+      px(g, [[16, 4], [18, 4], [15, 5], [20, 5]], RD);
+      px(g, [[17, 4]], '#C7356B');
+      px(g, [[16, 5], [18, 5]], RD);
+      px(g, [[16, 6], [18, 6]], RB);
+      px(g, [[10, 12], [13, 12], [11, 13], [12, 13]], '#FCE3EC');
+      ell(g, 12, 18.9, 3.4, 2.6, C);
+      px(g, [[11, 12], [12, 12]], E);
+      px(g, [[10, 13], [13, 13], [11, 14], [12, 14]], INK);
+      rect(g, 6, 21, 4, 1, C);
+      rect(g, 14, 21, 4, 1, C);
+      return g;
     },
   },
 };
