@@ -1,63 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Küçük araç (2×1): maskotun sahnesi tüm zemini kaplar, maskotun büstü alt kenardan bakar, tutar yarı saydam panelde.
+    Küçük araç (2×1 ≈ 2:1): mini sahne tüm zemini kaplar, maskotun büstü aracın yüksekliğinin ≈ %88'i kadar
+    alttan bakar (genişliği CepWidgetProvider'da aracın ≈ %42'siyle sınırlanır), tutar sağda dikey ortalı panelde.
     Görseller ve renkler maskota göre CepWidgetProvider'da seçilir; buradakiler (Fıstık) yalnız varsayılandır.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/widget_bg"
-    android:clipToOutline="true">
+    android:background="@drawable/widget_frame_fistik"
+    android:clipToOutline="true"
+    android:foreground="@drawable/widget_ripple_root">
 
-    <ImageView
-        android:id="@+id/widget_scene"
+    <!-- Çerçeve: kök zemini maskot renginde (widget_frame_<anahtar>), içerik widget_frame (2 dp) içeride. -->
+    <FrameLayout
+        android:id="@+id/widget_inner"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:importantForAccessibility="no"
-        android:scaleType="centerCrop"
-        android:src="@drawable/widget_scene_fistik_strip" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingEnd="8dp">
+        android:layout_margin="@dimen/widget_frame"
+        android:background="@drawable/widget_bg"
+        android:clipToOutline="true">
 
         <ImageView
-            android:id="@+id/widget_mascot"
-            android:layout_width="wrap_content"
+            android:id="@+id/widget_scene"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="bottom"
-            android:layout_marginStart="6dp"
-            android:layout_marginTop="8dp"
-            android:adjustViewBounds="true"
-            android:contentDescription="@string/widget_mascot_desc"
-            android:maxWidth="64dp"
-            android:scaleType="fitEnd"
-            android:src="@drawable/widget_bust_fistik" />
+            android:importantForAccessibility="no"
+            android:scaleType="centerCrop"
+            android:src="@drawable/widget_scene_fistik_mini" />
 
-        <TextView
-            android:id="@+id/widget_amount"
-            android:layout_width="0dp"
-            android:layout_height="34dp"
-            android:layout_marginStart="4dp"
-            android:layout_weight="1"
-            android:autoSizeMaxTextSize="18sp"
-            android:autoSizeMinTextSize="10sp"
-            android:autoSizeStepGranularity="1sp"
-            android:autoSizeTextType="uniform"
-            android:background="@drawable/widget_panel"
-            android:ellipsize="end"
-            android:gravity="center"
-            android:includeFontPadding="false"
-            android:maxLines="1"
-            android:paddingStart="6dp"
-            android:paddingEnd="6dp"
-            android:text="—"
-            android:textColor="@color/widget_ink"
-            android:textSize="17sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="4dp"
+            android:paddingEnd="8dp">
+
+            <ImageView
+                android:id="@+id/widget_mascot"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="bottom"
+                android:layout_marginTop="9dp"
+                android:maxWidth="84dp"
+                android:scaleType="fitEnd"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/widget_mascot_desc"
+                android:src="@drawable/widget_bust_fistik" />
+
+            <TextView
+                android:id="@+id/widget_amount"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="4dp"
+                android:layout_weight="1"
+                android:autoSizeMaxTextSize="20sp"
+                android:autoSizeMinTextSize="9sp"
+                android:autoSizeStepGranularity="1sp"
+                android:autoSizeTextType="uniform"
+                android:background="@drawable/widget_panel"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:text="—"
+                android:textColor="@color/widget_ink"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </FrameLayout>
 </FrameLayout>

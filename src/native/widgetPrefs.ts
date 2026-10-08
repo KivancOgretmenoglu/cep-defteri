@@ -1,16 +1,21 @@
 /**
- * Ana ekran aracına ait, yalnız bu cihazdaki tercihler (yedeğe girmez): büyük araçtaki canlandırma.
- * Ayrı bir localStorage anahtarında tutulur; widget.ts payload'a `animate` olarak ekler.
+ * Ana ekran aracına ait, yalnız bu cihazdaki tercihler (yedeğe girmez): büyük araçtaki canlandırma ve araçta
+ * tutarı gizleme. Ayrı bir localStorage anahtarında tutulur; widget.ts payload'a `animate` / `hidden` olarak ekler.
  */
 import { useSyncExternalStore } from 'react';
 
 export interface WidgetPrefs {
   /** Büyük araçta maskotun kare kare canlandırması (kapalıysa sabit kare). */
   animate: boolean;
+  /**
+   * "Widget'ta tutarı gizle": uygulamadaki tutarlar görünürken yalnız araçta "•••• TL" (çiplerde ve "Bugün"de de),
+   * maskot gizli ajan gözlüğüyle. Uygulamadaki "Toplamları gizle" açıksa araç zaten gizler.
+   */
+  hideAmount: boolean;
 }
 
 const KEY = 'cep-defteri:widget';
-export const DEFAULT_WIDGET_PREFS: WidgetPrefs = { animate: true };
+export const DEFAULT_WIDGET_PREFS: WidgetPrefs = { animate: true, hideAmount: false };
 
 function read(): WidgetPrefs {
   try {

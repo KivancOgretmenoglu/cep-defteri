@@ -10,4 +10,6 @@
     <color name="widget_chip">#332F29</color>
     <!-- Metin paneli: koyu kâğıt, %85 opak -->
     <color name="widget_scrim">#D91E1B17</color>
+    <!-- Basınca dalga (ripple): yarı saydam açık mürekkep -->
+    <color name="widget_ripple">#33FFFFFF</color>
 </resources>

@@ -11,9 +11,9 @@
  *   mipmap-<yoğunluk>/ic_launcher.png, _round.png, _foreground.png            varsayılan simge: Fıstık, kâğıt zemin
  *   drawable, drawable-port-…, drawable-land-… içinde splash.png               açılış ekranı: Fıstık
  *   drawable-nodpi/widget_mascot_<anahtar>.png, widget_preview.png             ana ekran aracı (simge, seçici önizlemesi)
- *   drawable-nodpi/widget_scene_<anahtar>_strip|wide|tall.png                  araç zemini: maskotun sahnesi
- *   drawable-nodpi/widget_anim_<anahtar>_*.png, widget_bust_<anahtar>*.png     maskot kareleri/pozları, küçük araç büstü
- *   drawable/widget_btn|btn_soft|chip|fab_<anahtar>.xml, values(-night)/widget_mascot_colors.xml   maskot renginde düğmeler
+ *   drawable-nodpi/widget_scene_<anahtar>_mini|strip|square|wide|tall.png      araç zemini: maskotun sahnesi
+ *   drawable-nodpi/widget_anim_<anahtar>[_spy]_*.png, widget_bust_<anahtar>[_spy]*.png   maskot kareleri/pozları, büst (+ gizli ajan)
+ *   drawable/widget_btn|btn_soft|chip|fab|frame_<anahtar>.xml, values(-night)/widget_mascot_colors.xml   düğmeler (ripple), çerçeve
  * ve public/icon-180.png, icon-192.png, icon-512.png, icon.svg (web/PWA simgesi: Fıstık).
  *
  * Maskot pikselleri keskin kalır (yumuşatma yok); yalnız zemin şekillerinin (daire, yuvarlak köşe) kenarı yumuşatılır.
@@ -23,7 +23,7 @@ import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CHARACTERS, INK, MASCOT_KEYS, bodyGrid, type Grid, type MascotKey } from '../src/mascot/characters';
-import { CW, OY, compose, type MascotLive, type R } from '../src/mascot/render';
+import { CW, OX, OY, OUTFITS, compose, type MascotLive, type R } from '../src/mascot/render';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const RES = join(ROOT, 'android/app/src/main/res');
@@ -297,7 +297,9 @@ function webSvg(): string {
  * Araç "önce sahne" düzenindedir: maskotun sahnesi aracın tamamını kaplar (centerCrop, yuvarlak köşe kırpması
  * Android 12+'da clipToOutline ile), maskot ayrı ve büyük bir görsel olarak sahnenin zemin bandında durur; metin
  * yarı saydam bir panelde, düğmeler maskotun renginde.
- *   drawable-nodpi/widget_scene_<anahtar>_strip.png  küçük + geniş araç zemini (110×28 birim ≈ 4:1)
+ *   drawable-nodpi/widget_scene_<anahtar>_mini.png   küçük araç zemini (56×28 birim, 2:1)
+ *   drawable-nodpi/widget_scene_<anahtar>_strip.png  geniş araç zemini (92×28 birim ≈ 3.3:1)
+ *   drawable-nodpi/widget_scene_<anahtar>_square.png kare araç zemini (42×42 birim)
  *   drawable-nodpi/widget_scene_<anahtar>_wide.png   orta araç zemini (110×54 birim ≈ 2:1)
  *   drawable-nodpi/widget_scene_<anahtar>_tall.png   büyük araç zemini (88×74 birim ≈ 1.2:1)
  *   drawable-nodpi/widget_anim_<anahtar>_<0..5>.png  maskot döngü kareleri, saydam (0 = sabit kare; geniş/orta araçta da)
@@ -315,8 +317,14 @@ const ANIM_FRAMES = 6;
 const SCENE_K = 10;
 /** Maskot kareleri: birim başına piksel (büyük araçta ≈ 150 dp genişlik). */
 const SPRITE_K = 12;
-/** [genişlik, yükseklik, zemin çizgisi] (birim). Zemin bandı yüksekliğin ≈ %32–38'i: maskotun ayakları bu bantta. */
-const SCENE_SIZES = { strip: [110, 28, 19], wide: [110, 54, 36], tall: [88, 74, 46] } as const;
+/**
+ * [genişlik, yükseklik, zemin çizgisi] (birim). Zemin bandı yüksekliğin ≈ %32–38'i: maskotun ayakları bu bantta.
+ * Her düzenin gerçek en/boy oranına yakın çizilir (centerCrop az kırpar, sahne "yakınlaştırılmış" görünmez):
+ *   mini 2:1 (küçük 2×1), strip ≈3.3:1 (geniş 3×1–5×1), square 1:1 (kare 2×2, 3×2, 3×3), wide 2:1 (orta 4×2, 5×2), tall 1.2:1 (büyük 4×3+)
+ */
+const SCENE_SIZES = { mini: [56, 28, 19], strip: [92, 28, 19], square: [42, 42, 28], wide: [110, 54, 36], tall: [88, 74, 46] } as const;
+/** Sahne birimi başına piksel; kare sahne 3×3'te (≈ 300 dp × 3 px/dp) de büyütülmesin diye daha yoğun. */
+const SCENE_KS: Partial<Record<keyof typeof SCENE_SIZES, number>> = { square: 21, mini: 11 };
 type SceneSize = keyof typeof SCENE_SIZES;
 /** Kare tuvali (maskot tuvali koordinatları): x 0–36 (sağda yumak/top payı), y 0–27 (ayaklar y=26'da biter). */
 const SPRITE_W = 36, SPRITE_H = 27;
@@ -391,8 +399,9 @@ const SCENES: Record<MascotKey, (p: P, W: number, H: number, G: number) => void>
       p(wx + (ww >> 1), wy, 1, wh, '#A0785A');
       p(wx - 2, wy + wh + 1, ww + 4, 1, '#8A6448');
     }
-    const fx = Math.round(W * 0.43);
-    if (G >= 16) {
+    // Tablo: pencere ile raf arasında yer varsa (kare sahnede dar).
+    const fx = Math.max(Math.round(W * 0.43), wx + ww + 4);
+    if (G >= 16 && fx + 10 <= W - 16) {
       p(fx, 3, 9, 7, '#A0785A');
       p(fx + 1, 4, 7, 5, '#F4D6A0');
       disk(p, fx + 4.5, 6.5, 1.6, '#D97757');
@@ -589,8 +598,9 @@ const SCENES: Record<MascotKey, (p: P, W: number, H: number, G: number) => void>
 
 function sceneBg(key: MascotKey, size: SceneSize): Canvas {
   const [W, H, G] = SCENE_SIZES[size];
-  const c = new Canvas(W * SCENE_K, H * SCENE_K);
-  SCENES[key]((x, y, w, h, col) => c.rect(Math.round(x * SCENE_K), Math.round(y * SCENE_K), Math.round(w * SCENE_K), Math.round(h * SCENE_K), col), W, H, G);
+  const K = SCENE_KS[size] ?? SCENE_K;
+  const c = new Canvas(W * K, H * K);
+  SCENES[key]((x, y, w, h, col) => c.rect(Math.round(x * K), Math.round(y * K), Math.round(w * K), Math.round(h * K), col), W, H, G);
   return c;
 }
 
@@ -779,42 +789,76 @@ function roundMask(c: Canvas, r: number) {
     }
 }
 
-/** Bir maskotun tüm kareleri ve büstleri. Kareler aynı kutuyla kırpılır (ViewFlipper'da kayma olmaz). */
+/**
+ * Gizli toplamlarda (uygulamadaki "spy" kıyafeti: fötr şapka, güneş gözlüğü, yaka) yazma pozu ajandayı da tutar.
+ * Yalnız bu betikte tanımlanır; uygulamadaki dolapta görünmez.
+ */
+OUTFITS.spyPlanner ??= { ...OUTFITS.spy, hold: OUTFITS.planner.hold };
+const spyOutfit = (o: string) => (o === 'planner' ? 'spyPlanner' : 'spy');
+
+/**
+ * Bir maskotun tüm kareleri ve büstleri, sade ve gizli ajan ("_spy") takımı olarak.
+ * Bir takımdaki kareler aynı kutuyla kırpılır (ViewFlipper'da kayma olmaz).
+ *   widget_anim_<k>_<0..5|write|noted>.png, widget_anim_<k>_spy_<0..5|write|noted>.png
+ *   widget_bust_<k>[_write|_noted].png,     widget_bust_<k>_spy[_write|_noted].png
+ */
 function widgetSprites(k: MascotKey) {
   const frames = ANIMS[k];
   if (frames.length !== ANIM_FRAMES) throw new Error(`${k}: ${ANIM_FRAMES} kare olmalı`);
-  const items: [string, Live, string][] = [...frames.map((L, i): [string, Live, string] => [String(i), L, 'plain']), ['write', WRITE, 'planner'], ['noted', NOTED, 'plain']];
-  let b: Box | null = null;
-  for (const [, L, o] of items) {
-    const PAD = 6;
-    const raw = alphaBox(spriteFull(k, L, 1, o, PAD), 1);
-    const bb: Box = { x0: raw.x0 - PAD, y0: raw.y0 - PAD, x1: raw.x1 - PAD, y1: raw.y1 - PAD };
-    b = b ? union(b, bb) : bb;
-  }
-  if (!b || b.x0 < 0 || b.y0 < 0 || b.x1 > SPRITE_W || b.y1 > SPRITE_H) throw new Error(`${k}: kare tuvale sığmıyor ${JSON.stringify(b)}`);
-  const fb: Box = { x0: Math.max(0, b.x0 - 1), y0: Math.max(0, b.y0 - 1), x1: Math.min(SPRITE_W, b.x1 + 1), y1: SPRITE_H };
-  for (const [name, L, o] of items) write(join(RES, `drawable-nodpi/widget_anim_${k}_${name}.png`), pngSmall(crop(spriteFull(k, L, SPRITE_K, o), fb, SPRITE_K)));
+  for (const spy of [false, true]) {
+    const sfx = spy ? '_spy' : '';
+    const of = (o: string) => (spy ? spyOutfit(o) : o);
+    const items: [string, Live, string][] = [...frames.map((L, i): [string, Live, string] => [String(i), L, of('plain')]), ['write', WRITE, of('planner')], ['noted', NOTED, of('plain')]];
+    let b: Box | null = null;
+    for (const [, L, o] of items) {
+      const PAD = 6;
+      const raw = alphaBox(spriteFull(k, L, 1, o, PAD), 1);
+      const bb: Box = { x0: raw.x0 - PAD, y0: raw.y0 - PAD, x1: raw.x1 - PAD, y1: raw.y1 - PAD };
+      b = b ? union(b, bb) : bb;
+    }
+    if (!b || b.x0 < 0 || b.y0 < 0 || b.x1 > SPRITE_W || b.y1 > SPRITE_H) throw new Error(`${k}${sfx}: kare tuvale sığmıyor ${JSON.stringify(b)}`);
+    const fb: Box = { x0: Math.max(0, b.x0 - 1), y0: Math.max(0, b.y0 - 1), x1: Math.min(SPRITE_W, b.x1 + 1), y1: SPRITE_H };
+    for (const [name, L, o] of items) write(join(RES, `drawable-nodpi/widget_anim_${k}${sfx}_${name}.png`), pngSmall(crop(spriteFull(k, L, SPRITE_K, o), fb, SPRITE_K)));
 
-  // Büst (küçük araç): boynun biraz altında kesilir, aracın alt kenarından bakar.
-  const bottom = OY + CHARACTERS[k].anchors.neck.y + 3;
-  const busts: [string, Live, string][] = [['', frames[0], 'plain'], ['_write', WRITE, 'planner'], ['_noted', NOTED, 'plain']];
-  const top: Box = { x0: 0, y0: 0, x1: SPRITE_W, y1: bottom };
-  let bb: Box | null = null;
-  for (const [, L, o] of busts) {
-    // Kutu yalnız figürden: yandaki parçacıklar (onay, iz) büstü genişletmesin, taşan kısmı kırpılır.
-    const x = alphaBox(crop(spriteFull(k, { ...L, over: [] }, 1, o), top, 1), 1);
-    bb = bb ? union(bb, x) : x;
+    // Büst (küçük araç): baş + omuzlar, boynun biraz altında kesilir ve başın çevresine dar kırpılır
+    // (≈ kare oran: aracın yüksekliğinin ≈ %88'ini kaplarken tutara yer kalır). Her poz kendi kutusuyla kırpılır.
+    const { head, neck } = CHARACTERS[k].anchors;
+    const bottom = OY + neck.y + 3;
+    const cx = OX + head.x;
+    const busts: [string, Live, string][] = [['', frames[0], of('plain')], ['_write', WRITE, of('planner')], ['_noted', NOTED, of('plain')]];
+    for (const [suffix, L, o] of busts) {
+      const region: Box = { x0: Math.max(0, cx - 10), y0: 0, x1: Math.min(SPRITE_W, cx + 11), y1: bottom };
+      const x = alphaBox(crop(spriteFull(k, { ...L, over: [] }, 1, o), region, 1), 1);
+      const cb: Box = { x0: Math.max(0, region.x0 + x.x0 - 1), y0: Math.max(0, x.y0 - 1), x1: Math.min(SPRITE_W, region.x0 + x.x1 + 1), y1: bottom };
+      write(join(RES, `drawable-nodpi/widget_bust_${k}${sfx}${suffix}.png`), pngSmall(crop(spriteFull(k, L, SPRITE_K, o), cb, SPRITE_K)));
+    }
   }
-  const cb: Box = { x0: Math.max(0, bb!.x0 - 1), y0: Math.max(0, bb!.y0 - 1), x1: Math.min(SPRITE_W, bb!.x1 + 1), y1: bottom };
-  for (const [suffix, L, o] of busts) write(join(RES, `drawable-nodpi/widget_bust_${k}${suffix}.png`), pngSmall(crop(spriteFull(k, L, SPRITE_K, o), cb, SPRITE_K)));
 }
 
 const GEN_NOTE = '<!-- scripts/gen-android-icons.ts tarafından üretildi; elle düzenleme. -->';
-function shapeXml(body: string, oval = false): string {
-  return `<?xml version="1.0" encoding="utf-8"?>\n${GEN_NOTE}\n<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="${oval ? 'oval' : 'rectangle'}">\n${body}</shape>\n`;
+/**
+ * Dokunulabilir şekil: <ripple> içinde (basınca maskot şeklinde yarı saydam mürekkep dalgası). Dalga, şeklin
+ * kendisiyle sınırlanır (maske katmanı yok → çocuk katmanın alfası).
+ */
+function rippleXml(ripple: string, shape: string, oval = false): string {
+  const body = shape
+    .split('\n')
+    .filter(Boolean)
+    .map((l) => '        ' + l)
+    .join('\n');
+  return `<?xml version="1.0" encoding="utf-8"?>\n${GEN_NOTE}\n<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="${ripple}">\n    <item>\n        <shape android:shape="${oval ? 'oval' : 'rectangle'}">\n${body}\n        </shape>\n    </item>\n</ripple>\n`;
+}
+function shapeXml(body: string): string {
+  return `<?xml version="1.0" encoding="utf-8"?>\n${GEN_NOTE}\n<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">\n${body}</shape>\n`;
 }
 
-/** Maskot renginde düğmeler: renk kaynakları + şekil çizilebilirleri. Kontrast ≥ 4.5 değilse üretim durur. */
+/** Çerçeve: maskot renginin biraz koyusu (duvar kâğıdından ayırır). */
+const FRAME_DARKEN = 0.22;
+
+/**
+ * Maskot renginde düğmeler: renk kaynakları + dalgalı (ripple) şekiller + çerçeve. Kontrast ≥ 4.5 değilse üretim durur.
+ * Dolu düğmede dalga, yazı rengine göre açık (#4DFFFFFF) ya da koyu (#33000000); saydam tonlularda @color/widget_ripple.
+ */
 function widgetButtons() {
   const light: string[] = [], dark: string[] = [];
   for (const k of MASCOT_KEYS) {
@@ -822,16 +866,25 @@ function widgetButtons() {
     const softL = mix(SOFT_BASE.light, btn, SOFT_MIX.light), softD = mix(SOFT_BASE.dark, btn, SOFT_MIX.dark);
     const checks: [string, string, string][] = [[btn, ink, 'düğme'], [softL, WIDGET_INK.light, 'açık ikincil'], [softD, WIDGET_INK.dark, 'koyu ikincil']];
     for (const [a, c, n] of checks) if (contrast(a, c) < 4.5) throw new Error(`${k}: ${n} kontrastı düşük (${contrast(a, c).toFixed(2)})`);
-    light.push(`    <color name="widget_btn_${k}">${btn}</color>`, `    <color name="widget_btn_ink_${k}">${ink}</color>`, `    <color name="widget_soft_${k}">#${SOFT_ALPHA}${softL.slice(1)}</color>`);
+    const frame = mix(btn, '#000000', FRAME_DARKEN);
+    light.push(
+      `    <color name="widget_btn_${k}">${btn}</color>`,
+      `    <color name="widget_btn_ink_${k}">${ink}</color>`,
+      `    <color name="widget_soft_${k}">#${SOFT_ALPHA}${softL.slice(1)}</color>`,
+      `    <color name="widget_frame_${k}">${frame}</color>`,
+    );
     dark.push(`    <color name="widget_soft_${k}">#${SOFT_ALPHA}${softD.slice(1)}</color>`);
+    const inkRipple = luminance(ink) > 0.5 ? '#4DFFFFFF' : '#33000000';
     const edge = '    <stroke android:width="1dp" android:color="#38FFFFFF" />\n';
-    write(join(RES, `drawable/widget_btn_${k}.xml`), shapeXml(`    <solid android:color="@color/widget_btn_${k}" />\n${edge}    <corners android:radius="100dp" />\n`));
-    write(join(RES, `drawable/widget_fab_${k}.xml`), shapeXml(`    <solid android:color="@color/widget_btn_${k}" />\n${edge}`, true));
-    write(join(RES, `drawable/widget_btn_soft_${k}.xml`), shapeXml(`    <solid android:color="@color/widget_soft_${k}" />\n    <stroke android:width="1.5dp" android:color="@color/widget_btn_${k}" />\n    <corners android:radius="100dp" />\n`));
-    write(join(RES, `drawable/widget_chip_${k}.xml`), shapeXml(`    <solid android:color="@color/widget_soft_${k}" />\n    <stroke android:width="1dp" android:color="@color/widget_btn_${k}" />\n    <corners android:radius="100dp" />\n`));
+    write(join(RES, `drawable/widget_btn_${k}.xml`), rippleXml(inkRipple, `    <solid android:color="@color/widget_btn_${k}" />\n${edge}    <corners android:radius="100dp" />\n`));
+    write(join(RES, `drawable/widget_fab_${k}.xml`), rippleXml(inkRipple, `    <solid android:color="@color/widget_btn_${k}" />\n${edge}`, true));
+    write(join(RES, `drawable/widget_btn_soft_${k}.xml`), rippleXml('@color/widget_ripple', `    <solid android:color="@color/widget_soft_${k}" />\n    <stroke android:width="1.5dp" android:color="@color/widget_btn_${k}" />\n    <corners android:radius="100dp" />\n`));
+    write(join(RES, `drawable/widget_chip_${k}.xml`), rippleXml('@color/widget_ripple', `    <solid android:color="@color/widget_soft_${k}" />\n    <stroke android:width="1dp" android:color="@color/widget_btn_${k}" />\n    <corners android:radius="100dp" />\n`));
+    // Kök zemini: dolu çerçeve rengi; sahne 2 dp içeride (widget_inner) durduğundan kenarda 2 dp'lik çizgi kalır.
+    write(join(RES, `drawable/widget_frame_${k}.xml`), shapeXml(`    <solid android:color="@color/widget_frame_${k}" />\n    <corners android:radius="@dimen/widget_radius" />\n`));
   }
   const res = (comment: string, lines: string[]) => `<?xml version="1.0" encoding="utf-8"?>\n<!-- scripts/gen-android-icons.ts tarafından üretildi: ${comment} -->\n<resources>\n${lines.join('\n')}\n</resources>\n`;
-  write(join(RES, 'values/widget_mascot_colors.xml'), res('araç düğmeleri maskotun renginde (WIDGET_BTN); ikincil düğme/çip saydam tonu.', light));
+  write(join(RES, 'values/widget_mascot_colors.xml'), res('araç düğmeleri maskotun renginde (WIDGET_BTN); ikincil düğme/çip saydam tonu; çerçeve biraz koyusu.', light));
   write(join(RES, 'values-night/widget_mascot_colors.xml'), res('koyu temada ikincil düğme/çip tonu.', dark));
 }
 

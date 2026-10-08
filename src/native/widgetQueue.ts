@@ -11,6 +11,7 @@ import type { Data, ID } from '../domain/types';
 import { todayISO, type ISODate } from '../domain/dates';
 import { commit, getState, showToast } from '../store/store';
 import { ackWidgetQueue, readWidgetQueue, updateWidget } from './widget';
+import { loadSeen, saveSeen } from './widgetSeen';
 
 export interface QueuedEntry {
   qid: string;
@@ -23,9 +24,6 @@ export interface QueuedEntry {
   note?: string;
   label?: string;
 }
-
-const SEEN_KEY = 'cep-defteri:widget-seen';
-const SEEN_MAX = 300;
 
 /** Ham kuyruk metni → geçerli öğeler (bozuk olanlar atlanır). */
 export function parseQueue(raw: string | null | undefined): QueuedEntry[] {
@@ -90,22 +88,6 @@ export function ingestQueue(data: Data, items: QueuedEntry[], seen: ReadonlySet<
   return { data: d, added, failed, handled };
 }
 
-function loadSeen(): string[] {
-  try {
-    const v = JSON.parse(localStorage.getItem(SEEN_KEY) ?? '[]');
-    return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : [];
-  } catch {
-    return [];
-  }
-}
-function saveSeen(ids: string[]) {
-  try {
-    localStorage.setItem(SEEN_KEY, JSON.stringify(ids.slice(-SEEN_MAX)));
-  } catch {
-    /* depolama yoksa koruma yalnız ack'e kalır */
-  }
-}
-
 const MSG = {
   tr: (n: number, f: number) => `Widget'tan ${n} kayıt eklendi` + (f ? ` (${f} kayıt eklenemedi)` : ''),
   en: (n: number, f: number) => `${n} ${n === 1 ? 'entry' : 'entries'} added from the widget` + (f ? ` (${f} couldn't be added)` : ''),
@@ -133,6 +115,7 @@ async function run() {
   if (r.added > 0) commit(() => r.data, MSG[lang](r.added, r.failed), { pulse: true });
   else if (r.failed > 0) showToast(MSG.failOnly[lang](r.failed), { tone: 'error' });
   await ackWidgetQueue(r.handled);
+  // Taze payload: yeni tutar + güncel `seen` listesi (araç işlenen öğeleri artık iyimser olarak düşmez).
   const s = getState();
-  updateWidget(s.data, s.today, s.mode, true);
+  await updateWidget(s.data, s.today, s.mode, true);
 }

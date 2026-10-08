@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Ana ekran aracının köşe yarıçapı. Android 12+ sistem değerini kullanır (values-v31). -->
+<!--
+    Ana ekran aracının köşe yarıçapı. Android 12+ sistem değerini kullanır (values-v31).
+    widget_frame: maskot renginde çerçevenin kalınlığı (kök zemini çerçeve rengi, içerik bu kadar içeride).
+-->
 <resources>
     <dimen name="widget_radius">20dp</dimen>
+    <dimen name="widget_frame">2dp</dimen>
 </resources>

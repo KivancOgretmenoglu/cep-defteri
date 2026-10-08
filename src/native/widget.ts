@@ -9,6 +9,7 @@ import type { ISODate } from '../domain/dates';
 import { isNative } from '../platform';
 import { widgetPayload } from './widgetPayload';
 import { getWidgetPrefs } from './widgetPrefs';
+import { loadSeen, SEEN_IN_PAYLOAD } from './widgetSeen';
 
 interface WidgetBridgePlugin {
   /** payload: JSON metni (WidgetPayload) */
@@ -26,7 +27,8 @@ let last = '';
 
 export async function updateWidget(data: Data, today: ISODate, mode: 'real' | 'demo', force = false) {
   if (!isNative()) return;
-  const p = widgetPayload(data, today, mode, Date.now(), { animate: getWidgetPrefs().animate });
+  const prefs = getWidgetPrefs();
+  const p = widgetPayload(data, today, mode, Date.now(), { animate: prefs.animate, hideAmount: prefs.hideAmount, seen: loadSeen().slice(-SEEN_IN_PAYLOAD) });
   const sig = JSON.stringify({ ...p, updatedAt: 0 });
   if (!force && sig === last) return;
   try {

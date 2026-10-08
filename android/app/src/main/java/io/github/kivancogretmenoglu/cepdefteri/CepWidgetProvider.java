@@ -13,10 +13,15 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.SizeF;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -25,22 +30,32 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Ana ekran aracı. "Önce sahne": maskotun sahnesi aracın tamamını kaplar (widget_scene, centerCrop; Android 12+'da
- * kök clipToOutline ile yuvarlak köşeli), maskot büyük ve zemin bandında, metin yarı saydam panelde, düğmeler maskotun
- * renginde (widget_btn_/widget_btn_soft_/widget_chip_/widget_fab_<anahtar>). Boyuta göre dört düzen:
- *   küçük  (2×1)      widget_small   şerit sahne + alttan bakan büst + tutar
- *   geniş  (3×1, 4×1) widget_cep     şerit sahne + solda maskot + tutar/dönem + yuvarlak "+"
- *   orta   (3×2, 4×2) widget_medium  geniş sahne + solda maskot + sağ üstte tutar/dönem + "Gider" / "Gelir"
- *   büyük  (4×3+)     widget_large   uzun sahne + canlanan maskot + bugünkü harcama + düğmeler + tek dokunuşla kayıt çipleri
- * Android 12+ (API 31) boyuta duyarlı RemoteViews (Map&lt;SizeF, RemoteViews&gt;) kullanır; daha eskilerde düzen
- * araç seçeneklerindeki (en/boy) ölçüye göre seçilir ve onAppWidgetOptionsChanged'de yenilenir.
+ * Ana ekran aracı. "Önce sahne": maskotun sahnesi aracın tamamını kaplar (widget_scene, centerCrop), maskot büyük ve
+ * zemin bandında, metin yarı saydam panelde, düğmeler maskotun renginde (widget_btn_/widget_btn_soft_/widget_chip_/
+ * widget_fab_<anahtar>; hepsi basınca dalgalanan &lt;ripple&gt;). Kök zemini maskot renginin koyusunda dolu bir şekil
+ * (widget_frame_<anahtar>), içerik (widget_inner) 2 dp içeride: kenarda duvar kâğıdından ayıran ince bir çerçeve kalır,
+ * dokunuşları engelleyen bir katman yoktur. Android 12+'da kök ve iç kap clipToOutline ile yuvarlak köşelidir.
  *
- * Metinler (dil dahil) web katmanında biçimlendirilip WidgetBridgePlugin ile SharedPreferences'a yazılır
- * (src/native/widgetPayload.ts). Ayrıca burada tutulanlar:
+ * Boyut kovaları (dp; boyut VE en/boy oranı, bkz. pickSize ve ANDROID.md):
+ *   küçük  widget_small   h &lt; 130, w &lt; 200          (2×1)          mini sahne + %88 yükseklikte büst + tutar
+ *   geniş  widget_cep     h &lt; 130, w ≥ 200          (3×1, 4×1, 5×1) şerit sahne + maskot + büyük tutar + "+"
+ *   büyük  widget_large   w ≥ 280, h ≥ 250           (4×3, 4×4, 5×3) canlanan maskot + bugün + Gider/Gelir + çipler
+ *   orta   widget_medium  w ≥ 260, w/h ≥ 1.4         (4×2, 5×2)      maskot + tutar + Gider/Gelir
+ *   kare   widget_square  geri kalan her şey         (2×2, 3×2, 3×3) üstte tutar, altta ortada büyük maskot, küçük "+"
+ * Android 12+ (API 31): başlatıcının bildirdiği gerçek boyutlar (OPTION_APPWIDGET_SIZES) için tam eşleşen bir
+ * Map&lt;SizeF, RemoteViews&gt;; bildirilmemişse kovaları temsil eden 16 çapa boyutu (başlatıcı sığan en yakını seçer).
+ * Daha eskilerde düzen, araç seçeneklerindeki en/boydan seçilir ve onAppWidgetOptionsChanged'de yenilenir.
+ *
+ * Veri (src/native/widgetPayload.ts → WidgetBridgePlugin → SharedPreferences "payload"): metinler web katmanında
+ * hazırlanır; tutarlar ise ham kuruş (available, todaySpent) + dil olarak da gelir ve burada src/i18n/format.ts ile
+ * aynı biçimde yazılır ("53.168,58 TL" / "₺53,168.58"). Böylece çiplerle kuyruğa eklenen ama uygulamanın henüz
+ * işlemediği kayıtlar tutara hemen yansıtılır (iyimser gösterim; bkz. load). hidden=true (uygulamada "Toplamları gizle"
+ * ya da cihazdaki "Widget'ta tutarı gizle") → tutarlar "•••• TL" ve maskot gizli ajan kıyafetinde (_spy görselleri).
+ * Ayrıca burada tutulanlar:
  *   writingAt : Gider/Gelir/kutucuk ile uygulama açıldığında (MainActivity) → "yazmaya gidiyorum" pozu (2 dk)
  *   notedAt   : çipe dokununca → "Not aldım ✓" pozu (3 dk). Uygulamada kayıt eklenince payload.notedAt aynı işi görür.
  *   queue     : çiplerle eklenen, uygulamanın henüz işlemediği kayıtlar (JSON dizi). Uygulama açılınca
- *               WidgetBridgePlugin.readQueue/ackQueue ile alınır ve silinir.
+ *               WidgetBridgePlugin.readQueue/ackQueue ile alınır ve silinir; uygulama sonra taze payload gönderir.
  */
 public class CepWidgetProvider extends AppWidgetProvider {
 
@@ -65,6 +80,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
     static final int SIZE_WIDE = 1;
     static final int SIZE_MEDIUM = 2;
     static final int SIZE_LARGE = 3;
+    static final int SIZE_SQUARE = 4;
 
     static final int POSE_NONE = 0;
     static final int POSE_WRITING = 1;
@@ -79,13 +95,27 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_mascot_diken,
         R.drawable.widget_mascot_karamel,
     };
-    /** Sahne zeminleri: şerit (küçük/geniş), geniş (orta), uzun (büyük). scripts/gen-android-icons.ts */
+    /** Sahne zeminleri, her düzenin en/boy oranında (scripts/gen-android-icons.ts SCENE_SIZES). */
+    static final int[] SCENE_MINI = {
+        R.drawable.widget_scene_fistik_mini,
+        R.drawable.widget_scene_bilge_mini,
+        R.drawable.widget_scene_ceviz_mini,
+        R.drawable.widget_scene_diken_mini,
+        R.drawable.widget_scene_karamel_mini,
+    };
     static final int[] SCENE_STRIP = {
         R.drawable.widget_scene_fistik_strip,
         R.drawable.widget_scene_bilge_strip,
         R.drawable.widget_scene_ceviz_strip,
         R.drawable.widget_scene_diken_strip,
         R.drawable.widget_scene_karamel_strip,
+    };
+    static final int[] SCENE_SQUARE = {
+        R.drawable.widget_scene_fistik_square,
+        R.drawable.widget_scene_bilge_square,
+        R.drawable.widget_scene_ceviz_square,
+        R.drawable.widget_scene_diken_square,
+        R.drawable.widget_scene_karamel_square,
     };
     static final int[] SCENE_WIDE = {
         R.drawable.widget_scene_fistik_wide,
@@ -101,13 +131,20 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_scene_diken_tall,
         R.drawable.widget_scene_karamel_tall,
     };
-    /** Saydam maskot pozları (geniş/orta/büyük): "yazmaya gidiyorum" ve "Not aldım! ✓". */
+    /** Saydam maskot pozları: "yazmaya gidiyorum" ve "Not aldım! ✓" (sade / gizli ajan). */
     static final int[] WRITE_IMG = {
         R.drawable.widget_anim_fistik_write,
         R.drawable.widget_anim_bilge_write,
         R.drawable.widget_anim_ceviz_write,
         R.drawable.widget_anim_diken_write,
         R.drawable.widget_anim_karamel_write,
+    };
+    static final int[] WRITE_IMG_SPY = {
+        R.drawable.widget_anim_fistik_spy_write,
+        R.drawable.widget_anim_bilge_spy_write,
+        R.drawable.widget_anim_ceviz_spy_write,
+        R.drawable.widget_anim_diken_spy_write,
+        R.drawable.widget_anim_karamel_spy_write,
     };
     static final int[] NOTED_IMG = {
         R.drawable.widget_anim_fistik_noted,
@@ -116,13 +153,27 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_anim_diken_noted,
         R.drawable.widget_anim_karamel_noted,
     };
-    /** Küçük araç: alttan bakan büst (sabit, yazıyor, not aldı). */
+    static final int[] NOTED_IMG_SPY = {
+        R.drawable.widget_anim_fistik_spy_noted,
+        R.drawable.widget_anim_bilge_spy_noted,
+        R.drawable.widget_anim_ceviz_spy_noted,
+        R.drawable.widget_anim_diken_spy_noted,
+        R.drawable.widget_anim_karamel_spy_noted,
+    };
+    /** Küçük araç: alttan bakan büst (sabit, yazıyor, not aldı; sade / gizli ajan). */
     static final int[] BUST = {
         R.drawable.widget_bust_fistik,
         R.drawable.widget_bust_bilge,
         R.drawable.widget_bust_ceviz,
         R.drawable.widget_bust_diken,
         R.drawable.widget_bust_karamel,
+    };
+    static final int[] BUST_SPY = {
+        R.drawable.widget_bust_fistik_spy,
+        R.drawable.widget_bust_bilge_spy,
+        R.drawable.widget_bust_ceviz_spy,
+        R.drawable.widget_bust_diken_spy,
+        R.drawable.widget_bust_karamel_spy,
     };
     static final int[] BUST_WRITE = {
         R.drawable.widget_bust_fistik_write,
@@ -131,6 +182,13 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_bust_diken_write,
         R.drawable.widget_bust_karamel_write,
     };
+    static final int[] BUST_WRITE_SPY = {
+        R.drawable.widget_bust_fistik_spy_write,
+        R.drawable.widget_bust_bilge_spy_write,
+        R.drawable.widget_bust_ceviz_spy_write,
+        R.drawable.widget_bust_diken_spy_write,
+        R.drawable.widget_bust_karamel_spy_write,
+    };
     static final int[] BUST_NOTED = {
         R.drawable.widget_bust_fistik_noted,
         R.drawable.widget_bust_bilge_noted,
@@ -138,7 +196,14 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_bust_diken_noted,
         R.drawable.widget_bust_karamel_noted,
     };
-    /** Maskot renginde düğmeler (üretilir: values/widget_mascot_colors.xml + drawable/widget_*_<anahtar>.xml). */
+    static final int[] BUST_NOTED_SPY = {
+        R.drawable.widget_bust_fistik_spy_noted,
+        R.drawable.widget_bust_bilge_spy_noted,
+        R.drawable.widget_bust_ceviz_spy_noted,
+        R.drawable.widget_bust_diken_spy_noted,
+        R.drawable.widget_bust_karamel_spy_noted,
+    };
+    /** Maskot renginde düğmeler ve çerçeve (üretilir: values/widget_mascot_colors.xml + drawable/widget_*_<anahtar>.xml). */
     static final int[] BTN = {
         R.drawable.widget_btn_fistik,
         R.drawable.widget_btn_bilge,
@@ -174,6 +239,13 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_fab_diken,
         R.drawable.widget_fab_karamel,
     };
+    static final int[] FRAME_BG = {
+        R.drawable.widget_frame_fistik,
+        R.drawable.widget_frame_bilge,
+        R.drawable.widget_frame_ceviz,
+        R.drawable.widget_frame_diken,
+        R.drawable.widget_frame_karamel,
+    };
     /** Canlandırma kareleri, saydam (scripts/gen-android-icons.ts, ANIM_FRAMES = 6). İlki aynı zamanda sabit kare. */
     static final int[][] FRAMES = {
         {
@@ -197,6 +269,28 @@ public class CepWidgetProvider extends AppWidgetProvider {
             R.drawable.widget_anim_karamel_3, R.drawable.widget_anim_karamel_4, R.drawable.widget_anim_karamel_5,
         },
     };
+    static final int[][] FRAMES_SPY = {
+        {
+            R.drawable.widget_anim_fistik_spy_0, R.drawable.widget_anim_fistik_spy_1, R.drawable.widget_anim_fistik_spy_2,
+            R.drawable.widget_anim_fistik_spy_3, R.drawable.widget_anim_fistik_spy_4, R.drawable.widget_anim_fistik_spy_5,
+        },
+        {
+            R.drawable.widget_anim_bilge_spy_0, R.drawable.widget_anim_bilge_spy_1, R.drawable.widget_anim_bilge_spy_2,
+            R.drawable.widget_anim_bilge_spy_3, R.drawable.widget_anim_bilge_spy_4, R.drawable.widget_anim_bilge_spy_5,
+        },
+        {
+            R.drawable.widget_anim_ceviz_spy_0, R.drawable.widget_anim_ceviz_spy_1, R.drawable.widget_anim_ceviz_spy_2,
+            R.drawable.widget_anim_ceviz_spy_3, R.drawable.widget_anim_ceviz_spy_4, R.drawable.widget_anim_ceviz_spy_5,
+        },
+        {
+            R.drawable.widget_anim_diken_spy_0, R.drawable.widget_anim_diken_spy_1, R.drawable.widget_anim_diken_spy_2,
+            R.drawable.widget_anim_diken_spy_3, R.drawable.widget_anim_diken_spy_4, R.drawable.widget_anim_diken_spy_5,
+        },
+        {
+            R.drawable.widget_anim_karamel_spy_0, R.drawable.widget_anim_karamel_spy_1, R.drawable.widget_anim_karamel_spy_2,
+            R.drawable.widget_anim_karamel_spy_3, R.drawable.widget_anim_karamel_spy_4, R.drawable.widget_anim_karamel_spy_5,
+        },
+    };
     static final int[] FRAME_IDS = {
         R.id.widget_frame_0, R.id.widget_frame_1, R.id.widget_frame_2,
         R.id.widget_frame_3, R.id.widget_frame_4, R.id.widget_frame_5,
@@ -207,6 +301,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
     static final class State {
         String amount = "—";
         String label;
+        String labelShort;
         String title;
         String add;
         String expense;
@@ -219,10 +314,14 @@ public class CepWidgetProvider extends AppWidgetProvider {
         int mascot = 0;
         boolean negative = false;
         boolean animate = true;
+        /** Tutarlar gizli (toplamları gizle ya da araçta gizle): "•••• TL" + gizli ajan maskot. */
+        boolean hidden = false;
         JSONArray chips = new JSONArray();
         int pose = POSE_NONE;
         /** Pozun biteceği an (ms); 0 = yenileme gerekmiyor. */
         long poseEndsAt = 0;
+        /** Uygulamanın henüz işlemediği, tutara iyimser olarak eklenen kuyruk öğesi sayısı. */
+        int pending = 0;
     }
 
     // ───────────────────────── Yaşam döngüsü ─────────────────────────
@@ -301,6 +400,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
     static State load(Context context, long now) {
         State st = new State();
         st.label = context.getString(R.string.widget_waiting);
+        st.labelShort = st.label;
         st.title = context.getString(R.string.widget_title);
         st.add = context.getString(R.string.widget_add);
         st.expense = context.getString(R.string.widget_expense);
@@ -312,11 +412,16 @@ public class CepWidgetProvider extends AppWidgetProvider {
         SharedPreferences p = prefs(context);
         long payloadNotedAt = 0;
         String json = p.getString(KEY, null);
+        String queueJson;
+        synchronized (LOCK) {
+            queueJson = p.getString(KEY_QUEUE, "[]");
+        }
         if (json != null) {
             try {
                 JSONObject o = new JSONObject(json);
                 st.amount = o.optString("amount", st.amount);
                 st.label = o.optString("label", st.label);
+                st.labelShort = o.optString("labelShort", st.label);
                 st.title = o.optString("title", st.title);
                 st.add = o.optString("add", st.add);
                 st.expense = o.optString("expense", st.expense);
@@ -329,9 +434,11 @@ public class CepWidgetProvider extends AppWidgetProvider {
                 st.mascot = mascotIndex(o.optString("mascot", "fistik"));
                 st.negative = o.optBoolean("negative", false);
                 st.animate = o.optBoolean("animate", true);
+                st.hidden = o.optBoolean("hidden", false);
                 payloadNotedAt = o.optLong("notedAt", 0L);
                 JSONArray chips = o.optJSONArray("chips");
                 if (chips != null) st.chips = chips;
+                applyAmounts(st, o, parseArray(queueJson), now);
             } catch (JSONException ignored) {
                 // Bozuk veri: varsayılan metinler kalır.
             }
@@ -349,6 +456,97 @@ public class CepWidgetProvider extends AppWidgetProvider {
             st.poseEndsAt = writingAt + WRITING_MS;
         }
         return st;
+    }
+
+    /**
+     * Tutar ve "Bugün" satırını ham kuruştan yazar (yeni payload; eskisinde hazır metinler kalır).
+     * İyimser gösterim: kuyruktaki, uygulamanın henüz işlemediği öğeler (qid payload.seen içinde değil; seen yoksa
+     * dokunma anı payload.updatedAt'ten sonra) kullanılabilir tutardan düşülür (gelir eklenir), bugün dokunulmuş
+     * giderler "Bugün"e eklenir. Yalnız gerçek veride (payload.real) uygulanır; örnek veri kuyruktan etkilenmez.
+     */
+    static void applyAmounts(State st, JSONObject o, JSONArray queue, long now) {
+        if (!o.has("available") || !o.has("lang")) return;
+        String lang = o.optString("lang", "tr");
+        boolean real = o.optBoolean("real", false);
+        boolean hasAvailable = !o.isNull("available");
+        long available = o.optLong("available", 0L);
+        String todayIso = o.optString("todayISO", "");
+        long today = todayIso.equals(isoDate(now)) ? o.optLong("todaySpent", 0L) : 0L;
+        long generatedAt = o.optLong("updatedAt", 0L);
+        JSONArray seenArr = o.optJSONArray("seen");
+        Set<String> seen = null;
+        if (seenArr != null) {
+            seen = new HashSet<>();
+            for (int i = 0; i < seenArr.length(); i++) seen.add(seenArr.optString(i, ""));
+        }
+        if (real && hasAvailable) {
+            String todayNow = isoDate(now);
+            for (int i = 0; i < queue.length(); i++) {
+                JSONObject e = queue.optJSONObject(i);
+                if (e == null) continue;
+                String qid = e.optString("qid", "");
+                long at = e.optLong("at", 0L);
+                if (seen != null ? seen.contains(qid) : at <= generatedAt) continue;
+                long amt = e.optLong("amount", 0L);
+                if (amt <= 0) continue;
+                String type = e.optString("type", "");
+                if ("expense".equals(type)) {
+                    available -= amt;
+                    if (todayNow.equals(isoDate(at))) today += amt;
+                } else if ("income".equals(type)) {
+                    available += amt;
+                } else {
+                    continue;
+                }
+                st.pending++;
+            }
+        }
+        if (hasAvailable) {
+            st.amount = st.hidden ? hiddenMoney(lang) : formatMoney(available, lang);
+            st.negative = !st.hidden && available < 0;
+        }
+        String tpl = o.optString("todayTpl", "");
+        if (hasAvailable && tpl.contains("%s")) {
+            st.today = tpl.replace("%s", st.hidden ? hiddenMoney(lang) : formatMoney(today, lang));
+        }
+    }
+
+    /** Cihazın yerel tarihi, "YYYY-MM-DD" (JS todayISO ile aynı). */
+    static String isoDate(long ms) {
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(ms);
+        return String.format(Locale.ROOT, "%04d-%02d-%02d", c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH));
+    }
+
+    /**
+     * src/domain/money.ts formatMoney (compact, birimli) ile birebir: kuruş sıfırsa ondalık yok, eksi "−" (U+2212).
+     *   tr: "53.168,58 TL", "1.234 TL", "−12,50 TL"     en: "₺53,168.58", "₺1,234", "−₺12.50"
+     */
+    static String formatMoney(long m, String lang) {
+        boolean en = "en".equals(lang);
+        boolean neg = m < 0;
+        long abs = Math.abs(m);
+        long lira = abs / 100;
+        long kurus = abs % 100;
+        String digits = Long.toString(lira);
+        StringBuilder body = new StringBuilder();
+        char group = en ? ',' : '.';
+        for (int i = 0; i < digits.length(); i++) {
+            if (i > 0 && (digits.length() - i) % 3 == 0) body.append(group);
+            body.append(digits.charAt(i));
+        }
+        if (kurus != 0) {
+            body.append(en ? '.' : ',');
+            if (kurus < 10) body.append('0');
+            body.append(kurus);
+        }
+        String prefix = neg ? "−" : "";
+        return en ? prefix + "₺" + body : prefix + body + " TL";
+    }
+
+    /** Gizli tutar: "•••• TL" (en: "₺••••"). */
+    static String hiddenMoney(String lang) {
+        return "en".equals(lang) ? "₺••••" : "•••• TL";
     }
 
     static int mascotIndex(String key) {
@@ -373,23 +571,47 @@ public class CepWidgetProvider extends AppWidgetProvider {
 
     // ───────────────────────── Düzen seçimi ─────────────────────────
 
+    /** Android 12+ yedek çapaları (gerçek boyutlar bildirilmediyse): {genişlik, yükseklik} dp, 16 adet (sınır). */
+    static final float[] ANCHOR_W = { 100f, 200f, 280f, 320f };
+    static final float[] ANCHOR_H = { 40f, 130f, 200f, 250f };
+    /** RemoteViews(Map) en fazla 16 boyut kabul eder. */
+    static final int MAX_SIZES = 16;
+
     static RemoteViews viewsFor(Context context, AppWidgetManager manager, int appWidgetId, State st) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // Başlatıcı, aracın o anki boyuna sığan en büyük düzeni seçer (dp).
             Map<SizeF, RemoteViews> sized = new HashMap<>();
-            sized.put(new SizeF(100f, 40f), build(context, SIZE_SMALL, st));
-            sized.put(new SizeF(180f, 40f), build(context, SIZE_WIDE, st));
-            sized.put(new SizeF(180f, 120f), build(context, SIZE_MEDIUM, st));
-            sized.put(new SizeF(250f, 200f), build(context, SIZE_LARGE, st));
+            // Başlatıcının bu araç için bildirdiği gerçek boyutlar (dikey/yatay): her birine tam o boyutun düzeni.
+            ArrayList<SizeF> sizes = null;
+            try {
+                Bundle o = manager.getAppWidgetOptions(appWidgetId);
+                if (o != null) sizes = o.getParcelableArrayList(AppWidgetManager.OPTION_APPWIDGET_SIZES);
+            } catch (RuntimeException ignored) {
+                sizes = null;
+            }
+            if (sizes != null) {
+                for (SizeF s : sizes) {
+                    if (s == null || s.getWidth() <= 0 || s.getHeight() <= 0 || sized.containsKey(s) || sized.size() >= MAX_SIZES) continue;
+                    sized.put(s, build(context, pickSize(s.getWidth(), s.getHeight()), st, s.getWidth(), s.getHeight()));
+                }
+            }
+            if (sized.isEmpty()) {
+                // Boyut bilinmiyor: kovaları temsil eden çapalar; başlatıcı sığanların en yakınını seçer.
+                for (float w : ANCHOR_W) {
+                    for (float h : ANCHOR_H) {
+                        sized.put(new SizeF(w, h), build(context, pickSize(w, h), st, 0f, 0f));
+                    }
+                }
+            }
             return new RemoteViews(sized);
         }
-        return build(context, legacySize(context, manager, appWidgetId), st);
+        float[] wh = legacySize(context, manager, appWidgetId);
+        return build(context, pickSize(wh[0], wh[1]), st, wh[0], wh[1]);
     }
 
-    /** Android 11 ve öncesi: dikeyde en küçük genişlik × en büyük yükseklik, yatayda tersi. */
-    static int legacySize(Context context, AppWidgetManager manager, int appWidgetId) {
+    /** Android 11 ve öncesi: dikeyde en küçük genişlik × en büyük yükseklik, yatayda tersi. {0,0} = bilinmiyor. */
+    static float[] legacySize(Context context, AppWidgetManager manager, int appWidgetId) {
         Bundle o = manager.getAppWidgetOptions(appWidgetId);
-        if (o == null) return SIZE_MEDIUM;
+        if (o == null) return new float[] { 0f, 0f };
         int minW = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0);
         int maxW = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, 0);
         int minH = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0);
@@ -397,37 +619,60 @@ public class CepWidgetProvider extends AppWidgetProvider {
         boolean landscape = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
         int w = landscape ? maxW : minW;
         int h = landscape ? minH : maxH;
-        if (w <= 0 || h <= 0) return SIZE_MEDIUM;
-        return pickSize(w, h);
+        if (w <= 0 || h <= 0) return new float[] { 0f, 0f };
+        return new float[] { w, h };
     }
 
-    static int pickSize(int w, int h) {
-        if (w >= 250 && h >= 200) return SIZE_LARGE;
-        if (w >= 180 && h >= 120) return SIZE_MEDIUM;
-        if (w >= 180) return SIZE_WIDE;
-        return SIZE_SMALL;
+    /**
+     * Boyut + en/boy oranı → düzen (dp). Samsung ızgarasında (hücre ≈ 80×100 dp):
+     *   2×1 küçük · 3×1, 4×1, 5×1 geniş · 2×2, 3×2, 3×3, 2×3 kare · 4×2, 5×2 orta · 4×3, 4×4, 5×3+ büyük.
+     * Bilinmeyen boyut (0) → orta.
+     */
+    static int pickSize(float w, float h) {
+        if (w <= 0 || h <= 0) return SIZE_MEDIUM;
+        if (h < 130f) return w < 200f ? SIZE_SMALL : SIZE_WIDE;
+        if (w >= 280f && h >= 250f) return SIZE_LARGE;
+        if (w >= 260f && w / h >= 1.4f) return SIZE_MEDIUM;
+        return SIZE_SQUARE;
     }
 
     // ───────────────────────── Çizim ─────────────────────────
 
-    static RemoteViews build(Context context, int size, State st) {
-        int layout;
+    static int layoutFor(int size) {
         switch (size) {
             case SIZE_SMALL:
-                layout = R.layout.widget_small;
-                break;
+                return R.layout.widget_small;
             case SIZE_WIDE:
-                layout = R.layout.widget_cep;
-                break;
+                return R.layout.widget_cep;
+            case SIZE_SQUARE:
+                return R.layout.widget_square;
             case SIZE_LARGE:
-                layout = R.layout.widget_large;
-                break;
+                return R.layout.widget_large;
             default:
-                layout = R.layout.widget_medium;
-                break;
+                return R.layout.widget_medium;
         }
-        RemoteViews views = new RemoteViews(context.getPackageName(), layout);
+    }
+
+    /**
+     * Düzene göre görünümler. Her düzende bulunan kimlikler (bir düzende olmayan kimliğe dokunmak aracı bozar):
+     *   hepsi          widget_root, widget_inner, widget_scene, widget_amount
+     *   küçük          + widget_mascot (büst)
+     *   geniş, kare    + widget_mascot, widget_body, widget_title, widget_label, widget_note, widget_add
+     *   orta           + widget_mascot, widget_body, widget_title, widget_label, widget_note, widget_btn_expense/income
+     *   büyük          + widget_body, widget_title, widget_label, widget_note, widget_today, widget_btn_expense/income,
+     *                    widget_flipper, widget_frame_0..5, widget_static, widget_chips, widget_chip_0..2
+     * w, h: aracın dp boyutu (0 = bilinmiyor; o zaman XML varsayılanları kalır).
+     */
+    static RemoteViews build(Context context, int size, State st, float w, float h) {
+        RemoteViews views = new RemoteViews(context.getPackageName(), layoutFor(size));
         int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
+        float density = context.getResources().getDisplayMetrics().density;
+        boolean known = w > 0 && h > 0;
+        int m = st.mascot;
+        boolean spy = st.hidden;
+
+        // Çerçeve: kök zemini maskot renginin koyusu (içerik 2 dp içeride).
+        views.setInt(R.id.widget_root, "setBackgroundResource", FRAME_BG[m]);
 
         views.setTextViewText(R.id.widget_amount, st.amount);
         int amountColor = st.negative ? R.color.widget_accent : R.color.widget_ink;
@@ -442,30 +687,97 @@ public class CepWidgetProvider extends AppWidgetProvider {
             open.addCategory(Intent.CATEGORY_LAUNCHER);
         }
         open.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        views.setOnClickPendingIntent(R.id.widget_root, PendingIntent.getActivity(context, 0, open, flags));
+        PendingIntent openPi = PendingIntent.getActivity(context, 0, open, flags);
+        views.setOnClickPendingIntent(R.id.widget_root, openPi);
 
-        int m = st.mascot;
-        int scene = size == SIZE_LARGE ? SCENE_TALL[m] : size == SIZE_MEDIUM ? SCENE_WIDE[m] : SCENE_STRIP[m];
+        int scene;
+        switch (size) {
+            case SIZE_SMALL:
+                scene = SCENE_MINI[m];
+                break;
+            case SIZE_WIDE:
+                scene = SCENE_STRIP[m];
+                break;
+            case SIZE_SQUARE:
+                scene = SCENE_SQUARE[m];
+                break;
+            case SIZE_LARGE:
+                scene = SCENE_TALL[m];
+                break;
+            default:
+                scene = SCENE_WIDE[m];
+                break;
+        }
         views.setImageViewResource(R.id.widget_scene, scene);
         int btnInk = context.getResources().getColor(BTN_INK[m], context.getTheme());
 
+        int bust;
+        if (st.pose == POSE_WRITING) bust = spy ? BUST_WRITE_SPY[m] : BUST_WRITE[m];
+        else if (st.pose == POSE_NOTED) bust = spy ? BUST_NOTED_SPY[m] : BUST_NOTED[m];
+        else bust = spy ? BUST_SPY[m] : BUST[m];
+        // Dar geniş araçta (3×1) tam boy maskot çok küçülür: onun yerine büst (yüksekliğin ≈ %90'ı).
+        boolean narrowWide = size == SIZE_WIDE && known && w < 280f;
+
         if (size == SIZE_SMALL) {
-            int bust = st.pose == POSE_WRITING ? BUST_WRITE[m] : st.pose == POSE_NOTED ? BUST_NOTED[m] : BUST[m];
             views.setImageViewResource(R.id.widget_mascot, bust);
+            // Büst yüksekliğin ≈ %88'i; genişliği aracın yarısını geçmesin (tutara yer kalsın).
+            if (known) views.setInt(R.id.widget_mascot, "setMaxWidth", Math.round(w * 0.5f * density));
+            // Tutar paneli de uygulamayı açar (basınca dalga).
+            views.setOnClickPendingIntent(R.id.widget_amount, openPi);
+            fitAmountLegacy(views, st.amount, known ? w * 0.5f - 28f : 0f, 20f);
             return views;
         }
-        if (size != SIZE_LARGE) {
-            int img = st.pose == POSE_WRITING ? WRITE_IMG[m] : st.pose == POSE_NOTED ? NOTED_IMG[m] : FRAMES[m][0];
-            views.setImageViewResource(R.id.widget_mascot, img);
-        }
 
+        int[] frames = spy ? FRAMES_SPY[m] : FRAMES[m];
+        int still;
+        if (st.pose == POSE_WRITING) still = spy ? WRITE_IMG_SPY[m] : WRITE_IMG[m];
+        else if (st.pose == POSE_NOTED) still = spy ? NOTED_IMG_SPY[m] : NOTED_IMG[m];
+        else still = frames[0];
+        if (size != SIZE_LARGE) views.setImageViewResource(R.id.widget_mascot, narrowWide ? bust : still);
+
+        views.setOnClickPendingIntent(R.id.widget_body, openPi);
         views.setTextViewText(R.id.widget_title, st.title);
-        views.setTextViewText(R.id.widget_label, st.label);
         String status = st.pose == POSE_NOTED ? st.noted : st.pose == POSE_WRITING ? st.writing : st.note;
         views.setTextViewText(R.id.widget_note, status);
         views.setViewVisibility(R.id.widget_note, status.isEmpty() ? View.GONE : View.VISIBLE);
 
-        if (size == SIZE_WIDE) {
+        // Panelin iç genişliği (dp, yaklaşık): tutar ve dönem metni buna göre (dönem: tam → kısa → gizli).
+        float panelW = 0f;
+        if (known) {
+            switch (size) {
+                case SIZE_WIDE: {
+                    float share = narrowWide ? 0.34f : 0.30f;
+                    float mascotW = Math.min(w * share, (h - 11f) * (narrowWide ? 1.1f : 1.35f));
+                    panelW = w - 4f - 8f - mascotW - 4f - 6f - 40f - 18f - 4f;
+                    views.setInt(R.id.widget_mascot, "setMaxWidth", Math.round(w * share * density));
+                    break;
+                }
+                case SIZE_SQUARE:
+                    panelW = w - 16f - 18f - 4f;
+                    break;
+                case SIZE_MEDIUM:
+                    panelW = (w - 16f - 6f - 4f) * 0.56f - 22f;
+                    break;
+                default: {
+                    // Büyük: canlanan maskot en fazla aracın %45'i (panel ≥ %55, tutar büyük kalsın).
+                    int maxPx = Math.round(Math.min(170f, w * 0.45f) * density);
+                    for (int id : FRAME_IDS) views.setInt(id, "setMaxWidth", maxPx);
+                    views.setInt(R.id.widget_static, "setMaxWidth", maxPx);
+                    panelW = w - 20f - 4f - Math.min(170f, w * 0.45f) - 4f - 22f;
+                    break;
+                }
+            }
+        }
+        // Tek satırlık ve kare araçta durum notu ("Not aldım ✓") geçici olarak dönemin yerini alır (yükseklik yetmez);
+        // geniş araçta başlık da gizlenir.
+        boolean statusReplaces = !status.isEmpty() && (size == SIZE_WIDE || size == SIZE_SQUARE);
+        views.setViewVisibility(R.id.widget_title, statusReplaces && size == SIZE_WIDE ? View.GONE : View.VISIBLE);
+        String label = statusReplaces ? "" : chooseLabel(st.label, st.labelShort, panelW, 11f);
+        views.setTextViewText(R.id.widget_label, label);
+        views.setViewVisibility(R.id.widget_label, label.isEmpty() ? View.GONE : View.VISIBLE);
+        fitAmountLegacy(views, st.amount, panelW, size == SIZE_WIDE ? 30f : 28f);
+
+        if (size == SIZE_WIDE || size == SIZE_SQUARE) {
             // Yuvarlak "+" (maskot renginde): derin bağlantı → uygulama ekleme sayfasını açar.
             views.setInt(R.id.widget_add, "setBackgroundResource", FAB[m]);
             views.setTextColor(R.id.widget_add, btnInk);
@@ -487,28 +799,27 @@ public class CepWidgetProvider extends AppWidgetProvider {
         views.setTextViewText(R.id.widget_today, st.today);
         views.setViewVisibility(R.id.widget_today, st.today.isEmpty() ? View.GONE : View.VISIBLE);
 
-        int[] frames = FRAMES[m];
         for (int i = 0; i < FRAME_IDS.length; i++) {
             views.setImageViewResource(FRAME_IDS[i], frames[i]);
         }
-        int still;
-        if (st.pose == POSE_WRITING) still = WRITE_IMG[m];
-        else if (st.pose == POSE_NOTED) still = NOTED_IMG[m];
-        else still = frames[0];
         boolean flip = st.animate && st.pose == POSE_NONE;
         views.setImageViewResource(R.id.widget_static, still);
         views.setViewVisibility(R.id.widget_flipper, flip ? View.VISIBLE : View.GONE);
         views.setViewVisibility(R.id.widget_static, flip ? View.GONE : View.VISIBLE);
 
         int shown = 0;
+        // Çipler içerikleri kadar geniş, sola dayalı; sığmayan (tahmini genişlik) çip gösterilmez, kesik görünmez.
+        float room = known ? w - 20f - 4f : Float.MAX_VALUE;
         for (int i = 0; i < CHIP_IDS.length; i++) {
             JSONObject chip = i < MAX_CHIPS ? st.chips.optJSONObject(i) : null;
             String id = chip == null ? "" : chip.optString("id", "");
-            if (chip == null || id.isEmpty()) {
+            float chipW = chip == null ? 0f : Math.min(150f, textWidth(chip.optString("label", ""), 12f) + 22f) + (shown > 0 ? 6f : 0f);
+            if (chip == null || id.isEmpty() || chipW > room) {
                 views.setViewVisibility(CHIP_IDS[i], View.GONE);
                 continue;
             }
             shown++;
+            room -= chipW;
             views.setTextViewText(CHIP_IDS[i], chip.optString("label", ""));
             views.setInt(CHIP_IDS[i], "setBackgroundResource", CHIP_BG[m]);
             views.setViewVisibility(CHIP_IDS[i], View.VISIBLE);
@@ -520,6 +831,28 @@ public class CepWidgetProvider extends AppWidgetProvider {
         }
         views.setViewVisibility(R.id.widget_chips, shown > 0 ? View.VISIBLE : View.GONE);
         return views;
+    }
+
+    /** Metnin yaklaşık genişliği (dp): ortalama karakter ≈ 0.52 em (Roboto/SamsungOne, küçük yazı). */
+    static float textWidth(String s, float sp) {
+        return s.length() * sp * 0.52f;
+    }
+
+    /** Dönem metni: sığarsa tam, değilse kısa, o da sığmazsa gizli (""). panelW = 0 → tam (bilinmiyor). */
+    static String chooseLabel(String full, String shortLabel, float panelW, float sp) {
+        if (panelW <= 0f || textWidth(full, sp) <= panelW) return full;
+        if (shortLabel != null && !shortLabel.isEmpty() && textWidth(shortLabel, sp) <= panelW) return shortLabel;
+        return "";
+    }
+
+    /**
+     * Android 8 öncesinde autoSize yok: tutar boyutu panel genişliğinden hesaplanır (kalın rakam ≈ 0.6 em).
+     * 8+ sürümlerde XML'deki autoSizeTextType="uniform" tutarı sığdırır (setTextSize orada yok sayılır, dokunulmaz).
+     */
+    static void fitAmountLegacy(RemoteViews views, String amount, float widthDp, float maxSp) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O || widthDp <= 0f || amount.isEmpty()) return;
+        float sp = Math.max(10f, Math.min(maxSp, widthDp / (amount.length() * 0.6f)));
+        views.setTextViewTextSize(R.id.widget_amount, TypedValue.COMPLEX_UNIT_SP, sp);
     }
 
     /** Ekleme sayfası derin bağlantısı; type: "expense" | "income" | null. */
@@ -573,8 +906,9 @@ public class CepWidgetProvider extends AppWidgetProvider {
                 return;
             }
         }
-        Toast.makeText(context, label.isEmpty() ? queuedText : queuedText + " " + label, Toast.LENGTH_SHORT).show();
+        // Önce araç: "Not aldım ✓" pozu ve kuyruk düşülmüş tutar hemen görünsün; sonra kısa bildirim.
         refreshAll(context);
+        Toast.makeText(context, label.isEmpty() ? queuedText : queuedText + " " + label, Toast.LENGTH_SHORT).show();
     }
 
     static JSONArray parseArray(String s) {

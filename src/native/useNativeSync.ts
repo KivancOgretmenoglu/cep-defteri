@@ -52,12 +52,20 @@ function handleNotif(ex: NotifExtra) {
 let setupDone = false;
 let backupTimer: ReturnType<typeof setTimeout> | undefined;
 let backupPending = false;
+let widgetTimer: ReturnType<typeof setTimeout> | undefined;
 
 function syncNow(opts: { backupIfStale?: boolean } = {}) {
   const { data, today, mode } = getState();
   rescheduleNotifications(data, today, mode);
   updateWidget(data, today, mode, true);
   if (opts.backupIfStale && !backedUpToday(getDevice().autoBackup.lastAt, today)) runAutoBackup(data, mode);
+}
+
+/** Aracı hemen güncelle (gecikmeli güncellemeyi iptal ederek). */
+function syncWidgetNow() {
+  clearTimeout(widgetTimer);
+  const { data, today, mode } = getState();
+  void updateWidget(data, today, mode);
 }
 
 function flushBackup() {
@@ -81,7 +89,11 @@ function setupOnce() {
             refreshToday();
             void ingestWidgetQueue();
             syncNow({ backupIfStale: true });
-          } else flushBackup();
+          } else {
+            // Arka plana geçerken: bekleyen (gecikmeli) araç güncellemesini beklemeden en son veriyi gönder.
+            syncWidgetNow();
+            flushBackup();
+          }
         });
         const launch = await App.getLaunchUrl().catch(() => undefined);
         handleDeepLink(launch?.url);
@@ -116,14 +128,19 @@ export function useNativeSync(): void {
     if (mode === 'real' && isNative()) void ingestWidgetQueue();
   }, [mode]);
 
-  // Bildirim + araç: veri ya da tercih değişince (kısa gecikmeyle, art arda değişiklikler birleşir).
+  // Araç: veri ya da araç tercihi değişince hemen sayılır (300 ms; art arda değişiklikler birleşir). Kayıt eklenince
+  // tutar ve "Not aldım ✓" pozu ana ekrana dönmeden güncellenmiş olur; arka plana geçişte ayrıca beklemeden gönderilir.
   useEffect(() => {
-    const t = setTimeout(() => {
-      rescheduleNotifications(data, today, mode);
-      updateWidget(data, today, mode);
-    }, 1500);
+    clearTimeout(widgetTimer);
+    widgetTimer = setTimeout(() => void updateWidget(data, today, mode), 300);
+    return () => clearTimeout(widgetTimer);
+  }, [data, today, mode, widgetPrefs]);
+
+  // Bildirimler: daha pahalı, 1.5 sn gecikmeyle.
+  useEffect(() => {
+    const t = setTimeout(() => rescheduleNotifications(data, today, mode), 1500);
     return () => clearTimeout(t);
-  }, [data, today, mode, notif, widgetPrefs]);
+  }, [data, today, mode, notif]);
 
   // Otomatik yedek: veri değişikliğinden 15 sn sonra (açılıştaki ilk değer hariç; o setupOnce'ta).
   useEffect(() => {

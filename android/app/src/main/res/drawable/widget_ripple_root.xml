@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Araç kökünün ön planı (android:foreground): sahnenin boş bir yerine basınca tüm araçta yarı saydam dalga.
+    İçeriği yok, yalnız maske (yuvarlak köşeli); basılmadığında hiçbir şey çizmez.
+-->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="@color/widget_ripple">
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+            <solid android:color="#FFFFFFFF" />
+            <corners android:radius="@dimen/widget_radius" />
+        </shape>
+    </item>
+</ripple>

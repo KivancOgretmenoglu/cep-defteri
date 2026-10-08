@@ -3,7 +3,7 @@
  * Ayarlar.tsx bunları mevcut kartların arasına yerleştirir.
  */
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Bell, Fingerprint, HardDriveDownload, LayoutGrid, Lock, RotateCcw } from 'lucide-react';
+import { Bell, EyeOff, Fingerprint, HardDriveDownload, LayoutGrid, Lock, RotateCcw } from 'lucide-react';
 import { SectionHead, Segmented } from '../ui/kit';
 import { isNative } from '../platform';
 import { getDevice, setDevice, useDevice, type DevicePrefs } from '../store/device';
@@ -396,13 +396,17 @@ const WIDGET_TXT = {
     title: 'Ana ekran aracı',
     anim: 'Widget animasyonu',
     animHint: 'Büyük araçta (4×3 ve üstü) maskot kendi sahnesinde kısa bir döngü oynar. Kapalıyken sabit durur.',
-    info: 'Araç boyuna göre değişir: küçükte tutar, ortada Gider / Gelir düğmeleri, büyükte bugünkü harcama ve sık kayıtların tek dokunuşla eklendiği çipler. Çiplerle eklenenler uygulamayı açınca kaydedilir.',
+    hide: "Widget'ta tutarı gizle",
+    hideHint: 'Ana ekrandaki araçta tutarlar "•••• TL" görünür (çiplerde ve bugünkü harcamada da), maskot gizli ajan gözlüğü takar. Uygulamanın içi etkilenmez.',
+    info: 'Araç boyuna göre değişir: küçükte tutar, karede büyük maskot ve +, ortada Gider / Gelir düğmeleri, büyükte bugünkü harcama ve sık kayıtların tek dokunuşla eklendiği çipler. Çiplerle eklenenler araçtaki tutara hemen yansır, uygulamayı açınca kaydedilir.',
   },
   en: {
     title: 'Home screen widget',
     anim: 'Widget animation',
     animHint: 'On the large widget (4×3 and up) your mascot plays a short loop in its own scene. When off, it stays still.',
-    info: 'The widget adapts to its size: the amount when small, Expense / Income buttons when medium, and today’s spending plus one-tap chips for frequent entries when large. Chip entries are saved the next time you open the app.',
+    hide: 'Hide amount on widget',
+    hideHint: 'The home screen widget shows "₺••••" instead of amounts (on chips and today’s spending too) and your mascot puts on its secret-agent glasses. The app itself is unaffected.',
+    info: 'The widget adapts to its size: the amount when small, a big mascot and + when square, Expense / Income buttons when medium, and today’s spending plus one-tap chips for frequent entries when large. Chip entries show up in the widget’s amount right away and are saved the next time you open the app.',
   },
 } as const;
 
@@ -417,6 +421,9 @@ export function WidgetSettings() {
       <SectionHead id="s-widget" title={s.title} />
       <Row title={<><LayoutGrid size={16} aria-hidden /> {s.anim}</>} hint={s.animHint}>
         <Segmented<OnOff> size="sm" label={s.anim} value={w.animate ? 'on' : 'off'} onChange={(v) => setWidgetPrefs({ animate: v === 'on' })} options={ONOFF} />
+      </Row>
+      <Row title={<><EyeOff size={16} aria-hidden /> {s.hide}</>} hint={s.hideHint}>
+        <Segmented<OnOff> size="sm" label={s.hide} value={w.hideAmount ? 'on' : 'off'} onChange={(v) => setWidgetPrefs({ hideAmount: v === 'on' })} options={ONOFF} />
       </Row>
       <p className="muted small">{s.info}</p>
     </section>

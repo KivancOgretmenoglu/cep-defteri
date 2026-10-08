@@ -1,11 +1,13 @@
 /**
- * Ana ekran aracının (widget) göstereceği metinler ve maskot. Biçimlendirme (dil dahil) burada yapılır;
- * Java tarafı (CepWidgetProvider) yalnız yazar, boyuta göre düzeni ve `mascot` anahtarına göre görselleri seçer.
+ * Ana ekran aracının (widget) göstereceği metinler ve maskot. Metinler (dil dahil) burada hazırlanır; tutarlar ayrıca
+ * ham kuruş olarak (`available`, `todaySpent`) gider: Java tarafı (CepWidgetProvider) bunları src/domain/money.ts
+ * formatMoney ile aynı biçimde yazar ve çiplerle kuyruğa eklenmiş ama henüz işlenmemiş kayıtları iyimser olarak düşer.
+ * Boyuta göre düzeni ve `mascot` anahtarına göre görselleri Java seçer; `hidden` ise maskot gizli ajan kıyafetindedir.
  */
 import type { Data, ID, Lang } from '../domain/types';
 import { availability, rangeSummary } from '../domain/ledger';
 import { dayOfMonth, monthName, monthOf, type ISODate, type MonthKey } from '../domain/dates';
-import { formatMoney } from '../domain/money';
+import { formatMoney, hiddenMoney, type Money } from '../domain/money';
 import { categoryName } from '../domain/defaults';
 import { frequentTemplates } from '../ui/hooks';
 import { DEFAULT_MASCOT, MASCOT_KEYS, type MascotKey } from '../mascot/characters';
@@ -28,10 +30,14 @@ export interface WidgetChip {
 }
 
 export interface WidgetPayload {
-  /** "1.234 TL", "•••• TL" ya da "—" */
+  /** "1.234 TL" (en: "₺1,234"), "•••• TL" ya da "—" (eski APK'lar için; yenisi `available`tan yazar) */
   amount: string;
+  /** Kullanılabilir tutar, kuruş; hesap yoksa null */
+  available: Money | null;
   /** "Ekim sonuna kadar" / "until end of October" */
   label: string;
+  /** Dar araçta: "Ekim sonu" / "end of Oct" */
+  labelShort: string;
   /** Küçük not: "örnek veri" / "hesap ekleyince görünür" / "" */
   note: string;
   negative: boolean;
@@ -48,6 +54,17 @@ export interface WidgetPayload {
   income: string;
   /** Büyük araç: "Bugün: 120 TL" ("" = gösterme) */
   today: string;
+  /** Bugünkü harcama, kuruş (iyimser gösterim için ham değer) ve şablonu: "Bugün: %s" ("" = gösterme) */
+  todaySpent: Money;
+  todayTpl: string;
+  /** Payload'ın hazırlandığı gün (cihaz tarihi değiştiyse araç bugünkü harcamayı 0 sayar) */
+  todayISO: ISODate;
+  /** Tutarlar gizli: uygulamada "Toplamları gizle" ya da cihazda "Widget'ta tutarı gizle" (maskot gizli ajan olur) */
+  hidden: boolean;
+  /** Gerçek veri mi (örnek veri modunda kuyruk tutara yansıtılmaz) */
+  real: boolean;
+  /** Bu veriye zaten işlenmiş kuyruk qid'leri (widgetSeen.ts); araç bunları iyimser olarak düşmez */
+  seen: string[];
   /** Büyük araçta canlandırma (cihaz tercihi, widgetPrefs.ts) */
   animate: boolean;
   /** Uygulamada son kaydın eklendiği an (ms; yalnız gerçek veri, yoksa 0). Araç 3 dk "Not aldım ✓" gösterir. */
@@ -70,6 +87,8 @@ const STR = {
     expense: 'Gider',
     income: 'Gelir',
     today: (m: string) => `Bugün: ${m}`,
+    monthEndShort: (m: MonthKey) => `${monthName(m)} sonu`,
+    untilShort: (d: ISODate) => `${dayOfMonth(d)} ${monthName(monthOf(d))}`,
     noted: 'Not aldım! ✓',
     writing: 'Yazmaya gidiyorum…',
     queued: 'Not aldım ✓',
@@ -85,6 +104,8 @@ const STR = {
     expense: 'Expense',
     income: 'Income',
     today: (m: string) => `Today: ${m}`,
+    monthEndShort: (m: MonthKey) => `end of ${MONTHS_EN[Number(m.slice(5, 7)) - 1].slice(0, 3)}`,
+    untilShort: (d: ISODate) => `to ${dayOfMonth(d)} ${MONTHS_EN[Number(d.slice(5, 7)) - 1].slice(0, 3)}`,
     noted: 'Got it! ✓',
     writing: 'Off to jot it down…',
     queued: 'Got it ✓',
@@ -111,6 +132,22 @@ export function periodLabel(data: Data, today: ISODate, periodEnd: ISODate, lang
   return s.until(periodEnd);
 }
 
+/** Dar araç için kısa dönem: "Ekim sonu" / "13 Kasım" (en: "end of Oct" / "to 13 Nov"). */
+export function periodLabelShort(data: Data, today: ISODate, periodEnd: ISODate, lang: Lang = widgetLang(data)): string {
+  const s = STR[lang];
+  if (data.settings.periodMode === 'month') return s.monthEndShort(monthOf(today));
+  return s.untilShort(periodEnd);
+}
+
+export interface WidgetOpts {
+  /** Büyük araçta canlandırma (cihaz tercihi) */
+  animate?: boolean;
+  /** Cihaz tercihi "Widget'ta tutarı gizle" (uygulamadaki toplamları gizlemeden bağımsız) */
+  hideAmount?: boolean;
+  /** İşlenmiş kuyruk qid'leri (widgetSeen.ts) */
+  seen?: string[];
+}
+
 /** Kategori simgesi → çip emojisi (ui/icons.tsx'teki adlar). */
 const CHIP_EMOJI: Record<string, string> = {
   utensils: '🍽️', basket: '🛒', bus: '🚌', home: '🏠', bolt: '⚡', repeat: '🔁', phone: '📱', book: '📚', ticket: '🎟️',
@@ -119,9 +156,8 @@ const CHIP_EMOJI: Record<string, string> = {
   fuel: '⛽', sparkles: '✨', wallet: '👛', bank: '🏦', sprout: '🌱', cash: '💵',
 };
 
-/** Sık tekrarlanan giderlerden (ui/hooks.ts frequentTemplates) en fazla 3 çip. */
-export function widgetChips(data: Data, today: ISODate, lang: Lang = widgetLang(data)): WidgetChip[] {
-  const hidden = data.settings.hideTotals;
+/** Sık tekrarlanan giderlerden (ui/hooks.ts frequentTemplates) en fazla 3 çip. hidden: tutarsız etiket ("☕ Kahve"). */
+export function widgetChips(data: Data, today: ISODate, lang: Lang = widgetLang(data), hidden = data.settings.hideTotals): WidgetChip[] {
   return frequentTemplates(data, 'expense', today)
     .slice(0, 3)
     .flatMap((t) => {
@@ -129,17 +165,20 @@ export function widgetChips(data: Data, today: ISODate, lang: Lang = widgetLang(
       if (!cat) return [];
       const name = t.note || categoryName(cat, lang);
       const emoji = /kahve|coffee/i.test(name) ? '☕' : (CHIP_EMOJI[cat.icon] ?? '•');
-      const label = hidden ? `${emoji} ${name}` : `${emoji} ${name} ${formatMoney(t.amount)}`;
+      const label = hidden ? `${emoji} ${name}` : `${emoji} ${name} ${formatMoney(t.amount, { lang })}`;
       const chip: WidgetChip = { id: t.key, label, type: 'expense', amount: t.amount, categoryId: t.categoryId, accountId: t.accountId };
       if (t.note) chip.note = t.note;
       return [chip];
     });
 }
 
-export function widgetPayload(data: Data, today: ISODate, mode: 'real' | 'demo', now = Date.now(), opts: { animate?: boolean } = {}): WidgetPayload {
+export function widgetPayload(data: Data, today: ISODate, mode: 'real' | 'demo', now = Date.now(), opts: WidgetOpts = {}): WidgetPayload {
   const lang = widgetLang(data);
   const s = STR[lang];
   const demo = mode === 'demo';
+  const hidden = !!data.settings.hideTotals || !!opts.hideAmount;
+  const masked = hiddenMoney(lang, '••••');
+  const money = (m: Money) => (hidden ? masked : formatMoney(m, { lang }));
   const base = {
     title: s.title,
     add: s.add,
@@ -153,19 +192,27 @@ export function widgetPayload(data: Data, today: ISODate, mode: 'real' | 'demo',
     notedText: s.noted,
     writingText: s.writing,
     queuedText: s.queued,
+    hidden,
+    real: !demo,
+    todayISO: today,
+    seen: demo ? [] : (opts.seen ?? []),
   };
   const av = availability(data, today);
   if (av.confidence === 'none') {
-    return { amount: '—', label: s.emptyLabel, note: demo ? s.demo : s.noAccount, negative: false, today: '', chips: [], ...base };
+    return { amount: '—', available: null, label: s.emptyLabel, labelShort: s.emptyLabel, note: demo ? s.demo : s.noAccount, negative: false, today: '', todaySpent: 0, todayTpl: '', chips: [], ...base };
   }
-  const hidden = data.settings.hideTotals;
+  const spent = rangeSummary(data, today, today).spending;
   return {
-    amount: hidden ? '•••• TL' : formatMoney(av.available),
+    amount: money(av.available),
+    available: av.available,
     label: periodLabel(data, today, av.periodEnd, lang),
+    labelShort: periodLabelShort(data, today, av.periodEnd, lang),
     note: demo ? s.demo : '',
     negative: !hidden && av.available < 0,
-    today: s.today(hidden ? '•••• TL' : formatMoney(rangeSummary(data, today, today).spending)),
-    chips: demo ? [] : widgetChips(data, today, lang),
+    today: s.today(money(spent)),
+    todaySpent: spent,
+    todayTpl: s.today('%s'),
+    chips: demo ? [] : widgetChips(data, today, lang, hidden),
     ...base,
   };
 }

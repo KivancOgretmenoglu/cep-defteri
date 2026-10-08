@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- scripts/gen-android-icons.ts tarafından üretildi: araç düğmeleri maskotun renginde (WIDGET_BTN); ikincil düğme/çip saydam tonu. -->
+<!-- scripts/gen-android-icons.ts tarafından üretildi: araç düğmeleri maskotun renginde (WIDGET_BTN); ikincil düğme/çip saydam tonu; çerçeve biraz koyusu. -->
 <resources>
     <color name="widget_btn_fistik">#E9893C</color>
     <color name="widget_btn_ink_fistik">#2A1A0E</color>
     <color name="widget_soft_fistik">#E6FBE3CC</color>
+    <color name="widget_frame_fistik">#B66B2F</color>
     <color name="widget_btn_bilge">#5867B5</color>
     <color name="widget_btn_ink_bilge">#FFFFFF</color>
     <color name="widget_soft_bilge">#E6DEDCE4</color>
+    <color name="widget_frame_bilge">#45508D</color>
     <color name="widget_btn_ceviz">#9A5E33</color>
     <color name="widget_btn_ink_ceviz">#FFFFFF</color>
     <color name="widget_soft_ceviz">#E6EBDACA</color>
+    <color name="widget_frame_ceviz">#784928</color>
     <color name="widget_btn_diken">#5F7A26</color>
     <color name="widget_btn_ink_diken">#FFFFFF</color>
     <color name="widget_soft_diken">#E6DFE0C8</color>
+    <color name="widget_frame_diken">#4A5F1E</color>
     <color name="widget_btn_karamel">#E2A75A</color>
     <color name="widget_btn_ink_karamel">#2A1A0E</color>
     <color name="widget_soft_karamel">#E6F9E9D2</color>
+    <color name="widget_frame_karamel">#B08246</color>
 </resources>
