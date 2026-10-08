@@ -11,6 +11,7 @@ public class MainActivity extends BridgeActivity {
         // Uygulamaya özel yerel eklentiler, köprü kurulmadan önce kaydedilmeli.
         registerPlugin(WidgetBridgePlugin.class);
         registerPlugin(AppIconPlugin.class);
+        registerPlugin(ShortcutsPlugin.class);
         super.onCreate(savedInstanceState);
     }
 

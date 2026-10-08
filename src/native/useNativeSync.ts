@@ -13,6 +13,7 @@ import { updateWidget } from './widget';
 import { ingestWidgetQueue } from './widgetQueue';
 import { useWidgetPrefs } from './widgetPrefs';
 import { runAutoBackup } from './autoBackup';
+import { initShortcuts } from './shortcuts';
 import { backedUpToday } from './backupPlan';
 import type { NotifExtra } from './schedule';
 
@@ -71,6 +72,7 @@ function setupOnce() {
   if (setupDone || typeof window === 'undefined') return;
   setupDone = true;
   if (isNative()) {
+    void initShortcuts();
     import('@capacitor/app')
       .then(async ({ App }) => {
         App.addListener('appUrlOpen', ({ url }) => handleDeepLink(url));
