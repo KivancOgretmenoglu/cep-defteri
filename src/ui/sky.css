@@ -1,0 +1,142 @@
+/* ───────── Gökyüzü bandı (ana ekran başlığı) ─────────
+   Renk: bant tonu + biraz maskot vurgusu, kâğıt zeminine karıştırılır. Kayıtlı (@property) renkler
+   sayesinde bant değişince degrade yumuşakça geçer. Metin rengi değişmez; kontrast testle doğrulanır. */
+
+@property --sky-top {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: transparent;
+}
+@property --sky-mid {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: transparent;
+}
+@property --sky-stars {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+.sky-head {
+  position: relative;
+  isolation: isolate;
+}
+.sky-head .eyebrow {
+  /* Bant üstünde --ink-3 yerine bir ton koyu: küçük büyük-harf metin AA'yı rahat geçer */
+  color: var(--ink-2);
+}
+
+.sky {
+  --sky-a: var(--sky-a-l);
+  --sky-b: var(--sky-b-l);
+  --sky-p: var(--sky-p-l);
+  --sky-star: #5d5f9e;
+  --sky-star-max: 0.28;
+  position: absolute;
+  inset: -10px -10px -14px;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: var(--radius-card) var(--radius-card) 6px 6px;
+  --sky-top: color-mix(in srgb, color-mix(in srgb, var(--sky-a), var(--accent) 12%) var(--sky-p), var(--paper));
+  --sky-mid: color-mix(in srgb, color-mix(in srgb, var(--sky-b), var(--accent) 12%) var(--sky-p), var(--paper));
+  --sky-stars: 0;
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 58%, color-mix(in srgb, var(--sky-mid) 0%, var(--paper)) 100%);
+  transition:
+    --sky-top 2.4s var(--ease-gentle),
+    --sky-mid 2.4s var(--ease-gentle),
+    --sky-stars 2.4s var(--ease-gentle);
+}
+.sky[data-band='night'] {
+  --sky-stars: 1;
+}
+.sky[data-band='evening'] {
+  --sky-stars: 0.35;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .sky {
+    --sky-a: var(--sky-a-d);
+    --sky-b: var(--sky-b-d);
+    --sky-p: var(--sky-p-d);
+    --sky-star: #e9e4ff;
+    --sky-star-max: 0.75;
+  }
+}
+:root[data-theme='dark'] .sky {
+  --sky-a: var(--sky-a-d);
+  --sky-b: var(--sky-b-d);
+  --sky-p: var(--sky-p-d);
+  --sky-star: #e9e4ff;
+  --sky-star-max: 0.75;
+}
+
+/* Yıldızlar: tek 2px nokta, gölgelerle çoğaltılır (piksel, bulanıklık yok) */
+.sky__stars {
+  position: absolute;
+  top: 6px;
+  left: 48%;
+  width: 2px;
+  height: 2px;
+  background: var(--sky-star);
+  /* Başlık metninin sağında kalır (sol yarı boş) */
+  box-shadow:
+    26px 12px var(--sky-star),
+    58px 2px var(--sky-star),
+    84px 18px var(--sky-star),
+    112px 6px var(--sky-star),
+    140px 14px var(--sky-star),
+    168px 0 var(--sky-star),
+    -14px 20px var(--sky-star);
+  opacity: calc(var(--sky-stars) * var(--sky-star-max));
+}
+
+/* Güneş / ay: başlığın ortasındaki boşlukta, saate göre bir yay üzerinde */
+.sky-body {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: calc(50% + var(--sky-x) * (50% - 130px));
+  top: calc(8px + var(--sky-y) * 30px);
+  transition:
+    left 2.4s var(--ease-gentle),
+    top 2.4s var(--ease-gentle);
+}
+.sky-body__art {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.sky-body__art.sun {
+  fill: color-mix(in srgb, #e5a93a 80%, var(--accent));
+  opacity: 0.75;
+}
+.sky-body__art.moon {
+  fill: #c9c6e8;
+  opacity: 0.8;
+}
+.sky[data-band='night'] .sky-body__art.moon {
+  fill: #8f8cc4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .sky[data-band='night'] .sky-body__art.moon {
+    fill: #e6e0c2;
+  }
+}
+:root[data-theme='dark'] .sky[data-band='night'] .sky-body__art.moon {
+  fill: #e6e0c2;
+}
+
+@media (min-width: 900px) {
+  .sky {
+    inset: -14px -16px -16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sky,
+  .sky-body {
+    transition: none;
+  }
+}

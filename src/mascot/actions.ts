@@ -3,9 +3,10 @@
  * Konumlar karakterin bağlantı noktalarından (anchors) hesaplanır; böylece her hayvanda doğru yere düşer.
  * Saf veri üretir; zamanlama lively.ts içinde.
  */
-import { CHARACTERS, INK, type MascotKey } from './characters';
+import { CHARACTERS, INK, type Character, type MascotKey } from './characters';
 import { OX, OY, type MascotLive, type R } from './render';
 import { DIZZY, SNEEZE, TICKLE, YAWN } from './quips';
+import type { CategoryReaction } from './categoryReact';
 
 type Line = { tr: string; en: string };
 
@@ -22,7 +23,8 @@ export type ActionName =
   | 'glasses' | 'water' | 'write' | 'pages' | 'music' | 'shiver' | 'captip' | 'spylook' | 'glint' | 'psst' | 'study'
   | 'tailwag' | 'earflap' | 'stash' | 'curl' | 'leaf' | 'tilt'
   | 'giggle' | 'jump' | 'spin' | 'hey' | 'dizzy' | 'tickle'
-  | 'note' | 'coins' | 'sprout' | 'confetti' | 'wiggle' | 'shrug' | 'disguise' | 'undisguise' | 'nod';
+  | 'note' | 'coins' | 'sprout' | 'confetti' | 'wiggle' | 'shrug' | 'disguise' | 'undisguise' | 'nod'
+  | CategoryReaction;
 
 export interface ActionCtx {
   who: MascotKey;
@@ -288,6 +290,10 @@ export function buildAction(name: ActionName, ctx: ActionCtx): Frame[] {
       ];
     case 'nod':
       return [{ ms: 150, squash: true, eyes: 'closed' }, { ms: 150, dy: -1 }, { ms: 150, squash: true }, { ms: 120 }];
+
+    // ── Kategoriye göre kayıt tepkileri (categoryReact.ts) — her biri ≤ ~1,2 sn ──
+    default:
+      return categoryFrames(name, { ch, eyeL, eyeR, eyeY, holdL, holdR, headTop, midX });
   }
 }
 
@@ -304,6 +310,7 @@ export const OUTFIT_ACTIONS: Partial<Record<string, ActionName[]>> = {
   exam: ['study', 'glasses'],
   newyear: ['dance'],
   bayram: ['wave'],
+  pajama: ['yawn'],
 };
 
 /** Hareketi azaltılmış görünüm: yalnız kısa bir yüz ifadesi. */
@@ -311,4 +318,246 @@ export function reduceFrames(frames: Frame[]): Frame[] {
   const eyes = frames.find((f) => f.eyes && f.eyes !== 'none')?.eyes;
   const pop = frames.find((f) => f.pop)?.pop;
   return [{ ms: 700, eyes, pop, blush: frames.some((f) => f.blush) || undefined }];
+}
+
+// ── Kategori tepkileri ─────────────────────────────────
+interface Geo {
+  ch: Character;
+  eyeL: number;
+  eyeR: number;
+  eyeY: number;
+  holdL: [number, number];
+  holdR: [number, number];
+  headTop: number;
+  midX: number;
+}
+
+const BROWN = '#7A5A44';
+const BREAD = '#C98A44';
+const BREAD2 = '#E3B26A';
+const PINKR = '#E8577A';
+
+const cupAt = (x: number, y: number): R[] => [[x, y, 3, 3, CREAM], [x, y, 3, 1, BROWN], [x, y + 1, 3, 1, '#D97757'], [x + 3, y + 1, 1, 1, CREAM]];
+const steam = (x: number, y: number): R[] => [[x, y, 1, 2, '#CFC6B8']];
+const heartAt = (x: number, y: number, c = PINKR): R[] => [[x, y, 2, 1, c], [x + 3, y, 2, 1, c], [x, y + 1, 5, 1, c], [x + 1, y + 2, 3, 1, c], [x + 2, y + 3, 1, 1, c]];
+const bus = (x: number): R[] => {
+  const y = 19;
+  return [
+    [x, y, 11, 5, '#4F86C6'], [x, y, 11, 1, '#3C6EA8'],
+    [x + 1, y + 1, 2, 2, CREAM], [x + 4, y + 1, 2, 2, CREAM], [x + 7, y + 1, 2, 2, CREAM],
+    [x + 10, y + 3, 1, 1, GOLD], [x + 1, y + 5, 2, 1, INK], [x + 7, y + 5, 2, 1, INK],
+  ];
+};
+const car = (x: number): R[] => {
+  const y = 22;
+  return [[x + 2, y, 4, 1, '#C2453E'], [x, y + 1, 8, 2, '#D2423A'], [x + 3, y, 2, 1, '#BFE0EE'], [x + 7, y + 1, 1, 1, GOLD], [x + 1, y + 3, 2, 1, INK], [x + 5, y + 3, 2, 1, INK]];
+};
+const plane = (x: number, y: number): R[] => [
+  [x, y + 1, 7, 2, '#E8E4DC'], [x + 1, y + 1, 1, 1, '#6FB7E0'], [x + 3, y + 1, 1, 1, '#6FB7E0'],
+  [x + 3, y, 2, 1, '#9AA6B8'], [x + 3, y + 3, 2, 1, '#9AA6B8'], [x + 6, y - 1, 1, 2, '#D2423A'],
+  [x + 8, y + 2, 3, 1, '#E3DCCF'],
+];
+const dust = (x: number, y: number): R[] => [[x, y, 1, 1, '#D9D0C1'], [x - 2, y - 1, 1, 1, '#E3DCCF']];
+
+function categoryFrames(name: ActionName, g: Geo): Frame[] {
+  const { eyeL, eyeR, eyeY, holdL, holdR, headTop, midX, ch } = g;
+  // Ağız: iki gözün ortası, biraz altı
+  const mx = Math.round((eyeL + eyeR + 2) / 2) - 1;
+  const my = eyeY + 4;
+  switch (name) {
+    case 'sip': {
+      const [x, y] = holdR;
+      const low = cupAt(x, y - 2);
+      const up = cupAt(mx + 2, my - 1);
+      return [
+        { ms: 150, look: [1, 0], props: low },
+        { ms: 140, look: [1, -1], props: cupAt(mx + 3, my - 2) },
+        { ms: 300, eyes: 'closed', props: up, over: steam(mx + 3, my - 5) },
+        { ms: 150, eyes: 'closed', squash: true, props: up },
+        { ms: 150, props: low },
+        { ms: 250, eyes: 'happy', blush: true, props: low, over: steam(x + 1, y - 6) },
+      ];
+    }
+    case 'munch': {
+      const food = (w: number): R[] => (w ? [[mx - 2, my - 1, w, 1, BREAD2], [mx - 2, my, w, 1, '#7DBA62'], [mx - 2, my + 1, w, 1, BREAD]] : []);
+      const crumbs = (k: number): R[] => [[mx - 3 + k, my + 3, 1, 1, BREAD], [mx + 3 - k, my + 4, 1, 1, BREAD2]];
+      return [
+        { ms: 140, look: [0, 1], props: food(5) },
+        { ms: 150, squash: true, eyes: 'closed', props: food(5) },
+        { ms: 150, props: food(3), over: crumbs(0) },
+        { ms: 150, squash: true, eyes: 'closed', props: food(3) },
+        { ms: 150, props: food(1), over: crumbs(1) },
+        { ms: 300, eyes: 'happy', blush: true },
+      ];
+    }
+    case 'bag': {
+      const [x, y] = holdR;
+      const bx = x, by = y - 4;
+      const bag: R[] = [[bx, by + 2, 5, 6, '#C9A06A'], [bx, by + 2, 5, 1, '#A87F4C'], [bx + 3, by - 1, 1, 4, BREAD2], [bx + 1, by, 1, 2, '#6E9E5B'], [bx, by, 1, 1, '#8CC46E']];
+      return [
+        { ms: 150, look: [1, 1], dy: 1, props: bag },
+        { ms: 150, eyes: 'happy', props: bag },
+        { ms: 140, dx: -1, squash: true, props: bag },
+        { ms: 140, dy: -1, props: bag },
+        { ms: 140, dx: 1, squash: true, props: bag },
+        { ms: 140, dy: -1, props: bag },
+        { ms: 260, eyes: 'happy', blush: true, props: bag },
+      ];
+    }
+    case 'drive': {
+      // Otobüs figürün arkasından soldan sağa geçer; gözler onu izler.
+      const xs = [-12, -7, -2, 3, 8, 13, 18, 23, 28, 33];
+      return [
+        ...xs.map((x, i): Frame => ({ ms: 100, under: bus(x), look: [i < 3 ? -1 : i > 6 ? 1 : 0, 0], over: i === 1 ? dust(-1, 25) : i === 9 ? dust(29, 25) : undefined })),
+        { ms: 180, eyes: 'happy' },
+      ];
+    }
+    case 'zoom': {
+      const xs = [-10, -3, 4, 11, 18, 25, 32];
+      return [
+        ...xs.map((x, i): Frame => ({ ms: 90, under: car(x), look: [i < 2 ? -1 : i > 4 ? 1 : 0, 0], over: i >= 5 ? dust(x - 2, 25) : undefined })),
+        { ms: 140, eyes: 'wide', look: [1, 0] },
+        { ms: 220, eyes: 'happy' },
+      ];
+    }
+    case 'fly': {
+      const xs = [34, 28, 22, 16, 10, 4, -2, -8];
+      return [
+        ...xs.map((x, i): Frame => ({ ms: 110, over: plane(x, 0), look: [i < 3 ? 1 : i > 5 ? -1 : 0, -1] })),
+        { ms: 250, eyes: 'happy', look: [-1, -1] },
+      ];
+    }
+    case 'house': {
+      const x0 = -5, y0 = 20;
+      const R_ = '#C2553C';
+      const full = (dy: number): R[] => [
+        [x0 + 3, y0 + dy, 2, 1, R_], [x0 + 2, y0 + 1 + dy, 4, 1, R_], [x0 + 1, y0 + 2 + dy, 6, 1, R_], [x0, y0 + 3 + dy, 8, 1, R_],
+        [x0 + 6, y0 + dy, 1, 2, '#8A5A2B'],
+        [x0 + 1, y0 + 4 + dy, 6, 4 - dy, '#F1E3C8'], [x0 + 3, y0 + 6, 2, 2, '#8A5A2B'], [x0 + 5, y0 + 5 + dy, 1, 1, '#6FB7E0'],
+      ];
+      const tiny: R[] = [[x0 + 2, y0 + 5, 4, 1, R_], [x0 + 2, y0 + 6, 4, 2, '#F1E3C8'], [x0 + 3, y0 + 7, 1, 1, '#8A5A2B']];
+      return [
+        { ms: 120, look: [-1, 1], over: [[x0 + 1, y0 + 7, 6, 1, '#D9D0C1']] },
+        { ms: 140, look: [-1, 0], over: tiny },
+        { ms: 140, look: [-1, 0], eyes: 'wide', over: full(-1) },
+        { ms: 200, look: [-1, 0], over: full(0) },
+        { ms: 250, look: [-1, 0], over: [...full(0), ...puff(x0 + 7, y0 - 4)] },
+        { ms: 300, eyes: 'happy', blush: true, over: full(0) },
+      ];
+    }
+    case 'bulb': {
+      const x = midX - 1, y = headTop - 9;
+      const b = (on: boolean): R[] => [
+        [x, y, 3, 3, on ? '#F7D560' : '#D9D2C4'], [x + 1, y, 1, 1, on ? '#FFF3C4' : '#EDE7DB'], [x, y + 3, 3, 1, '#8C8272'], [x + 1, y + 4, 1, 1, '#6B6357'],
+        ...(on ? ([[x - 2, y + 1, 1, 1, GOLD], [x + 4, y + 1, 1, 1, GOLD], [x + 1, y - 2, 1, 1, GOLD]] as R[]) : []),
+      ];
+      return [
+        { ms: 150, look: [0, -1], over: b(false) },
+        { ms: 120, look: [0, -1], over: b(true) },
+        { ms: 100, look: [0, -1], over: b(false) },
+        { ms: 130, look: [0, -1], eyes: 'wide', over: b(true) },
+        { ms: 300, eyes: 'happy', over: b(true) },
+        { ms: 150, eyes: 'happy' },
+      ];
+    }
+    case 'groove':
+      return [
+        { ms: 160, dx: -1, paws: 'up', eyes: 'happy', over: note(1, 6) },
+        { ms: 160, dy: -1, paws: 'wave', eyes: 'happy' },
+        { ms: 160, dx: 1, paws: 'up', eyes: 'happy', over: note(27, 4) },
+        { ms: 160, dy: -1, paws: 'wave2', eyes: 'happy', flip: true },
+        { ms: 160, dx: -1, paws: 'up', eyes: 'happy' },
+        { ms: 160, dy: -1, paws: 'wave', eyes: 'happy', over: note(2, 3) },
+        { ms: 200, eyes: 'happy', blush: true },
+      ];
+    case 'buzz': {
+      const [x, y] = holdR;
+      const ph = (dx: number, lit = false): R[] => [[x + dx, y - 4, 4, 6, '#2E2C36'], [x + dx + 1, y - 3, 2, 3, lit ? '#BDEBF5' : '#7FC8D8'], [x + dx + 1, y + 1, 2, 1, '#55535F']];
+      const lines: R[] = [[x - 2, y - 3, 1, 1, PINKR], [x + 5, y - 3, 1, 1, PINKR], [x - 2, y - 1, 1, 1, PINKR], [x + 5, y - 1, 1, 1, PINKR]];
+      return [
+        { ms: 120, eyes: 'wide', props: ph(0) },
+        { ms: 80, eyes: 'wide', props: ph(1), over: lines },
+        { ms: 80, eyes: 'wide', props: ph(-1) },
+        { ms: 80, eyes: 'wide', props: ph(1), over: lines },
+        { ms: 80, eyes: 'wide', props: ph(-1) },
+        { ms: 80, eyes: 'wide', props: ph(1), over: lines },
+        { ms: 350, look: [1, 1], props: ph(0, true) },
+        { ms: 250, eyes: 'happy', props: ph(0, true) },
+      ];
+    }
+    case 'tryhat': {
+      const { w } = ch.anchors.head;
+      const l = Math.round(ch.anchors.head.x - w / 2) + OX;
+      const hat = (dy: number): R[] => [
+        [l - 1, headTop - 2 + dy, w + 2, 2, PINKR], [l, headTop - 3 + dy, w, 1, PINKR], [l - 1, headTop - 1 + dy, w + 2, 1, '#B8435F'], [midX, headTop - 4 + dy, 1, 1, '#B8435F'],
+      ];
+      return [
+        { ms: 150, look: [0, -1], props: hat(-6) },
+        { ms: 120, look: [0, -1], props: hat(-4) },
+        { ms: 120, look: [0, -1], props: hat(-2) },
+        { ms: 150, squash: true, props: hat(0) },
+        { ms: 300, flip: true, eyes: 'happy', blush: true, props: hat(0) },
+        { ms: 300, eyes: 'happy', look: [1, 0], props: hat(0), over: star(midX + 6, headTop - 5) },
+      ];
+    }
+    case 'read': {
+      const [x, y] = holdR;
+      const book: R[] = [[x - 1, y - 2, 7, 5, '#5B4FA0'], [x, y - 2, 2, 4, CREAM], [x + 3, y - 2, 2, 4, CREAM], [x + 2, y - 2, 1, 5, '#3E3480'], [x, y - 1, 2, 1, '#B9AE9B'], [x + 3, y, 2, 1, '#B9AE9B']];
+      return [
+        { ms: 150, look: [1, 1], props: book },
+        { ms: 220, look: [1, 1], eyes: 'half', props: book },
+        { ms: 130, look: [1, 1], props: [...book, [x + 3, y - 4, 2, 4, CREAM]] },
+        { ms: 130, look: [1, 1], props: [...book, [x + 1, y - 4, 2, 4, CREAM]] },
+        { ms: 230, look: [1, 1], props: book },
+        { ms: 250, eyes: 'happy', props: book, over: star(x + 1, y - 9) },
+      ];
+    }
+    case 'heart': {
+      const hx = 25, y0 = 16;
+      return [
+        { ms: 150, eyes: 'happy', blush: true, over: heartAt(hx, y0) },
+        { ms: 150, eyes: 'happy', blush: true, over: heartAt(hx, y0 - 3) },
+        { ms: 150, eyes: 'happy', over: heartAt(hx + 1, y0 - 6) },
+        { ms: 150, eyes: 'happy', over: heartAt(hx, y0 - 9) },
+        { ms: 200, eyes: 'happy', blush: true, over: heartAt(hx + 1, y0 - 12, '#F29AB0') },
+        { ms: 200, blush: true },
+      ];
+    }
+    case 'gift': {
+      const gx = holdL[0] - 2, gy = holdL[1] - 2;
+      const box: R[] = [[gx, gy + 2, 6, 5, '#D2423A'], [gx + 2, gy + 2, 2, 5, GOLD]];
+      const lid = (up: number): R[] => [[gx - 1, gy + 1 - up, 8, 1, '#B8352E'], [gx + 1, gy - up, 1, 1, GOLD], [gx + 4, gy - up, 1, 1, GOLD]];
+      return [
+        { ms: 150, look: [-1, 1], props: [...box, ...lid(0)] },
+        { ms: 150, squash: true, props: [...box, ...lid(0)] },
+        { ms: 150, eyes: 'wide', props: [...box, ...lid(3)], over: star(gx + 1, gy - 6) },
+        { ms: 300, eyes: 'happy', blush: true, props: [...box, ...lid(3)], over: [...star(gx - 1, gy - 8), ...star(gx + 4, gy - 7, '#F3D98A')] },
+        { ms: 200, eyes: 'happy', props: [...box, ...lid(0)] },
+      ];
+    }
+    case 'pocket': {
+      // Paralar havada sekip karındaki cebe girer.
+      const px = mx - 1, py = eyeY + 7;
+      const pocket: R[] = [[px, py, 4, 3, CREAM], [px, py, 4, 1, INK], [px + 1, py + 2, 2, 1, '#E3D9C6']];
+      return [
+        { ms: 100, squash: true, props: pocket },
+        { ms: 140, dy: -1, paws: 'up', props: pocket, over: coin(4, 6) },
+        { ms: 140, paws: 'up', eyes: 'happy', props: pocket, over: [...coin(9, 1), ...coin(26, 8)] },
+        { ms: 140, eyes: 'happy', props: pocket, over: [...coin(px + 1, py - 5), ...coin(22, 2)] },
+        { ms: 140, eyes: 'happy', squash: true, props: pocket, over: [[px + 1, py + 1, 2, 1, GOLD], ...coin(px + 1, py - 4)] },
+        { ms: 140, eyes: 'happy', props: pocket, over: [[px + 1, py + 1, 2, 1, GOLD]] },
+        { ms: 260, eyes: 'happy', blush: true, props: pocket, over: star(px + 5, py - 4) },
+      ];
+    }
+    case 'happynod':
+      return [
+        { ms: 120, squash: true, eyes: 'happy', blush: true },
+        { ms: 150, dy: -1, eyes: 'happy', blush: true, over: star(26, 4) },
+        { ms: 150, squash: true, eyes: 'happy', blush: true },
+        { ms: 150, dy: -1, eyes: 'happy' },
+        { ms: 150, eyes: 'happy', blush: true },
+      ];
+    default:
+      return [{ ms: 150, squash: true, eyes: 'closed' }, { ms: 150, dy: -1 }, { ms: 150, squash: true }, { ms: 120 }];
+  }
 }

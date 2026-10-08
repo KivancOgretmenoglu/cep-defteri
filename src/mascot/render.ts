@@ -43,6 +43,8 @@ export interface MascotLive {
   props?: R[];
   /** Figürden bağımsız parçacıklar */
   over?: R[];
+  /** Figürün ARKASINDA çizilen parçacıklar (ör. arkadan geçen otobüs) */
+  under?: R[];
   /** Bu satırın altını kırp (saklanıp bakma) */
   clipY?: number;
   zzz?: boolean;
@@ -119,8 +121,8 @@ const shade = (hex: string, amt: number) => {
   return '#' + ((ch(n >> 16) << 16) | (ch((n >> 8) & 255) << 8) | ch(n & 255)).toString(16).padStart(6, '0');
 };
 
-type Hat = 'beanie' | 'cap' | 'straw' | 'fedora' | 'hardhat' | 'santa' | 'visor' | 'headphones' | 'nightcap';
-type Neck = 'scarf' | 'scarfRed' | 'bowtie' | 'bowtieGold' | 'collar';
+type Hat = 'beanie' | 'cap' | 'straw' | 'fedora' | 'hardhat' | 'santa' | 'visor' | 'headphones' | 'nightcap' | 'pjcap';
+type Neck = 'scarf' | 'scarfRed' | 'bowtie' | 'bowtieGold' | 'collar' | 'pjcollar';
 type Face = 'glasses' | 'sunglasses';
 type Item = 'receipt' | 'notebook' | 'clipboard' | 'pot' | 'box' | 'book' | 'icecream';
 
@@ -152,6 +154,8 @@ export const OUTFITS: Record<string, Outfit> = {
   newyear: { name: { tr: 'Yılbaşı', en: 'New Year' }, hat: 'santa', neck: 'scarfRed' },
   bayram: { name: { tr: 'Bayramlık', en: 'Holiday best' }, neck: 'bowtieGold', sparkle: true },
   summer: { name: { tr: 'Yaz', en: 'Summer' }, face: 'sunglasses', hold: { side: 'r', item: 'icecream' } },
+  /** Gece 22:00–05:59, ana ekranda (bkz. seasonal.homeOutfit) */
+  pajama: { name: { tr: 'Pijama', en: 'Pajamas' }, hat: 'pjcap', neck: 'pjcollar' },
 };
 export const HOME_OUTFITS = ['plain', 'winter', 'cap', 'headphones', 'bowtie'] as const;
 
@@ -222,6 +226,21 @@ function hatRects(ch: Character, hat: Hat, lift: boolean): R[] {
       box(l + w + 1, y - 2, 2, 2, CREAM);
       break;
     }
+    case 'pjcap': {
+      // Çizgili, yana sarkan uyku şapkası + ponpon (pijamayla takım)
+      const b = '#6F82C8';
+      const st = '#B8C4EE';
+      box(l, y - 1, w, 1, CREAM);
+      box(l + 1, y - 3, w - 2, 2, b);
+      for (let i = 2; i < w - 1; i += 3) box(l + i, y - 3, 1, 2, st);
+      box(l + 3, y - 4, w - 4, 1, b);
+      box(l + 5, y - 5, w - 6, 1, st);
+      box(l + w - 1, y - 4, 2, 1, b);
+      box(l + w + 1, y - 3, 1, 2, st);
+      box(l + w + 1, y - 1, 2, 2, CREAM);
+      box(l + w + 2, y - 1, 1, 1, '#E3D9C6');
+      break;
+    }
     case 'headphones': {
       const c = '#9B7BC6';
       box(l, y - 2, w, 1, c);
@@ -249,6 +268,13 @@ function neckRects(ch: Character, neck: Neck): R[] {
     const c = neck === 'bowtie' ? '#C2453E' : GOLD;
     const m = Math.round(cx);
     r.push(at(m - 3, y, 2, 3, c), at(m + 1, y, 2, 3, c), at(m - 1, y + 1, 2, 1, shade(c, -0.3)));
+  } else if (neck === 'pjcollar') {
+    // Pijama yakası: açık mavi çizgiler + iki düğme
+    const b = '#6F82C8';
+    const m = Math.round(cx);
+    r.push(at(l, y, w, 2, '#B8C4EE'));
+    for (let i = 0; i < w; i += 2) r.push(at(l + i, y, 1, 2, b));
+    r.push(at(m - 1, y + 1, 2, 1, CREAM), at(m - 1, y + 2, 1, 1, CREAM), at(m - 1, y + 4, 1, 1, CREAM));
   } else if (neck === 'collar') {
     const coat = '#B8976A';
     r.push(at(l, y, 3, 3, coat), at(l + w - 3, y, 3, 3, coat), at(l + 1, y + 1, 1, 2, shade(coat, -0.22)), at(l + w - 2, y + 1, 1, 2, shade(coat, -0.22)));

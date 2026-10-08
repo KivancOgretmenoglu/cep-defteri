@@ -5,7 +5,8 @@ import { Mascot } from './Mascot';
 import { useLively, type Lively } from './lively';
 import { HOME_OUTFITS } from './render';
 import { characterOf, type Lang } from './characters';
-import { examActive, seasonFor } from './seasonal';
+import { examActive, homeOutfit, pajamaTime, seasonFor } from './seasonal';
+import { useNow } from '../ui/Sky';
 import './mascot.css';
 
 const HOME = HOME_OUTFITS as readonly string[];
@@ -68,7 +69,11 @@ export function MascotNote({ mood, text, why, outfit, size = 92, action, compact
   const ref = useRef<HTMLButtonElement>(null);
   // Ana ekran maskotu (dolaptaki kıyafetlerden biri): bakiyeler gizliyse ajan, özel günlerde bayramlık.
   const home = HOME.includes(outfit) || outfit === 'spy';
-  const lv = useLively({ who: m.who, lang: m.lang, name: m.name, season: m.season, exam: m.exam, mood, outfit: outfit === 'spy' ? 'plain' : outfit, quips: m.quips, home, spy: home && hideTotals, priority: home ? 0 : 1, ref });
+  // Gece 22–06 ana ekran maskotu pijamalı (ajan > sınav > özel gün > pijama > seçilen kıyafet)
+  const night = pajamaTime(useNow());
+  const mine = outfit === 'spy' ? 'plain' : outfit;
+  const want = home ? homeOutfit({ spy: hideTotals, exam: m.exam, season: m.season, night, user: mine }) : mine;
+  const lv = useLively({ who: m.who, lang: m.lang, name: m.name, season: m.season, exam: m.exam, mood, outfit: want, quips: m.quips, home, spy: home && hideTotals, priority: home ? 0 : 1, ref });
 
   const seenPulse = useRef(pulse);
   const { play, lastEventAt } = lv;

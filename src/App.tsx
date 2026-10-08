@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { HintHost } from './mascot/hints';
 import { CameoHost } from './mascot/cameo/Cameo';
+import { ScrollPeek } from './mascot/peek/ScrollPeek';
 import { CelebrateHost } from './ui/Celebrate';
 import { resumeTxDraft } from './sheets/txDraft';
 import { Plus, House, ListOrdered, CalendarRange, ChartColumn, Sprout, Settings as Gear, AlertTriangle, FlaskConical, Undo2, X, HandCoins } from 'lucide-react';
@@ -24,6 +25,7 @@ import { characterOf } from './mascot/characters';
 import { setAppIcon } from './native/appIcon';
 import { TxSheet, RefundSheet, ConfirmSheet } from './sheets/TxSheet';
 import { useT } from './i18n';
+import './ui/motion.css';
 import type { Key } from './i18n/core';
 import { AccountSheet, BudgetSheet, CategorySheet, GoalSheet, LimitSheet, PlanSheet, ValuationSheet } from './sheets/OtherSheets';
 
@@ -36,6 +38,17 @@ const NAV: { screen: Screen; label: Key; icon: typeof House; phone: boolean }[] 
   { screen: 'reports', label: 'nav.reports', icon: ChartColumn, phone: true },
   { screen: 'settings', label: 'nav.settings', icon: Gear, phone: false },
 ];
+
+/** Ekran değişince giriş yönü: sağdaki sekmeye geçince sağdan, soldakine soldan; sekme dışı ekranlar aşağıdan belirir. */
+function useEnterDir(screen: Screen): 'none' | 'right' | 'left' | 'up' {
+  const r = useRef<{ screen: Screen; dir: 'none' | 'right' | 'left' | 'up' }>({ screen, dir: 'none' });
+  if (r.current.screen !== screen) {
+    const a = NAV.findIndex((n) => n.screen === r.current.screen);
+    const b = NAV.findIndex((n) => n.screen === screen);
+    r.current = { screen, dir: a < 0 || b < 0 ? 'up' : b > a ? 'right' : 'left' };
+  }
+  return r.current.dir;
+}
 
 function useTheme() {
   const theme = useStore((s) => s.data.settings.theme);
@@ -151,6 +164,7 @@ export function App() {
     return () => window.removeEventListener('keydown', onKey);
   }, [sheet]);
 
+  const enterDir = useEnterDir(screen);
   const Main = { home: Home, tx: Transactions, budget: Budget, invest: Invest, reports: Reports, settings: Settings, balance: Balance, people: People }[screen];
 
   return (
@@ -171,7 +185,7 @@ export function App() {
           <ul>
             {NAV.map((n) => (
               <li key={n.screen}>
-                <button className={`rail__item ${screen === n.screen ? 'is-on' : ''}`} aria-current={screen === n.screen ? 'page' : undefined} onClick={() => go(n.screen)}>
+                <button data-tab={n.screen} className={`rail__item ${screen === n.screen ? 'is-on' : ''}`} aria-current={screen === n.screen ? 'page' : undefined} onClick={() => go(n.screen)}>
                   <n.icon size={20} aria-hidden /> {t(n.label)}
                 </button>
               </li>
@@ -202,13 +216,13 @@ export function App() {
             <span>{t('app.saveFailed')}</span>
           </div>
         )}
-        {showOnboarding ? <Onboarding /> : <Main />}
+        {showOnboarding ? <Onboarding /> : <div key={screen} className={`screen-enter screen-enter--${enterDir}`}><Main /></div>}
       </main>
 
       {!showOnboarding && (
         <nav className="tabbar" aria-label={t('app.bottomNav')}>
           {NAV.filter((n) => n.phone).slice(0, 2).map((n) => (
-            <button key={n.screen} className={`tabbar__item ${screen === n.screen ? 'is-on' : ''}`} aria-current={screen === n.screen ? 'page' : undefined} onClick={() => go(n.screen)}>
+            <button key={n.screen} data-tab={n.screen} className={`tabbar__item ${screen === n.screen ? 'is-on' : ''}`} aria-current={screen === n.screen ? 'page' : undefined} onClick={() => go(n.screen)}>
               <n.icon size={22} aria-hidden />
               <span>{t(n.label)}</span>
             </button>
@@ -218,7 +232,7 @@ export function App() {
             <Plus size={28} strokeWidth={2.5} />
           </button>
           {NAV.filter((n) => n.phone).slice(2).map((n) => (
-            <button key={n.screen} className={`tabbar__item ${screen === n.screen ? 'is-on' : ''}`} aria-current={screen === n.screen ? 'page' : undefined} onClick={() => go(n.screen)}>
+            <button key={n.screen} data-tab={n.screen} className={`tabbar__item ${screen === n.screen ? 'is-on' : ''}`} aria-current={screen === n.screen ? 'page' : undefined} onClick={() => go(n.screen)}>
               <n.icon size={22} aria-hidden />
               <span>{t(n.label)}</span>
             </button>
@@ -229,6 +243,7 @@ export function App() {
       <Toast />
       <HintHost />
       <CameoHost />
+      <ScrollPeek />
       <CelebrateHost />
     </div>
     </LockGate>

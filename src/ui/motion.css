@@ -1,0 +1,147 @@
+/* ───────── Hareket: ekran geçişleri + sekme simgesi mikro animasyonları ─────────
+   Yalnız transform/opacity; dolgu modu yok (bitince transform kalkar, sabit konumlu
+   öğeler etkilenmez). Girdiyi engellemez. Azaltılmış harekette tamamen kapalı. */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Ekran girişi (App.tsx: <div key={screen} class="screen-enter …">) */
+  .screen-enter--right {
+    animation: screen-in-right 0.22s var(--ease-snappy);
+  }
+  .screen-enter--left {
+    animation: screen-in-left 0.22s var(--ease-snappy);
+  }
+  .screen-enter--up {
+    animation: screen-in-up 0.22s var(--ease-snappy);
+  }
+
+  /* Sekme simgeleri: etkinleşince bir kez oynar (is-on sınıfı eklendiğinde). */
+  .tabbar__item.is-on svg,
+  .rail__item.is-on svg {
+    transform-origin: 50% 60%;
+  }
+  .tabbar__item.is-on svg *,
+  .rail__item.is-on svg * {
+    transform-box: fill-box;
+  }
+
+  /* Özet: küçük zıplama + bacadan duman */
+  :is(.tabbar__item, .rail__item)[data-tab='home'].is-on svg {
+    transform-origin: 50% 100%;
+    animation: tab-hop 0.45s var(--ease-snappy);
+  }
+  .tabbar__item[data-tab='home'] {
+    position: relative;
+  }
+  .tabbar__item[data-tab='home'].is-on::before {
+    content: '';
+    position: absolute;
+    left: calc(50% + 4px);
+    top: calc((var(--tabbar-h) - 40px) / 2 - 1px);
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--ink-3);
+    opacity: 0;
+    pointer-events: none;
+    animation: tab-puff 0.5s var(--ease-gentle) 0.08s;
+  }
+
+  /* İşlemler: satırlar sırayla kayarak gelir */
+  :is(.tabbar__item, .rail__item)[data-tab='tx'].is-on svg > :nth-child(-n + 3) {
+    animation: tab-line 0.36s var(--ease-snappy) backwards;
+  }
+  :is(.tabbar__item, .rail__item)[data-tab='tx'].is-on svg > :nth-child(2) {
+    animation-delay: 0.06s;
+  }
+  :is(.tabbar__item, .rail__item)[data-tab='tx'].is-on svg > :nth-child(3) {
+    animation-delay: 0.12s;
+  }
+
+  /* Bütçe: takvim hafifçe devrilir */
+  :is(.tabbar__item, .rail__item)[data-tab='budget'].is-on svg {
+    animation: tab-flip 0.45s var(--ease-snappy);
+  }
+
+  /* Raporlar: çubuklar alttan büyür */
+  :is(.tabbar__item, .rail__item)[data-tab='reports'].is-on svg > :nth-child(n + 2) {
+    transform-origin: 50% 100%;
+    animation: tab-grow 0.42s var(--spring-bouncy) backwards;
+  }
+  :is(.tabbar__item, .rail__item)[data-tab='reports'].is-on svg > :nth-child(3) {
+    animation-delay: 0.05s;
+  }
+  :is(.tabbar__item, .rail__item)[data-tab='reports'].is-on svg > :nth-child(2) {
+    animation-delay: 0.1s;
+  }
+
+  /* Yatırım: filiz salınır */
+  :is(.tabbar__item, .rail__item)[data-tab='invest'].is-on svg {
+    transform-origin: 50% 90%;
+    animation: tab-sway 0.5s var(--ease-gentle);
+  }
+
+  /* Borçlar: kıpırdanma */
+  :is(.tabbar__item, .rail__item)[data-tab='people'].is-on svg {
+    animation: tab-wiggle 0.42s var(--ease-gentle);
+  }
+
+  /* Ayarlar: çark 90° döner */
+  :is(.tabbar__item, .rail__item)[data-tab='settings'].is-on svg {
+    transform-origin: 50% 50%;
+    animation: tab-gear 0.45s var(--spring-bouncy);
+  }
+}
+
+@keyframes screen-in-right {
+  from { opacity: 0; transform: translateX(22px); }
+}
+@keyframes screen-in-left {
+  from { opacity: 0; transform: translateX(-22px); }
+}
+@keyframes screen-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+}
+
+@keyframes tab-hop {
+  0% { transform: translateY(0) scale(1, 1); }
+  15% { transform: translateY(0) scale(1.08, 0.9); }
+  45% { transform: translateY(-4px) scale(0.96, 1.05); }
+  75% { transform: translateY(0) scale(1.05, 0.94); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes tab-puff {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  30% { opacity: 0.8; }
+  100% { opacity: 0; transform: translate(2px, -7px) scale(1.6); }
+}
+@keyframes tab-line {
+  from { opacity: 0; transform: translateX(-5px); }
+}
+@keyframes tab-flip {
+  0% { transform: perspective(60px) rotateX(0) rotate(0); }
+  40% { transform: perspective(60px) rotateX(35deg) rotate(-6deg); }
+  75% { transform: perspective(60px) rotateX(-8deg) rotate(2deg); }
+  100% { transform: perspective(60px) rotateX(0) rotate(0); }
+}
+@keyframes tab-grow {
+  from { transform: scaleY(0.2); }
+}
+@keyframes tab-sway {
+  0% { transform: rotate(0); }
+  25% { transform: rotate(-10deg); }
+  55% { transform: rotate(7deg); }
+  80% { transform: rotate(-3deg); }
+  100% { transform: rotate(0); }
+}
+@keyframes tab-wiggle {
+  0% { transform: rotate(0); }
+  20% { transform: rotate(-12deg); }
+  40% { transform: rotate(10deg); }
+  60% { transform: rotate(-6deg); }
+  80% { transform: rotate(3deg); }
+  100% { transform: rotate(0); }
+}
+@keyframes tab-gear {
+  from { transform: rotate(-90deg); }
+  to { transform: rotate(0); }
+}

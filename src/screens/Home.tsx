@@ -22,6 +22,7 @@ import { go, openSheet } from '../ui/nav';
 import { useData, useLookups } from '../ui/hooks';
 import { ACCOUNT_ICONS } from '../ui/icons';
 import { BackupReminderCard } from '../native/BackupReminder';
+import { Sky } from '../ui/Sky';
 
 export function Home() {
   const t = useT();
@@ -61,7 +62,8 @@ export function Home() {
 
   return (
     <div className="screen screen--home">
-      <header className="screen-head">
+      <header className="screen-head sky-head">
+        <Sky />
         <div>
           <p className="eyebrow">{monthLabel(month)}</p>
           <h1 className="wordmark">Cep Defteri</h1>

@@ -14,6 +14,22 @@ import { onMascotEvent, type MascotEvent } from './events';
 import { dayPhase, type Season } from './seasonal';
 import { eventPool, GREET, jokesFor, popsFor, say as sayLine, TIPS } from './quips';
 import { CHARACTERS, type Lang, type MascotKey } from './characters';
+import { reactionFor } from './categoryReact';
+import { getState } from '../store/store';
+
+/** Kategori kimliği → simge anahtarı ve ad (kullanıcının kendi kategorileri dahil). */
+function categoryInfo(id: string | undefined): { icon?: string; name?: string } {
+  if (!id) return {};
+  try {
+    const c = getState().data.categories.find((x) => x.id === id);
+    return c ? { icon: c.icon, name: c.name } : {};
+  } catch {
+    return {};
+  }
+}
+
+/** Art arda kayıtlarda yalnız sonuncusuna tepki: bu süre içinde gelen yeni kayıt öncekini iptal eder. */
+const REACT_DEBOUNCE_MS = 220;
 
 export interface LivelyOptions {
   who: MascotKey;
@@ -139,6 +155,7 @@ export function useLively({ who, lang, name, season = null, exam = false, mood, 
     lastEventAt: 0,
     lastDisguiseAt: 0,
     seq: 0,
+    reactTimer: undefined as ReturnType<typeof setTimeout> | undefined,
   });
   const cur = useRef({ who, lang, name, season, exam, outfit, mood, sprout, reduced, active, quips, home, spy, bubble, priority });
   cur.current = { who, lang, name, season, exam, outfit, mood, sprout, reduced, active, quips, home, spy, bubble, priority };
@@ -205,6 +222,7 @@ export function useLively({ who, lang, name, season = null, exam = false, mood, 
       clearTimeout(st.popTimer);
       clearTimeout(st.bubbleTimer);
       clearTimeout(st.pressTimer);
+      clearTimeout(st.reactTimer);
     };
   }, []);
 
@@ -392,13 +410,25 @@ export function useLively({ who, lang, name, season = null, exam = false, mood, 
       let chance = CHARACTERS[c.who].quipChance;
       switch (e.type) {
         case 'expense':
-          act = c.outfit === 'ledger' ? 'write' : 'note';
-          break;
+        case 'income':
+        case 'refund': {
+          // Kategoriye göre küçük sahne. Hızlı art arda kayıtlarda yalnız sonuncusu oynar.
+          clearTimeout(r.current.reactTimer);
+          if (c.reduced) return;
+          const info = e.type === 'refund' ? {} : categoryInfo(e.categoryId);
+          const name = reactionFor({ type: e.type, ...info }, c.outfit === 'ledger' ? 'write' : 'note');
+          const pool = eventPool(e, c.who);
+          const ch = chance;
+          r.current.reactTimer = setTimeout(() => {
+            const now = cur.current;
+            if (!now.active) return;
+            play(name);
+            if (pool) setTimeout(() => quip(pool, ch), 400 + 80 * now.priority);
+          }, REACT_DEBOUNCE_MS);
+          return;
+        }
         case 'debt':
           act = c.who === 'karamel' ? 'tailwag' : 'nod';
-          break;
-        case 'income':
-          act = 'coins';
           break;
         case 'invest':
           act = c.who === 'ceviz' ? 'stash' : 'sprout';
@@ -406,9 +436,6 @@ export function useLively({ who, lang, name, season = null, exam = false, mood, 
         case 'goal-reached':
           act = 'confetti';
           chance = 1;
-          break;
-        case 'refund':
-          act = 'wiggle';
           break;
         case 'deleted':
         case 'undo':
