@@ -133,6 +133,8 @@ export function App() {
   const warning = useStore((s) => s.warning);
   const saveFailed = useStore((s) => s.saveFailed);
   const noAccounts = useStore((s) => s.data.accounts.length === 0);
+  // Bugün hiç kayıt yoksa + düğmesinin parıltısı biraz daha belirgin
+  const loggedToday = useStore((s) => s.data.txs.some((x) => x.date === s.today));
   const showOnboarding = noAccounts && mode === 'real' && screen !== 'settings';
 
   // Kısayol: N veya + ile hızlı ekleme (yazı alanında değilken).
@@ -211,7 +213,8 @@ export function App() {
               <span>{t(n.label)}</span>
             </button>
           ))}
-          <button className="tabbar__add" onClick={() => openSheet({ kind: 'add' })} aria-label={t('app.addTx')}>
+          <button className={`tabbar__add ${sheet ? '' : loggedToday ? 'tabbar__add--glow' : 'tabbar__add--glow tabbar__add--nudge'}`} onClick={() => openSheet({ kind: 'add' })} aria-label={t('app.addTx')}>
+            <span className="tabbar__aura" aria-hidden />
             <Plus size={28} strokeWidth={2.5} />
           </button>
           {NAV.filter((n) => n.phone).slice(2).map((n) => (

@@ -265,7 +265,7 @@ export function useLively({ who, lang, name, season = null, exam = false, mood, 
           setGlance(null);
           loop();
         }, rand(600, 1300));
-      }, rand(3500, 8000));
+      }, rand(2500, 5500));
     };
     loop();
     return () => {
@@ -317,7 +317,7 @@ export function useLively({ who, lang, name, season = null, exam = false, mood, 
     };
   }, [active, reduced, ref]);
 
-  // Sürprizler: görünürken 20–45 sn'de bir, havuzdan
+  // Sürprizler: görünürken 9–20 sn'de bir, havuzdan
   useEffect(() => {
     if (!active || reduced) return;
     let t: ReturnType<typeof setTimeout>;
@@ -336,7 +336,7 @@ export function useLively({ who, lang, name, season = null, exam = false, mood, 
           play(pool[Math.floor(Math.random() * pool.length)]);
         }
         loop();
-      }, rand(20_000, 45_000));
+      }, rand(9_000, 20_000));
     };
     loop();
     return () => clearTimeout(t);

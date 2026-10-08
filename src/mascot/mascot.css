@@ -8,7 +8,7 @@
 
 /* Canlı olmayan ama boşta duran maskot (ör. ilk açılış): seyrek, kısa hareketler */
 .mascot--idle:not(.mascot--live) .mascot__all {
-  animation: mascot-bob 7s steps(1) infinite;
+  animation: mascot-bob 4s steps(1) infinite;
 }
 .mascot--idle:not(.mascot--live) .mascot__eyes {
   transform-box: fill-box;

@@ -2877,3 +2877,74 @@ fieldset.block {
   font-variant-numeric: tabular-nums;
   background: var(--surface-2);
 }
+
+/* ───────── + düğmesi parıltısı ─────────
+   Etrafında yavaşça dönen ince bir ışık halkası ve ara sıra yayılan yumuşak nabız.
+   Bugün henüz kayıt yoksa (--nudge) nabız daha sık ve belirgin. Form açıkken ve hareket azaltıldığında yok. */
+@property --aura-a {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+.tabbar__add {
+  position: relative;
+  isolation: isolate;
+}
+.tabbar__add > svg {
+  position: relative;
+  z-index: 1;
+}
+.tabbar__aura {
+  position: absolute;
+  inset: -5px;
+  border-radius: calc(var(--radius-add) + 5px);
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-gentle, ease);
+}
+.tabbar__add--glow .tabbar__aura {
+  opacity: 1;
+  background: conic-gradient(
+    from var(--aura-a),
+    transparent 0deg 200deg,
+    color-mix(in srgb, var(--accent) 45%, transparent) 270deg,
+    var(--accent) 325deg,
+    color-mix(in srgb, var(--accent) 40%, white) 340deg,
+    transparent 352deg 360deg
+  );
+  /* Yalnız kenar: düğmenin köşe biçimini izleyen 2,5 px'lik halka */
+  padding: 3px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: aura-spin 4.5s linear infinite;
+}
+.tabbar__add--glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -2;
+  animation: aura-pulse 6s var(--ease-out, ease-out) infinite;
+}
+.tabbar__add--nudge::after {
+  animation-duration: 2.8s;
+}
+.tabbar__add--nudge .tabbar__aura {
+  animation-duration: 3s;
+}
+@keyframes aura-spin {
+  to { --aura-a: 360deg; }
+}
+@keyframes aura-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+  45%, 100% { box-shadow: 0 0 0 14px color-mix(in srgb, var(--accent) 0%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tabbar__add--glow .tabbar__aura,
+  .tabbar__add--glow::after {
+    animation: none;
+  }
+}

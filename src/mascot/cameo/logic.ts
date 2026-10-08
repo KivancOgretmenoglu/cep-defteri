@@ -5,14 +5,14 @@
 import type { Screen } from '../../ui/nav';
 import { hourFits, SCENE_IDS, SCENES, type SceneId } from './scenes';
 
-/** Yaklaşık 10 açılışta bir. */
-export const CHANCE = 0.1;
+/** Yaklaşık 5 açılışta bir. */
+export const CHANCE = 0.2;
 /** İki sahne arası en az 5 dakika. */
 export const MIN_GAP_MS = 5 * 60_000;
 /** İlk açılışlarda hiç çıkmaz. */
 export const MIN_OPENS = 2;
 /** Şanssız seri: bu kadar açılış sahnesiz geçtiyse bir sonraki kesin kurulur. */
-export const PITY_OPENS = 15;
+export const PITY_OPENS = 8;
 /** Arka plandan bu kadar süre sonra dönüş yeni bir "açılış" sayılır (Android uygulamayı bellekte tutar). */
 export const REOPEN_AFTER_MS = 10_000;
 
