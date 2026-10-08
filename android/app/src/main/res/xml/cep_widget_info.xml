@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Ana ekran aracı tanımı. Boyuta göre düzen (CepWidgetProvider.java):
-      küçük  (2×1)      widget_small   maskot + tutar
-      geniş  (3×1, 4×1) widget_cep     maskot + tutar + dönem + "+ Ekle"
-      orta   (3×2, 4×2) widget_medium  + "Gider" / "Gelir"
-      büyük  (4×3+)     widget_large   sahne + canlandırma + bugünkü harcama + tek dokunuşla kayıt çipleri
+    Ana ekran aracı tanımı. Maskotun sahnesi tüm aracı kaplar; boyuta göre düzen (CepWidgetProvider.java):
+      küçük  (2×1)      widget_small   şerit sahne + maskot büstü + tutar
+      geniş  (3×1, 4×1) widget_cep     şerit sahne + maskot + tutar/dönem + maskot renginde "+"
+      orta   (3×2, 4×2) widget_medium  geniş sahne + maskot + tutar/dönem + "Gider" / "Gelir"
+      büyük  (4×3+)     widget_large   uzun sahne + canlanan maskot + bugünkü harcama + tek dokunuşla kayıt çipleri
     Android 12+ boyuta duyarlı RemoteViews kullanır; daha eskilerde düzen onAppWidgetOptionsChanged'de seçilir.
     Güncelleme zamanlayıcısı yok: uygulama veri değişince kendisi yeniler (geçici pozlar için AlarmManager).
 -->

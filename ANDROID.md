@@ -23,10 +23,12 @@ Kilit bir **gizlilik perdesidir**, kayıtlar şifrelenmez. PIN unutulursa: parma
 
 | Boyut | Düzen | İçerik |
 | --- | --- | --- |
-| 2×1 | `widget_small` | maskot + tutar |
-| 3×1, 4×1 | `widget_cep` | maskot, tutar, dönem, **+ Ekle** |
-| 3×2, 4×2 (varsayılan) | `widget_medium` | maskot, tutar, dönem, **Gider** / **Gelir** |
-| 4×3 ve üstü | `widget_large` | maskot kendi sahnesinde (kedi: kilim + yün yumağı, baykuş: gece penceresi + kitaplar, sincap: dal + palamutlar, kirpi: yapraklı toprak, köpek: çimen + top), tutar, dönem, **bugünkü harcama**, Gider / Gelir, en fazla 3 **tek dokunuşla kayıt** çipi |
+| 2×1 | `widget_small` | şerit sahne, alttan bakan maskot büstü, tutar |
+| 3×1, 4×1 | `widget_cep` | şerit sahne, solda büyük maskot, tutar + dönem, maskot renginde yuvarlak **+** |
+| 3×2, 4×2 (varsayılan) | `widget_medium` | geniş sahne, solda büyük maskot, sağ üstte tutar + dönem, **Gider** / **Gelir** |
+| 4×3 ve üstü | `widget_large` | uzun sahne, canlanan büyük maskot, tutar, dönem, **bugünkü harcama**, Gider / Gelir, en fazla 3 **tek dokunuşla kayıt** çipi |
+
+Tasarım "önce sahne"dir: maskotun kendi sahnesi (kedi: sıcak oda + kilim, baykuş: aylı gece penceresi + kitaplık, sincap: gökyüzü + meşe dalı, kirpi: çayır + yapraklı toprak, köpek: güneşli park + çit) aracın **tamamını** kaplar (`widget_scene`, `centerCrop`), maskot sahnenin zemin bandında büyük durur. Metin, açık temada %85 kâğıt, koyu temada %85 koyu kâğıt renkli yarı saydam bir panelde (`widget_panel`, `widget_scrim`) olduğundan her sahnede okunur. Düğmeler **maskotun renginde**: Gider ve "+" dolu (`widget_btn_<anahtar>`, `widget_fab_<anahtar>`; kedi turuncu, baykuş mavi, sincap kahve, kirpi adaçayı yeşili, köpek karamel), Gelir ve çipler aynı rengin saydam tonu (`widget_btn_soft_`, `widget_chip_<anahtar>`); `CepWidgetProvider` bunları payload'daki `mascot` anahtarına göre `setBackgroundResource` / `setTextColor` ile seçer. Köşeler Android 12+'da kökteki `clipToOutline` ve sistemin araç köşe yarıçapıyla (`values-v31/widget_dimens.xml`) yuvarlanır; Android 11 ve öncesinde sahne köşeleri düz kalır. Önizleme: `docs/widget-preview.png`.
 
 Android 12+ boyuta duyarlı `RemoteViews(Map<SizeF, RemoteViews>)` kullanır (eşikler dp: 100×40 küçük, 180×40 geniş, 180×120 orta, 250×200 büyük); Android 11 ve öncesinde düzen, aracın en/boy seçeneklerinden `onAppWidgetOptionsChanged`'de seçilir.
 
@@ -49,7 +51,7 @@ Bildirime dokunma, ana ekran aracı ve `://add` derin bağlantısı takma adlard
 
 Kod: `src/lock/` (kilit), `src/native/` (bildirim planı, araç köprüsü, otomatik yedek, eşitleme), `android/app/src/main/java/.../CepWidgetProvider.java` ve `WidgetBridgePlugin.java` (araç, çip kuyruğu ve JS köprüsü), `AddTileService.java` (hızlı ayarlar kutucuğu), `AppIconPlugin.java` (simge).
 
-**Simgeler ve görseller** maskot tanımlarından (`src/mascot/characters.ts`) üretilir: başlatıcı simgeleri (her maskot için kare, yuvarlak ve uyarlanabilir; zemin `palette.iconBg`), varsayılan `ic_launcher*` ve açılış ekranı (Fıstık, kâğıt zemin `#F4EFE6`), araç görselleri `drawable-nodpi/widget_mascot_<anahtar>.png` + `widget_preview.png`, büyük aracın sahneli canlandırma kareleri `widget_anim_<anahtar>_0…5.png` ile `_write` / `_noted` pozları ve küçük/orta araç için saydam pozlar `widget_pose_<anahtar>_write|noted.png` (kare sayısı `CepWidgetProvider.FRAMES` ile aynı olmalı) ve web simgeleri `public/icon*.png`, `public/icon.svg`. Maskot değişince yeniden üret:
+**Simgeler ve görseller** maskot tanımlarından (`src/mascot/characters.ts`) üretilir: başlatıcı simgeleri (her maskot için kare, yuvarlak ve uyarlanabilir; zemin `palette.iconBg`), varsayılan `ic_launcher*` ve açılış ekranı (Fıstık, kâğıt zemin `#F4EFE6`), araç görselleri: sahne zeminleri `drawable-nodpi/widget_scene_<anahtar>_strip|wide|tall.png` (≈4:1, 2:1, 1.2:1), saydam maskot kareleri `widget_anim_<anahtar>_0…5.png` ile `_write` / `_noted` pozları (kare sayısı `CepWidgetProvider.FRAMES` ile aynı olmalı), küçük araç büstleri `widget_bust_<anahtar>[_write|_noted].png`, maskot renginde düğme şekilleri `drawable/widget_btn|btn_soft|chip|fab_<anahtar>.xml` ve renkleri `values(-night)/widget_mascot_colors.xml` (betikteki `WIDGET_BTN`; yazı kontrastı 4.5'in altındaysa betik durur), ayrıca `widget_mascot_<anahtar>.png` + `widget_preview.png`. Araç görselleri küçük bir piksel ızgarasında çizilip tam sayı katla büyütülür ve dizinli (palet) PNG olarak yazılır (hepsi ≈ 300 KB) ve web simgeleri `public/icon*.png`, `public/icon.svg`. Maskot değişince yeniden üret:
 
 ```bash
 npx tsx scripts/gen-android-icons.ts

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- scripts/gen-android-icons.ts tarafından üretildi: koyu temada ikincil düğme/çip tonu. -->
+<resources>
+    <color name="widget_soft_fistik">#E6603F24</color>
+    <color name="widget_soft_bilge">#E631344A</color>
+    <color name="widget_soft_ceviz">#E6463121</color>
+    <color name="widget_soft_diken">#E6333A1C</color>
+    <color name="widget_soft_karamel">#E65D482D</color>
+</resources>

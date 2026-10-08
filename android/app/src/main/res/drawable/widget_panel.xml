@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sahnenin üstündeki metin paneli: yarı saydam kâğıt (açık) / koyu kâğıt (koyu tema). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/widget_scrim" />
+    <corners android:radius="16dp" />
+</shape>

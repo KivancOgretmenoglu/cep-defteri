@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Ana ekran aracı renkleri (koyu tema). -->
+<!-- Ana ekran aracı renkleri (koyu tema). Sahne aynı kalır; panel koyulaşır, metin açılır. -->
 <resources>
     <color name="widget_bg">#25221E</color>
     <color name="widget_line">#3A352F</color>
     <color name="widget_ink">#F1EBE0</color>
-    <color name="widget_ink_2">#C3B9A9</color>
-    <color name="widget_accent">#E8825C</color>
+    <color name="widget_ink_2">#C9BFAF</color>
+    <color name="widget_accent">#F08F69</color>
     <color name="widget_accent_ink">#1C1A17</color>
     <color name="widget_chip">#332F29</color>
+    <!-- Metin paneli: koyu kâğıt, %85 opak -->
+    <color name="widget_scrim">#D91E1B17</color>
 </resources>

@@ -25,11 +25,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Ana ekran aracı. Boyuta göre dört düzen:
- *   küçük  (2×1)      widget_small   maskot + tutar
- *   geniş  (3×1, 4×1) widget_cep     maskot + tutar + dönem + "+ Ekle"
- *   orta   (3×2, 4×2) widget_medium  maskot + tutar + dönem + "Gider" / "Gelir"
- *   büyük  (4×3+)     widget_large   sahnede canlanan maskot, bugünkü harcama, düğmeler, tek dokunuşla kayıt çipleri
+ * Ana ekran aracı. "Önce sahne": maskotun sahnesi aracın tamamını kaplar (widget_scene, centerCrop; Android 12+'da
+ * kök clipToOutline ile yuvarlak köşeli), maskot büyük ve zemin bandında, metin yarı saydam panelde, düğmeler maskotun
+ * renginde (widget_btn_/widget_btn_soft_/widget_chip_/widget_fab_<anahtar>). Boyuta göre dört düzen:
+ *   küçük  (2×1)      widget_small   şerit sahne + alttan bakan büst + tutar
+ *   geniş  (3×1, 4×1) widget_cep     şerit sahne + solda maskot + tutar/dönem + yuvarlak "+"
+ *   orta   (3×2, 4×2) widget_medium  geniş sahne + solda maskot + sağ üstte tutar/dönem + "Gider" / "Gelir"
+ *   büyük  (4×3+)     widget_large   uzun sahne + canlanan maskot + bugünkü harcama + düğmeler + tek dokunuşla kayıt çipleri
  * Android 12+ (API 31) boyuta duyarlı RemoteViews (Map&lt;SizeF, RemoteViews&gt;) kullanır; daha eskilerde düzen
  * araç seçeneklerindeki (en/boy) ölçüye göre seçilir ve onAppWidgetOptionsChanged'de yenilenir.
  *
@@ -69,6 +71,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
     static final int POSE_NOTED = 2;
 
     // Sıra: AppIconPlugin.KEYS ile aynı (fistik, bilge, ceviz, diken, karamel).
+    /** Maskotun tek başına simgesi (eski düzen; görsel hâlâ üretiliyor, mascotDrawable ile erişilir). */
     static final int[] MASCOT = {
         R.drawable.widget_mascot_fistik,
         R.drawable.widget_mascot_bilge,
@@ -76,35 +79,102 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_mascot_diken,
         R.drawable.widget_mascot_karamel,
     };
-    static final int[] POSE_WRITE_IMG = {
-        R.drawable.widget_pose_fistik_write,
-        R.drawable.widget_pose_bilge_write,
-        R.drawable.widget_pose_ceviz_write,
-        R.drawable.widget_pose_diken_write,
-        R.drawable.widget_pose_karamel_write,
+    /** Sahne zeminleri: şerit (küçük/geniş), geniş (orta), uzun (büyük). scripts/gen-android-icons.ts */
+    static final int[] SCENE_STRIP = {
+        R.drawable.widget_scene_fistik_strip,
+        R.drawable.widget_scene_bilge_strip,
+        R.drawable.widget_scene_ceviz_strip,
+        R.drawable.widget_scene_diken_strip,
+        R.drawable.widget_scene_karamel_strip,
     };
-    static final int[] POSE_NOTED_IMG = {
-        R.drawable.widget_pose_fistik_noted,
-        R.drawable.widget_pose_bilge_noted,
-        R.drawable.widget_pose_ceviz_noted,
-        R.drawable.widget_pose_diken_noted,
-        R.drawable.widget_pose_karamel_noted,
+    static final int[] SCENE_WIDE = {
+        R.drawable.widget_scene_fistik_wide,
+        R.drawable.widget_scene_bilge_wide,
+        R.drawable.widget_scene_ceviz_wide,
+        R.drawable.widget_scene_diken_wide,
+        R.drawable.widget_scene_karamel_wide,
     };
-    static final int[] SCENE_WRITE_IMG = {
+    static final int[] SCENE_TALL = {
+        R.drawable.widget_scene_fistik_tall,
+        R.drawable.widget_scene_bilge_tall,
+        R.drawable.widget_scene_ceviz_tall,
+        R.drawable.widget_scene_diken_tall,
+        R.drawable.widget_scene_karamel_tall,
+    };
+    /** Saydam maskot pozları (geniş/orta/büyük): "yazmaya gidiyorum" ve "Not aldım! ✓". */
+    static final int[] WRITE_IMG = {
         R.drawable.widget_anim_fistik_write,
         R.drawable.widget_anim_bilge_write,
         R.drawable.widget_anim_ceviz_write,
         R.drawable.widget_anim_diken_write,
         R.drawable.widget_anim_karamel_write,
     };
-    static final int[] SCENE_NOTED_IMG = {
+    static final int[] NOTED_IMG = {
         R.drawable.widget_anim_fistik_noted,
         R.drawable.widget_anim_bilge_noted,
         R.drawable.widget_anim_ceviz_noted,
         R.drawable.widget_anim_diken_noted,
         R.drawable.widget_anim_karamel_noted,
     };
-    /** Canlandırma kareleri (scripts/gen-android-icons.ts, ANIM_FRAMES = 6). İlki aynı zamanda sabit kare. */
+    /** Küçük araç: alttan bakan büst (sabit, yazıyor, not aldı). */
+    static final int[] BUST = {
+        R.drawable.widget_bust_fistik,
+        R.drawable.widget_bust_bilge,
+        R.drawable.widget_bust_ceviz,
+        R.drawable.widget_bust_diken,
+        R.drawable.widget_bust_karamel,
+    };
+    static final int[] BUST_WRITE = {
+        R.drawable.widget_bust_fistik_write,
+        R.drawable.widget_bust_bilge_write,
+        R.drawable.widget_bust_ceviz_write,
+        R.drawable.widget_bust_diken_write,
+        R.drawable.widget_bust_karamel_write,
+    };
+    static final int[] BUST_NOTED = {
+        R.drawable.widget_bust_fistik_noted,
+        R.drawable.widget_bust_bilge_noted,
+        R.drawable.widget_bust_ceviz_noted,
+        R.drawable.widget_bust_diken_noted,
+        R.drawable.widget_bust_karamel_noted,
+    };
+    /** Maskot renginde düğmeler (üretilir: values/widget_mascot_colors.xml + drawable/widget_*_<anahtar>.xml). */
+    static final int[] BTN = {
+        R.drawable.widget_btn_fistik,
+        R.drawable.widget_btn_bilge,
+        R.drawable.widget_btn_ceviz,
+        R.drawable.widget_btn_diken,
+        R.drawable.widget_btn_karamel,
+    };
+    static final int[] BTN_INK = {
+        R.color.widget_btn_ink_fistik,
+        R.color.widget_btn_ink_bilge,
+        R.color.widget_btn_ink_ceviz,
+        R.color.widget_btn_ink_diken,
+        R.color.widget_btn_ink_karamel,
+    };
+    static final int[] BTN_SOFT = {
+        R.drawable.widget_btn_soft_fistik,
+        R.drawable.widget_btn_soft_bilge,
+        R.drawable.widget_btn_soft_ceviz,
+        R.drawable.widget_btn_soft_diken,
+        R.drawable.widget_btn_soft_karamel,
+    };
+    static final int[] CHIP_BG = {
+        R.drawable.widget_chip_fistik,
+        R.drawable.widget_chip_bilge,
+        R.drawable.widget_chip_ceviz,
+        R.drawable.widget_chip_diken,
+        R.drawable.widget_chip_karamel,
+    };
+    static final int[] FAB = {
+        R.drawable.widget_fab_fistik,
+        R.drawable.widget_fab_bilge,
+        R.drawable.widget_fab_ceviz,
+        R.drawable.widget_fab_diken,
+        R.drawable.widget_fab_karamel,
+    };
+    /** Canlandırma kareleri, saydam (scripts/gen-android-icons.ts, ANIM_FRAMES = 6). İlki aynı zamanda sabit kare. */
     static final int[][] FRAMES = {
         {
             R.drawable.widget_anim_fistik_0, R.drawable.widget_anim_fistik_1, R.drawable.widget_anim_fistik_2,
@@ -374,14 +444,20 @@ public class CepWidgetProvider extends AppWidgetProvider {
         open.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         views.setOnClickPendingIntent(R.id.widget_root, PendingIntent.getActivity(context, 0, open, flags));
 
+        int m = st.mascot;
+        int scene = size == SIZE_LARGE ? SCENE_TALL[m] : size == SIZE_MEDIUM ? SCENE_WIDE[m] : SCENE_STRIP[m];
+        views.setImageViewResource(R.id.widget_scene, scene);
+        int btnInk = context.getResources().getColor(BTN_INK[m], context.getTheme());
+
+        if (size == SIZE_SMALL) {
+            int bust = st.pose == POSE_WRITING ? BUST_WRITE[m] : st.pose == POSE_NOTED ? BUST_NOTED[m] : BUST[m];
+            views.setImageViewResource(R.id.widget_mascot, bust);
+            return views;
+        }
         if (size != SIZE_LARGE) {
-            int img;
-            if (st.pose == POSE_WRITING) img = POSE_WRITE_IMG[st.mascot];
-            else if (st.pose == POSE_NOTED) img = POSE_NOTED_IMG[st.mascot];
-            else img = MASCOT[st.mascot];
+            int img = st.pose == POSE_WRITING ? WRITE_IMG[m] : st.pose == POSE_NOTED ? NOTED_IMG[m] : FRAMES[m][0];
             views.setImageViewResource(R.id.widget_mascot, img);
         }
-        if (size == SIZE_SMALL) return views;
 
         views.setTextViewText(R.id.widget_title, st.title);
         views.setTextViewText(R.id.widget_label, st.label);
@@ -390,14 +466,19 @@ public class CepWidgetProvider extends AppWidgetProvider {
         views.setViewVisibility(R.id.widget_note, status.isEmpty() ? View.GONE : View.VISIBLE);
 
         if (size == SIZE_WIDE) {
-            // "+ Ekle": derin bağlantı → uygulama ekleme sayfasını açar.
-            views.setTextViewText(R.id.widget_add, st.add);
+            // Yuvarlak "+" (maskot renginde): derin bağlantı → uygulama ekleme sayfasını açar.
+            views.setInt(R.id.widget_add, "setBackgroundResource", FAB[m]);
+            views.setTextColor(R.id.widget_add, btnInk);
+            views.setContentDescription(R.id.widget_add, st.add);
             views.setOnClickPendingIntent(R.id.widget_add, PendingIntent.getActivity(context, 1, addIntent(context, null), flags));
             return views;
         }
 
         views.setTextViewText(R.id.widget_btn_expense, st.expense);
         views.setTextViewText(R.id.widget_btn_income, st.income);
+        views.setInt(R.id.widget_btn_expense, "setBackgroundResource", BTN[m]);
+        views.setTextColor(R.id.widget_btn_expense, btnInk);
+        views.setInt(R.id.widget_btn_income, "setBackgroundResource", BTN_SOFT[m]);
         views.setOnClickPendingIntent(R.id.widget_btn_expense, PendingIntent.getActivity(context, 2, addIntent(context, "expense"), flags));
         views.setOnClickPendingIntent(R.id.widget_btn_income, PendingIntent.getActivity(context, 3, addIntent(context, "income"), flags));
         if (size == SIZE_MEDIUM) return views;
@@ -406,13 +487,13 @@ public class CepWidgetProvider extends AppWidgetProvider {
         views.setTextViewText(R.id.widget_today, st.today);
         views.setViewVisibility(R.id.widget_today, st.today.isEmpty() ? View.GONE : View.VISIBLE);
 
-        int[] frames = FRAMES[st.mascot];
+        int[] frames = FRAMES[m];
         for (int i = 0; i < FRAME_IDS.length; i++) {
             views.setImageViewResource(FRAME_IDS[i], frames[i]);
         }
         int still;
-        if (st.pose == POSE_WRITING) still = SCENE_WRITE_IMG[st.mascot];
-        else if (st.pose == POSE_NOTED) still = SCENE_NOTED_IMG[st.mascot];
+        if (st.pose == POSE_WRITING) still = WRITE_IMG[m];
+        else if (st.pose == POSE_NOTED) still = NOTED_IMG[m];
         else still = frames[0];
         boolean flip = st.animate && st.pose == POSE_NONE;
         views.setImageViewResource(R.id.widget_static, still);
@@ -429,6 +510,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
             }
             shown++;
             views.setTextViewText(CHIP_IDS[i], chip.optString("label", ""));
+            views.setInt(CHIP_IDS[i], "setBackgroundResource", CHIP_BG[m]);
             views.setViewVisibility(CHIP_IDS[i], View.VISIBLE);
             Intent quick = new Intent(context, CepWidgetProvider.class);
             quick.setAction(ACTION_QUICK);
