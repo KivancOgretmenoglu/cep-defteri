@@ -65,6 +65,15 @@ export function ringValues(data: Data, today: ISODate): Ring[] {
   return rings;
 }
 
+/**
+ * Bu değişiklikle ilk kez ulaşılan hedeflerin id'leri: önceki hâlde var olan ve tamamlanmamış,
+ * yenisinde tamamlanmış hedefler. Yeni oluşturulan (zaten dolu) hedefler kutlanmaz.
+ */
+export function newlyReachedGoals(prev: Data, next: Data): string[] {
+  const before = new Map(prev.goals.map((g) => [g.id, g.target > 0 && (goalProgress(prev, g)?.reached ?? false)]));
+  return next.goals.filter((g) => g.target > 0 && before.get(g.id) === false && goalProgress(next, g)?.reached).map((g) => g.id);
+}
+
 export interface Improvement {
   /** Geçen ayın aynı noktasına göre daha az harcanan tutar. */
   lessBy: Money;

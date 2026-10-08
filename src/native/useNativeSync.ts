@@ -4,20 +4,17 @@
  * App içinde bir kez çağrılır.
  */
 import { useEffect, useRef } from 'react';
-import { getState, refreshToday, showToast, useStore } from '../store/store';
+import { getState, refreshToday, useStore } from '../store/store';
 import { getDevice, useDevice } from '../store/device';
 import { openSheet } from '../ui/nav';
 import { isNative } from '../platform';
 import { rescheduleNotifications, onNotificationTap } from './notifications';
 import { updateWidget } from './widget';
 import { runAutoBackup } from './autoBackup';
-import { backedUpToday, backupNudgeDue } from './backupPlan';
-import { todayISO } from '../domain/dates';
-import { t } from '../i18n';
+import { backedUpToday } from './backupPlan';
 import type { NotifExtra } from './schedule';
 
 export const DEEP_LINK_SCHEME = 'io.github.kivancogretmenoglu.cepdefteri';
-const NUDGE_KEY = 'cep-defteri:backup-nudge';
 
 /** "io.github.kivancogretmenoglu.cepdefteri://add" → ekleme sayfası. */
 export function handleDeepLink(url: string | undefined | null): boolean {
@@ -35,22 +32,6 @@ function handleNotif(ex: NotifExtra) {
   if (ex.open === 'add') return openSheet({ kind: 'add' });
   const { data } = getState();
   if (data.plans.some((p) => p.id === ex.planId)) openSheet({ kind: 'confirm', planId: ex.planId, due: ex.due });
-}
-
-/** Gün içinde bir kez, nazik bir yedek hatırlatması (tarayıcıda ya da otomatik yedek kapalıysa). */
-function maybeNudge() {
-  const { data, mode } = getState();
-  if (mode !== 'real') return;
-  if (isNative() && getDevice().autoBackup.enabled) return;
-  if (!backupNudgeDue(data, Date.now())) return;
-  const today = todayISO();
-  try {
-    if (localStorage.getItem(NUDGE_KEY) === today) return;
-    localStorage.setItem(NUDGE_KEY, today);
-  } catch {
-    return;
-  }
-  setTimeout(() => showToast(t('sync.nudge'), { ms: 7000 }), 2500);
 }
 
 let setupDone = false;
@@ -96,11 +77,8 @@ function setupOnce() {
       else syncNow({ backupIfStale: true });
     });
   }
-  // Açılışta: bugün yedek alınmadıysa al; hatırlatmayı değerlendir.
-  setTimeout(() => {
-    syncNow({ backupIfStale: true });
-    maybeNudge();
-  }, 1200);
+  // Açılışta: bugün yedek alınmadıysa al. (Yedek hatırlatması ana ekrandaki BackupReminder kartında.)
+  setTimeout(() => syncNow({ backupIfStale: true }), 1200);
 }
 
 export function useNativeSync(): void {

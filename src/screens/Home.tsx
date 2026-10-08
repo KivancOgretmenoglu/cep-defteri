@@ -13,13 +13,15 @@ import { BalanceChart } from '../ui/BalanceChart';
 import { DueRow } from '../ui/DueRow';
 import { mascotMood } from '../domain/mood';
 import { addDays } from '../domain/dates';
-import { Amount, Progress, SectionHead } from '../ui/kit';
+import { Amount, AnimatedMoney, Progress, SectionHead } from '../ui/kit';
+import { useListSettle } from '../ui/motion';
 import { MascotNote } from '../mascot/MascotNote';
 import { Rings } from '../ui/Rings';
 import { TxRow } from '../ui/TxRow';
 import { go, openSheet } from '../ui/nav';
 import { useData, useLookups } from '../ui/hooks';
 import { ACCOUNT_ICONS } from '../ui/icons';
+import { BackupReminderCard } from '../native/BackupReminder';
 
 export function Home() {
   const t = useT();
@@ -44,6 +46,7 @@ export function Home() {
   const dailyAccs = data.accounts.filter((a) => isDaily(a) && (!a.archived || cashBalance(data, a.id) !== 0));
   const invAccs = data.accounts.filter((a) => isInvestment(a) && !a.archived);
   const recent = [...data.txs].sort((a, b) => (a.date === b.date ? b.seq - a.seq : a.date < b.date ? 1 : -1)).slice(0, 5);
+  const recentRef = useListSettle<HTMLUListElement>(recent.map((x) => x.id));
   const daily = dailyBalance(data);
   const invTotal = investmentTotal(data);
   const hide = data.settings.hideTotals;
@@ -96,6 +99,8 @@ export function Home() {
         }
       />
 
+      <BackupReminderCard />
+
       <div className="home-grid">
         <Rings />
         <section className="card receipt" aria-labelledby="avail-h">
@@ -108,14 +113,14 @@ export function Home() {
           ) : (
             <>
               <div className="receipt__hero">
-                <Amount value={av.available} size="xl" hide={hide} className={av.available < 0 && !hide ? 'tone-warn' : ''} />
+                <Amount value={av.available} size="xl" hide={hide} animate className={av.available < 0 && !hide ? 'tone-warn' : ''} />
                 <button className="icon-btn icon-btn--small" onClick={toggleHide} aria-label={hide ? t('home.showBalances') : t('home.hideBalances')}>{hide ? <EyeOff size={18} /> : <Eye size={18} />}</button>
               </div>
-              {av.available > 0 && <p className="receipt__perday">{t('home.perDayPre')} <b>{H(av.perDay)}</b>{t('home.perDayPost')} · {t('common.days', { n: av.daysLeft })}</p>}
+              {av.available > 0 && <p className="receipt__perday">{t('home.perDayPre')} <b><AnimatedMoney value={av.perDay} hide={hide} /></b>{t('home.perDayPost')} · {t('common.days', { n: av.daysLeft })}</p>}
               <dl className="receipt__lines">
                 <div>
                   <dt>{t('home.inDaily')}</dt>
-                  <dd>{H(av.dailyBalance)}</dd>
+                  <dd><AnimatedMoney value={av.dailyBalance} hide={hide} /></dd>
                 </div>
                 <div>
                   <dt>
@@ -143,7 +148,7 @@ export function Home() {
                 )}
                 <div className="receipt__total">
                   <dt>= {t('home.availableShort')}</dt>
-                  <dd>{H(av.available)}</dd>
+                  <dd><AnimatedMoney value={av.available} hide={hide} /></dd>
                 </div>
               </dl>
               {av.debtsReceivable > 0 && (
@@ -183,17 +188,17 @@ export function Home() {
         <section className="month-stats" aria-label={t('home.monthSummary', { month: monthName(month) })}>
           <button className="stat" onClick={() => go('tx', { filter: { month, kind: 'income' } })}>
             <span className="stat__label">{t('home.statIncome')}</span>
-            <Amount value={sum.income} size="md" tone="pos" />
+            <Amount value={sum.income} size="md" tone="pos" animate />
             <span className="stat__hint">{t('home.statIncomeHint')}</span>
           </button>
           <button className="stat" onClick={() => go('tx', { filter: { month, kind: 'expense' } })}>
             <span className="stat__label">{t('home.statSpending')}</span>
-            <Amount value={sum.spending} size="md" />
+            <Amount value={sum.spending} size="md" animate />
             <span className="stat__hint">{sum.refunds ? t('home.refundsDeducted', { amount: formatMoney(sum.refunds) }) : t('home.statSpendingHint')}</span>
           </button>
           <button className="stat" onClick={() => go('invest')}>
             <span className="stat__label">{t('home.statInvest')}</span>
-            <Amount value={sum.contributions} size="md" tone="invest" />
+            <Amount value={sum.contributions} size="md" tone="invest" animate />
             <span className="stat__hint">{sum.withdrawals ? t('home.withdrawn', { amount: formatMoney(sum.withdrawals) }) : t('home.thisMonth')}</span>
           </button>
           {budget.budget !== null && (
@@ -224,7 +229,7 @@ export function Home() {
                   <button className="acc-row" onClick={() => go('tx', { filter: { accountId: a.id } })}>
                     <I size={18} aria-hidden />
                     <span className="acc-row__name">{a.name}{a.archived && <small> {t('home.archivedTag')}</small>}</span>
-                    <Amount value={cashBalance(data, a.id)} hide={hide} />
+                    <Amount value={cashBalance(data, a.id)} hide={hide} animate />
                   </button>
                 </li>
               );
@@ -232,7 +237,7 @@ export function Home() {
             {dailyAccs.length > 1 && (
               <li className="acc-total">
                 <span>{t('home.dailyTotal')}</span>
-                <Amount value={daily} hide={hide} />
+                <Amount value={daily} hide={hide} animate />
               </li>
             )}
           </ul>
@@ -250,7 +255,7 @@ export function Home() {
                           {a.name}
                           <small>{t('home.valueAsOf', { date: shortDate(st.lastValuation.date, today) })}{st.flowsSinceValuation !== 0 ? t('home.plusLater') : ''}</small>
                         </span>
-                        <Amount value={st.currentValue} tone="invest" hide={hide} />
+                        <Amount value={st.currentValue} tone="invest" hide={hide} animate />
                       </button>
                     </li>
                   );
@@ -296,7 +301,7 @@ export function Home() {
           {recent.length === 0 ? (
             <p className="muted">{t('home.noTxPre')} <b>+</b> {t('home.noTxPost')}</p>
           ) : (
-            <ul className="tx-list">
+            <ul className="tx-list" ref={recentRef}>
               {recent.map((t) => (
                 <TxRow key={t.id} t={t} data={data} lookups={lookups} showDate={shortDate(t.date, today)} />
               ))}

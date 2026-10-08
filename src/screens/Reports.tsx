@@ -20,18 +20,27 @@ function rangeText(c: Comparison['current']) {
   return T('rep.range', { a, b, mon: monthShort(monthOf(c.from)) });
 }
 
-/** Rapor yorumu: yalnızca gerçek kayıtlardan; karşılaştırma anlamlı değilse söylemez. */
+/**
+ * Rapor yorumu: yalnızca gerçek kayıtlardan; karşılaştırma anlamlı değilse söylemez.
+ * Balonda tek kısa cümle (ana çıkarım); tutarlar, ikincil bulgular ve kural gerekçeleri `why`da.
+ */
 function reportComment(data: Data, month: MonthKey, today: string, c: Comparison, catName: (id: ID) => string): { mood: Mood; text: string; why: string } {
   if (c.current.txCount === 0) return { mood: 'curious', text: T('rep.c.empty'), why: T('rep.c.emptyWhy') };
-  const lines: string[] = [];
+  let compare: string | null = null;
+  const details: string[] = [];
   const whys: string[] = [];
   if (!c.meaningful) {
-    lines.push(c.previousComplete ? T('rep.c.noPrev') : T('rep.c.partialPrev', { month: monthName(addMonths(month, -1)) }));
+    if (c.previousComplete) compare = T('rep.c.noPrev');
+    else {
+      compare = T('rep.c.partialPrev');
+      whys.push(T('rep.c.partialPrevWhy', { month: monthName(addMonths(month, -1)) }));
+    }
   } else {
     const d = c.current.spending - c.previous.spending;
     if (c.previous.spending > 0) {
       const ch = Math.round((Math.abs(d) / c.previous.spending) * 100);
-      lines.push(d === 0 ? T('rep.c.same') : T(d < 0 ? 'rep.c.less' : 'rep.c.more', { range: rangeText(c.previous), pct: pctPlain(ch), from: formatMoney(c.previous.spending), to: formatMoney(c.current.spending) }));
+      compare = d === 0 ? T('rep.c.same') : T(d < 0 ? 'rep.c.less' : 'rep.c.more', { range: rangeText(c.previous), pct: pctPlain(ch) });
+      if (d !== 0) details.push(T('rep.c.fromTo', { from: formatMoney(c.previous.spending), to: formatMoney(c.current.spending) }));
     }
     // En çok değişen kategori
     const ids = new Set([...c.current.spendingByCategory.keys(), ...c.previous.spendingByCategory.keys()]);
@@ -40,19 +49,24 @@ function reportComment(data: Data, month: MonthKey, today: string, c: Comparison
       const diff = (c.current.spendingByCategory.get(id) ?? 0) - (c.previous.spendingByCategory.get(id) ?? 0);
       if (!best || Math.abs(diff) > Math.abs(best.diff)) best = { id, diff };
     }
-    if (best && Math.abs(best.diff) >= 5000) lines.push(T('rep.c.biggest', { cat: catName(best.id), amount: formatMoney(best.diff, { sign: true }) }));
+    if (best && Math.abs(best.diff) >= 5000) details.push(T('rep.c.biggest', { cat: catName(best.id), amount: formatMoney(best.diff, { sign: true }) }));
     whys.push(T('rep.c.ranges', { a: rangeText(c.current), b: rangeText(c.previous), partial: c.partial ? T('rep.c.rangesPartial') : '' }));
   }
   const b = budgetStatus(data, month, today);
   let mood: Mood = 'calm';
+  let budgetLine: string | null = null;
   if (b.budget !== null && b.usedPct !== null) {
-    if (c.partial) lines.push(T('rep.c.budgetPace', { used: pctForm(b.usedPct, 'poss'), elapsed: pctForm(b.elapsedPct, 'poss') }));
-    else lines.push(b.spent <= b.budget ? T('rep.c.closedUnder', { amount: formatMoney(b.budget - b.spent) }) : T('rep.c.closedOver', { amount: formatMoney(b.spent - b.budget) }));
+    budgetLine = c.partial
+      ? T('rep.c.budgetPace', { used: pctForm(b.usedPct, 'poss'), elapsed: pctForm(b.elapsedPct, 'poss') })
+      : b.spent <= b.budget ? T('rep.c.closedUnder', { amount: formatMoney(b.budget - b.spent) }) : T('rep.c.closedOver', { amount: formatMoney(b.spent - b.budget) });
     if (b.state === 'on-track' || b.state === 'closed-within') mood = 'happy';
     if (b.state === 'over' || b.state === 'tight') mood = 'thoughtful';
     whys.push(T('rep.c.budgetWhy'));
   } else whys.push(T('rep.c.noBudgetWhy'));
-  return { mood, text: lines.join(' '), why: whys.join(' ') };
+  // Anlamlı karşılaştırma varsa o öne çıkar; yoksa bütçe durumu (varsa), yoksa neden karşılaştırmadığım.
+  const headline = c.meaningful && compare ? compare : budgetLine ?? compare ?? T('rep.c.noPrev');
+  const rest = [compare, ...details, budgetLine].filter((x): x is string => !!x && x !== headline);
+  return { mood, text: headline, why: [...rest, ...whys].join(' ') };
 }
 
 export function Reports() {

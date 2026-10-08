@@ -68,8 +68,9 @@ export function Budget() {
     if (b.state === 'on-track' || b.state === 'watch' || b.state === 'tight')
       note = {
         mood: st.mood,
-        text: `${t('bud.note.pace', { elapsed: pctForm(b.elapsedPct, 'poss'), used: pctForm(b.flexUsedPct ?? 0, 'acc') })} ${b.remaining !== null && b.remaining > 0 ? t('bud.note.left', { amount: formatMoney(b.remaining), perDay: formatMoney(Math.floor(b.remaining / left)) }) : ''}`,
-        why: t('bud.note.paceWhy'),
+        // Balonda tek kısa cümle (kalan + günlük pay); tempo yüzdeleri "Neden böyle?" içinde.
+        text: b.remaining !== null && b.remaining > 0 ? t('bud.note.left', { amount: formatMoney(b.remaining), perDay: formatMoney(Math.floor(b.remaining / left)) }) : t('bud.note.pace', { elapsed: pctForm(b.elapsedPct, 'poss'), used: pctForm(b.flexUsedPct ?? 0, 'acc') }),
+        why: t('bud.note.paceWhy', { pace: t('bud.note.pace', { elapsed: pctForm(b.elapsedPct, 'poss'), used: pctForm(b.flexUsedPct ?? 0, 'acc') }) }),
       };
     else if (b.state === 'over')
       note = { mood: 'thoughtful', text: t('bud.note.over', { amount: formatMoney(b.spent - b.budget) }), why: t('bud.note.overWhy', { spent: formatMoney(b.spent), budget: formatMoney(b.budget) }) };

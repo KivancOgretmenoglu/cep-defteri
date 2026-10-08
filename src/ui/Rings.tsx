@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ringValues, type Ring } from '../domain/rings';
 import { formatMoney, hiddenMoney } from '../i18n/format';
 import { useT } from '../i18n';
@@ -6,6 +6,8 @@ import { useData } from './hooks';
 
 const RADII = [46, 35, 24]; // dıştan içe yarıçaplar
 const circ = (r: number) => 2 * Math.PI * r;
+// Açılış dolumu oturumda bir kez: ana ekrana her dönüşte yeniden oynamasın.
+let introPlayed = false;
 
 /** Ay ilerlemesi halkaları: dış ince halka ayın akışı, içtekiler bütçe ve hedef. Veri yoksa hiçbir şey çizilmez. */
 export function Rings() {
@@ -13,7 +15,27 @@ export function Rings() {
   const { data, today } = useData();
   const hide = data.settings.hideTotals;
   const rings = useMemo(() => ringValues(data, today), [data, today]);
-  if (rings.length === 0) return null;
+  // İlk görünüşte halkalar 0'dan dolar (CSS geçişi, sırayla); sonra değişimlerde yaylanır.
+  const [drawn, setDrawn] = useState(introPlayed);
+  const has = rings.length > 0;
+  useEffect(() => {
+    if (drawn || !has) return;
+    // İki kare bekle: 0 değeri boyansın ki geçiş başlasın.
+    let id = requestAnimationFrame(() => {
+      id = requestAnimationFrame(() => {
+        introPlayed = true;
+        setDrawn(true);
+      });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [drawn, has]);
+  const [settled, setSettled] = useState(introPlayed);
+  useEffect(() => {
+    if (!drawn || settled) return;
+    const id = setTimeout(() => setSettled(true), 1000);
+    return () => clearTimeout(id);
+  }, [drawn, settled]);
+  if (!has) return null;
   const M = (v: number) => (hide ? hiddenMoney() : formatMoney(v));
 
   // Metin karşılığı; gizli toplamlarda tutar yok, yalnız yüzde.
@@ -31,11 +53,18 @@ export function Rings() {
 
   return (
     <section className="rings card" aria-label={t('rings.label')}>
-      <svg className="rings__svg" viewBox="0 0 100 100" aria-hidden focusable="false">
+      <svg className={`rings__svg ${settled ? 'is-settled' : ''}`} viewBox="0 0 100 100" aria-hidden focusable="false">
         {rings.map((r, i) => (
           <g key={r.kind} className={`ring ring--${r.kind} ring--${r.state}`} transform="rotate(-90 50 50)">
             <circle className="ring__track" cx="50" cy="50" r={RADII[i]} />
-            {r.value > 0 && <circle className="ring__fill" cx="50" cy="50" r={RADII[i]} strokeDasharray={`${circ(RADII[i]) * r.value} ${circ(RADII[i])}`} />}
+            <circle
+              className="ring__fill"
+              cx="50"
+              cy="50"
+              r={RADII[i]}
+              style={{ '--i': i, opacity: r.value > 0 ? 1 : 0 } as React.CSSProperties}
+              strokeDasharray={`${drawn ? circ(RADII[i]) * r.value : 0} ${circ(RADII[i])}`}
+            />
           </g>
         ))}
       </svg>

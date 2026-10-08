@@ -2,15 +2,17 @@ import { useEffect, useId, useRef, useState, type ReactNode, type InputHTMLAttri
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Money } from '../domain/money';
 import { addMonths, type MonthKey } from '../domain/dates';
-import { decimalSep, formatMoney, moneyParts, moneyToInput, moneyUnit, parseMoney, monthLabel } from '../i18n/format';
+import { decimalSep, formatMoney, hiddenMoney, moneyParts, moneyToInput, moneyUnit, parseMoney, monthLabel } from '../i18n/format';
 import { useT } from '../i18n';
+import { useCountUp } from './motion';
 
 // ── Tutar gösterimi ────────────────────────────────────
 /** Gizli tutar gösterimi (bakiye gizleme açıkken). */
 export const HIDDEN = '•••••';
 
-export function Amount({ value, size = 'md', sign = false, tone, className = '', hide = false }: { value: Money; size?: 'sm' | 'md' | 'lg' | 'xl'; sign?: boolean; tone?: 'pos' | 'neg' | 'invest' | 'muted'; className?: string; hide?: boolean }) {
+export function Amount({ value: target, size = 'md', sign = false, tone, className = '', hide = false, animate = false }: { value: Money; size?: 'sm' | 'md' | 'lg' | 'xl'; sign?: boolean; tone?: 'pos' | 'neg' | 'invest' | 'muted'; className?: string; hide?: boolean; /** Değer değişince kısa sayma (ilk çizimde ve gizliyken yok) */ animate?: boolean }) {
   const t = useT();
+  const value = useCountUp(target, animate && !hide);
   const en = t.lang === 'en';
   if (hide)
     return (
@@ -36,6 +38,12 @@ export function Amount({ value, size = 'md', sign = false, tone, className = '',
     );
   }
   return <span className={`amount amount--${size} ${tone ? 'tone-' + tone : ''} ${className}`}>{formatMoney(value, { sign })}</span>;
+}
+
+/** Düz metin tutar (formatMoney) için sayan sürüm; gizliyken maske, sayma yok. */
+export function AnimatedMoney({ value, hide = false }: { value: Money; hide?: boolean }) {
+  const v = useCountUp(value, !hide);
+  return <>{hide ? hiddenMoney() : formatMoney(v)}</>;
 }
 
 // ── Tutar girişi ───────────────────────────────────────

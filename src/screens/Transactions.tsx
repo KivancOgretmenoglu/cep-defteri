@@ -10,6 +10,7 @@ import { Chip, MonthSwitcher } from '../ui/kit';
 import { TxRow, txView } from '../ui/TxRow';
 import { setFilter, useNav, openSheet, type TxFilter } from '../ui/nav';
 import { useData, useLookups } from '../ui/hooks';
+import { useListSettle } from '../ui/motion';
 import { EmptyState } from '../mascot/MascotNote';
 
 const KINDS: { value: NonNullable<TxFilter['kind']>; label: Key }[] = [
@@ -65,6 +66,8 @@ export function Transactions() {
     }
     return g;
   }, [list]);
+  // Kayıt eklenince yeni satırın yerleşmesi (yalnız listenin başı izlenir).
+  const listRef = useListSettle<HTMLDivElement>(useMemo(() => list.slice(0, 60).map((x) => x.id), [list]));
 
   // Filtrelenmiş listenin toplamları da aynı hesaplama kurallarından gelir.
   const totals = useMemo(() => {
@@ -144,7 +147,7 @@ export function Transactions() {
           </EmptyState>
         )
       ) : (
-        <div className="day-groups">
+        <div className="day-groups" ref={listRef}>
           {groups.map((g) => {
             const s = rangeSummary({ ...data, txs: g.txs }, g.date, g.date);
             return (

@@ -13,7 +13,7 @@ export const ringsTr = {
   'rings.goalAltAmt': "\"{goal}\" hedefi: {cur} / {target} (%{pct}).",
   'rings.goalDone': "\"{goal}\" hedefine ulaşıldı.",
   'rings.pctShort': "%{pct}",
-  'mood.better.text': "Bu ay ayın aynı noktasında geçen aya göre {amount} daha az harcadın.",
-  'mood.better.textHidden': "Bu ay ayın aynı noktasında geçen aya göre daha az harcadın.",
+  'mood.better.text': "Geçen ayın aynı gününe göre {amount} daha az harcadın.",
+  'mood.better.textHidden': "Geçen ayın aynı gününe göre daha az harcadın.",
   'mood.better.why': "Kural: bu ayın harcaması, geçen ayın aynı gününe kadarki harcamadan en az %10 düşük (iadeler düşülmüş, iki ay da takip kapsamında).",
 } satisfies Record<string, string>;

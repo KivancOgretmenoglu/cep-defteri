@@ -13,7 +13,8 @@ import { closeSheet, openSheet, type SheetState } from '../ui/nav';
 import { discardTxDraft, stashTxDraft, takeTxDraft, type TxSnap } from './txDraft';
 import { Chip, FormError, MoneyInput, Segmented, Sheet, inputFromMoney } from '../ui/kit';
 import { CatIcon, ACCOUNT_ICONS } from '../ui/icons';
-import { dailyAccounts, frequentTemplates, recentCategories, useData, useLookups } from '../ui/hooks';
+import { categoryOrder, dailyAccounts, frequentTemplates, useData, useLookups } from '../ui/hooks';
+import { quickAmounts } from '../domain/smart';
 
 type Tab = 'expense' | 'income' | 'transfer' | 'invest' | 'debt';
 
@@ -97,12 +98,17 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
       next,
     );
   }
+  // Sıra açılışta bir kez hesaplanır: sayfa açıkken ızgara kaymasın (kayıt eklenince yer değiştirmesin).
+  const [catOrder] = useState(() => {
+    const hour = new Date().getHours();
+    return { expense: categoryOrder(data, 'expense', today, hour), income: categoryOrder(data, 'income', today, hour) };
+  });
   const catList = useMemo(() => {
-    const recent = recentCategories(data, catKind);
+    const ranked = catOrder[catKind];
     const all = data.categories.filter((c) => c.kind === catKind && (!c.archived || c.id === editing?.categoryId));
-    const ordered = [...recent.map((id) => all.find((c) => c.id === id)).filter((c): c is NonNullable<typeof c> => !!c), ...all.filter((c) => !recent.includes(c.id))];
+    const ordered = [...ranked.map((id) => all.find((c) => c.id === id)).filter((c): c is NonNullable<typeof c> => !!c), ...all.filter((c) => !ranked.includes(c.id))];
     return ordered;
-  }, [data, catKind, editing?.categoryId]);
+  }, [data, catKind, catOrder, editing?.categoryId]);
   const visibleCats = showAllCats ? catList : catList.slice(0, 8);
   if (categoryId && !visibleCats.some((c) => c.id === categoryId)) {
     const sel = catList.find((c) => c.id === categoryId);
@@ -110,6 +116,10 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
   }
 
   const templates = !editing && (tab === 'expense' || tab === 'income') ? frequentTemplates(data, tab, today) : [];
+  // Sık girilen yuvarlak tutarlar (yalnız yeni gider/gelir): dokununca tutarı doldurur, kaydetmez.
+  const [amountChips] = useState(() => ({ expense: quickAmounts(data, 'expense', today), income: quickAmounts(data, 'income', today) }));
+  // Kalıp çipinin zaten önerdiği tutar tekrar gösterilmez (aynı satır iki kez görünmesin).
+  const quick = !editing && !planRef && (tab === 'expense' || tab === 'income') ? amountChips[tab].filter((m) => !templates.some((t) => t.amount === m)) : [];
 
   // Bu türdeki yakın tarihli bekleyen planlı kalemler: seçilirse işlem plana bağlanır (iki kez düşülmez).
   const planMatches = useMemo(() => {
@@ -339,8 +349,20 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
 
       <MoneyInput big label={T('csv.amount')} value={amount} onChange={setAmount} autoFocus={!editing} onEnter={save} />
 
-      {templates.length > 0 && (
-        <div className="chip-row chip-row--scroll" role="group" aria-label={T('txs.frequent')}>
+
+      {(quick.length > 0 || templates.length > 0) && (
+        // Hızlı tutarlar ve kalıplar tek kaydırılabilir satırda: kategori ızgarası aşağı itilmesin.
+        <div className="chip-row chip-row--scroll quick-row">
+          {quick.length > 0 && (
+            <span className="quick-row__group" role="group" aria-label={T('defaults.quickAmounts')}>
+              {quick.map((m) => (
+                <Chip key={m} className="chip--amount" on={parseMoney(amount) === m} onClick={() => setAmount(inputFromMoney(m))}>
+                  {formatMoney(m)}
+                </Chip>
+              ))}
+            </span>
+          )}
+          <span className="quick-row__group" role="group" aria-label={T('txs.frequent')}>
           {templates.map((t) => (
             <Chip
               key={t.key}
@@ -356,6 +378,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
               <Repeat size={14} aria-hidden /> {t.note ?? catName(cats.get(t.categoryId))} · {formatMoney(t.amount)}
             </Chip>
           ))}
+          </span>
         </div>
       )}
 

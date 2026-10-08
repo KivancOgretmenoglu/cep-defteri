@@ -17,7 +17,7 @@ import { biometricInfo, verifyBiometric, type BiometricInfo } from '../lock/biom
 import { computeSchedule } from './schedule';
 import { loadSent, notificationPermission, requestNotificationPermission, type NotifPermission } from './notifications';
 import { listAutoBackups, requestStoragePermission, runAutoBackup, type AutoBackupEntry } from './autoBackup';
-import { backupNudgeDue, NUDGE_DAYS } from './backupPlan';
+import { reminderTexts, useBackupReminder } from './BackupReminder';
 import { intlLocale } from '../i18n/format';
 import { t as tNow, useT } from '../i18n';
 import './native.css';
@@ -268,7 +268,6 @@ export function AutoBackupSettings() {
   const t = useT();
   const ONOFF = onOff();
   const ab = useDevice((p) => p.autoBackup);
-  const data = useStore((s) => s.data);
   const mode = useStore((s) => s.mode);
   const native = isNative();
   const [list, setList] = useState<AutoBackupEntry[]>([]);
@@ -276,7 +275,9 @@ export function AutoBackupSettings() {
   useEffect(() => {
     listAutoBackups().then(setList);
   }, [ab.lastAt]);
-  const nudge = (!native || !ab.enabled) && mode === 'real' && backupNudgeDue(data, Date.now());
+  // Ana ekrandaki hatırlatmanın aynısı ("Sonra" denmiş olsa da burada görünür).
+  const reminder = useBackupReminder(true);
+  const rem = reminder && reminderTexts(reminder, t);
 
   async function backupNow() {
     setBusy(true);
@@ -312,9 +313,9 @@ export function AutoBackupSettings() {
         </p>
       )}
       {ab.lastError && <p className="form-error" role="alert">{ab.lastError}</p>}
-      {nudge && (
+      {rem && (
         <div className="callout callout--quiet">
-          {t('ns.nudge', { n: NUDGE_DAYS })}{native ? '' : t('ns.nudgeWeb')}. {t('ns.nudgeHowPre')}<b>{t('ns.downloadBackup')}</b>{t('ns.nudgeHowPost')}
+          <b>{rem.title}</b> {rem.why}{rem.last && <> {rem.last}</>} {t('ns.nudgeHowPre')}<b>{t('ns.downloadBackup')}</b>{t('ns.nudgeHowPost')}
         </div>
       )}
       {mode === 'real' && (

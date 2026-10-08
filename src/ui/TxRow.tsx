@@ -33,7 +33,7 @@ export function TxRow({ t, data, lookups, showDate }: { t: Tx; data: Data; looku
   const v = txView(t, lookups.accounts, lookups.cats, lookups.txById);
   const refunded = t.type === 'expense' ? data.txs.filter((r) => r.refundOf === t.id).reduce((a, r) => a + r.amount, 0) : 0;
   return (
-    <li>
+    <li data-tx={t.id}>
       <button className="tx-row" onClick={() => openSheet(t.type === 'refund' ? { kind: 'refund', txId: t.id } : { kind: 'edit', txId: t.id })}>
         <span className={`tx-row__icon ${v.icon === 'invest' ? 'is-invest' : v.icon === 'transfer' || v.icon === 'debt' ? 'is-transfer' : ''}`} style={v.color ? ({ '--cat': v.color } as React.CSSProperties) : undefined}>
           {v.icon === 'debt' ? <HandCoins size={18} /> : v.icon === 'invest' ? <Sprout size={18} /> : v.icon === 'transfer' ? <ArrowLeftRight size={18} /> : v.icon === 'refund' ? <RotateCcw size={18} /> : <CatIcon icon={v.icon} />}

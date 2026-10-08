@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { HintHost } from './mascot/hints';
 import { CameoHost } from './mascot/cameo/Cameo';
+import { CelebrateHost } from './ui/Celebrate';
 import { resumeTxDraft } from './sheets/txDraft';
 import { Plus, House, ListOrdered, CalendarRange, ChartColumn, Sprout, Settings as Gear, AlertTriangle, FlaskConical, Undo2, X, HandCoins } from 'lucide-react';
 import { dismissWarning, hideToast, setMode, undo, useStore } from './store/store';
@@ -225,6 +226,7 @@ export function App() {
       <Toast />
       <HintHost />
       <CameoHost />
+      <CelebrateHost />
     </div>
     </LockGate>
   );
