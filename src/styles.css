@@ -244,6 +244,8 @@ kbd {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--line);
+  /* Kendi katmanında: arkadaki ekran animasyonları çubuğu yeniden yerleştirmesin */
+  transform: translateZ(0);
 }
 .tabbar__item {
   display: flex;

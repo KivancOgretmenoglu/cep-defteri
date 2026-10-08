@@ -2,6 +2,16 @@
    Yalnız transform/opacity; dolgu modu yok (bitince transform kalkar, sabit konumlu
    öğeler etkilenmez). Girdiyi engellemez. Azaltılmış harekette tamamen kapalı. */
 
+/* Yandan kayan ekran bir an sayfadan taşmasın: taşma, Android'de görünür alanı genişletip
+   sabit alt çubuğu (tabbar) kaydırıyordu. clip kaydırma kabı oluşturmaz, position:fixed etkilenmez. */
+.main {
+  overflow-x: clip;
+}
+html,
+body {
+  overflow-x: clip;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   /* Ekran girişi (App.tsx: <div key={screen} class="screen-enter …">) */
   .screen-enter--right {
