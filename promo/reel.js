@@ -35,7 +35,7 @@ function spriteSVG(k) {
 function pick(who, outfit, mood, paws, eyes) {
   const base = outfit ? `${who}@${outfit}` : who;
   const tries = outfit
-    ? [`${base}|${mood}|${paws}|mood`, `${base}|${mood}|${paws === 'wave2' ? 'wave' : paws}|mood`, `${base}|${mood}|null|mood`]
+    ? [`${base}|${mood}|${paws}|${eyes}`, `${base}|${mood}|${paws}|mood`, `${base}|${mood}|${paws === 'wave2' ? 'wave' : paws}|mood`, `${base}|${mood}|null|mood`]
     : [`${base}|${mood}|${paws}|${eyes}`, `${base}|${mood}|${paws}|mood`, `${base}|${mood}|null|mood`];
   return tries.find((k) => SP[k]) || `${who}|calm|null|mood`;
 }
@@ -638,12 +638,14 @@ window.renderAt = (t) => {
 };
 
 window.ready = (async () => {
+  if (document.readyState === 'loading') await new Promise((r) => document.addEventListener('DOMContentLoaded', r));
   SP = await (await fetch('assets/sprites.json')).json();
   const REELS = await (await fetch('reels.json')).json();
   const name = new URLSearchParams(location.search).get('r') || 'tanitim';
   const reel = REELS[name];
   if (!reel) throw new Error('reels.json içinde yok: ' + name);
   defineScenes();
+  if (typeof defineStories === 'function') defineStories();
   for (const [type, t0, opts = {}] of reel.scenes) {
     OPTS = opts;
     SCENES[type](t0, opts);

@@ -35,12 +35,22 @@ Her sahne: `[tür, başlangıç saniyesi, seçenekler]`.
 | `savings` | Raporlar, birikim sayacı, hedef çubuğu | 3 sn |
 | `mascots` | Beş maskot ve sesleri | 3 sn |
 | `outro` | Logo, iki satır, düğme (`sub`, `accent`, `cta`) | 4 sn |
+| `app` | Genel uygulama sahnesi: `lines`, `phone` (`img` ya da `scroll`), `chips`, `taps`, `mascot` | 3 sn |
+| `bursStory` | Burs yattı bildirimi → alışveriş → "2 gün sonra" | 5 sn |
+| `tostStory` | Tost mu, yemekhane mi? → 22 günlük hesap | 5,2 sn |
+| `subsStory` | Unuttuğun abonelikler → dedektif Fıstık İPTAL damgaları | 5 sn |
+| `debtStory` | Karamel: "Yarın veririm" → 3 ay sonra "Hangi 120?" | 5,6 sn |
+| `examStory` | Sınav haftası gecesi → hatırlatma → sınav haftası modu | 5,4 sn |
 
 Seçenekler:
 - `poster`: girişler ilk karede tamamlanmış olur. Videonun ilk sahnesinde kullanılır, çünkü ilk kare kapak olur.
 - `skip`: sahneye bu kadar saniye ileriden başlanır (baştaki boşluğu keser).
 - `flash`: açılışta beyaz flaş ve patlama sesi.
 
-Kısa reels için 8–12 sn önerilir: ilk karede soru veya kanca, sonda `outro`.
+Kısa reels için 10–12 sn önerilir: kanca + hikâye (`*Story`), uygulama ekranı (`app`), `outro`.
+Hikâye sahneleri `stories.js`, sesleri `audio.py` içindeki `cue_<sahne>` fonksiyonlarındadır.
+
+Reels düzeyinde `"music": { "gaps": [[a, b]], "lowpass": [[a, b]] }`: müzik a–b arasında bant gibi durur
+ya da boğuklaşır (komik dönüşlerde efektlere yer açmak için).
 
 Uygulama ekranları `assets/ui/` altındadır (örnek veri modundan çekildi). Maskot pozları `assets/sprites.json` içindedir (uygulamanın kendi çiziminden üretildi).

@@ -3,38 +3,431 @@
     "title": "Uzun tanıtım (sabitlenmiş gönderi)",
     "end": 29.5,
     "scenes": [
-      ["hook", 0],
-      ["brand", 4.5, { "flash": true }],
-      ["quickAdd", 7.5],
-      ["daily", 12.5],
-      ["bills", 15.5],
-      ["savings", 19.5],
-      ["mascots", 22.5],
-      ["outro", 25.5, { "flash": true }]
+      [
+        "hook",
+        0
+      ],
+      [
+        "brand",
+        4.5,
+        {
+          "flash": true
+        }
+      ],
+      [
+        "quickAdd",
+        7.5
+      ],
+      [
+        "daily",
+        12.5
+      ],
+      [
+        "bills",
+        15.5
+      ],
+      [
+        "savings",
+        19.5
+      ],
+      [
+        "mascots",
+        22.5
+      ],
+      [
+        "outro",
+        25.5,
+        {
+          "flash": true
+        }
+      ]
     ]
   },
   "ay-sonu": {
     "title": "Ayın 1'i / 15'i / 30'u",
     "end": 9.5,
     "scenes": [
-      ["hook", 0],
-      ["outro", 4.5, { "flash": true, "sub": "Ay sonu sürprizlerine son.", "accent": "Bütçeni cebine koy.", "cta": "Takipte kal" }]
+      [
+        "hook",
+        0
+      ],
+      [
+        "outro",
+        4.5,
+        {
+          "flash": true,
+          "sub": "Ay sonu sürprizlerine son.",
+          "accent": "Bütçeni cebine koy.",
+          "cta": "Takipte kal"
+        }
+      ]
     ]
   },
-  "5-saniye": {
-    "title": "Harcamanı 5 saniyede yaz",
-    "end": 10.0,
+  "burs-gunu": {
+    "title": "Burs yattı bildirimi gelince",
+    "end": 11.5,
     "scenes": [
-      ["quickAdd", 0, { "poster": true, "skip": 0.5 }],
-      ["outro", 5.5, { "flash": true, "sub": "Kayıt girmek bu kadar kolay.", "accent": "Gerisini Fıstık halleder.", "cta": "Takipte kal" }]
-    ]
+      [
+        "bursStory",
+        0
+      ],
+      [
+        "app",
+        5.0,
+        {
+          "bg": "var(--soft)",
+          "lines": [
+            {
+              "html": "Bu sefer",
+              "y": 240,
+              "size": 124
+            },
+            {
+              "html": "*önce planla.*",
+              "y": 370,
+              "size": 120,
+              "itColor": "var(--acc)"
+            }
+          ],
+          "phone": {
+            "w": 560,
+            "top": 760,
+            "scroll": {
+              "src": "assets/ui/full-butce.png",
+              "nav": "assets/ui/nav-butce.png",
+              "from": 820,
+              "to": 1000
+            }
+          },
+          "chips": [
+            {
+              "html": "<span>Telefon faturası</span><b style='color:#1F6F78'>350 TL ayrıldı ✓</b>",
+              "x": 30,
+              "y": 900,
+              "w": 620,
+              "t": 0.9
+            },
+            {
+              "html": "<span>Kulaklık taksiti</span><b style='color:#1F6F78'>415 TL ayrıldı ✓</b>",
+              "x": 30,
+              "y": 1030,
+              "w": 620,
+              "t": 1.2
+            },
+            {
+              "html": "<span>Gerisi rahat:</span><b style='color:#AE4716'>günde ~243 TL</b>",
+              "x": 400,
+              "y": 1160,
+              "w": 640,
+              "t": 1.5,
+              "from": 300,
+              "rot": 5
+            }
+          ],
+          "mascot": {
+            "outfit": "ledger",
+            "x": 860,
+            "t": 1.6
+          }
+        }
+      ],
+      [
+        "outro",
+        8.0,
+        {
+          "flash": true,
+          "sub": "Burs yattığı gün değil,",
+          "accent": "ay sonunda da gül.",
+          "cta": "Takipte kal"
+        }
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          3.3,
+          5.0
+        ]
+      ]
+    }
   },
-  "bugun-ne-kadar": {
-    "title": "Bugün ne kadar harcayabilirim?",
-    "end": 10.0,
+  "tost-mu-yemekhane-mi": {
+    "title": "Tost mu, yemekhane mi?",
+    "end": 11.7,
     "scenes": [
-      ["daily", 0, { "poster": true, "skip": 0.5 }],
-      ["outro", 5.5, { "flash": true, "sub": "Yaklaşan ödemeler düşülür,", "accent": "kalanı senin.", "cta": "Takipte kal" }]
-    ]
+      [
+        "tostStory",
+        0
+      ],
+      [
+        "app",
+        5.2,
+        {
+          "bg": "#F8DCC8",
+          "lines": [
+            {
+              "html": "Kategoriye limit koy,",
+              "y": 240,
+              "size": 110
+            },
+            {
+              "html": "*kalanı gör.*",
+              "y": 370,
+              "size": 130,
+              "itColor": "var(--acc)"
+            }
+          ],
+          "phone": {
+            "w": 560,
+            "top": 760,
+            "scroll": {
+              "src": "assets/ui/full-butce.png",
+              "nav": "assets/ui/nav-butce.png",
+              "from": 300,
+              "to": 560
+            }
+          },
+          "chips": [
+            {
+              "html": "<span>Yemek &amp; kafe</span><b style='color:#AE4716'>835 / 2.500 TL</b>",
+              "x": 30,
+              "y": 960,
+              "w": 600,
+              "t": 1.3
+            }
+          ],
+          "mascot": {
+            "outfit": "cap",
+            "x": 860,
+            "t": 1.5
+          }
+        }
+      ],
+      [
+        "outro",
+        8.2,
+        {
+          "flash": true,
+          "sub": "Küçük harcamalar",
+          "accent": "büyük fark yapar.",
+          "cta": "Takipte kal"
+        }
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          4.0,
+          5.2
+        ]
+      ]
+    }
+  },
+  "abonelik-avcisi": {
+    "title": "Abonelik avcısı",
+    "end": 11.5,
+    "scenes": [
+      [
+        "subsStory",
+        0
+      ],
+      [
+        "app",
+        5.0,
+        {
+          "bg": "#DEE2F6",
+          "dot": "rgba(67,81,163,.10)",
+          "lines": [
+            {
+              "html": "Her ay ne ödediğini gör,",
+              "y": 240,
+              "size": 96
+            },
+            {
+              "html": "*unuttuğunu yakala.*",
+              "y": 360,
+              "size": 110,
+              "itColor": "#4351A3"
+            }
+          ],
+          "phone": {
+            "w": 560,
+            "top": 760,
+            "scroll": {
+              "src": "assets/ui/full-butce.png",
+              "nav": "assets/ui/nav-butce.png",
+              "from": 820,
+              "to": 980
+            }
+          },
+          "chips": [
+            {
+              "html": "<span>Müzik aboneliği</span><b style='color:#4351A3'>4 gün sonra · 60 TL</b>",
+              "x": 30,
+              "y": 960,
+              "w": 640,
+              "t": 1.2
+            }
+          ],
+          "mascot": {
+            "outfit": "spy",
+            "x": 860,
+            "t": 1.5
+          }
+        }
+      ],
+      [
+        "outro",
+        8.0,
+        {
+          "flash": true,
+          "sub": "Abonelikler sessizce",
+          "accent": "cebini yemesin.",
+          "cta": "Takipte kal"
+        }
+      ]
+    ],
+    "music": {
+      "lowpass": [
+        [
+          1.85,
+          3.75
+        ]
+      ]
+    }
+  },
+  "yarin-veririm": {
+    "title": "Yarın veririm",
+    "end": 12.1,
+    "scenes": [
+      [
+        "debtStory",
+        0
+      ],
+      [
+        "app",
+        5.6,
+        {
+          "bg": "var(--soft)",
+          "lines": [
+            {
+              "html": "Kim kime borçlu,",
+              "y": 240,
+              "size": 120
+            },
+            {
+              "html": "*Cep Defteri unutmaz.*",
+              "y": 370,
+              "size": 100,
+              "itColor": "var(--acc)"
+            }
+          ],
+          "phone": {
+            "w": 560,
+            "top": 760,
+            "scroll": {
+              "src": "assets/ui/full-borclar.png",
+              "nav": "assets/ui/nav-borclar.png",
+              "from": 0,
+              "to": 120
+            }
+          },
+          "chips": [
+            {
+              "html": "<span>Ali</span><b style='color:#2F8F5A'>sana borçlu · 120 TL</b>",
+              "x": 30,
+              "y": 1000,
+              "w": 560,
+              "t": 1.2
+            }
+          ],
+          "mascot": {
+            "who": "karamel",
+            "x": 860,
+            "t": 1.5
+          }
+        }
+      ],
+      [
+        "outro",
+        8.6,
+        {
+          "flash": true,
+          "sub": "Borç verdin mi?",
+          "accent": "Hemen deftere yaz.",
+          "cta": "Takipte kal"
+        }
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          2.1,
+          5.6
+        ]
+      ]
+    }
+  },
+  "sinav-haftasi": {
+    "title": "Sınav haftası",
+    "end": 11.9,
+    "scenes": [
+      [
+        "examStory",
+        0
+      ],
+      [
+        "app",
+        5.4,
+        {
+          "bg": "#DEE2F6",
+          "dot": "rgba(67,81,163,.10)",
+          "lines": [
+            {
+              "html": "Fıstık da",
+              "y": 240,
+              "size": 124
+            },
+            {
+              "html": "*seninle çalışır.*",
+              "y": 370,
+              "size": 120,
+              "itColor": "#4351A3"
+            }
+          ],
+          "phone": {
+            "w": 560,
+            "top": 760,
+            "img": "assets/ui/home-exam.png"
+          },
+          "chips": [
+            {
+              "html": "<span>Sınav haftası açık ·</span><b style='color:#4351A3'>ödeme hatırlatmaları sürer</b>",
+              "x": 40,
+              "y": 1520,
+              "t": 1.3
+            }
+          ]
+        }
+      ],
+      [
+        "outro",
+        8.4,
+        {
+          "flash": true,
+          "sub": "Sınavlarında",
+          "accent": "bol şans!",
+          "cta": "Takipte kal"
+        }
+      ]
+    ],
+    "music": {
+      "lowpass": [
+        [
+          0,
+          4.1
+        ]
+      ]
+    }
   }
 }

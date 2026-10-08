@@ -518,6 +518,107 @@ def fanfare(t0):
             put(SFX, pluck(m + interval, d, 'square', 0.35, cut=4000, v=0.09, vib=0.01 if i == 3 else 0), st)
 
 
+
+# ───────── hikâye efektleri ─────────
+def notif_ding():
+    """telefon bildirimi: kısa üçlü tını"""
+    out = np.zeros(int(0.6 * SR))
+    for i, f in enumerate([1318.5, 1760, 2093]):
+        b = fm_bell(f, 0.35, 0.22, ratio=2.0)
+        j = int(i * 0.07 * SR)
+        out[j : j + len(b)] += b[: len(out) - j]
+    return out
+
+
+def crunch():
+    d = 0.16
+    x = bp(noise(d), 1500, 7000) * 1.6
+    cr = np.zeros(int(d * SR))
+    idx = rng.choice(len(cr), 70, replace=False)
+    cr[idx] = rng.uniform(0.3, 1, 70)
+    cr = np.convolve(cr, np.exp(-np.arange(60) / 8), 'same')
+    return x * (0.2 + cr) * expd(d, 14) * 0.9
+
+
+def sting():
+    """dramatik "dan dan daaan"""
+    out = np.zeros(int(1.6 * SR))
+    for off, m, d in [(0, 43, 0.18), (0.22, 41, 0.18), (0.44, 40, 1.0)]:
+        t = tt(d)
+        x = sum(wave_(phase(np.full(len(t), freq(m + iv) * det)), 'saw') for iv in (0, 12) for det in (0.995, 1.005))
+        x = sweep_lp(x, 600 + 1600 * np.exp(-t * 3)) * adsr(len(t), 0.01, 0.1, 0.8, 0.2 if d > 0.5 else 0.05) * 0.35
+        i = int(off * SR)
+        out[i : i + len(x)] += x
+    k = kick(1.0)
+    out[: len(k)] += k
+    j = int(0.44 * SR)
+    out[j : j + len(k)] += k
+    return np.tanh(out * 1.2)
+
+
+def alarm(d=0.7):
+    t = tt(d)
+    f = np.where((t * 8) % 1 < 0.5, 1100, 820)
+    x = wave_(phase(f), 'square', 0.5) * 0.3
+    return lp(x, 4000) * adsr(len(x), 0.005, 0.05, 0.9, 0.05)
+
+
+def pew():
+    d = 0.22
+    x = wave_(phase(glide(2400, 180, d, 0.5)), 'square', 0.3)
+    return lp(x, 5000) * expd(d, 9) * 0.4
+
+
+def spy_riff(t0, bus):
+    """dedektif girişi: alçak, dolanan bas"""
+    for i, (off, m) in enumerate([(0, 40), (0.15, 43), (0.3, 45), (0.45, 46), (0.6, 45), (0.75, 43)]):
+        put(bus, pluck(m, 0.16, 'saw', cut=1400, v=0.22), t0 + off)
+
+
+def whistle(t0, bus, notes):
+    """ıslık: titreşimli saf ton ezgisi"""
+    for off, m, d in notes:
+        t = tt(d)
+        f = freq(m) * (1 + 0.012 * np.sin(2 * np.pi * 6 * t)) * glide(0.97, 1.0, d, 0.2)
+        x = np.sin(2 * np.pi * phase(f)) + lp(noise(d), 3000) * 0.05
+        put(bus, x * adsr(len(x), 0.03, 0.05, 0.85, 0.06) * 0.22, t0 + off)
+
+
+def crickets(d):
+    out = np.zeros(int(d * SR))
+    tm = 0.0
+    while tm < d - 0.2:
+        for k in range(3):
+            c = np.sin(2 * np.pi * 4600 * tt(0.025)) * np.sin(np.pi * np.linspace(0, 1, int(0.025 * SR))) * 0.06
+            i = int((tm + k * 0.04) * SR)
+            out[i : i + len(c)] += c[: len(out) - i]
+        tm += 0.5
+    return out
+
+
+def wind(d):
+    t = tt(d)
+    return sweep_bp(noise(d), 500 + 300 * np.sin(2 * np.pi * 0.8 * t), q=3) * np.sin(np.pi * t / d) * 0.5
+
+
+def growl_meow():
+    x = voice([520, 640, 420], [(500, 2000), (850, 1300), (600, 900)], 0.45, v=0.6)
+    return x * (0.6 + 0.4 * np.sin(2 * np.pi * 38 * tt(0.45)))
+
+
+def clink():
+    b = fm_bell(3135, 0.35, 0.18, ratio=2.7)
+    n = bp(noise(0.05), 3000, 9000) * expd(0.05, 60) * 0.2
+    b[: len(n)] += n
+    return b
+
+
+def snore(d=0.6):
+    t = tt(d)
+    x = lp(noise(d), 500) * 3 * (0.5 + 0.5 * np.sin(2 * np.pi * 30 * t)) * np.sin(np.pi * t / d) ** 2
+    return x * 0.35
+
+
 # ═════════ SAHNE SESLERİ ═════════
 # Her fonksiyon sahnenin başladığı an (t0) ve atlanan süreyle (skip) çağrılır;
 # içerdeki zamanlar reel.js'teki sahne içi zamanlarla (lt) aynıdır.
@@ -683,6 +784,100 @@ def cue_outro(t0, skip=0, o=None):
     put(SFX, meow(1.2, 0.5), T(2.25), 0.8)
 
 
+def cue_app(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    put(SFX, stereo_move(whoosh(0.45, 150, 1800), 0, 0), T(0.3), 0.45)
+    for i, c in enumerate(o.get('chips', [])):
+        fr = 1 if c.get('from', -300) > 0 else -1
+        put(SFX, stereo_move(whoosh(0.22, 600, 4000), fr * 0.9, fr * 0.3), T(c['t'] - 0.05), 0.35)
+        put(SFX, bloop(700 + 120 * i, 1300 + 150 * i, 0.07, 0.35), T(c['t'] + 0.05), pan=fr * 0.4)
+    for tp in o.get('taps', []):
+        put(SFX, ui_tap(), T(tp['t']))
+    m = o.get('mascot')
+    if m:
+        mt = m.get('t', 1.4)
+        put(SFX, boing(0.35, 0.22), T(mt), pan=0.5)
+        voice_ = {'karamel': woof(), 'bilge': hoot()}.get(m.get('who'), meow(1.1, 0.4))
+        put(SFX, voice_, T(mt + 0.45), 0.55, pan=0.5)
+
+
+def cue_bursStory(t0, skip=0, o=None):
+    T = at(t0, skip)
+    put(SFX, snore(0.5), T(0.0), 0.8)
+    put(SFX, stereo_move(whoosh(0.3, 300, 2500), 0, 0), T(0.25), 0.35)
+    put(SFX, notif_ding(), T(0.32), 0.85)
+    put(SFX, boing(0.35, 0.35), T(0.55))
+    put(SFX, meow(1.35, 0.3), T(0.62), 0.6)
+    put(SFX, popper(), T(1.1), 0.55)
+    for i, t in enumerate([1.5, 1.9, 2.3, 2.7]):
+        put(SFX, cash_register(), T(t), 0.6, pan=-0.4 if i % 2 == 0 else 0.4)
+        put(SFX, stereo_move(whoosh(0.22, 600, 4000), -0.9 if i % 2 == 0 else 0.9, 0), T(t - 0.05), 0.3)
+    put(SFX, sad_trombone(), T(3.38), 0.9)
+    put(SFX, np.stack([rain(1.7), rain(1.7)], 1), T(3.3), 0.6)
+
+
+def cue_tostStory(t0, skip=0, o=None):
+    T = at(t0, skip)
+    for i, t in enumerate([0.4, 0.8, 1.2]):
+        put(SFX, stereo_move(whoosh(0.16, 900, 5000), 0.6 if i % 2 else -0.6, 0), T(t), 0.3)
+    put(SFX, fm_bell(1568, 0.6, 0.25), T(1.6))
+    put(SFX, stereo_move(whoosh(0.3, 300, 2500), 0.3, -0.6), T(1.62), 0.4)
+    for t in [1.95, 2.15, 2.35]:
+        put(SFX, crunch(), T(t), 0.9, pan=-0.4)
+    put(SFX, voice([480, 520, 470], [(400, 900), (420, 850)], 0.35, kind='tri', v=0.4), T(2.42), 0.6, pan=-0.4)  # "mmm"
+    put(SFX, stereo_move(whoosh(0.4, 200, 3000), -0.5, 0.5), T(2.55), 0.5)
+    put(SFX, slot_roll(0.7), T(2.8), 0.55)
+    put(SFX, sting(), T(4.0), 0.9)
+
+
+def cue_subsStory(t0, skip=0, o=None):
+    T = at(t0, skip)
+    for i, t in enumerate([0.15, 0.35, 0.55]):
+        put(SFX, bloop(500 + 150 * i, 1400 + 200 * i, 0.08, 0.4), T(t), pan=(i - 1) * 0.6)
+    put(SFX, alarm(0.6), T(1.4), 0.7)
+    put(SFX, slam_hit(0.9), T(1.4), 0.6)
+    put(SFX, stereo_move(whoosh(0.4, 200, 2000), 0.9, 0.4), T(1.85), 0.45)
+    spy_riff(T(1.9), SFX)
+    for t in [2.4, 2.8, 3.2]:
+        put(SFX, pew(), T(t - 0.1), 0.8, pan=0.5)
+        put(SFX, stamp(), T(t), 0.8)
+    put(SFX, ding_ding(), T(3.8), 0.7)
+    put(SFX, cash_register(), T(3.85), 0.5)
+    put(SFX, popper(), T(3.9), 0.5)
+
+
+def cue_debtStory(t0, skip=0, o=None):
+    T = at(t0, skip)
+    put(SFX, woof(), T(0.25), 0.6, pan=-0.5)
+    put(SFX, meow(1.1, 0.4), T(1.2), 0.65, pan=0.5)
+    for i in range(3):
+        put(SFX, pling(1568 * 1.06 ** i, 0.25, 0.35), T(1.4 + i * 0.15), pan=0.4 - i * 0.4)
+    put(SFX, woof(), T(1.75), 0.5, pan=-0.5)
+    for t in [2.1, 2.55, 3.0, 3.45]:
+        put(SFX, paper_tear(0.22), T(t), 0.6)
+    whistle(T(2.2), SFX, [(0, 79, 0.2), (0.22, 84, 0.2), (0.44, 81, 0.35), (0.85, 79, 0.2), (1.07, 76, 0.2), (1.29, 77, 0.45)])
+    put(SFX, crickets(1.6), T(2.4), 0.8)
+    put(SFX, np.stack([wind(1.0), wind(1.0)], 1), T(3.4), 0.5)
+    put(SFX, growl_meow(), T(4.05), 0.7, pan=0.5)
+    put(SFX, voice([300, 380, 260], [(500, 1100), (650, 1200)], 0.3, breath=0.3, v=0.55), T(4.6), 0.7, pan=-0.5)  # "hm?"
+    put(SFX, boing(0.4, 0.25), T(4.75), pan=-0.5)
+
+
+def cue_examStory(t0, skip=0, o=None):
+    T = at(t0, skip)
+    for k, tk in enumerate(np.arange(0.3, 2.95, 0.25)):
+        put(SFX, tick(k % 2 == 0, 0.3), T(tk), pan=0.4)
+    for i in range(5):
+        put(SFX, clink(), T(0.5 + i * 0.45), 0.6, pan=-0.5 if i % 2 == 0 else 0.5)
+    put(SFX, snore(0.7), T(2.2), 0.6)
+    put(SFX, notif_ding(), T(3.0), 0.85)
+    put(SFX, boing(0.35, 0.35), T(3.05))
+    put(SFX, growl_meow(), T(3.55), 0.8)
+    put(SFX, stereo_move(whoosh(0.35, 3000, 300), 0, 0), T(3.85), 0.5)
+    put(SFX, bloop(900, 300, 0.15, 0.4), T(4.3))
+
+
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
 # ═════════ ANA MÜZİK ═════════
@@ -797,6 +992,25 @@ if music_start is not None:
             music_main(a, b)
     for c in range(2):
         MUS[:, c] *= np.where(np.arange(N) / SR >= music_start, duck, 1.0)
+
+MFX = REEL.get('music', {})
+for a, b in MFX.get('lowpass', []):  # boğuk (yan odadan geliyormuş gibi)
+    i, j = int(a * SR), int(b * SR)
+    seg = np.stack([lp(MUS[i:j, c], 600, 3) for c in range(2)], 1) * 1.3
+    xf = min(int(0.08 * SR), (j - i) // 2)
+    w = np.ones(j - i); w[:xf] = np.linspace(0, 1, xf); w[-xf:] = np.linspace(1, 0, xf)
+    MUS[i:j] = MUS[i:j] * (1 - w[:, None]) + seg * w[:, None]
+for a, b in MFX.get('gaps', []):  # müzik bant gibi durur, aradaki boşluk efektlere kalır
+    i, j = int(a * SR), int(b * SR)
+    stop = int(0.22 * SR)
+    src = MUS[i : i + int(0.4 * SR)].copy()
+    tail = np.stack([varispeed(src[:, c], np.linspace(1, 0.05, stop)) for c in range(2)], 1)
+    tail *= np.linspace(1, 0, len(tail))[:, None]
+    MUS[i:j] = 0
+    MUS[i : i + len(tail)] = tail[: j - i]
+    fi = min(int(0.05 * SR), N - j)
+    if fi > 0:
+        MUS[j : j + fi] *= np.linspace(0, 1, fi)[:, None]
 
 # ═════════ MİKS ═════════
 ir = reverb_ir()
