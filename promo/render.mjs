@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(DIR, 'out');
 fs.mkdirSync(OUT, { recursive: true });
-const FPS = 30, DURATION = 28.0;
+const FPS = 30, DURATION = 29.5;
 const [mode, ...args] = process.argv.slice(2);
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.png': 'image/png', '.woff2': 'font/woff2' };
