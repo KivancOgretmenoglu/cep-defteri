@@ -546,9 +546,8 @@ put(MUS, g2v * 1.3, 1.5)
 put(AMB, hp(noise(1.0), 3000) * 0.025 * (rng.random(int(SR)) > 0.995) * 10, 1.5)  # plak cızırtısı
 
 # efektler
-put(SFX, slam_hit(), 0.12, 0.9)
-put(SFX, cash_register(), 0.16, 0.9, pan=-0.1)
-put(SFX, popper(), 0.2, 0.5, pan=0.4)
+put(SFX, cash_register(), 0.0, 0.95, pan=-0.1)
+put(SFX, popper(), 0.05, 0.5, pan=0.4)
 for k in range(5):  # para hışırtısı
     put(SFX, bp(noise(0.12), 2500, 8000) * expd(0.12, 25) * 0.25, 0.3 + k * 0.23, pan=rng.uniform(-0.8, 0.8))
 put(SFX, meow(1.15, 0.38), 0.85, 0.6, pan=0.1)  # keyifli miyav
