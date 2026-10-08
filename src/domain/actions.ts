@@ -9,6 +9,7 @@ import { isMoney, type Money } from './money';
 import { isISODate, type ISODate } from './dates';
 import { accountIndex, installmentEnd, isDaily, isInvestment, isPerson, occKey, occurrences } from './ledger';
 import { addDays } from './dates';
+import { isAssetSpec, isQty, roundQty, valueOf, type AssetSpec } from './assets';
 
 /**
  * Doğrulama hatası. Mesaj bir sözlük anahtarı + değişkenler olarak taşınır; arayüz sınırında
@@ -53,6 +54,31 @@ export interface TxDraft {
   refundOf?: ID;
   planRef?: PlanRef;
   tags?: string[];
+  /** Altın/döviz hesabı transferinde alınan/satılan miktar ve birim fiyat (zorunlu). */
+  qty?: number;
+  unitPrice?: Money;
+}
+
+/** Transferin altın/döviz tutan yatırım tarafı (varsa). */
+export function assetSideOf(data: Data, d: { type: TxType; accountId: ID; toAccountId?: ID }): Account | undefined {
+  if (d.type !== 'transfer') return undefined;
+  const accounts = accountIndex(data);
+  const to = accounts.get(d.toAccountId ?? '');
+  const from = accounts.get(d.accountId);
+  if (to?.kind === 'investment' && to.asset) return to;
+  if (from?.kind === 'investment' && from.asset) return from;
+  return undefined;
+}
+
+/** Varlık hesabındaki miktar (isteğe bağlı olarak bir işlem hariç). */
+export function heldQty(data: Data, account: Account, exceptTxId?: ID): number {
+  let q = account.openingQty ?? 0;
+  for (const t of data.txs) {
+    if (t.id === exceptTxId || t.type !== 'transfer' || t.qty === undefined) continue;
+    if (t.toAccountId === account.id) q += t.qty;
+    else if (t.accountId === account.id) q -= t.qty;
+  }
+  return account.asset ? roundQty(q, account.asset.unit) : q;
 }
 
 /** Etiketleri temizler: küçük harf, baştaki # yok, boşluk tekil, en fazla 5 etiket × 24 karakter. */
@@ -86,6 +112,15 @@ export function validateTx(data: Data, d: TxDraft, today: ISODate, editingId?: I
     if (isPerson(acc) && isPerson(to)) fail('err.personPerson');
     if (d.date < to.openingDate) fail('err.toBeforeOpening', { name: to.name, date: to.openingDate });
     if (d.categoryId || d.refundOf) fail('err.transferNoCat');
+    const asset = assetSideOf(data, d);
+    if (asset) {
+      if (!isQty(d.qty)) fail('err.assetQty');
+      if (!isMoney(d.unitPrice) || d.unitPrice! <= 0) fail('err.assetPrice');
+      if (asset.id === d.accountId) {
+        const held = heldQty(data, asset, editingId);
+        if (roundQty(d.qty!, asset.asset!.unit) > held) fail('err.assetTooMuch', { held: String(held) });
+      }
+    }
   } else {
     // "Başkası ödedi": gider bir kişinin hesabından girilebilir (sen ona borçlanırsın).
     if (!isDaily(acc) && !(d.type === 'expense' && isPerson(acc)))
@@ -126,9 +161,14 @@ export function validateTx(data: Data, d: TxDraft, today: ISODate, editingId?: I
   }
 }
 
-function cleanDraft(d: TxDraft): TxDraft {
+function cleanDraft(d: TxDraft, data: Data): TxDraft {
   const out: TxDraft = { type: d.type, amount: d.amount, date: d.date, accountId: d.accountId };
   if (d.type === 'transfer') out.toAccountId = d.toAccountId;
+  const asset = assetSideOf(data, d);
+  if (asset) {
+    out.qty = roundQty(d.qty!, asset.asset!.unit);
+    out.unitPrice = d.unitPrice;
+  }
   else out.categoryId = d.categoryId;
   if (d.type === 'refund') out.refundOf = d.refundOf;
   const note = d.note?.trim();
@@ -141,7 +181,7 @@ function cleanDraft(d: TxDraft): TxDraft {
 
 export function addTx(data: Data, draft: TxDraft, today: ISODate, now = Date.now()): { data: Data; tx: Tx } {
   validateTx(data, draft, today);
-  const d = cleanDraft(draft);
+  const d = cleanDraft(draft, data);
   // İadenin kategorisi her zaman bağlı olduğu gidere uyar.
   if (d.type === 'refund') d.categoryId = data.txs.find((t) => t.id === d.refundOf)!.categoryId;
   const tx: Tx = { id: newId(), seq: data.nextSeq, createdAt: now, ...d };
@@ -155,7 +195,7 @@ export function addTx(data: Data, draft: TxDraft, today: ISODate, now = Date.now
 export function updateTx(data: Data, id: ID, draft: TxDraft, today: ISODate): Data {
   validateTx(data, draft, today, id);
   const old = data.txs.find((t) => t.id === id)!;
-  const d = cleanDraft(draft);
+  const d = cleanDraft(draft, data);
   if (d.type === 'refund') d.categoryId = data.txs.find((t) => t.id === d.refundOf)!.categoryId;
   // Sıra (seq) korunur: aynı günlü değerleme ile ilişkisi düzenlemeyle değişmez.
   const tx: Tx = { id: old.id, seq: old.seq, createdAt: old.createdAt, ...d };
@@ -178,6 +218,19 @@ export interface AccountDraft {
   openingBalance: Money;
   openingDate: ISODate;
   priorContribution?: Money | null;
+  /** Yalnız yatırım: altın/döviz birimi; yoksa TL hesabı. */
+  asset?: AssetSpec | null;
+  /** Varlık hesabı: takip başlangıcındaki miktar ve o günkü birim fiyat. openingBalance bunlardan hesaplanır. */
+  openingQty?: number | null;
+  openingPrice?: Money | null;
+}
+
+/** Varlık hesabında açılış değeri miktar × fiyattır; taslaktaki openingBalance yok sayılır. */
+function assetFields(d: AccountDraft): Pick<Account, 'asset' | 'openingQty' | 'openingPrice'> & { openingBalance: Money } | null {
+  if (d.kind !== 'investment' || !d.asset) return null;
+  const q = d.openingQty && d.openingQty > 0 ? roundQty(d.openingQty, d.asset.unit) : 0;
+  if (q > 0) return { asset: { kind: d.asset.kind, unit: d.asset.unit }, openingQty: q, openingPrice: d.openingPrice!, openingBalance: valueOf(q, d.openingPrice!) };
+  return { asset: { kind: d.asset.kind, unit: d.asset.unit }, openingBalance: 0 };
 }
 
 function validateAccount(data: Data, d: AccountDraft, editing?: Account) {
@@ -191,7 +244,16 @@ function validateAccount(data: Data, d: AccountDraft, editing?: Account) {
   if (!isISODate(d.openingDate)) fail('err.startDateInvalid');
   if (d.priorContribution != null && (!isMoney(d.priorContribution) || d.priorContribution < 0))
     fail('err.priorInvalid');
+  if (d.asset) {
+    if (d.kind !== 'investment' || !isAssetSpec(d.asset)) fail('err.assetInvalid');
+    if (d.openingQty != null && d.openingQty !== 0) {
+      if (!isQty(d.openingQty)) fail('err.assetQty');
+      if (!isMoney(d.openingPrice) || d.openingPrice! <= 0) fail('err.assetPrice');
+    }
+  }
 }
+
+const sameAsset = (a?: AssetSpec | null, b?: AssetSpec | null) => (a?.unit ?? null) === (b?.unit ?? null);
 
 export function addAccount(data: Data, d: AccountDraft, now = Date.now()): { data: Data; account: Account } {
   validateAccount(data, d);
@@ -204,6 +266,8 @@ export function addAccount(data: Data, d: AccountDraft, now = Date.now()): { dat
     createdAt: now,
   };
   if (d.kind === 'investment') account.priorContribution = d.priorContribution ?? null;
+  const af = assetFields(d);
+  if (af) Object.assign(account, af);
   const settings = !data.settings.lastAccountId && (d.kind === 'bank' || d.kind === 'cash') ? { ...data.settings, lastAccountId: account.id } : data.settings;
   return { data: { ...data, accounts: [...data.accounts, account], settings }, account };
 }
@@ -233,9 +297,20 @@ export function updateAccount(data: Data, id: ID, d: AccountDraft): Data {
     fail('err.accountKindLocked');
   const first = earliestUse(data, id);
   if (first && d.openingDate > first) fail('err.openingAfterUse', { date: first });
+  const nextAsset = d.kind === 'investment' ? d.asset ?? null : null;
+  if (!sameAsset(acc.asset, nextAsset) && (data.txs.some((t) => t.accountId === id || t.toAccountId === id) || data.valuations.some((v) => v.accountId === id)))
+    fail('err.assetLocked');
   const next: Account = { ...acc, name: d.name.trim(), kind: d.kind, openingBalance: d.openingBalance, openingDate: d.openingDate };
   if (d.kind === 'investment') next.priorContribution = d.priorContribution ?? null;
   else delete next.priorContribution;
+  delete next.asset;
+  delete next.openingQty;
+  delete next.openingPrice;
+  const af = assetFields(d);
+  if (af) {
+    Object.assign(next, af);
+    if (heldQty({ ...data, accounts: data.accounts.map((a) => (a.id === id ? next : a)) }, next) < 0) fail('err.assetOpeningTooLow');
+  }
   return { ...data, accounts: data.accounts.map((a) => (a.id === id ? next : a)) };
 }
 
@@ -375,7 +450,7 @@ export function confirmOccurrence(
   data: Data,
   planId: ID,
   due: ISODate,
-  over: { amount?: Money; date?: ISODate; accountId?: ID; note?: string },
+  over: { amount?: Money; date?: ISODate; accountId?: ID; note?: string; qty?: number; unitPrice?: Money },
   today: ISODate,
   now = Date.now(),
 ) {
@@ -391,7 +466,11 @@ export function confirmOccurrence(
     note: over.note ?? plan.title,
     planRef: { planId, due },
   };
-  if (plan.kind === 'transfer') draft.toAccountId = plan.toAccountId;
+  if (plan.kind === 'transfer') {
+    draft.toAccountId = plan.toAccountId;
+    draft.qty = over.qty;
+    draft.unitPrice = over.unitPrice;
+  }
   else draft.categoryId = plan.categoryId;
   let next = occ!.status === 'skipped' ? skipOccurrence(data, planId, due, false) : data;
   // Atlanmış vade, başka bir tarihle kaydedilmiş olabilir; dönem anahtarına göre temizle.
@@ -456,5 +535,6 @@ export function removeCategory(data: Data, id: ID): Data {
 export function updateSettings(data: Data, patch: Partial<Settings>): Data {
   if (patch.monthlyBudget != null && (!isMoney(patch.monthlyBudget) || patch.monthlyBudget <= 0)) fail('err.budgetPositive');
   if (patch.reserve !== undefined && (!isMoney(patch.reserve) || patch.reserve < 0)) fail('err.reserveNegative');
+  if (patch.monthEndFloor != null && (!isMoney(patch.monthEndFloor) || patch.monthEndFloor < 0)) fail('err.floorNegative');
   return { ...data, settings: { ...data.settings, ...patch } };
 }

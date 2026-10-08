@@ -6,12 +6,14 @@ import { useT } from '../i18n';
 import {
   availability, balanceSeries, budgetStatus, cashBalance, dailyBalance, debtTotals, investmentState, investmentTotal, isDaily, isInvestment, monthSummary, pendingReportCard, personBalances, upcomingOutflows, pendingUntil, trackingStart,
 } from '../domain/ledger';
+import { usePrices } from '../store/prices';
 import * as A from '../domain/actions';
 import { commit } from '../store/store';
 import { mascotEvent } from '../mascot/events';
 import { BalanceChart } from '../ui/BalanceChart';
 import { DueRow } from '../ui/DueRow';
 import { mascotMood } from '../domain/mood';
+import { planLine } from '../domain/planLine';
 import { addDays } from '../domain/dates';
 import { Amount, AnimatedMoney, Progress, SectionHead } from '../ui/kit';
 import { useListSettle } from '../ui/motion';
@@ -40,8 +42,11 @@ export function Home() {
     const start = trackingStart(data);
     const from = start && start > addDays(today, -29) ? start : addDays(today, -29);
     const spark = start ? balanceSeries(data, from, today) : [];
+    // Küçük grafikte de harcama planı çizgisi (bugüne kadarki kısmı görünür).
+    const pl = start ? planLine(data, today) : null;
+    const sparkPlan = pl ? [{ date: addDays(pl.from, -1), balance: pl.start }, ...pl.points] : [];
     const card = pendingReportCard(data, today);
-    return { av, mood, sum, budget, up, soon, spark, card };
+    return { av, mood, sum, budget, up, soon, spark, sparkPlan, card };
   }, [data, today, month, lang]);
   const { av, mood, sum, budget, soon } = d;
   const dailyAccs = data.accounts.filter((a) => isDaily(a) && (!a.archived || cashBalance(data, a.id) !== 0));
@@ -49,7 +54,8 @@ export function Home() {
   const recent = [...data.txs].sort((a, b) => (a.date === b.date ? b.seq - a.seq : a.date < b.date ? 1 : -1)).slice(0, 5);
   const recentRef = useListSettle<HTMLUListElement>(recent.map((x) => x.id));
   const daily = dailyBalance(data);
-  const invTotal = investmentTotal(data);
+  const priceBook = usePrices().book;
+  const invTotal = investmentTotal(data, priceBook);
   const hide = data.settings.hideTotals;
   const people = personBalances(data).filter((p) => p.balance !== 0 || !p.account.archived);
   const debts = debtTotals(data);
@@ -218,7 +224,7 @@ export function Home() {
           <SectionHead id="acc-h" title={t('home.accounts')} action={<button className="link" onClick={() => openSheet({ kind: 'account' })}><Plus size={16} /> {t('common.add')}</button>} />
           {d.spark.length > 1 && (
             <button className="spark-btn" onClick={() => go('balance')} aria-label={t('home.openHistory')}>
-              <BalanceChart history={d.spark} today={today} hide={hide} compact height={64} label={t('home.sparkLabel')} />
+              <BalanceChart history={d.spark} plan={d.sparkPlan} today={today} hide={hide} compact height={64} label={t('home.sparkLabel')} />
               <span className="spark-btn__label"><ChartLine size={15} aria-hidden /> {t('balance.title')} <ChevronRight size={15} aria-hidden /></span>
             </button>
           )}
@@ -248,7 +254,7 @@ export function Home() {
               <h3 className="sub-label"><Sprout size={14} aria-hidden /> {t('home.investSeparate')}</h3>
               <ul className="acc-list">
                 {invAccs.map((a) => {
-                  const st = investmentState(data, a.id)!;
+                  const st = investmentState(data, a.id, priceBook)!;
                   return (
                     <li key={a.id}>
                       <button className="acc-row acc-row--invest" onClick={() => go('invest')}>

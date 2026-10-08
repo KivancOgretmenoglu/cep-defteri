@@ -4,6 +4,8 @@
  */
 import type { Account, Category, Data, Goal, ID, Plan, Tx, Valuation } from './types';
 import { sum, type Money } from './money';
+import { roundQty, valueOf, type AssetSpec } from './assets';
+import type { PriceBook, PriceSource } from './prices';
 import {
   addDays, addMonths, dayInMonth, weekStart, dayOfMonth, daysInMonth, diffDays, inRange, monthEnd, monthOf, monthStart,
   type ISODate, type MonthKey,
@@ -115,9 +117,49 @@ export interface InvestmentState {
   /** currentValue − basis (taban biliniyorsa). Getiri oranı uydurulmaz. */
   valueDiff: Money | null;
   history: ValuationPoint[];
+  /** Yalnız altın/döviz hesabı: elde tutulan miktar ve değerlemede kullanılan fiyat. */
+  asset?: AssetHolding;
 }
 
-export function investmentState(data: Data, accountId: ID): InvestmentState | null {
+export interface AssetHolding {
+  spec: AssetSpec;
+  /** Açılış + alınan − satılan (birim). */
+  qty: number;
+  /** Değerlemede kullanılan birim fiyat (alış); hiç fiyat yoksa null. */
+  price: Money | null;
+  /** Fiyatın zamanı: güncel fiyatta ms, son işlem fiyatında işlem tarihi. */
+  priceAt: number | ISODate | null;
+  /** 'last-tx': güncel fiyat yok, son işlem (veya açılış) fiyatı kullanıldı. */
+  priceSource: PriceSource | 'last-tx' | null;
+}
+
+/**
+ * Varlık hesabının miktarı ve son bilinen işlem fiyatı. Miktar, katkıda +qty, çekimde −qty.
+ * (Yatırım hesapları arası transfer zaten yasak; kişi ↔ yatırım da.)
+ */
+export function assetHolding(data: Data, account: Account, prices?: PriceBook): AssetHolding | undefined {
+  const spec = account.asset;
+  if (!spec || account.kind !== 'investment') return undefined;
+  let qty = account.openingQty ?? 0;
+  let last: { date: ISODate; seq: number; price: Money } | null = account.openingPrice ? { date: account.openingDate, seq: 0, price: account.openingPrice } : null;
+  for (const t of data.txs) {
+    if (t.type !== 'transfer' || t.qty === undefined) continue;
+    if (t.toAccountId === account.id) qty += t.qty;
+    else if (t.accountId === account.id) qty -= t.qty;
+    else continue;
+    if (t.unitPrice && (!last || after(t, last))) last = { date: t.date, seq: t.seq, price: t.unitPrice };
+  }
+  qty = roundQty(qty, spec.unit);
+  const live = prices?.[spec.unit];
+  if (live) return { spec, qty, price: live.buy, priceAt: live.at, priceSource: live.source };
+  return { spec, qty, price: last?.price ?? null, priceAt: last?.date ?? null, priceSource: last ? 'last-tx' : null };
+}
+
+/**
+ * Yatırım hesabının durumu. `prices` verilirse altın/döviz hesapları güncel alış fiyatıyla değerlenir;
+ * verilmezse son işlem fiyatıyla. TL hesapları fiyatlardan etkilenmez.
+ */
+export function investmentState(data: Data, accountId: ID, prices?: PriceBook): InvestmentState | null {
   const accounts = accountIndex(data);
   const account = accounts.get(accountId);
   if (!account || account.kind !== 'investment') return null;
@@ -140,6 +182,33 @@ export function investmentState(data: Data, accountId: ID): InvestmentState | nu
   }
 
   const opening: ValuationPoint = { date: account.openingDate, seq: 0, value: account.openingBalance, isOpening: true };
+  // Açılış değeri 0 ise takip öncesi katkı da yok sayılabilir.
+  const prior = account.priorContribution ?? (account.openingBalance === 0 ? 0 : null);
+  const netContribution = contributed - withdrawn;
+  const basis = prior === null ? null : prior + netContribution;
+
+  const asset = assetHolding(data, account, prices);
+  if (asset) {
+    // Varlık hesabı: elle girilen değerleme kullanılmaz; değer = miktar × fiyat.
+    // Geçmiş çizgisi, her işlem anındaki miktar × o işlemin fiyatıdır.
+    let q = account.openingQty ?? 0;
+    const points: ValuationPoint[] = [opening];
+    const own = data.txs
+      .filter((t) => t.type === 'transfer' && t.qty !== undefined && (t.toAccountId === accountId || t.accountId === accountId))
+      .sort((a, b) => (a.date === b.date ? a.seq - b.seq : a.date < b.date ? -1 : 1));
+    for (const t of own) {
+      q += t.toAccountId === accountId ? t.qty! : -t.qty!;
+      if (t.unitPrice) points.push({ date: t.date, seq: t.seq, value: valueOf(Math.max(0, roundQty(q, asset.spec.unit)), t.unitPrice), isOpening: false });
+    }
+    const currentValue = asset.price === null ? 0 : valueOf(Math.max(0, asset.qty), asset.price);
+    return {
+      account, contributed, withdrawn, netContribution, priorContribution: prior,
+      lastValuation: opening, flowsSinceValuation: 0, currentValue, basis,
+      valueDiff: basis === null ? null : currentValue - basis,
+      history: points, asset,
+    };
+  }
+
   const history: ValuationPoint[] = [
     opening,
     ...data.valuations
@@ -149,11 +218,6 @@ export function investmentState(data: Data, accountId: ID): InvestmentState | nu
   const lastValuation = history[history.length - 1];
   const flowsSinceValuation = sum(flows.filter((f) => after(f, lastValuation)).map((f) => f.amount));
   const currentValue = lastValuation.value + flowsSinceValuation;
-
-  // Açılış değeri 0 ise takip öncesi katkı da yok sayılabilir.
-  const prior = account.priorContribution ?? (account.openingBalance === 0 ? 0 : null);
-  const netContribution = contributed - withdrawn;
-  const basis = prior === null ? null : prior + netContribution;
   return {
     account,
     contributed,
@@ -174,8 +238,8 @@ export function investmentAccounts(data: Data): Account[] {
 }
 
 /** Tüm yatırım hesaplarının güncel değer toplamı. */
-export function investmentTotal(data: Data): Money {
-  return sum(investmentAccounts(data).map((a) => investmentState(data, a.id)?.currentValue ?? 0));
+export function investmentTotal(data: Data, prices?: PriceBook): Money {
+  return sum(investmentAccounts(data).map((a) => investmentState(data, a.id, prices)?.currentValue ?? 0));
 }
 
 /** Bir değerlemenin, o hesap için hangi hareketleri kapsadığını açıklamak için: değerlemeden sonraki net akış. */

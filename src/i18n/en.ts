@@ -2,11 +2,14 @@
 import type { Dict } from './core';
 import { plural } from './grammar';
 import { hintsEn } from './hints.en';
+import { assetsEn } from './assets.en';
 import { defaultsEn } from './defaults.en';
 import { ringsEn } from './rings.en';
+import { planEn } from './plan.en';
 
 export const en: Dict = {
   ...hintsEn,
+  ...assetsEn,
   ...defaultsEn,
   'err.validDate': "Pick a valid date.",
   'err.futureDate': "You can't log something in the future. Add a plan for upcoming payments instead.",
@@ -1008,5 +1011,6 @@ export const en: Dict = {
   'note.hide': "Hide",
   'note.poke': "Poke (hold for a tip)",
   ...ringsEn,
+  ...planEn,
   // @end
 };

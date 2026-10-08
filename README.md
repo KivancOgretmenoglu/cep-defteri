@@ -41,6 +41,7 @@ npm run preview    # derlenmiş sürümü yerelde aç
 - Bir işleme dokununca düzenlenir veya silinir; giderlerde **İade ekle** vardır.
 - **Bütçe**: isteğe bağlı aylık bütçe, isteğe bağlı kategori limitleri, yaklaşan ödemeler/beklenen gelirler (tekrarlayan planlar). Vadesi gelen kalem kendiliğinden gerçekleşmez; **Ödendi/Geldi** ile tutarı düzeltip kaydedersin.
 - **Yatırım**: güncel değer (elle, tarihli), bu ay / toplam yatırılan, çekilen, net katkı, birikim hedefleri.
+- **Altın / döviz hesabı**: yatırım hesabı açarken *Ne olarak tutuyorsun? TL / Altın / Döviz* (gram 24 ayar, çeyrek, yarım, tam, Cumhuriyet, 22 ayar bilezik gram; USD, EUR, GBP). *Mevcut birikimimi ekle* ile elindeki miktar ve o günkü fiyat girilir. Katkı/çekimde TL tutarın yanında güncel fiyat önerilir (katkıda satış, çekimde alış; kuyumcunun fiyatı farklıysa düzeltilir) ve miktar = tutar ÷ fiyat hesaplanır; miktarı yazarsan fiyat tutardan bulunur. Yatırım ekranında miktar ("12,5 gram · 3 çeyrek"), güncel değer, net katkı ve değer farkı görünür. Kayıt girilmiş hesabın birimi değiştirilemez.
 - **Raporlar**: kategori ve gelir kaynağı dağılımı, önceki dönemle karşılaştırma (devam eden ayda aynı gün aralığı), son 6 ay. Satıra dokununca o işlemlere gidilir.
 - **Ayarlar**: hesaplar, kategoriler, maskot, adı ve dolabı, sınav haftası, dil, tema, yedek indir / geri yükle, CSV, örnek veri modu.
 - **Bakiye gizleme**: Özet'teki göz simgesi toplam bakiyeleri (kullanılabilir para, hesap bakiyeleri, yatırım değeri) "•••••" yapar; işlem tutarları görünür kalır. Maskot bu sırada gizli ajan kılığına girer.
@@ -62,6 +63,8 @@ Tüm hesaplar `src/domain/ledger.ts` içindeki saf fonksiyonlardan gelir; bakiye
 | Bu ay gelir | Gerçekleşmiş gelirler. Açılış bakiyesi, transfer, iade ve yatırımdan çekim hariç. |
 | Bu ay harcama | Giderler − iadeler. Transfer ve yatırım katkısı hariç. |
 | Yatırım değeri | Son girilen değer + o değerden sonraki katkı − çekim. Değer girişi para hareketi değildir. |
+| Altın/döviz miktarı | Açılış miktarı + katkılarda alınan − çekimlerde satılan (her işlem miktarı ve birim fiyatı saklar). |
+| Altın/döviz değeri | Miktar × güncel **alış** fiyatı (bugün satsan eline geçecek). Fiyat sırası: bu cihazdaki en yeni fiyat (internetten ya da elle girilen; hangisi daha yeniyse) → yoksa son işlem/açılış fiyatı. Elle değer kaydı bu hesaplarda kullanılmaz; "Fiyatı gir" ile birim fiyat girilir. Net katkı ve hedefler TL üzerinden ölçülür. |
 | Değer farkı | Yalnız takip öncesi katkı biliniyorsa: değer − (önceki katkı + net katkı). Getiri oranı hesaplanmaz. |
 
 Bir planlı kalem gerçekleşince oluşan işlem plana bağlanır ve o vade artık "bekleyen" sayılmaz; böylece aynı ödeme iki kez düşülmez. Eşleşme dönem bazındadır (aylık planda ay), plan günü sonradan değişse de çift sayım olmaz.
@@ -73,6 +76,8 @@ Bir planlı kalem gerçekleşince oluşan işlem plana bağlanır ve o vade art�
 ## Veri
 
 Kayıtlar yalnızca bu cihazdaki tarayıcıda (`localStorage`) tutulur; sunucu ve cihazlar arası eşitleme yoktur. Taşımak ya da korumak için **Ayarlar → Yedek indir** (JSON) kullan; geri yükleme dosyayı baştan sona doğrular ve önceki veriyi geri alınabilir şekilde saklar. Örnek veri ayrı bir alanda tutulur, gerçek kayıtlara dokunmaz.
+
+Tek ağ isteği altın/döviz fiyatlarıdır: bir altın/döviz hesabı varsa açılışta ve Yatırım ekranında (son fiyat 15 dakikadan eskiyse) anahtarsız, herkese açık JSON'dan yalnızca fiyat **alınır** (GET; kayıt, kimlik ya da çerez gönderilmez). Kaynak `finans.truncgil.com/today.json` (Türk altın türleri + USD/EUR/GBP alış/satış); erişilemezse `@fawazahmed0/currency-api` (jsDelivr) yedeği: döviz orta kur, altın ons fiyatından *tahmini*. Android uygulamasında istek yerel HTTP (CapacitorHttp) ile atılır, tarayıcıda `fetch` ile. Fiyatlar bu cihazda ayrı bir anahtarda önbelleğe alınır ve yedeğe girmez; çevrimdışıyken son fiyat "x saat önce" diye gösterilir, fiyat elle de girilebilir. **Ayarlar → Altın ve döviz fiyatları**'ndan otomatik fiyat alma kapatılabilir (o zaman hiç istek atılmaz).
 
 ## Yapı
 
@@ -91,6 +96,7 @@ android/      Capacitor ile üretilen Android projesi
 ## Bilinen sınırlar
 
 - Kredi kartı ayrı hesap türü değil (kart harcaması, ödendiği hesaptan gider olarak girilir).
-- Döviz yok; tek para birimi TL.
+- Hesap para birimi TL; altın/döviz yalnız yatırım hesabında miktar olarak tutulur (değeri TL'ye çevrilerek gösterilir).
+- Kuyumcu fiyatları kaynaktaki ortalamadır; bulunduğun yerdeki fiyat farklı olabilir (formda düzeltilebilir). Yedek kaynaktaki altın fiyatı işçiliksiz tahmindir.
 - Bağımsız (bir gidere bağlı olmayan) iade girişi yok.
-- Fiş fotoğrafı, banka bağlantısı, canlı fiyatlar yok (ilk sürüm kapsamı dışında).
+- Fiş fotoğrafı ve banka bağlantısı yok (ilk sürüm kapsamı dışında).

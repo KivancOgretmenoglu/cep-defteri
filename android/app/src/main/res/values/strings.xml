@@ -13,4 +13,13 @@
     <string name="widget_add">+ Ekle</string>
     <string name="widget_add_desc">Yeni kayıt ekle</string>
     <string name="widget_mascot_desc">Maskot</string>
+    <string name="widget_expense">Gider</string>
+    <string name="widget_income">Gelir</string>
+    <string name="widget_noted">Not aldım! ✓</string>
+    <string name="widget_writing">Yazmaya gidiyorum…</string>
+    <string name="widget_queued">Not aldım ✓</string>
+
+    <!-- Hızlı ayarlar kutucuğu -->
+    <string name="tile_label">Cep Defteri: + Kayıt</string>
+    <string name="tile_subtitle">Yeni kayıt ekle</string>
 </resources>

@@ -1,5 +1,6 @@
 import type { Money } from './money';
 import type { ISODate } from './dates';
+import type { AssetSpec } from './assets';
 
 export type ID = string;
 
@@ -27,6 +28,15 @@ export interface Account {
    * null = bilinmiyor → kâr/zarar hesaplanmaz.
    */
   priorContribution?: Money | null;
+  /**
+   * Yalnız yatırım hesabı: TL yerine altın/döviz tutuyorsa birimi (src/domain/assets.ts).
+   * Yoksa klasik TL hesabıdır. Geçmişi olan hesapta değiştirilemez.
+   */
+  asset?: AssetSpec;
+  /** Varlık hesabı: takip başlangıcında elde olan miktar (birim cinsinden). */
+  openingQty?: number;
+  /** Varlık hesabı: açılış miktarının değerlendiği birim fiyat (kuruş). openingBalance = openingQty × openingPrice. */
+  openingPrice?: Money;
   archived?: boolean;
   createdAt: number;
 }
@@ -73,6 +83,10 @@ export interface Tx {
   planRef?: PlanRef; // planlı bir kalemin gerçekleşmesi
   /** Serbest etiketler (ör. "erasmus", "tatil"); küçük harf, tekil. */
   tags?: string[];
+  /** Varlık (altın/döviz) hesabına giren/çıkan transferde: alınan/satılan miktar (birim, ondalıklı olabilir). */
+  qty?: number;
+  /** Varlık hesabı transferinde işlem anındaki birim fiyat (kuruş). amount ≈ qty × unitPrice. */
+  unitPrice?: Money;
   createdAt: number;
 }
 
@@ -159,6 +173,8 @@ export interface Settings {
   hintsSeen: string[];
   /** Misafir maskot sahneleri ara sıra görünsün. */
   cameos: boolean;
+  /** Ay sonunda günlük hesaplarda en az kalması istenen tutar (grafikteki plan çizgisi); null = tanımsız. */
+  monthEndFloor: Money | null;
 }
 
 export interface Data {

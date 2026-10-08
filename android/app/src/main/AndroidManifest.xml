@@ -20,7 +20,7 @@
 
             <!-- Başlatıcı girişi aşağıdaki activity-alias'larda (seçilen maskota göre simge). -->
 
-            <!-- Derin bağlantı: io.github.kivancogretmenoglu.cepdefteri://add → ekleme sayfası (ana ekran aracındaki "+ Ekle"). -->
+            <!-- Derin bağlantı: io.github.kivancogretmenoglu.cepdefteri://add[?type=expense|income] → ekleme sayfası (araç düğmeleri, hızlı ayarlar kutucuğu). -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -104,7 +104,7 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Ana ekran aracı: kullanılabilir para + "+ Ekle" -->
+        <!-- Ana ekran aracı: kullanılabilir para, boyuta göre düzen; çiplerden gelen yayınlar (WIDGET_QUICK/WIDGET_REFRESH) açık niyetle gelir. -->
         <receiver
             android:name=".CepWidgetProvider"
             android:exported="false"
@@ -116,6 +116,18 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/cep_widget_info" />
         </receiver>
+
+        <!-- Hızlı ayarlar kutucuğu: "Cep Defteri: + Kayıt" → yeni kayıt sayfası (AddTileService.java). -->
+        <service
+            android:name=".AddTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_add"
+            android:label="@string/tile_label"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
 
         <provider
             android:name="androidx.core.content.FileProvider"

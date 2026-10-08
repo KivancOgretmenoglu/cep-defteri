@@ -92,6 +92,7 @@ export function Budget() {
           <EmptyState outfit="planner" mood="calm" title={t('bud.emptyTitle')} action={<button className="btn btn--primary" onClick={() => openSheet({ kind: 'budget' })}>{t('bud.setBudget')}</button>}>
             {t('bud.emptyBody')}
           </EmptyState>
+          <FloorRow />
         </section>
       ) : (
         <section className="card budget-card" aria-labelledby="budget-h">
@@ -110,6 +111,7 @@ export function Budget() {
           </dl>
           <p className="note-line">{t('bud.lineNote', { pct: pctPlain(b.elapsedPct) })}</p>
           {note && <MascotNote compact mood={note.mood} text={note.text} why={note.why} outfit="planner" size={64} />}
+          <FloorRow />
         </section>
       )}
 
@@ -222,6 +224,24 @@ export function Budget() {
         <ReserveRow />
         <button className="link" onClick={() => go('home')}>{t('common.backHome')}</button>
       </section>
+    </div>
+  );
+}
+
+/** Ay sonu tabanı (bakiye grafiğindeki harcama planı çizgisinin hedefi). */
+function FloorRow() {
+  const t = useT();
+  const { data } = useData();
+  const floor = data.settings.monthEndFloor ?? null;
+  return (
+    <div className="setting-row">
+      <span>
+        {t('bud.floor')}
+        <small>{t('bud.floorHint')}</small>
+      </span>
+      <button className="link" onClick={() => openSheet({ kind: 'floor' })}>
+        {floor === null ? <><Plus size={15} /> {t('bud.floorNone')}</> : <><Pencil size={15} /> {formatMoney(floor)}</>}
+      </button>
     </div>
   );
 }

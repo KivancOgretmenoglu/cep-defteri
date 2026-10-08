@@ -1,9 +1,9 @@
 /**
- * Ayarlar ekranı kartları: Güvenlik (uygulama kilidi), Bildirimler, Otomatik yedek.
+ * Ayarlar ekranı kartları: Güvenlik (uygulama kilidi), Bildirimler, Otomatik yedek, Ana ekran aracı (yalnız APK).
  * Ayarlar.tsx bunları mevcut kartların arasına yerleştirir.
  */
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Bell, Fingerprint, HardDriveDownload, Lock, RotateCcw } from 'lucide-react';
+import { Bell, Fingerprint, HardDriveDownload, LayoutGrid, Lock, RotateCcw } from 'lucide-react';
 import { SectionHead, Segmented } from '../ui/kit';
 import { isNative } from '../platform';
 import { getDevice, setDevice, useDevice, type DevicePrefs } from '../store/device';
@@ -20,6 +20,7 @@ import { listAutoBackups, requestStoragePermission, runAutoBackup, type AutoBack
 import { reminderTexts, useBackupReminder } from './BackupReminder';
 import { intlLocale } from '../i18n/format';
 import { t as tNow, useT } from '../i18n';
+import { setWidgetPrefs, useWidgetPrefs } from './widgetPrefs';
 import './native.css';
 
 type OnOff = 'on' | 'off';
@@ -385,5 +386,39 @@ function AutoRestoreList({ list }: { list: AutoBackupEntry[] }) {
       )}
       {err && <p className="form-error" role="alert">{err}</p>}
     </details>
+  );
+}
+
+// ───────────────────────── Ana ekran aracı (yalnız APK) ─────────────────────────
+
+const WIDGET_TXT = {
+  tr: {
+    title: 'Ana ekran aracı',
+    anim: 'Widget animasyonu',
+    animHint: 'Büyük araçta (4×3 ve üstü) maskot kendi sahnesinde kısa bir döngü oynar. Kapalıyken sabit durur.',
+    info: 'Araç boyuna göre değişir: küçükte tutar, ortada Gider / Gelir düğmeleri, büyükte bugünkü harcama ve sık kayıtların tek dokunuşla eklendiği çipler. Çiplerle eklenenler uygulamayı açınca kaydedilir.',
+  },
+  en: {
+    title: 'Home screen widget',
+    anim: 'Widget animation',
+    animHint: 'On the large widget (4×3 and up) your mascot plays a short loop in its own scene. When off, it stays still.',
+    info: 'The widget adapts to its size: the amount when small, Expense / Income buttons when medium, and today’s spending plus one-tap chips for frequent entries when large. Chip entries are saved the next time you open the app.',
+  },
+} as const;
+
+export function WidgetSettings() {
+  const t = useT();
+  const ONOFF = onOff();
+  const w = useWidgetPrefs();
+  if (!isNative()) return null;
+  const s = WIDGET_TXT[t.lang === 'en' ? 'en' : 'tr'];
+  return (
+    <section className="card" aria-labelledby="s-widget">
+      <SectionHead id="s-widget" title={s.title} />
+      <Row title={<><LayoutGrid size={16} aria-hidden /> {s.anim}</>} hint={s.animHint}>
+        <Segmented<OnOff> size="sm" label={s.anim} value={w.animate ? 'on' : 'off'} onChange={(v) => setWidgetPrefs({ animate: v === 'on' })} options={ONOFF} />
+      </Row>
+      <p className="muted small">{s.info}</p>
+    </section>
   );
 }

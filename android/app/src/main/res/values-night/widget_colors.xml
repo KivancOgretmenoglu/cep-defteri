@@ -7,4 +7,5 @@
     <color name="widget_ink_2">#C3B9A9</color>
     <color name="widget_accent">#E8825C</color>
     <color name="widget_accent_ink">#1C1A17</color>
+    <color name="widget_chip">#332F29</color>
 </resources>

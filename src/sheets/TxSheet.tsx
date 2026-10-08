@@ -6,6 +6,7 @@ import { addDays, diffDays, type ISODate } from '../domain/dates';
 import { catName, dueLabel, formatMoney, lower, parseMoney, shortDate } from '../i18n/format';
 import { useT } from '../i18n';
 import type { Key } from '../i18n/core';
+import { AssetQtyFields, type AssetValue } from './AssetFields';
 import { allTags, cashBalance, isInvestment, isPerson, occurrences, planIsInflow, planIsOutflow, transferKind } from '../domain/ledger';
 import { mascotEvent, type MascotEvent } from '../mascot/events';
 import { commit } from '../store/store';
@@ -86,6 +87,8 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
   const [planRef, setPlanRef] = useState<PlanRef | undefined>(pick('planRef', editing?.planRef));
   const [showAllCats, setShowAllCats] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  // Altın/döviz hesabına katkı/çekimde miktar + birim fiyat (yalnız Yatırım sekmesi)
+  const [assetVal, setAssetVal] = useState<AssetValue | null>(null);
 
   const catKind = tab === 'income' ? 'income' : 'expense';
 
@@ -188,9 +191,11 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
         : { type: 'transfer', amount: amt, date, accountId: personId, toAccountId: accountId, note, tags };
     }
     if (!invId) return T('txs.addInvFirst');
+    const assetPart = accounts.get(invId)?.asset ? assetVal : undefined;
+    if (assetPart === null) return T('err.assetPrice');
     return dir === 'in'
-      ? { type: 'transfer', amount: amt, date, accountId, toAccountId: invId, note, planRef, tags }
-      : { type: 'transfer', amount: amt, date, accountId: invId, toAccountId: accountId, note, planRef, tags };
+      ? { type: 'transfer', amount: amt, date, accountId, toAccountId: invId, note, planRef, tags, ...assetPart }
+      : { type: 'transfer', amount: amt, date, accountId: invId, toAccountId: accountId, note, planRef, tags, ...assetPart };
   }
 
   function eventFor(d: A.TxDraft): MascotEvent {
@@ -561,6 +566,17 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
                   <Chip onClick={() => openNew({ kind: 'account', kindPreset: 'investment' }, 'invId')}>+ {T('hint.newAccount')}</Chip>
                 </div>
               </fieldset>
+              {accounts.get(invId)?.asset && (
+                <AssetQtyFields
+                  key={invId + dir}
+                  account={accounts.get(invId)!}
+                  dir={dir}
+                  amount={amount}
+                  initial={editing?.qty !== undefined && editing.unitPrice && init.tab === 'invest' && init.dir === dir && (editing.toAccountId === invId || editing.accountId === invId) ? { qty: editing.qty, unitPrice: editing.unitPrice } : undefined}
+                  editingTxId={editing?.id}
+                  onChange={setAssetVal}
+                />
+              )}
               <p className="note-line">
                 {dir === 'in'
                   ? T('txs.investInNote', { name: accounts.get(invId)?.name ?? T('acc.kind.investment') })
@@ -740,7 +756,9 @@ export function ConfirmSheet({ planId, due }: { planId: ID; due: ISODate }) {
   const [date, setDate] = useState(due <= today ? due : today);
   const [accountId, setAccountId] = useState(plan?.accountId ?? '');
   const [err, setErr] = useState<string | null>(null);
+  const [assetVal, setAssetVal] = useState<AssetValue | null>(null);
   if (!plan) return null;
+  const assetAcc = plan.kind === 'transfer' ? A.assetSideOf(data, { type: 'transfer', accountId: plan.accountId, toAccountId: plan.toAccountId }) : undefined;
   const occ = occurrences(data, due, due, [plan])[0];
   const skipped = occ?.status === 'skipped';
   const verb = plan.kind === 'income' ? T('due.received') : plan.kind === 'transfer' ? T('due.moved') : T('due.paid');
@@ -749,7 +767,8 @@ export function ConfirmSheet({ planId, due }: { planId: ID; due: ISODate }) {
   function save() {
     const amt = parseMoney(amount);
     if (!amt) return setErr(T('txs.typeAmount'));
-    const e = commit((d, t) => A.confirmOccurrence(d, planId, due, { amount: amt, date, accountId: plan!.kind === 'transfer' ? undefined : accountId }, t).data, T('conf.saved', { title: plan!.title, verb: verbLower }), { pulse: true });
+    if (assetAcc && !assetVal) return setErr(T('err.assetPrice'));
+    const e = commit((d, t) => A.confirmOccurrence(d, planId, due, { amount: amt, date, accountId: plan!.kind === 'transfer' ? undefined : accountId, ...(assetVal ?? {}) }, t).data, T('conf.saved', { title: plan!.title, verb: verbLower }), { pulse: true });
     if (e) setErr(e);
     else closeSheet();
   }
@@ -775,6 +794,7 @@ export function ConfirmSheet({ planId, due }: { planId: ID; due: ISODate }) {
         {plan.kind === 'transfer' && ` · ${accounts.get(plan.accountId)?.name} → ${accounts.get(plan.toAccountId!)?.name}`}
       </p>
       <MoneyInput big label={T('conf.actualAmount')} value={amount} onChange={setAmount} autoFocus onEnter={save} />
+      {assetAcc && <AssetQtyFields account={assetAcc} dir={assetAcc.id === plan.toAccountId ? 'in' : 'out'} amount={amount} onChange={setAssetVal} />}
       {plan.kind !== 'transfer' && (
         <fieldset className="block">
           <legend>{T('csv.account')}</legend>

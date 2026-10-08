@@ -18,6 +18,7 @@ import { availability, budgetStatus, goalProgress, isDaily, monthSummary, upcomi
 import { categoryName } from './defaults';
 import { translator } from '../i18n/core';
 import { spendingImprovement } from './rings';
+import { planGap } from './planLine';
 
 export type Mood = 'curious' | 'calm' | 'happy' | 'thoughtful' | 'celebrate';
 export type MoodFocus = 'accounts' | 'add' | 'available' | 'upcoming' | 'budget' | 'goal' | 'none';
@@ -109,6 +110,23 @@ export function mascotMood(data: Data, today: ISODate, lang: Lang = 'tr'): MoodR
     };
   }
 
+  // 3b) Harcama planı çizgisinin belirgin biçimde altında (kullanıcı ay sonu tabanı belirlediyse).
+  //     Planlı ödemeler çizgide vade gününde basamak olduğundan kira günü tek başına bunu tetiklemez.
+  //     Taban ulaşılamazsa (çizgi düz) bu yargı verilmez; grafikte not gösterilir.
+  const gap = planGap(data, today);
+  const gapWhy = (key: 'mood.planBelow.why' | 'mood.planAbove.why') =>
+    t(key, {
+      target: tlb(gap!.target),
+      actual: tlb(gap!.actual),
+      gap: tlb(Math.abs(gap!.diff)),
+      threshold: tlb(gap!.threshold),
+      floor: tl(gap!.line.floor),
+      date: sd(gap!.line.to),
+    });
+  if (gap && gap.line.reachable && gap.state === 'below') {
+    return { mood: 'thoughtful', text: t('mood.planBelow.text'), why: gapWhy('mood.planBelow.why'), focus: 'available' };
+  }
+
   // 4) Yaklaşan ödemeler ayrılınca kullanılabilir para daralıyor (bütçe tanımlıysa ölçülebilir).
   //    Yalnız bekleyen ödeme varsa tetiklenir; yapılmış yatırım katkısı tek başına bu uyarıyı doğurmaz.
   if (budget.budget !== null && av.paymentsTotal > 0) {
@@ -148,6 +166,9 @@ export function mascotMood(data: Data, today: ISODate, lang: Lang = 'tr'): MoodR
       why: t('mood.better.why'),
       focus: 'none',
     };
+  }
+  if (gap && gap.line.reachable && gap.state === 'above') {
+    return { mood: 'happy', text: t('mood.planAbove.text'), why: gapWhy('mood.planAbove.why'), focus: 'available' };
   }
   if (budget.state === 'on-track' && budget.flexUsedPct !== null) {
     return {

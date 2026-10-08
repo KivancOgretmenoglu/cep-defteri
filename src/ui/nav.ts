@@ -29,6 +29,7 @@ export type SheetState =
   | { kind: 'goal'; goalId?: ID; accountId?: ID }
   | { kind: 'category'; categoryId?: ID; catKind?: 'expense' | 'income' }
   | { kind: 'budget' }
+  | { kind: 'floor' }
   | { kind: 'limit'; categoryId?: ID };
 
 interface NavState {

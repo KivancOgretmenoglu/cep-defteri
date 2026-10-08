@@ -6,6 +6,7 @@ import { isMoney } from './money';
 import { isISODate } from './dates';
 import { DEFAULT_SETTINGS } from './defaults';
 import { accountIndex, refundCategory, transferKind } from './ledger';
+import { isAssetSpec, isQty } from './assets';
 
 export const APP_ID = 'cep-defteri';
 
@@ -53,6 +54,10 @@ export function parseBackup(text: string, lang: Lang = 'tr'): Result {
     if (!isObj(a) || !isStr(a.id) || !isStr(a.name) || !['cash', 'bank', 'investment', 'person'].includes(a.kind as string)) return err('bk.account');
     if (!isMoney(a.openingBalance) || !isISODate(a.openingDate)) return err('bk.opening', { name: String(a.name) });
     if (a.priorContribution != null && !isMoney(a.priorContribution)) return err('bk.prior');
+    // Altın/döviz hesabı (isteğe bağlı alanlar; eski yedeklerde yoktur)
+    if (a.asset !== undefined && (!isAssetSpec(a.asset) || a.kind !== 'investment')) return err('bk.asset');
+    if (a.openingQty !== undefined && (a.asset === undefined || !isQty(a.openingQty) || !isMoney(a.openingPrice) || (a.openingPrice as number) <= 0)) return err('bk.asset');
+    if (a.openingPrice !== undefined && a.openingQty === undefined) return err('bk.asset');
     if (accIds.has(a.id)) return err('bk.dupAccount');
     accIds.add(a.id);
   }
@@ -74,6 +79,7 @@ export function parseBackup(text: string, lang: Lang = 'tr'): Result {
     if (!optStr(t.note) || !optStr(t.refundOf)) return err('bk.txNote');
     if (t.tags !== undefined && (!Array.isArray(t.tags) || !t.tags.every((x) => isStr(x) && x.length > 0 && x.length <= 24) || t.tags.length > 5)) return err('bk.tags');
     if (t.planRef !== undefined && (!isObj(t.planRef) || !isStr(t.planRef.planId) || !isISODate(t.planRef.due))) return err('bk.planRef');
+    if ((t.qty !== undefined && !isQty(t.qty)) || (t.unitPrice !== undefined && (!isMoney(t.unitPrice) || (t.unitPrice as number) <= 0))) return err('bk.assetTx');
     txIds.add(t.id);
     maxSeq = Math.max(maxSeq, t.seq as number);
   }
@@ -98,6 +104,7 @@ export function parseBackup(text: string, lang: Lang = 'tr'): Result {
   const s = d.settings;
   if (s.monthlyBudget != null && (!isMoney(s.monthlyBudget) || (s.monthlyBudget as number) <= 0)) return err('bk.budget');
   if (s.reserve !== undefined && (!isMoney(s.reserve) || (s.reserve as number) < 0)) return err('bk.reserve');
+  if (s.monthEndFloor != null && (!isMoney(s.monthEndFloor) || (s.monthEndFloor as number) < 0)) return err('bk.floor');
   if (s.periodMode !== undefined && !['month', 'days30'].includes(s.periodMode as string)) return err('bk.period');
   if (s.theme !== undefined && !['system', 'light', 'dark'].includes(s.theme as string)) return err('bk.theme');
   if (s.lang !== undefined && !['tr', 'en'].includes(s.lang as string)) return err('bk.lang');
@@ -142,7 +149,11 @@ function semanticCheck(d: Data): Key | null {
       if (a.kind === 'investment' && to.kind === 'investment') return 'bk.invInv';
       if ((a.kind === 'person' || to.kind === 'person') && (a.kind === 'investment' || to.kind === 'investment' || a.kind === to.kind)) return 'bk.personTransfer';
       if (t.date < to.openingDate) return 'bk.beforeStart';
+      // Altın/döviz hesabına giren/çıkan transfer miktar ve fiyat taşır; diğerleri taşımaz.
+      const assetSide = (to.kind === 'investment' && to.asset) || (a.kind === 'investment' && a.asset);
+      if (assetSide ? t.qty === undefined || t.unitPrice === undefined : t.qty !== undefined || t.unitPrice !== undefined) return 'bk.assetTx';
     } else {
+      if (t.qty !== undefined || t.unitPrice !== undefined) return 'bk.assetTx';
       if (a.kind === 'investment') return 'bk.invIncomeExpense';
       if (a.kind === 'person' && t.type !== 'expense') return 'bk.personIncome';
       if (cat.get(t.categoryId!)!.kind !== (t.type === 'income' ? 'income' : 'expense')) return 'bk.catKind';
@@ -209,7 +220,10 @@ export function transactionsCSV(data: Data, lang: Lang = 'tr'): string {
   const acc = accountIndex(data);
   const cats = new Map(data.categories.map((c) => [c.id, c]));
   const txById = new Map(data.txs.map((t) => [t.id, t]));
-  const header = [T('csv.date'), T('csv.type'), T('csv.amount'), T('csv.account'), T('csv.toAccount'), T('csv.category'), T('csv.note'), T('csv.planned'), T('csv.tags')];
+  // Altın/döviz işlemi varsa miktar ve birim fiyat sütunları eklenir (yoksa CSV eskisiyle aynı).
+  const withQty = data.txs.some((t) => t.qty !== undefined);
+  const qtyCell = (q: number) => (lang === 'en' ? String(q) : String(q).replace('.', ','));
+  const header = [T('csv.date'), T('csv.type'), T('csv.amount'), T('csv.account'), T('csv.toAccount'), T('csv.category'), T('csv.note'), T('csv.planned'), T('csv.tags'), ...(withQty ? [T('csv.qty'), T('csv.unitPrice')] : [])];
   const rows = [...data.txs]
     .sort((a, b) => (a.date === b.date ? a.seq - b.seq : a.date < b.date ? -1 : 1))
     .map((t) => {
@@ -224,6 +238,7 @@ export function transactionsCSV(data: Data, lang: Lang = 'tr'): string {
         t.note ?? '',
         t.planRef ? T('csv.yes') : '',
         (t.tags ?? []).join(', '),
+        ...(withQty ? [t.qty !== undefined ? qtyCell(t.qty) : '', t.unitPrice !== undefined ? csvAmount(t.unitPrice, lang) : ''] : []),
       ];
     });
   return csvRows([header, ...rows], lang);

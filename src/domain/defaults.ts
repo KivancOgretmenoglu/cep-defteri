@@ -79,6 +79,7 @@ export const DEFAULT_SETTINGS: Settings = {
   reportCardSeen: null,
   hintsSeen: [],
   cameos: true,
+  monthEndFloor: null,
 };
 
 export function emptyData(): Data {

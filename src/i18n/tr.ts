@@ -4,12 +4,15 @@
  */
 import type { Entry } from './core';
 import { hintsTr } from './hints.tr';
+import { assetsTr } from './assets.tr';
 import { defaultsTr } from './defaults.tr';
 
 import { ringsTr } from './rings.tr';
+import { planTr } from './plan.tr';
 
 export const tr = {
   ...hintsTr,
+  ...assetsTr,
   ...defaultsTr,
   'err.validDate': "Geçerli bir tarih seç.",
   'err.futureDate': "Gelecek tarihli kayıt girilemez. Yaklaşan ödemeler için plan ekleyebilirsin.",
@@ -1011,5 +1014,6 @@ export const tr = {
   'note.hide': "Gizle",
   'note.poke': "Dürt (basılı tut: ipucu)",
   ...ringsTr,
+  ...planTr,
   // @end
 } satisfies Record<string, Entry>;

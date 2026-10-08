@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hızlı ayarlar kutucuğu simgesi: defter + artı (tek renk; sistem yalnız saydamlığı kullanır). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M4,2h11a2,2 0,0 1,2,2v7h-2v-7H6v16h6v2H4z M8,7h5v2h-5z M8,11h5v2h-5z M17,13h2v3h3v2h-3v3h-2v-3h-3v-2h3z" />
+</vector>

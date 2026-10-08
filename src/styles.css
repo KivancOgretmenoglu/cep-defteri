@@ -2436,6 +2436,34 @@ fieldset.block {
 .bchart__key.is-proj {
   border-top-style: dashed;
 }
+.plan-summary,
+.plan-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 10px;
+}
+.plan-summary__text {
+  font-weight: 700;
+  color: var(--ink);
+}
+.plan-summary__text.is-below,
+.plan-summary__warn {
+  color: var(--warn);
+}
+.bchart__line--plan {
+  stroke: var(--invest);
+  stroke-width: 2.5;
+  stroke-dasharray: 0.5 6;
+  opacity: 0.95;
+}
+.bchart__key.is-plan {
+  border-top: 3px dotted var(--invest);
+}
+.bchart__tip .bchart__key.is-plan {
+  border-top-color: var(--invest-soft);
+}
 .bchart__tip .bchart__key {
   border-top-color: var(--accent-line);
 }

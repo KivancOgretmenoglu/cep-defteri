@@ -8,4 +8,12 @@
     <string name="widget_add">+ Add</string>
     <string name="widget_add_desc">Add a new entry</string>
     <string name="widget_mascot_desc">Mascot</string>
+    <string name="widget_expense">Expense</string>
+    <string name="widget_income">Income</string>
+    <string name="widget_noted">Got it! ✓</string>
+    <string name="widget_writing">Off to jot it down…</string>
+    <string name="widget_queued">Got it ✓</string>
+
+    <string name="tile_label">Cep Defteri: + Entry</string>
+    <string name="tile_subtitle">Add a new entry</string>
 </resources>

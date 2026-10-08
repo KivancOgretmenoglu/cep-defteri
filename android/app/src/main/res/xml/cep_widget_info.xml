@@ -1,16 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Ana ekran aracı tanımı. Güncelleme zamanlayıcısı yok: uygulama veri değişince kendisi yeniler. -->
+<!--
+    Ana ekran aracı tanımı. Boyuta göre düzen (CepWidgetProvider.java):
+      küçük  (2×1)      widget_small   maskot + tutar
+      geniş  (3×1, 4×1) widget_cep     maskot + tutar + dönem + "+ Ekle"
+      orta   (3×2, 4×2) widget_medium  + "Gider" / "Gelir"
+      büyük  (4×3+)     widget_large   sahne + canlandırma + bugünkü harcama + tek dokunuşla kayıt çipleri
+    Android 12+ boyuta duyarlı RemoteViews kullanır; daha eskilerde düzen onAppWidgetOptionsChanged'de seçilir.
+    Güncelleme zamanlayıcısı yok: uygulama veri değişince kendisi yeniler (geçici pozlar için AlarmManager).
+-->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/widget_description"
-    android:initialLayout="@layout/widget_cep"
+    android:initialLayout="@layout/widget_medium"
     android:minWidth="180dp"
-    android:minHeight="80dp"
-    android:minResizeWidth="180dp"
-    android:minResizeHeight="70dp"
+    android:minHeight="110dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="40dp"
     android:previewImage="@drawable/widget_preview"
-    android:previewLayout="@layout/widget_cep"
+    android:previewLayout="@layout/widget_medium"
     android:resizeMode="horizontal|vertical"
     android:targetCellWidth="3"
-    android:targetCellHeight="1"
+    android:targetCellHeight="2"
     android:updatePeriodMillis="0"
     android:widgetCategory="home_screen" />

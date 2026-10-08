@@ -23,11 +23,13 @@ import { useNativeSync } from './native/useNativeSync';
 import { useMascotTheme } from './mascot/theme';
 import { characterOf } from './mascot/characters';
 import { setAppIcon } from './native/appIcon';
+import { usePriceRefreshOnOpen } from './store/prices';
 import { TxSheet, RefundSheet, ConfirmSheet } from './sheets/TxSheet';
 import { useT } from './i18n';
 import './ui/motion.css';
 import type { Key } from './i18n/core';
 import { AccountSheet, BudgetSheet, CategorySheet, GoalSheet, LimitSheet, PlanSheet, ValuationSheet } from './sheets/OtherSheets';
+import { FloorSheet } from './sheets/FloorSheet';
 
 const NAV: { screen: Screen; label: Key; icon: typeof House; phone: boolean }[] = [
   { screen: 'home', label: 'nav.home', icon: House, phone: true },
@@ -110,6 +112,8 @@ function SheetHost() {
       return <CategorySheet categoryId={sheet.categoryId} catKind={sheet.catKind} />;
     case 'budget':
       return <BudgetSheet />;
+    case 'floor':
+      return <FloorSheet />;
     case 'limit':
       return <LimitSheet categoryId={sheet.categoryId} />;
   }
@@ -139,6 +143,7 @@ export function App() {
   useTheme();
   useMascotTheme();
   useAppIconSync();
+  usePriceRefreshOnOpen();
   useHtmlLang(t.lang);
   useNativeSync();
   const { screen, sheet } = useNav();

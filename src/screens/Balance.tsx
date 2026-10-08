@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Pencil, Plus } from 'lucide-react';
 import type { ID } from '../domain/types';
 import { addDays, monthEnd, monthOf, type ISODate } from '../domain/dates';
 import { formatMoney, hiddenMoney, shortDate } from '../i18n/format';
@@ -7,11 +7,12 @@ import { useT } from '../i18n';
 import type { Key } from '../i18n/core';
 import { balanceProjection, balanceSeries, isDaily, periodEndFor, trackingStart } from '../domain/ledger';
 import * as A from '../domain/actions';
+import { planGap } from '../domain/planLine';
 import { commit } from '../store/store';
 import { mascotEvent } from '../mascot/events';
 import { BalanceChart } from '../ui/BalanceChart';
 import { Chip, HIDDEN } from '../ui/kit';
-import { go } from '../ui/nav';
+import { go, openSheet } from '../ui/nav';
 import { useData } from '../ui/hooks';
 import { EmptyState } from '../mascot/MascotNote';
 
@@ -47,7 +48,10 @@ export function Balance() {
     for (const t of data.txs) if (idSet.has(t.accountId) || idSet.has(t.toAccountId ?? '')) txCount.set(t.date, (txCount.get(t.date) ?? 0) + 1);
     const low = history.reduce((m, p) => (p.balance < m.balance ? p : m), history[0]);
     const projLow = projection.reduce((m, p) => (p.balance < m.balance ? p : m), projection[0]);
-    return { history, projection, txCount, from, end, low, projLow };
+    // Harcama planı çizgisi: yalnız tüm günlük hesaplar görünümünde; dönem başı bakiyesiyle başlar.
+    const gap = acc === 'all' ? planGap(data, today) : null;
+    const plan = gap ? [{ date: addDays(gap.line.from, -1), balance: gap.line.start }, ...gap.line.points] : [];
+    return { history, projection, txCount, from, end, low, projLow, gap, plan };
   }, [data, today, range, acc, start, daily]);
 
   if (!view || daily.length === 0) {
@@ -114,6 +118,7 @@ export function Balance() {
         <BalanceChart
           history={view.history}
           projection={showProj ? view.projection : []}
+          plan={view.plan}
           today={today}
           hide={hide}
           txCount={view.txCount}
@@ -125,7 +130,9 @@ export function Balance() {
             <input type="checkbox" checked={showProj} onChange={(e) => setShowProj(e.target.checked)} />
             <i className="bchart__key is-proj" /> {t('bal.projection', { date: shortDate(view.end, today) })}
           </label>
+          {view.gap && <span><i className="bchart__key is-plan" /> {t('plan.legend')}</span>}
         </div>
+        {acc === 'all' && <PlanSummary gap={view.gap} hide={hide} />}
         <dl className="kv">
           <div><dt>{t('bal.lowest')}</dt><dd>{money(view.low.balance)} <small className="muted">{shortDate(view.low.date, today)}</small></dd></div>
           {showProj && view.projection.length > 1 && (
@@ -136,6 +143,7 @@ export function Balance() {
           )}
         </dl>
         <p className="note-line">{t('bal.dashedNote')}</p>
+        {view.gap && <p className="note-line">{t('plan.note')}</p>}
         <details className="details">
           <summary>{t('bal.asTable')}</summary>
           <table className="cmp-table">
@@ -148,6 +156,36 @@ export function Balance() {
           </table>
         </details>
       </section>
+    </div>
+  );
+}
+
+/** Plan çizgisine göre bugünkü durumun metin özeti (erişilebilirlik) ya da çizgi yoksa ekleme çağrısı. */
+function PlanSummary({ gap, hide }: { gap: ReturnType<typeof planGap>; hide: boolean }) {
+  const t = useT();
+  if (!gap) {
+    return (
+      <div className="plan-cta">
+        <p className="note-line">{t('plan.ctaHint')}</p>
+        <button className="btn btn--secondary btn--small" onClick={() => openSheet({ kind: 'floor' })}><Plus size={16} /> {t('plan.cta')}</button>
+      </div>
+    );
+  }
+  const amount = formatMoney(Math.abs(gap.diff));
+  const text =
+    Math.abs(gap.diff) < 100
+      ? t('plan.on')
+      : gap.diff > 0
+        ? hide ? t('plan.aboveHidden') : t('plan.above', { amount })
+        : hide ? t('plan.belowHidden') : t('plan.below', { amount });
+  return (
+    <div className="plan-summary">
+      <p className={`plan-summary__text ${gap.state === 'below' ? 'is-below' : ''}`} role="status">{text}</p>
+      <p className="note-line">
+        {t('plan.target')}: {hide ? hiddenMoney() : formatMoney(gap.target)} · {t('plan.floorAt', { date: shortDate(gap.line.to) })}: {formatMoney(gap.line.floor)}{' '}
+        <button className="link" onClick={() => openSheet({ kind: 'floor' })}><Pencil size={14} /> {t('plan.edit')}</button>
+      </p>
+      {!gap.line.reachable && <p className="note-line plan-summary__warn">{t('plan.unreachable')}</p>}
     </div>
   );
 }

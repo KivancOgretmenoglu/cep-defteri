@@ -11,6 +11,7 @@
  *   mipmap-<yoğunluk>/ic_launcher.png, _round.png, _foreground.png            varsayılan simge: Fıstık, kâğıt zemin
  *   drawable, drawable-port-…, drawable-land-… içinde splash.png               açılış ekranı: Fıstık
  *   drawable-nodpi/widget_mascot_<anahtar>.png, widget_preview.png             ana ekran aracı
+ *   drawable-nodpi/widget_anim_<anahtar>_*.png, widget_pose_<anahtar>_*.png    büyük araç sahnesi/kareleri, pozlar
  * ve public/icon-180.png, icon-192.png, icon-512.png, icon.svg (web/PWA simgesi: Fıstık).
  *
  * Maskot pikselleri keskin kalır (yumuşatma yok); yalnız zemin şekillerinin (daire, yuvarlak köşe) kenarı yumuşatılır.
@@ -20,6 +21,7 @@ import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CHARACTERS, INK, MASCOT_KEYS, bodyGrid, type Grid, type MascotKey } from '../src/mascot/characters';
+import { CW, compose, type MascotLive, type R } from '../src/mascot/render';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const RES = join(ROOT, 'android/app/src/main/res');
@@ -308,6 +310,277 @@ function webSvg(): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S} ${S}" shape-rendering="crispEdges"><rect width="${S}" height="${S}" rx="7" fill="${PAPER}"/>${rects.join('')}</svg>\n`;
 }
 
+// ── Büyük araç: sahne + canlandırma kareleri ───────────
+/*
+ * Büyük araçta (4×3 ve üstü) maskot kendi sahnesinde durur ve ViewFlipper ile birkaç karelik bir döngü oynar.
+ * Her kare sahneyle birlikte tek PNG'dir (hizalama kayması olmaz):
+ *   drawable-nodpi/widget_anim_<anahtar>_<0..5>.png   döngü kareleri (0 = canlandırma kapalıyken sabit kare)
+ *   drawable-nodpi/widget_anim_<anahtar>_write.png    "yazmaya gidiyorum" (Gider/Gelir'e dokununca)
+ *   drawable-nodpi/widget_anim_<anahtar>_noted.png    "Not aldım! ✓" (kayıt eklenince)
+ *   drawable-nodpi/widget_pose_<anahtar>_write.png    aynı iki poz, saydam zeminde (küçük/orta araç)
+ *   drawable-nodpi/widget_pose_<anahtar>_noted.png
+ * Karelerin sayısı CepWidgetProvider.java'daki dizilerle aynı olmalı (ANIM_FRAMES).
+ */
+const ANIM_FRAMES = 6;
+const U = 6; // birim başına piksel
+const SW = 40, SH = 36; // sahne (birim)
+const GROUND = 30; // sahnede zemin çizgisi (birim); maskotun ayakları bunun hemen üstünde
+type Live = MascotLive & { dx?: number; dy?: number };
+
+/** Birim koordinatlı boyama yardımcısı. */
+function painter(c: Canvas) {
+  return (x: number, y: number, w: number, h: number, col: string) => c.rect(x * U, y * U, w * U, h * U, col);
+}
+
+/** Yuvarlak köşe maskesi (kenarı yumuşatılmış). */
+function roundMask(c: Canvas, r: number) {
+  const N = 4;
+  for (let y = 0; y < c.h; y++)
+    for (let x = 0; x < c.w; x++) {
+      const cx = Math.min(Math.max(x, r), c.w - r), cy = Math.min(Math.max(y, r), c.h - r);
+      if (cx === x || cy === y) {
+        if (x >= r && x < c.w - r) continue;
+        if (y >= r && y < c.h - r) continue;
+      }
+      let n = 0;
+      for (let sy = 0; sy < N; sy++)
+        for (let sx = 0; sx < N; sx++) {
+          const px = x + (sx + 0.5) / N, py = y + (sy + 0.5) / N;
+          const qx = Math.max(r - px, 0, px - (c.w - r));
+          const qy = Math.max(r - py, 0, py - (c.h - r));
+          if (qx * qx + qy * qy <= r * r) n++;
+        }
+      const i = (y * c.w + x) * 4 + 3;
+      c.px[i] = Math.round((c.px[i] * n) / (N * N));
+    }
+}
+
+const SCENES: Record<MascotKey, (p: ReturnType<typeof painter>, t: number) => void> = {
+  // Kedi: sıcak oda, duvarda çerçeve, ahşap zemin, desenli kilim
+  fistik(p) {
+    p(0, 0, SW, GROUND, '#F6E5CF');
+    for (let x = 0; x < SW; x += 4) p(x, 0, 2, GROUND, '#F2DDC2');
+    p(4, 5, 9, 7, '#A0785A');
+    p(5, 6, 7, 5, '#CFE3EE');
+    p(5, 9, 7, 2, '#8DBF7A');
+    p(8, 7, 2, 2, '#F4C95D');
+    p(29, 6, 6, 1, '#A0785A');
+    p(30, 3, 2, 3, '#6E9E5B');
+    p(32, 4, 2, 2, '#8DBF7A');
+    p(0, GROUND, SW, SH - GROUND, '#C99A6B');
+    for (let y = GROUND + 1; y < SH; y += 2) p(0, y, SW, 1, '#B98A5D');
+    p(5, GROUND + 1, 30, 4, '#C2453E');
+    p(6, GROUND + 2, 28, 2, '#E5B94A');
+    for (let x = 7; x < 34; x += 3) p(x, GROUND + 2, 1, 2, '#C2453E');
+    for (let x = 5; x < 35; x += 2) p(x, GROUND + 5, 1, 1, '#E5B94A');
+  },
+  // Baykuş: gece penceresi (ay, yıldızlar), kitap rafı
+  bilge(p, t) {
+    p(0, 0, SW, SH, '#2E3560');
+    p(3, 3, 14, 13, '#1E2347');
+    p(4, 4, 12, 11, '#3B4A8A');
+    p(9, 4, 1, 11, '#1E2347');
+    p(4, 9, 12, 1, '#1E2347');
+    p(11, 5, 3, 3, '#F4E9B8');
+    p(12, 5, 2, 1, '#3B4A8A');
+    const stars: [number, number][] = [[5, 6], [7, 11], [14, 12], [6, 13], [12, 11]];
+    stars.forEach(([x, y], i) => p(x, y, 1, 1, (i + t) % 3 === 0 ? '#3B4A8A' : '#FFFFFF'));
+    for (const [x, y] of [[24, 4], [33, 8], [28, 12], [36, 3]] as const) p(x, y, 1, 1, (x + t) % 2 ? '#8E9BEA' : '#5867B5');
+    p(0, GROUND, SW, 1, '#7A5236');
+    p(0, GROUND + 1, SW, SH - GROUND - 1, '#5A3B26');
+    const spines = ['#C2453E', '#E5B94A', '#3E8A8C', '#9B7BC6', '#F2EAD8', '#6F9D7E', '#4A6FA5', '#D97757'];
+    let x = 1;
+    for (let i = 0; x < SW - 1; i++) {
+      const w = 1 + (i % 3 === 0 ? 2 : 1);
+      const h = 4 - (i % 2);
+      p(x, SH - h, w, h, spines[i % spines.length]);
+      x += w;
+    }
+  },
+  // Sincap: gökyüzü, yapraklar, kalın dal ve meşe palamutları
+  ceviz(p) {
+    p(0, 0, SW, SH, '#CFE8F2');
+    p(26, 4, 8, 2, '#FFFFFF');
+    p(28, 3, 4, 1, '#FFFFFF');
+    const leaf = (x: number, y: number, w: number, h: number) => {
+      p(x, y, w, h, '#6F9D5B');
+      p(x + 1, y + 1, Math.max(1, w - 2), Math.max(1, h - 2), '#8DBF6A');
+    };
+    leaf(0, 0, 8, 6);
+    leaf(5, 0, 6, 3);
+    leaf(33, 10, 7, 6);
+    leaf(0, 14, 4, 5);
+    p(0, GROUND, SW, 3, '#7E4A26');
+    p(0, GROUND, SW, 1, '#A8683A');
+    for (let x = 2; x < SW; x += 6) p(x, GROUND + 1, 2, 1, '#6A3D1F');
+    p(30, GROUND + 3, 3, 3, '#7E4A26');
+    for (const ax of [4, 34]) {
+      p(ax, GROUND + 3, 3, 1, '#7A4A22');
+      p(ax, GROUND + 4, 3, 2, '#C98B4A');
+    }
+    p(0, GROUND + 3, SW, SH - GROUND - 3, '#BFDDE9');
+    for (const ax of [5, 35]) {
+      p(ax, GROUND + 3, 1, 1, '#6A3D1F');
+      p(ax - 1, GROUND + 4, 3, 1, '#7A4A22');
+      p(ax - 1, GROUND + 5, 3, 1, '#C98B4A');
+    }
+  },
+  // Kirpi: sakin, yapraklı toprak; küçük mantar
+  diken(p) {
+    p(0, 0, SW, GROUND, '#E7EDD2');
+    p(3, 4, 6, 2, '#F6F8EC');
+    p(27, 7, 8, 2, '#F6F8EC');
+    for (const [x, h] of [[2, 6], [6, 9], [33, 7], [37, 5]] as const) {
+      p(x, GROUND - h, 1, h, '#8DAA5B');
+      p(x - 1, GROUND - h + 1, 1, 2, '#A8C46E');
+      p(x + 1, GROUND - h + 3, 1, 2, '#A8C46E');
+    }
+    p(0, GROUND, SW, SH - GROUND, '#8C6A4F');
+    p(0, GROUND, SW, 1, '#A07D5E');
+    const leaves: [number, number, string][] = [[2, 32, '#D97757'], [9, 34, '#E5B94A'], [15, 31, '#6F9D5B'], [22, 33, '#D97757'], [28, 31, '#E5B94A'], [34, 34, '#C2553C'], [37, 32, '#6F9D5B']];
+    for (const [x, y, c] of leaves) {
+      p(x, y, 2, 1, c);
+      p(x + 1, y - 1, 1, 1, c);
+    }
+    p(31, GROUND - 3, 4, 2, '#C2453E');
+    p(32, GROUND - 3, 1, 1, '#FFFFFF');
+    p(32, GROUND - 1, 2, 1, '#F2EAD8');
+  },
+  // Köpek: gökyüzü, bulut, çit ve çimen
+  karamel(p) {
+    p(0, 0, SW, GROUND, '#D7E9F6');
+    p(5, 5, 9, 2, '#FFFFFF');
+    p(7, 4, 5, 1, '#FFFFFF');
+    p(31, 3, 3, 3, '#F4C95D');
+    for (let x = 1; x < SW; x += 5) {
+      p(x, GROUND - 8, 2, 8, '#F2EAD8');
+      p(x, GROUND - 9, 1, 1, '#F2EAD8');
+    }
+    p(0, GROUND - 6, SW, 1, '#E3D9C6');
+    p(0, GROUND - 3, SW, 1, '#E3D9C6');
+    p(0, GROUND, SW, SH - GROUND, '#7DBA62');
+    p(0, GROUND, SW, 1, '#6F9D5B');
+    for (let x = 1; x < SW; x += 3) p(x, GROUND - 1, 1, 1, '#6F9D5B');
+    for (let x = 3; x < SW; x += 7) p(x, GROUND + 3, 1, 1, '#F2EAD8');
+  },
+};
+
+const ox0 = (SW - CW) / 2; // 4
+const oy0 = GROUND - 27; // ayaklar (tuval y=26) zeminin hemen üstünde
+
+function drawR(c: Canvas, rects: R[], ox: number, oy: number, flip = false) {
+  for (const [x, y, w, h, col] of rects) {
+    const xx = flip ? CW - x - w : x;
+    c.rect(Math.round((ox + xx) * U), Math.round((oy + y) * U), w * U, h * U, col);
+  }
+}
+
+function drawMascot(c: Canvas, key: MascotKey, L: Live, ox: number, oy: number, outfit = 'plain') {
+  const s = compose(key, 'calm', outfit, L);
+  const x = ox + (L.dx ?? 0), y = oy + (L.dy ?? 0);
+  drawR(c, s.extras, x, y);
+  drawR(c, s.figure, x, y, L.flip);
+  drawR(c, s.over, ox, oy);
+}
+
+/** Tuval birimi kısayolları (maskot tuvali 32×30; sahnede ox0/oy0 kadar kayık). */
+const box = (x: number, y: number, w: number, h: number, c: string): R => [x, y, w, h, c];
+const yarn = (x: number, y: number): R[] => [box(x, y + 1, 3, 1, '#D9566B'), box(x + 1, y, 1, 3, '#D9566B'), box(x, y, 1, 1, '#B23A50'), box(x + 2, y + 2, 1, 1, '#B23A50'), box(x + 1, y + 1, 1, 1, '#F08A9A'), box(x - 2, y + 2, 2, 1, '#D9566B')];
+const acorn = (x: number, y: number): R[] => [box(x + 1, y - 1, 1, 1, '#5A3B26'), box(x, y, 3, 1, '#7A4A22'), box(x, y + 1, 3, 2, '#C98B4A'), box(x + 1, y + 3, 1, 1, '#A8703A')];
+const ball = (x: number, y: number): R[] => [box(x, y, 3, 3, '#D2423A'), box(x, y + 1, 3, 1, '#FFFFFF'), box(x, y, 1, 1, '#E86A5F')];
+const crumbs = (x: number, y: number): R[] => [box(x, y, 1, 1, '#C98B4A'), box(x + 2, y + 2, 1, 1, '#A8703A')];
+const sniff = (x: number, y: number, n: number): R[] => Array.from({ length: n }, (_, i) => box(x - i * 2, y + (i % 2 ? -1 : 1), 1, 1, '#8A857C'));
+
+/** Maskota özgü döngü: her öğe bir kare. */
+const ANIMS: Record<MascotKey, Live[]> = {
+  // Kedi yün yumağını kovalar
+  fistik: [
+    { look: [1, 0], over: yarn(29, 24) },
+    { dx: 1, look: [1, 0], paws: 'face', over: yarn(31, 24) },
+    { dx: 1, look: [1, -1], eyes: 'wide', over: yarn(32, 21) },
+    { dx: 2, look: [1, 0], squash: true, paws: 'wave', over: yarn(33, 24) },
+    { dx: 1, look: [1, 0], over: yarn(31, 24) },
+    { dx: 0, look: [1, 0], squash: true, paws: 'face', over: yarn(29, 24) },
+  ],
+  // Baykuş başını çevirir, göz kırpar
+  bilge: [
+    { look: [0, 0] },
+    { look: [1, 0] },
+    { look: [1, 0], dx: 1 },
+    { eyes: 'half' },
+    { eyes: 'closed', squash: true },
+    { look: [-1, 0], dx: -1 },
+  ],
+  // Sincap palamut kemirir
+  ceviz: [
+    { props: acorn(12, 18) },
+    { dy: 0, squash: true, props: acorn(12, 17), eyes: 'happy' },
+    { props: acorn(12, 16), eyes: 'happy', over: crumbs(11, 22) },
+    { squash: true, props: acorn(12, 17), eyes: 'closed', over: crumbs(12, 24) },
+    { props: acorn(12, 16), eyes: 'happy', over: crumbs(10, 23) },
+    { look: [1, 0], props: acorn(12, 18) },
+  ],
+  // Kirpi yerleri koklar
+  diken: [
+    { look: [-1, 0] },
+    { dx: -1, look: [-1, 1], over: sniff(10, 21, 2) },
+    { dx: -1, squash: true, look: [-1, 1], over: sniff(10, 21, 3) },
+    { look: [0, 0] },
+    { dx: 1, look: [1, 1], over: sniff(26, 21, 2).map((r) => box(52 - r[0], r[1], 1, 1, r[4])) },
+    { dx: 1, squash: true, look: [1, 0] },
+  ],
+  // Köpek kuyruk sallar, top zıplatır
+  karamel: [
+    { look: [1, 0], eyes: 'happy', over: ball(29, 24) },
+    { look: [1, -1], squash: true, over: ball(29, 20), props: [box(25, 15, 2, 2, '#E2A75A'), box(25, 14, 2, 1, INK), box(27, 15, 1, 2, INK)] },
+    { look: [1, -1], over: ball(29, 17) },
+    { look: [1, -1], squash: true, over: ball(29, 20), props: [box(25, 15, 2, 2, '#E2A75A'), box(25, 14, 2, 1, INK), box(27, 15, 1, 2, INK)] },
+    { look: [1, 0], eyes: 'happy', over: ball(29, 24) },
+    { dx: 1, eyes: 'happy', squash: true, paws: 'wave', over: ball(30, 24) },
+  ],
+};
+
+/** "Yazmaya gidiyorum": ajanda kolunun altında, yana bakıp yola koyulmuş. */
+const WRITE: Live = { look: [1, 0], dx: 2, over: [box(30, 6, 1, 1, '#8A857C'), box(32, 5, 1, 1, '#8A857C'), box(34, 4, 1, 1, '#8A857C')] };
+/** "Not aldım! ✓": mutlu gözler, kalkık patiler, yeşil onay işareti. */
+const CHECK: R[] = [box(25, 5, 1, 1, '#3F8F6B'), box(26, 6, 1, 1, '#3F8F6B'), box(27, 7, 1, 1, '#3F8F6B'), box(28, 6, 1, 1, '#3F8F6B'), box(29, 5, 1, 1, '#3F8F6B'), box(30, 4, 1, 1, '#3F8F6B'), box(31, 3, 1, 1, '#3F8F6B'), box(26, 5, 1, 1, '#5DB58A'), box(28, 5, 1, 1, '#5DB58A'), box(30, 3, 1, 1, '#5DB58A')];
+const NOTED: Live = { eyes: 'happy', paws: 'up', blush: true, over: [...CHECK, box(2, 6, 1, 1, '#E5B94A'), box(4, 2, 1, 1, '#E5B94A')] };
+
+function sceneFrame(key: MascotKey, L: Live, t: number, outfit = 'plain'): Buffer {
+  const c = new Canvas(SW * U, SH * U);
+  SCENES[key](painter(c), t);
+  drawMascot(c, key, L, ox0, oy0, outfit);
+  roundMask(c, 4 * U);
+  return c.png();
+}
+
+/** Saydam zeminde poz (küçük/orta araçtaki maskot görselinin yerine). widget_mascot_* ile aynı ölçek: 26×26 birim, 8 px. */
+function poseOnly(key: MascotKey, L: Live, outfit = 'plain'): Buffer {
+  const k = 8;
+  const c = new Canvas(CW * k, CW * k);
+  const s = compose(key, 'calm', outfit, L);
+  const ox = (L.dx ?? 0), oy = 1 + (L.dy ?? 0);
+  const put = (rects: R[], dx: number, dy: number) => {
+    for (const [x, y, w, h, col] of rects) c.rect((x + dx) * k, (y + dy) * k, w * k, h * k, col);
+  };
+  put(s.extras, ox, oy);
+  put(s.figure, ox, oy);
+  put(s.over, 0, 1);
+  return c.png();
+}
+
+function widgetAnimations() {
+  for (const k of MASCOT_KEYS) {
+    const frames = ANIMS[k];
+    if (frames.length !== ANIM_FRAMES) throw new Error(`${k}: ${ANIM_FRAMES} kare olmalı`);
+    frames.forEach((L, i) => write(join(RES, `drawable-nodpi/widget_anim_${k}_${i}.png`), sceneFrame(k, L, i)));
+    write(join(RES, `drawable-nodpi/widget_anim_${k}_write.png`), sceneFrame(k, WRITE, 0, 'planner'));
+    write(join(RES, `drawable-nodpi/widget_anim_${k}_noted.png`), sceneFrame(k, NOTED, 0));
+    write(join(RES, `drawable-nodpi/widget_pose_${k}_write.png`), poseOnly(k, { ...WRITE, dx: 0 }, 'planner'));
+    write(join(RES, `drawable-nodpi/widget_pose_${k}_noted.png`), poseOnly(k, NOTED));
+  }
+}
+
 function main() {
   if (!existsSync(RES)) throw new Error(`Android projesi bulunamadı: ${RES}`);
 
@@ -332,6 +605,7 @@ function main() {
   // Ana ekran aracı
   for (const k of MASCOT_KEYS) write(join(RES, `drawable-nodpi/widget_mascot_${k}.png`), widgetMascot(k));
   write(join(RES, 'drawable-nodpi/widget_preview.png'), widgetPreview());
+  widgetAnimations();
   for (const f of readdirSync(join(RES, 'drawable-nodpi'))) if (f.startsWith('widget_clawd')) rmSync(join(RES, 'drawable-nodpi', f));
 
   // Web / PWA

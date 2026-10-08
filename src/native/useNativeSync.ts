@@ -10,22 +10,36 @@ import { openSheet } from '../ui/nav';
 import { isNative } from '../platform';
 import { rescheduleNotifications, onNotificationTap } from './notifications';
 import { updateWidget } from './widget';
+import { ingestWidgetQueue } from './widgetQueue';
+import { useWidgetPrefs } from './widgetPrefs';
 import { runAutoBackup } from './autoBackup';
 import { backedUpToday } from './backupPlan';
 import type { NotifExtra } from './schedule';
 
 export const DEEP_LINK_SCHEME = 'io.github.kivancogretmenoglu.cepdefteri';
 
-/** "io.github.kivancogretmenoglu.cepdefteri://add" → ekleme sayfası. */
+/**
+ * "io.github.kivancogretmenoglu.cepdefteri://add" → ekleme sayfası.
+ * "?type=expense" / "?type=income" (araçtaki Gider / Gelir düğmeleri) sayfayı o sekmeyle açar.
+ */
 export function handleDeepLink(url: string | undefined | null): boolean {
-  if (!url) return false;
-  const m = /^io\.github\.kivancogretmenoglu\.cepdefteri:\/\/([^/?#]*)/i.exec(url);
-  if (!m) return false;
-  if (m[1].toLowerCase() === 'add' || m[1].toLowerCase() === 'ekle') {
-    openSheet({ kind: 'add' });
-    return true;
-  }
-  return false;
+  const target = parseDeepLink(url);
+  if (!target) return false;
+  openSheet(target.type ? { kind: 'add', preset: { type: target.type } } : { kind: 'add' });
+  return true;
+}
+
+/** Saf ayrıştırıcı (test için): ekleme bağlantısıysa { type? }, değilse null. */
+export function parseDeepLink(url: string | undefined | null): { type?: 'expense' | 'income' } | null {
+  if (!url) return null;
+  const m = /^io\.github\.kivancogretmenoglu\.cepdefteri:\/\/([^/?#]*)[^?#]*(?:\?([^#]*))?/i.exec(url);
+  if (!m) return null;
+  const host = m[1].toLowerCase();
+  if (host !== 'add' && host !== 'ekle') return null;
+  const type = new URLSearchParams(m[2] ?? '').get('type')?.toLowerCase();
+  if (type === 'expense' || type === 'gider') return { type: 'expense' };
+  if (type === 'income' || type === 'gelir') return { type: 'income' };
+  return {};
 }
 
 function handleNotif(ex: NotifExtra) {
@@ -63,11 +77,14 @@ function setupOnce() {
         App.addListener('appStateChange', ({ isActive }) => {
           if (isActive) {
             refreshToday();
+            void ingestWidgetQueue();
             syncNow({ backupIfStale: true });
           } else flushBackup();
         });
         const launch = await App.getLaunchUrl().catch(() => undefined);
         handleDeepLink(launch?.url);
+        // Araçtaki çiplerle uygulama kapalıyken eklenen kayıtlar
+        void ingestWidgetQueue();
       })
       .catch(() => undefined);
     onNotificationTap(handleNotif).catch(() => undefined);
@@ -87,9 +104,15 @@ export function useNativeSync(): void {
   const mode = useStore((s) => s.mode);
   const notif = useDevice((p) => p.notifications);
   const abEnabled = useDevice((p) => p.autoBackup.enabled);
+  const widgetPrefs = useWidgetPrefs();
   const first = useRef(true);
 
   useEffect(() => setupOnce(), []);
+
+  // Örnek veriden gerçek veriye dönünce bekleyen araç kayıtlarını al.
+  useEffect(() => {
+    if (mode === 'real' && isNative()) void ingestWidgetQueue();
+  }, [mode]);
 
   // Bildirim + araç: veri ya da tercih değişince (kısa gecikmeyle, art arda değişiklikler birleşir).
   useEffect(() => {
@@ -98,7 +121,7 @@ export function useNativeSync(): void {
       updateWidget(data, today, mode);
     }, 1500);
     return () => clearTimeout(t);
-  }, [data, today, mode, notif]);
+  }, [data, today, mode, notif, widgetPrefs]);
 
   // Otomatik yedek: veri değişikliğinden 15 sn sonra (açılıştaki ilk değer hariç; o setupOnce'ta).
   useEffect(() => {

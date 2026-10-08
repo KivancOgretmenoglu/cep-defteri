@@ -1,0 +1,24 @@
+/* Altın/döviz hesapları: miktar + fiyat alanları, Yatırım ekranı miktar satırları */
+.asset-fields__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: end;
+}
+.asset-fields .field__label {
+  min-height: 2.6em;
+  display: flex;
+  align-items: flex-end;
+}
+.invest-hero__qty {
+  font-size: 17px;
+  color: var(--invest);
+  margin: 2px 0 0;
+}
+.invest-holdings {
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+.inv-ev__main small.inv-ev__qty {
+  font-variant-numeric: tabular-nums;
+}

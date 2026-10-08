@@ -9,6 +9,8 @@ import { catName, formatMoney, hiddenMoney, intlLocale } from '../i18n/format';
 import { t as tNow, useT } from '../i18n';
 import { getLang } from '../i18n/lang';
 import { cashBalance, investmentState } from '../domain/ledger';
+import { usePrices } from '../store/prices';
+import { PriceSettings } from './PriceSettings';
 import { commit, getState, replaceData, setMode, showToast, useStore } from '../store/store';
 import * as storage from '../store/storage';
 import { SectionHead, Segmented } from '../ui/kit';
@@ -16,7 +18,7 @@ import { go, openSheet } from '../ui/nav';
 import { useData } from '../ui/hooks';
 import { CatIcon, ACCOUNT_ICONS } from '../ui/icons';
 import { isNative, saveFile } from '../platform';
-import { SecuritySettings, NotificationSettings, AutoBackupSettings } from '../native/NativeSettings';
+import { SecuritySettings, NotificationSettings, AutoBackupSettings, WidgetSettings } from '../native/NativeSettings';
 import { appIconSupported, setAppIcon } from '../native/appIcon';
 import { MascotSettings } from '../mascot/MascotSettings';
 import { Tour } from '../mascot/Tour';
@@ -118,6 +120,7 @@ export function Settings() {
     storage.requestPersistence().then(setPersisted);
   }, []);
   const lastBackup = data.settings.lastBackupAt;
+  const priceBook = usePrices().book;
 
   return (
     <div className="screen">
@@ -128,7 +131,7 @@ export function Settings() {
           <ul className="acc-list">
             {data.accounts.map((a) => {
               const I = ACCOUNT_ICONS[a.kind];
-              const val = a.kind === 'investment' ? investmentState(data, a.id)!.currentValue : cashBalance(data, a.id);
+              const val = a.kind === 'investment' ? investmentState(data, a.id, priceBook)!.currentValue : cashBalance(data, a.id);
               return (
                 <li key={a.id}>
                   <button className="acc-row" onClick={() => openSheet({ kind: 'account', accountId: a.id })}>
@@ -224,9 +227,11 @@ export function Settings() {
           )}
         </section>
 
+        <PriceSettings />
         <SecuritySettings />
         <NotificationSettings />
         <AutoBackupSettings />
+        <WidgetSettings />
 
         <section className="card" aria-labelledby="s-demo">
           <SectionHead id="s-demo" title={t('app.demoTitle')} />
