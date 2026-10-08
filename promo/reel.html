@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Cep Defteri · Reels</title>
+<meta name="viewport" content="width=1080">
+<style>
+@font-face{font-family:'Bricolage';src:url(assets/fonts/bricolage-grotesque-latin-ext-wght-normal.woff2) format('woff2');font-weight:200 800;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Bricolage';src:url(assets/fonts/bricolage-grotesque-latin-wght-normal.woff2) format('woff2');font-weight:200 800;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Serif';font-style:italic;src:url(assets/fonts/instrument-serif-latin-ext-400-italic.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Serif';font-style:italic;src:url(assets/fonts/instrument-serif-latin-400-italic.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{--ink:#2A1E1A;--paper:#F6EEE6;--acc:#AE4716;--soft:#F8DCC8;--cream:#FFFCF6}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
+body{font-family:'Bricolage',system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden}
+.scene{position:absolute;inset:0;overflow:hidden;display:none}
+.pattern{position:absolute;inset:-100px;opacity:.55;background-image:radial-gradient(circle,rgba(0,0,0,.07) 3px,transparent 3.5px);background-size:72px 72px}
+.abs{position:absolute}
+.tx{position:absolute;left:0;right:0;text-align:center;font-weight:800;letter-spacing:-.035em;line-height:.98}
+.tx .w{display:inline-block;will-change:transform,opacity;white-space:pre}
+.tx .it,.it{font-family:'Serif',serif;font-style:italic;font-weight:400;letter-spacing:-.02em}
+.mascot svg{display:block;shape-rendering:crispEdges;overflow:visible}
+.phone{position:absolute;background:#17110f;border-radius:96px;padding:16px;box-shadow:0 60px 120px -30px rgba(40,20,10,.45),0 0 0 3px rgba(255,255,255,.08) inset}
+.phone .screen{position:relative;width:100%;height:100%;border-radius:80px;overflow:hidden;background:var(--cream)}
+.phone img{position:absolute;left:0;top:0;width:100%;display:block}
+.chip{position:absolute;background:#fff;border-radius:44px;padding:24px 34px;font-weight:700;font-size:38px;box-shadow:0 20px 50px -12px rgba(40,20,10,.35);white-space:nowrap;display:flex;align-items:center;gap:16px}
+.pill{position:absolute;background:#fff;border-radius:999px;padding:18px 34px;font-weight:700;font-size:44px;box-shadow:0 14px 40px -10px rgba(40,20,10,.3);display:flex;align-items:center;gap:14px;font-variant-numeric:tabular-nums}
+.dot{display:inline-block;width:26px;height:26px;border-radius:50%}
+.tap{position:absolute;width:120px;height:120px;border-radius:50%;border:8px solid rgba(174,71,22,.8);background:rgba(174,71,22,.25);transform:translate(-50%,-50%) scale(0);opacity:0}
+.stamp{position:absolute;border:7px solid #2a8a5a;color:#2a8a5a;font-weight:800;font-size:40px;padding:6px 20px;border-radius:14px;transform:rotate(-8deg);letter-spacing:.02em}
+.px{position:absolute;image-rendering:pixelated}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script src="reel.js"></script>
+</body>
+</html>
