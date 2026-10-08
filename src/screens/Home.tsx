@@ -112,7 +112,6 @@ export function Home() {
       <BackupReminderCard />
 
       <div className="home-grid">
-        <Rings />
         <section className="card receipt" aria-labelledby="avail-h">
           <div className="receipt__top">
             <h2 id="avail-h" className="label">{t('home.available')}</h2>
@@ -180,6 +179,9 @@ export function Home() {
             </>
           )}
         </section>
+
+        {/* Önce para (asıl soru: ne kadar harcayabilirim), halkalar onun altında */}
+        <Rings />
 
         <section className="card" id="yaklasan" aria-labelledby="up-h">
           <SectionHead id="up-h" title={t('home.upcoming')} action={<button className="link" onClick={() => go('budget')}>{t('home.plans')} <ChevronRight size={16} /></button>} />
