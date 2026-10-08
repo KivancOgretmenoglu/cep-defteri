@@ -25,6 +25,7 @@ import { useData, useLookups } from '../ui/hooks';
 import { ACCOUNT_ICONS } from '../ui/icons';
 import { BackupReminderCard } from '../native/BackupReminder';
 import { Sky } from '../ui/Sky';
+import { GuideInvite } from '../guide/Invite';
 
 export function Home() {
   const t = useT();
@@ -75,10 +76,10 @@ export function Home() {
           <h1 className="wordmark">Cep Defteri</h1>
         </div>
         <div className="head-actions">
-          <button className="icon-btn" onClick={toggleHide} aria-pressed={hide} aria-label={hide ? t('home.showBalances') : t('home.hideBalances')} title={hide ? t('home.showBalances') : t('home.hideBalances')}>
+          <button className="icon-btn" data-tour="eye" onClick={toggleHide} aria-pressed={hide} aria-label={hide ? t('home.showBalances') : t('home.hideBalances')} title={hide ? t('home.showBalances') : t('home.hideBalances')}>
             {hide ? <EyeOff size={22} /> : <Eye size={22} />}
           </button>
-          <button className="icon-btn only-phone" onClick={() => go('settings')} aria-label={t('nav.settings')}>
+          <button className="icon-btn only-phone" data-tour="settings" onClick={() => go('settings')} aria-label={t('nav.settings')}>
             <Settings size={22} />
           </button>
         </div>
@@ -107,6 +108,7 @@ export function Home() {
         }
       />
 
+      <GuideInvite />
       <BackupReminderCard />
 
       <div className="home-grid">
@@ -223,7 +225,7 @@ export function Home() {
         <section className="card" aria-labelledby="acc-h">
           <SectionHead id="acc-h" title={t('home.accounts')} action={<button className="link" onClick={() => openSheet({ kind: 'account' })}><Plus size={16} /> {t('common.add')}</button>} />
           {d.spark.length > 1 && (
-            <button className="spark-btn" onClick={() => go('balance')} aria-label={t('home.openHistory')}>
+            <button className="spark-btn" data-tour="chart" onClick={() => go('balance')} aria-label={t('home.openHistory')}>
               <BalanceChart history={d.spark} plan={d.sparkPlan} today={today} hide={hide} compact height={64} label={t('home.sparkLabel')} />
               <span className="spark-btn__label"><ChartLine size={15} aria-hidden /> {t('balance.title')} <ChevronRight size={15} aria-hidden /></span>
             </button>
@@ -251,8 +253,8 @@ export function Home() {
           </ul>
           {invAccs.length > 0 && (
             <>
-              <h3 className="sub-label"><Sprout size={14} aria-hidden /> {t('home.investSeparate')}</h3>
-              <ul className="acc-list">
+              <h3 data-tour="invest" className="sub-label"><Sprout size={14} aria-hidden /> {t('home.investSeparate')}</h3>
+              <ul className="acc-list" data-tour="invest">
                 {invAccs.map((a) => {
                   const st = investmentState(data, a.id, priceBook)!;
                   return (
@@ -276,7 +278,7 @@ export function Home() {
             </>
           )}
           {invAccs.length === 0 && dailyAccs.length > 0 && (
-            <button className="link link--small" onClick={() => openSheet({ kind: 'account', kindPreset: 'investment' })}>
+            <button className="link link--small" data-tour="invest" onClick={() => openSheet({ kind: 'account', kindPreset: 'investment' })}>
               <Sprout size={14} /> {t('home.addInvestAccount')}
             </button>
           )}

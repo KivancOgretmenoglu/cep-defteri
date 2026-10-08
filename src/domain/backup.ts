@@ -105,6 +105,7 @@ export function parseBackup(text: string, lang: Lang = 'tr'): Result {
   if (s.monthlyBudget != null && (!isMoney(s.monthlyBudget) || (s.monthlyBudget as number) <= 0)) return err('bk.budget');
   if (s.reserve !== undefined && (!isMoney(s.reserve) || (s.reserve as number) < 0)) return err('bk.reserve');
   if (s.monthEndFloor != null && (!isMoney(s.monthEndFloor) || (s.monthEndFloor as number) < 0)) return err('bk.floor');
+  if (s.guideVersion != null && (!Number.isSafeInteger(s.guideVersion) || (s.guideVersion as number) < 0)) return err('bk.guide');
   if (s.periodMode !== undefined && !['month', 'days30'].includes(s.periodMode as string)) return err('bk.period');
   if (s.theme !== undefined && !['system', 'light', 'dark'].includes(s.theme as string)) return err('bk.theme');
   if (s.lang !== undefined && !['tr', 'en'].includes(s.lang as string)) return err('bk.lang');

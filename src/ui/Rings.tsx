@@ -52,7 +52,7 @@ export function Rings() {
   const name = (r: Ring) => (r.kind === 'goal' ? r.title ?? t('rings.goal') : t(r.kind === 'elapsed' ? 'rings.elapsed' : 'rings.budget'));
 
   return (
-    <section className="rings card" aria-label={t('rings.label')}>
+    <section className="rings card" data-tour="rings" aria-label={t('rings.label')}>
       <svg className={`rings__svg ${settled ? 'is-settled' : ''}`} viewBox="0 0 100 100" aria-hidden focusable="false">
         {rings.map((r, i) => (
           <g key={r.kind} className={`ring ring--${r.kind} ring--${r.state}`} transform="rotate(-90 50 50)">

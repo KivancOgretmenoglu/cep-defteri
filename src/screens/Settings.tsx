@@ -21,8 +21,7 @@ import { isNative, saveFile } from '../platform';
 import { SecuritySettings, NotificationSettings, AutoBackupSettings, WidgetSettings } from '../native/NativeSettings';
 import { appIconSupported, setAppIcon } from '../native/appIcon';
 import { MascotSettings } from '../mascot/MascotSettings';
-import { Tour } from '../mascot/Tour';
-import { tourText } from '../mascot/tourLines';
+import { startGuide } from '../guide/state';
 import { characterOf } from '../mascot/characters';
 
 async function download(name: string, content: string, type: string): Promise<boolean> {
@@ -300,14 +299,16 @@ function IconFollowRow() {
   );
 }
 
-/** Ayarlar > Maskot: ilk açılış rehberini tam ekran yeniden açar; bitince/geçince kapanır. */
+/** Ayarlar > Maskot: spot ışıklı rehberi 1. adımdan başlatır (Özet'e geçer, gerçek düğmeleri gösterir). */
 function TourReplay() {
-  const lang = useStore((s) => s.data.settings.lang ?? 'tr');
-  const [open, setOpen] = useState(false);
+  const t = useT();
   return (
-    <>
-      <button type="button" className="btn btn--secondary" onClick={() => setOpen(true)}>{tourText('replay', lang)}</button>
-      {open && <div className="tour-overlay"><Tour onDone={() => setOpen(false)} /></div>}
-    </>
+    <div className="setting-row">
+      <span>
+        {t('guide.replay')}
+        <small>{t('guide.replayHint')}</small>
+      </span>
+      <button type="button" className="btn btn--secondary btn--small" onClick={startGuide}>{t('guide.show')}</button>
+    </div>
   );
 }

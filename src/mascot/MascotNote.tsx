@@ -96,7 +96,7 @@ export function MascotNote({ mood, text, why, outfit, size = 92, action, compact
         <p>{text}</p>
         <div className="mascot-note__foot">
           {why && (
-            <button className="link link--small" aria-expanded={open} onClick={() => setOpen(!open)}>
+            <button className="link link--small" data-tour="why" aria-expanded={open} onClick={() => setOpen(!open)}>
               {open ? TXT.hide[m.lang] : TXT.why[m.lang]}
             </button>
           )}

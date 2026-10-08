@@ -80,6 +80,7 @@ export const DEFAULT_SETTINGS: Settings = {
   hintsSeen: [],
   cameos: true,
   monthEndFloor: null,
+  guideVersion: null,
 };
 
 export function emptyData(): Data {

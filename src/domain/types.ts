@@ -175,6 +175,8 @@ export interface Settings {
   cameos: boolean;
   /** Ay sonunda günlük hesaplarda en az kalması istenen tutar (grafikteki plan çizgisi); null = tanımsız. */
   monthEndFloor: Money | null;
+  /** Tamamlanan/geçilen spot ışıklı rehberin sürümü; null = hiç görülmedi. */
+  guideVersion?: number | null;
 }
 
 export interface Data {

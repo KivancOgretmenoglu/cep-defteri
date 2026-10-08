@@ -18,7 +18,8 @@ type Side = 'l' | 'r';
 type Phase = 'in' | 'out';
 
 const BUSY_SEL = '.cameo, .hint-region, .toast, .mascot-quip';
-const isBusy = () => !!document.querySelector(BUSY_SEL);
+/** Rehber (spot ışığı) açıkken de meşgul: <body data-tour="1">. */
+const isBusy = () => document.body.dataset.tour === '1' || !!document.querySelector(BUSY_SEL);
 
 function noteVisible(): boolean {
   const el = document.querySelector('main .mascot-note');

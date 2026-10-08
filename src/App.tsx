@@ -3,6 +3,7 @@ import { HintHost } from './mascot/hints';
 import { CameoHost } from './mascot/cameo/Cameo';
 import { ScrollPeek } from './mascot/peek/ScrollPeek';
 import { CelebrateHost } from './ui/Celebrate';
+import { GuideHost } from './guide/Coach';
 import { resumeTxDraft } from './sheets/txDraft';
 import { Plus, House, ListOrdered, CalendarRange, ChartColumn, Sprout, Settings as Gear, AlertTriangle, FlaskConical, Undo2, X, HandCoins } from 'lucide-react';
 import { dismissWarning, hideToast, setMode, undo, useStore } from './store/store';
@@ -184,13 +185,13 @@ export function App() {
             </span>
             Cep Defteri
           </div>
-          <button className="btn btn--primary rail__add" onClick={() => openSheet({ kind: 'add' })}>
+          <button className="btn btn--primary rail__add" data-tour="add" onClick={() => openSheet({ kind: 'add' })}>
             <Plus size={20} /> {t('app.addTx')}
           </button>
           <ul>
             {NAV.map((n) => (
               <li key={n.screen}>
-                <button data-tab={n.screen} className={`rail__item ${screen === n.screen ? 'is-on' : ''}`} aria-current={screen === n.screen ? 'page' : undefined} onClick={() => go(n.screen)}>
+                <button data-tab={n.screen} data-tour={n.screen === 'settings' ? 'settings' : undefined} className={`rail__item ${screen === n.screen ? 'is-on' : ''}`} aria-current={screen === n.screen ? 'page' : undefined} onClick={() => go(n.screen)}>
                   <n.icon size={20} aria-hidden /> {t(n.label)}
                 </button>
               </li>
@@ -232,7 +233,7 @@ export function App() {
               <span>{t(n.label)}</span>
             </button>
           ))}
-          <button className={`tabbar__add ${sheet ? '' : loggedToday ? 'tabbar__add--glow' : 'tabbar__add--glow tabbar__add--nudge'}`} onClick={() => openSheet({ kind: 'add' })} aria-label={t('app.addTx')}>
+          <button data-tour="add" className={`tabbar__add ${sheet ? '' : loggedToday ? 'tabbar__add--glow' : 'tabbar__add--glow tabbar__add--nudge'}`} onClick={() => openSheet({ kind: 'add' })} aria-label={t('app.addTx')}>
             <span className="tabbar__aura" aria-hidden />
             <Plus size={28} strokeWidth={2.5} />
           </button>
@@ -250,6 +251,7 @@ export function App() {
       <CameoHost />
       <ScrollPeek />
       <CelebrateHost />
+      <GuideHost />
     </div>
     </LockGate>
   );

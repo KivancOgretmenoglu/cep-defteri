@@ -352,12 +352,12 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
         />
       )}
 
-      <MoneyInput big label={T('csv.amount')} value={amount} onChange={setAmount} autoFocus={!editing} onEnter={save} />
+      <MoneyInput big tour="amount" label={T('csv.amount')} value={amount} onChange={setAmount} autoFocus={!editing} onEnter={save} />
 
 
       {(quick.length > 0 || templates.length > 0) && (
         // Hızlı tutarlar ve kalıplar tek kaydırılabilir satırda: kategori ızgarası aşağı itilmesin.
-        <div className="chip-row chip-row--scroll quick-row">
+        <div className="chip-row chip-row--scroll quick-row" data-tour="quick">
           {quick.length > 0 && (
             <span className="quick-row__group" role="group" aria-label={T('defaults.quickAmounts')}>
               {quick.map((m) => (
@@ -426,7 +426,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
                 <span className="cat-btn__name">{catName(c)}</span>
               </button>
             ))}
-            <button type="button" className="cat-btn cat-btn--more" onClick={() => openNew({ kind: 'category', catKind })}>
+            <button type="button" className="cat-btn cat-btn--more" data-tour="newCat" onClick={() => openNew({ kind: 'category', catKind })}>
               <span className="cat-btn__name">+ {T('hint.newCategory')}</span>
             </button>
             {catList.length > 8 && (

@@ -9,6 +9,7 @@ import { defaultsTr } from './defaults.tr';
 
 import { ringsTr } from './rings.tr';
 import { planTr } from './plan.tr';
+import { guideTr } from './guide.tr';
 
 export const tr = {
   ...hintsTr,
@@ -1015,5 +1016,6 @@ export const tr = {
   'note.poke': "Dürt (basılı tut: ipucu)",
   ...ringsTr,
   ...planTr,
+  ...guideTr,
   // @end
 } satisfies Record<string, Entry>;

@@ -48,7 +48,7 @@ export function AnimatedMoney({ value, hide = false }: { value: Money; hide?: bo
 
 // ── Tutar girişi ───────────────────────────────────────
 export function MoneyInput({
-  value, onChange, label, big = false, autoFocus = false, id, allowZero = false, placeholder = '0', onEnter, ...rest
+  value, onChange, label, big = false, autoFocus = false, id, allowZero = false, placeholder = '0', onEnter, tour, ...rest
 }: {
   value: string;
   onChange: (raw: string) => void;
@@ -59,12 +59,15 @@ export function MoneyInput({
   allowZero?: boolean;
   placeholder?: string;
   onEnter?: () => void;
+  /** Rehber hedefi (data-tour) — tüm alanı (etiket dahil) işaretler */
+  tour?: string;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'>) {
   const auto = useId();
   const t = useT();
   const ref = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    if (autoFocus) {
+    // Rehber (spot ışığı) açıkken klavye açılmasın.
+    if (autoFocus && document.body.dataset.tour !== '1') {
       // Sayfa açılış animasyonu bitmeden odaklanınca iOS klavyeyi açmayabilir.
       const t = setTimeout(() => ref.current?.focus({ preventScroll: true }), 60);
       return () => clearTimeout(t);
@@ -73,7 +76,7 @@ export function MoneyInput({
   const parsed = value.trim() ? parseMoney(value) : null;
   const invalid = value.trim() !== '' && parsed === null && !(allowZero && /^0+([.,]0*)?$/.test(value.trim()));
   return (
-    <label className={`money-input ${big ? 'money-input--big' : ''} ${invalid ? 'is-invalid' : ''}`} htmlFor={id ?? auto}>
+    <label className={`money-input ${big ? 'money-input--big' : ''} ${invalid ? 'is-invalid' : ''}`} htmlFor={id ?? auto} data-tour={tour}>
       <span className="money-input__label">{label}</span>
       <span className="money-input__row">
         <input

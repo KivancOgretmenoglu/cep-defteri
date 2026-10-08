@@ -234,7 +234,7 @@ function FloorRow() {
   const { data } = useData();
   const floor = data.settings.monthEndFloor ?? null;
   return (
-    <div className="setting-row">
+    <div className="setting-row" data-tour="floor">
       <span>
         {t('bud.floor')}
         <small>{t('bud.floorHint')}</small>

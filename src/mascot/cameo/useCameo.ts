@@ -44,7 +44,8 @@ export function findLedgeCard(): HTMLElement | null {
 }
 
 /** Başka bir maskot sözü, ipucu ya da bildirim görünüyor mu? */
-const isBusy = () => !!document.querySelector('.hint-region, .mascot-quip, .toast');
+/** Rehber (spot ışığı) açıkken de meşgul sayılır: <body data-tour="1">. */
+const isBusy = () => document.body.dataset.tour === '1' || !!document.querySelector('.hint-region, .mascot-quip, .toast');
 
 function readForce(): SceneId | null {
   try {

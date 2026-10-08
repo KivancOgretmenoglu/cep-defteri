@@ -1,0 +1,79 @@
+/**
+ * Rehberin maskot ağzından satırları: adım × 5 karakter × tr+en. Her satır 1–2 kısa cümle.
+ * Ton: Fıstık oyuncu, Bilge sakin ve az sözlü, Ceviz tutumlu/telaşlı, Diken kuru ve minimal, Karamel neşeli/sadık.
+ */
+import type { Lang, MascotKey } from '../mascot/characters';
+import type { StepId } from './steps';
+
+type Line = { tr: string; en: string };
+const L = (tr: string, en: string): Line => ({ tr, en });
+
+export const GUIDE_LINES: Record<MascotKey, Record<StepId, Line>> = {
+  fistik: {
+    add: L('Kayıt buradan! Tutar, kategori, kaydet: 3 dokunuşta biter.', 'Entries start here! Amount, category, save: done in 3 taps.'),
+    amount: L('Önce tutarı yaz. Ya da hazır tutarlardan birine dokun, daha da hızlı.', 'Type the amount first. Or tap a ready amount, even faster.'),
+    newCat: L('Kategorin yok mu? “+ Yeni kategori” ile kendininkini yap.', 'Missing a category? Make your own with “+ New category”.'),
+    why: L('Ruh halimi merak edersen “Neden böyle?”ye dokun. Sebepsiz yargılamam!', 'Curious about my mood? Tap “Why?”. I never judge without a reason!'),
+    eye: L('Biri omzundan mı bakıyor? Göze dokun, toplamları saklarım. Ajan modu!', 'Someone peeking? Tap the eye and I hide the totals. Spy mode!'),
+    rings: L('Bu kart ayın gidişatı: bütçe, hedef, geçen günler. Bir bakışta durum.', 'This card is your month at a glance: budget, goals, days gone.'),
+    floor: L('Buraya bir hedef koy; grafikte plan çizgisini çizerim, altına inersen söylerim.', 'Set a target here; I’ll draw a plan line on the chart and tell you if you dip below.'),
+    invest: L('Yatırımını altın ya da döviz olarak da tutabilirsin; fiyatı ben güncellerim.', 'Keep investments as gold or currency too; I’ll update the price.'),
+    widget: L('Beni ana ekranına koy! Uygulamayı açmadan bakiyeni görür, tek dokunuşla kayıt eklersin.', 'Put me on your home screen! See your balance and add entries without opening the app.'),
+    tile: L('Bildirim paneline bir kutucuk koyalım; kayıt bir kaydırma uzağında olsun.', 'Let’s add a quick settings tile; entries are one swipe away.'),
+    settings: L('Bitti! Rehberi buradan, Ayarlar’dan tekrar açabilirsin.', 'Done! You can replay the guide from Settings, right here.'),
+  },
+  bilge: {
+    add: L('Kayıt buradan başlar. Üç dokunuş yeter.', 'Entries begin here. Three taps are enough.'),
+    amount: L('Önce tutar. Hazır tutarlar da burada.', 'First, the amount. Ready amounts are here too.'),
+    newCat: L('Aradığın kategori yoksa, buradan yenisini kur.', 'If your category is missing, create it here.'),
+    why: L('“Neden böyle?” dersen gerekçemi söylerim.', 'Ask “Why?” and I will give my reason.'),
+    eye: L('Göz, toplamları gizler. Kalabalıkta işe yarar.', 'The eye hides totals. Useful in a crowd.'),
+    rings: L('Bu kart ayın gidişatını gösterir. Bir bakış yeter.', 'This card shows how the month goes. One glance is enough.'),
+    floor: L('Buraya bir hedef koy. Grafikte plan çizgisini çizerim, altına inersen söylerim.', 'Set a target here. I will draw a plan line and tell you if you fall below.'),
+    invest: L('Yatırımını altın ya da döviz olarak tutabilirsin. Fiyatı ben güncellerim.', 'You may hold gold or currency. I will keep the price current.'),
+    widget: L('Ana ekranına bir pencere aç. Bakiyen hep gözünün önünde olur.', 'Open a window on your home screen. Your balance stays in sight.'),
+    tile: L('Bildirim paneline bir kutucuk ekle. Kayıt bir kaydırma uzakta.', 'Add a tile to quick settings. An entry is one swipe away.'),
+    settings: L('Hepsi bu. Rehber, Ayarlar’da seni bekler.', 'That is all. The guide waits in Settings.'),
+  },
+  ceviz: {
+    add: L('Kayıt buradan! 3 dokunuş, tek kuruş harcamadan.', 'Entries here! Three taps, not a penny spent.'),
+    amount: L('Tutarı yaz ya da hazır tutara dokun. Zaman da paradır!', 'Type the amount or tap a ready one. Time is money!'),
+    newCat: L('Kategori eksikse “+ Yeni kategori”. Her kuruşun yeri belli olsun!', 'Missing one? “+ New category”. Every coin gets its place!'),
+    why: L('“Neden böyle?”ye dokun, hesabımı açıklarım. Kuruşu kuruşuna!', 'Tap “Why?” and I’ll show my math. To the last penny!'),
+    eye: L('Göze dokun, toplamlar saklanır. Paramızı herkes görmesin!', 'Tap the eye, the totals hide. Nobody needs to see our coins!'),
+    rings: L('Bu kart ayın özeti: ne harcadık, ne kaldı. Hızlı kontrol!', 'This card sums up the month: spent, left. Quick check!'),
+    floor: L('Buraya hedef koy; grafikte plan çizgisini çizerim, altına inersen hemen söylerim!', 'Set a target here; I’ll draw a plan line and shout if you dip below!'),
+    invest: L('Yatırımını altın ya da döviz olarak da tutabilirsin; fiyatı ben güncellerim, bedavaya!', 'Keep it as gold or currency too; I’ll update the price, free of charge!'),
+    widget: L('Ana ekrana koy, uygulamayı açmadan kayıt ekle. Dokunuş tasarrufu!', 'Put it on your home screen and log without opening the app. Tap savings!'),
+    tile: L('Bildirim paneline kutucuk ekle; kayıt bir kaydırma uzakta. Verimli!', 'Add a quick settings tile; logging is one swipe away. Efficient!'),
+    settings: L('Tamamdır! Rehberi istersen buradan, Ayarlar’dan yine aç.', 'All set! Reopen the guide from Settings, right here.'),
+  },
+  diken: {
+    add: L('Kayıt. Burada. Üç dokunuş.', 'Entries. Here. Three taps.'),
+    amount: L('Tutar. Ya da hazır tutar. Seçim senin.', 'Amount. Or a ready amount. Your call.'),
+    newCat: L('Kategori yoksa yenisi. Basit.', 'No category? Make one. Simple.'),
+    why: L('“Neden böyle?” Sebebim var. Her zaman.', '“Why?” I have reasons. Always.'),
+    eye: L('Göz. Toplamlar kaybolur. Sihir değil.', 'The eye. Totals vanish. Not magic.'),
+    rings: L('Bu kart. Ayın durumu. Grafik sevenlere.', 'This card. The month’s status. For chart people.'),
+    floor: L('Hedef koy. Plan çizgisi çizerim. Altına inersen söylerim.', 'Set a target. I draw a plan line. Dip below, I tell you.'),
+    invest: L('Altın, döviz, olur. Fiyatı ben güncellerim.', 'Gold, currency, fine. I update the price.'),
+    widget: L('Ana ekran aracı. Uygulamayı açmana gerek kalmaz. Ben de gelirim.', 'Home screen widget. No need to open the app. I come along.'),
+    tile: L('Bildirim paneline kutucuk. Bir kaydırma. O kadar.', 'A quick settings tile. One swipe. That’s it.'),
+    settings: L('Bitti. Rehber Ayarlar’da. Gerekirse.', 'Done. The guide is in Settings. If needed.'),
+  },
+  karamel: {
+    add: L('Hav! Kayıt buradan, 3 dokunuşta biter. Hep yanındayım!', 'Woof! Entries start here, done in 3 taps. I’m right beside you!'),
+    amount: L('Tutarı yaz ya da hazır tutarlara dokun, çok kolay!', 'Type the amount or tap a ready one, so easy!'),
+    newCat: L('İstediğin kategori yok mu? “+ Yeni kategori” ile ekle, birlikte yapalım!', 'Don’t see yours? Add it with “+ New category”, let’s do it together!'),
+    why: L('“Neden böyle?”ye dokun, hepsini anlatırım! Sebepsiz hiç kızmam, söz!', 'Tap “Why?” and I’ll tell you everything! I never scold without a reason, promise!'),
+    eye: L('Göze dokun, toplamları saklarım! Sırrın bende güvende.', 'Tap the eye and I hide the totals! Your secret’s safe with me.'),
+    rings: L('Bu kart ayın nasıl gittiğini gösterir. Halkalar dolunca ben de sevinirim!', 'This card shows how the month goes. When the rings fill, I wag!'),
+    floor: L('Buraya bir hedef koy; grafikte plan çizgisini çizerim, altına inersen söylerim!', 'Set a target here; I’ll draw a plan line and tell you if you dip below!'),
+    invest: L('Yatırımını altın ya da döviz olarak da tutabilirsin; fiyatı ben güncellerim!', 'Keep it as gold or currency too; I’ll fetch the price for you!'),
+    widget: L('Beni ana ekranına koy, her gün seni karşılayayım!', 'Put me on your home screen, I’ll greet you every day!'),
+    tile: L('Bildirim paneline bir kutucuk ekleyelim, kayıt bir kaydırma uzakta!', 'Let’s add a quick settings tile, logging is one swipe away!'),
+    settings: L('Harikaydın! Rehberi Ayarlar’dan, buradan tekrar açabilirsin.', 'You did great! Replay the guide from Settings, right here.'),
+  },
+};
+
+export const guideLine = (who: MascotKey, id: StepId, lang: Lang) => GUIDE_LINES[who][id][lang];

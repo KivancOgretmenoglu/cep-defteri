@@ -1,0 +1,344 @@
+/* Spot ışıklı rehber (Coach.tsx). Sayfaların (50), bildirimin (60) ve ipuçlarının (55) üstünde. */
+.coach {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+}
+.coach__block {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+}
+/* Kutu gölgesi hilesi: delik dışındaki her yer kararır. */
+.coach__hole {
+  position: absolute;
+  border-radius: 14px;
+  box-shadow: 0 0 0 200vmax rgba(18, 12, 8, 0.62);
+  transition: left 0.32s var(--ease-snappy), top 0.32s var(--ease-snappy), width 0.32s var(--ease-snappy), height 0.32s var(--ease-snappy), border-radius 0.32s;
+}
+:root[data-theme='dark'] .coach__hole {
+  box-shadow: 0 0 0 200vmax rgba(0, 0, 0, 0.74);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .coach__hole {
+    box-shadow: 0 0 0 200vmax rgba(0, 0, 0, 0.74);
+  }
+}
+.coach__hole--none {
+  border-radius: 50%;
+}
+.coach__ring {
+  position: absolute;
+  border-radius: 14px;
+  border: 2px solid var(--accent-line);
+  box-shadow: 0 0 0 2px var(--accent);
+  animation: coach-ring 1.6s ease-out infinite;
+  transition: left 0.32s var(--ease-snappy), top 0.32s var(--ease-snappy), width 0.32s var(--ease-snappy), height 0.32s var(--ease-snappy);
+}
+@keyframes coach-ring {
+  0% { opacity: 0.95; transform: scale(1); }
+  70% { opacity: 0; transform: scale(1.08); }
+  100% { opacity: 0; transform: scale(1.08); }
+}
+
+.coach__bubble {
+  position: absolute;
+  pointer-events: auto;
+  box-sizing: border-box;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 12px 12px 10px;
+  box-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.55);
+  transition: top 0.32s var(--ease-snappy), left 0.32s var(--ease-snappy), opacity 0.18s;
+  animation: coach-in 0.28s var(--ease-snappy);
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+}
+.coach.is-seeking .coach__bubble {
+  opacity: 0;
+}
+@keyframes coach-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+}
+/* Ok: balonun hedefe bakan kenarında (balonun kaydırma kırpmasından etkilenmesin diye ayrı öğe) */
+.coach__arrow {
+  position: absolute;
+  z-index: 1;
+  width: 16px;
+  height: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  transform: rotate(45deg);
+  transition: top 0.32s var(--ease-snappy), left 0.32s var(--ease-snappy), opacity 0.18s;
+}
+.coach__arrow--below {
+  border-right: 0;
+  border-bottom: 0;
+}
+.coach__arrow--above {
+  border-left: 0;
+  border-top: 0;
+}
+.coach.is-seeking .coach__arrow {
+  opacity: 0;
+}
+.coach__head {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.coach__mascot {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: var(--accent-soft);
+}
+.coach__text {
+  min-width: 0;
+  flex: 1;
+}
+.coach__name {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+.coach__name span {
+  font-weight: 500;
+}
+.coach__line {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.38;
+}
+.coach__body {
+  margin-top: 10px;
+  display: grid;
+  gap: 10px;
+}
+.coach__ok {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+.coach__dots {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin: 10px 0 6px;
+}
+.coach__dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line-strong);
+  transition: width 0.2s, background 0.2s;
+}
+.coach__dots i.is-on {
+  width: 16px;
+  background: var(--accent);
+}
+.coach__dots i.is-skipped {
+  display: none;
+}
+.coach__foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.coach__skiptext {
+  margin-right: auto;
+}
+.coach__next {
+  min-width: 96px;
+  justify-content: center;
+}
+.coach--still .coach__hole,
+.coach--still .coach__ring,
+.coach--still .coach__bubble,
+.coach--still .coach__arrow {
+  transition: none;
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .coach__hole,
+  .coach__ring,
+  .coach__bubble,
+  .coach__arrow,
+  .coach-steps li {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Rehber açıkken misafir maskot, kaydırma bakışı, ipuçları ve maskot sözleri bekler. */
+body[data-tour='1'] .cameo,
+body[data-tour='1'] .scroll-peek,
+body[data-tour='1'] .hint-region,
+body[data-tour='1'] .mascot-quip {
+  display: none !important;
+}
+
+/* Hedeflere kaydırırken üstte/altta pay */
+[data-tour] {
+  scroll-margin: 96px 0 calc(var(--tabbar-h) + var(--safe-b) + 140px);
+}
+
+/* Elle ekleme adımları: sırayla belirir, şu anki adım vurgulanır */
+.coach-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.coach-steps li {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  font-size: 14px;
+  animation: coach-step-in 0.4s var(--ease-snappy) both, coach-step-hi 4.5s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.25s), calc(var(--i) * 1.5s + 0.8s);
+}
+.coach-steps__n {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+@keyframes coach-step-in {
+  from { opacity: 0; transform: translateX(-8px); }
+}
+@keyframes coach-step-hi {
+  0%, 30%, 100% { box-shadow: inset 0 0 0 0 transparent; }
+  8%, 22% { box-shadow: inset 0 0 0 2px var(--accent); }
+}
+
+/* Ana ekran maketi */
+.phone-mock {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 16px;
+  background: linear-gradient(160deg, #5b6f9a, #9b7fa6 55%, #e3a98c);
+}
+.phone-mock__apps {
+  display: flex;
+  justify-content: space-around;
+}
+.phone-mock__apps i {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.55);
+}
+.widget-mock {
+  position: relative;
+  height: 92px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 6px 14px -6px rgba(0, 0, 0, 0.5);
+  animation: widget-pop 0.5s var(--spring-bouncy) 0.2s both;
+}
+@keyframes widget-pop {
+  from { opacity: 0; transform: scale(0.85); }
+}
+/* Maskot sahne zeminleri (gerçek araçtaki resimlerin sade CSS karşılığı) */
+.widget-mock--fistik {
+  background: linear-gradient(transparent 68%, #a0623a 68% 74%, #8a5230 74%), repeating-linear-gradient(90deg, #f6e3c8 0 7px, #efd5b2 7px 14px);
+}
+.widget-mock--bilge {
+  background: linear-gradient(transparent 70%, #7a4a2a 70%), linear-gradient(90deg, #26306b 0 55%, #3a2a1e 55% 57%, transparent 57%), repeating-linear-gradient(90deg, #b6413a 0 4px, #e0b54a 4px 8px, #4f7fb5 8px 12px, #2c2a4a 12px 14px);
+}
+.widget-mock--ceviz {
+  background: linear-gradient(#cfe8f5 0 70%, #6aa84f 70% 74%, #8a5a34 74%);
+}
+.widget-mock--diken {
+  background: linear-gradient(#e7efd6 0 68%, #9fbf6a 68% 73%, #8a6a44 73%);
+}
+.widget-mock--karamel {
+  background: linear-gradient(transparent 52%, #fff 52% 56%, transparent 56% 60%, #fff 60% 63%, transparent 63%), linear-gradient(#cfe6f7 0 66%, #7cc04f 66%);
+}
+.widget-mock__mascot {
+  position: absolute;
+  left: 8px;
+  bottom: 4px;
+}
+.widget-mock__card {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  display: grid;
+  padding: 4px 9px;
+  border-radius: 9px;
+  background: rgba(255, 253, 248, 0.92);
+  color: #23201b;
+  line-height: 1.15;
+}
+.widget-mock__card small {
+  font-size: 9px;
+  color: #5b5448;
+}
+.widget-mock__card b {
+  font-size: 15px;
+}
+.widget-mock__btns {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  gap: 5px;
+}
+.widget-mock__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--w-soft);
+  color: #23201b;
+}
+.widget-mock__btn--main {
+  background: var(--w-accent);
+  color: #fff;
+}
+
+/* Mevcut kullanıcı daveti */
+.card.guide-invite {
+  flex-direction: row;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  margin-bottom: 14px;
+}
+.guide-invite h2 {
+  margin: 0 0 2px;
+  font-size: 16px;
+}
+.guide-invite p {
+  margin: 0 0 8px;
+}
+.guide-invite__text {
+  min-width: 0;
+}

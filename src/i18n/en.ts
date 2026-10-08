@@ -6,6 +6,7 @@ import { assetsEn } from './assets.en';
 import { defaultsEn } from './defaults.en';
 import { ringsEn } from './rings.en';
 import { planEn } from './plan.en';
+import { guideEn } from './guide.en';
 
 export const en: Dict = {
   ...hintsEn,
@@ -1012,5 +1013,6 @@ export const en: Dict = {
   'note.poke': "Poke (hold for a tip)",
   ...ringsEn,
   ...planEn,
+  ...guideEn,
   // @end
 };
