@@ -187,19 +187,19 @@ const tapAt = (e, lt, t0, x, y) => {
 /* ───────── Sahneler ───────── */
 const scenes = [];
 let cur;
+let OPTS = {};
 function scene(t0, bg, wipe = [540, 1500], wdur = 0.6) {
   const root = el('div', 'scene', stage, { background: bg });
-  cur = { t0, root, wipe, wdur, items: [], bg };
+  cur = { t0, root, wipe, wdur, items: [], bg, skip: OPTS.skip || 0, flash: !!OPTS.flash };
   scenes.push(cur);
   return cur;
 }
-const T = { s1: 0, s2: 4.5, s3: 7.5, s4: 12.5, s5: 15.5, s6: 19.5, s7: 22.5, s8: 25.5, end: 29.5 };
-
-function buildAll() {
+const SCENES = {};
+function defineScenes() {
   /* S1 · Kanca: Ayın 1'i → 15'i → 30'u, dondurulmuş kare: "Tanıdık geldi mi?" */
-  {
+  SCENES.hook = (t0, o = {}) => {
     const D15 = 1.5, D30 = 2.5, FR = 3.5;
-    const s = scene(T.s1, '#F9D9C3');
+    const s = scene(t0, '#F9D9C3');
     const cam = el('div', 'abs', s.root, { inset: 0, transformOrigin: '50% 60%' });
     // zeminler (yaprak koptukça sert kesme)
     const bg1 = el('div', 'abs', cam, { inset: 0, background: '#F9D9C3', overflow: 'hidden' });
@@ -355,11 +355,11 @@ function buildAll() {
         w.style.textShadow = '0 10px 0 #2A1E1A';
       });
     };
-  }
+  };
 
   /* S2 · Tanıtım: bütçeni cebine koy */
-  {
-    const s = scene(T.s2, 'var(--acc)', [540, 1300], 0.22);
+  SCENES.brand = (t0, o = {}) => {
+    const s = scene(t0, 'var(--acc)', [540, 1300], 0.22);
     pattern(s.root, 'rgba(255,255,255,.14)');
     const icon = el('img', 'abs', s.root, { width: '220px', height: '220px', left: px(430), top: px(250), borderRadius: '56px', boxShadow: '0 30px 60px -10px rgba(0,0,0,.4)' });
     icon.src = 'assets/icon.png';
@@ -385,17 +385,18 @@ function buildAll() {
       m.put(540, 2030 + (1 - E.out(prog(lt, 0.3, 0.6))) * 700 - h.y, { sx: h.sx, sy: h.sy });
       conf.update(lt);
     };
-  }
+  };
 
   /* S3 · Harcamanı 5 saniyede yaz */
-  {
-    const s = scene(T.s3, 'var(--soft)', [540, 1300]);
+  SCENES.quickAdd = (t0, o = {}) => {
+    const s = scene(t0, 'var(--soft)', [540, 1300]);
     pattern(s.root, 'rgba(174,71,22,.10)');
     const lines = [
       new Line(s.root, { html: 'Harcamanı', y: 240, size: 124, delay: 0.1 }),
       new Line(s.root, { html: '*5 saniyede*', y: 370, size: 190, itColor: 'var(--acc)', delay: 0.35 }),
       new Line(s.root, { html: 'yaz.', y: 600, size: 150, delay: 0.7 }),
     ];
+    const P = o.poster ? 3 : 0;
     const ph = new Phone(s.root, { w: 580, x: 250, top: 800, imgs: ['assets/ui/add0.png', 'assets/ui/add2.png', 'assets/ui/add3.png', 'assets/ui/saved.png'] });
     const sw = el('div', 'pill', s.root, { left: px(700), top: px(590), width: '330px', justifyContent: 'center', color: 'var(--acc)' });
     const swDot = el('span', 'dot', sw, { background: 'var(--acc)' });
@@ -406,8 +407,8 @@ function buildAll() {
     m.root.style.left = px(-30); m.root.style.top = px(40);
     const conf = new Burst(s.root, { n: 26, t0: 3.45, ox: 540, oy: 1500, colors: ['#AE4716', '#FFE08A', '#2F8F9D', '#fff'], speed: 800, grav: 1800, life: 1.4, size: [20, 20] });
     s.update = (lt) => {
-      lines.forEach((l) => l.update(lt));
-      const rise = E.out(prog(lt, 0.3, 0.7));
+      lines.forEach((l) => l.update(lt + P));
+      const rise = E.out(prog(lt + P, 0.3, 0.7));
       const top = 1960 - rise * (1960 - 800);
       ph.pos(250, top, (1 - rise) * 4);
       // ekran durumu: 0 boş → 1 "95" → 2 kategori → 3 kaydedildi
@@ -424,10 +425,10 @@ function buildAll() {
       // kronometre
       const secs = lt < 1.0 ? 0 : lt < 3.45 ? ((lt - 1.0) / 2.45) * 4.8 : 4.8;
       swTxt.textContent = secs.toFixed(1).replace('.', ',') + ' sn';
-      sw.style.opacity = prog(lt, 0.7, 0.3);
+      sw.style.opacity = prog(lt + P, 0.7, 0.3);
       sw.style.transform = `scale(${lt > 3.45 ? 1 + 0.15 * Math.sin(prog(lt, 3.45, 0.4) * Math.PI) : 1})`;
       // maskot balonu
-      const ap = prog(lt, 0.9, 0.5);
+      const ap = prog(lt + P, 0.9, 0.5);
       const done = lt > 3.45;
       popIn(av, ap, { fromX: -200, fromY: 0 });
       const h = hop(lt, 0.7, done ? 22 : 0);
@@ -435,11 +436,11 @@ function buildAll() {
       m.put(165, 330 - h.y, { sy: h.sy, sx: h.sx });
       conf.update(lt);
     };
-  }
+  };
 
   /* S4 · Bugün ne kadar harcayabilirim? */
-  {
-    const s = scene(T.s4, '#DDEFE9', [540, 1500]);
+  SCENES.daily = (t0, o = {}) => {
+    const s = scene(t0, '#DDEFE9', [540, 1500]);
     pattern(s.root, 'rgba(31,111,120,.10)');
     const TEAL = '#1F6F78';
     const lines = [
@@ -447,6 +448,7 @@ function buildAll() {
       new Line(s.root, { html: 'ne kadar', y: 350, size: 150, delay: 0.3 }),
       new Line(s.root, { html: '*harcayabilirim?*', y: 500, size: 130, itColor: TEAL, delay: 0.55 }),
     ];
+    const P = o.poster ? 3 : 0;
     const ph = new Phone(s.root, { w: 500, x: 560, top: 800, scrollImg: 'assets/ui/full-ozet.png', nav: 'assets/ui/nav-ozet.png' });
     const rows = [
       ['Günlük hesaplarda', '8.840 TL', '#fff', 'var(--ink)'],
@@ -462,8 +464,8 @@ function buildAll() {
     const resN = res.querySelector('.n');
     const m = new Mascot(s.root, { w: 320, outfit: 'scholar' });
     s.update = (lt) => {
-      lines.forEach((l) => l.update(lt));
-      const rise = E.out(prog(lt, 0.4, 0.7));
+      lines.forEach((l) => l.update(lt + P));
+      const rise = E.out(prog(lt + P, 0.4, 0.7));
       ph.pos(560, 2000 - rise * (2000 - 800), 0);
       ph.scrollTo(lerp(0, 640, E.inOut(prog(lt, 0.9, 2.2))));
       rows.forEach((r, i) => popIn(r, prog(lt, 0.9 + i * 0.28, 0.5), { fromX: -300, fromY: 0, rot: -6 }));
@@ -475,11 +477,11 @@ function buildAll() {
       const mp = E.back(prog(lt, 1.9, 0.5));
       m.put(840, 1820 + (1 - mp) * 500 - h.y, { sy: h.sy, sx: h.sx });
     };
-  }
+  };
 
   /* S5 · Faturalar, taksitler, abonelikler */
-  {
-    const s = scene(T.s5, '#DEE2F6', [540, 1500]);
+  SCENES.bills = (t0, o = {}) => {
+    const s = scene(t0, '#DEE2F6', [540, 1500]);
     pattern(s.root, 'rgba(67,81,163,.10)');
     const IND = '#4351A3';
     const lines = [
@@ -514,11 +516,11 @@ function buildAll() {
       m.set(lt > 2.2 ? 'celebrate' : 'happy', lt > 2.2 ? (Math.floor(lt / 0.2) % 2 ? 'wave' : 'up') : null);
       m.put(860, 1900 + (1 - E.back(prog(lt, 1.4, 0.6))) * 500 - h.y, { sy: h.sy, sx: h.sx });
     };
-  }
+  };
 
   /* S6 · Nereye gitti, ne kadar birikti? */
-  {
-    const s = scene(T.s6, '#2A1E1A', [540, 1500]);
+  SCENES.savings = (t0, o = {}) => {
+    const s = scene(t0, '#2A1E1A', [540, 1500]);
     pattern(s.root, 'rgba(255,255,255,.07)');
     const lines = [
       new Line(s.root, { html: 'Nereye gitti,', y: 240, size: 120, color: '#FFFCF6', delay: 0.1 }),
@@ -545,11 +547,11 @@ function buildAll() {
       popIn(goal, prog(lt, 1.7, 0.5), { fromY: 150 });
       bar.style.width = E.out(prog(lt, 1.9, 0.9)) * 58 + '%';
     };
-  }
+  };
 
   /* S7 · Maskotunu seç */
-  {
-    const s = scene(T.s7, 'var(--paper)', [540, 900]);
+  SCENES.mascots = (t0, o = {}) => {
+    const s = scene(t0, 'var(--paper)', [540, 900]);
     pattern(s.root);
     const lines = [
       new Line(s.root, { html: 'Maskotunu', y: 240, size: 134, delay: 0.1 }),
@@ -584,21 +586,21 @@ function buildAll() {
         m.put(160, 305 - h.y, { sy: h.sy, sx: h.sx });
       });
     };
-  }
+  };
 
   /* S8 · Kapanış */
-  {
-    const s = scene(T.s8, 'var(--acc)', [540, 1100], 0.22);
+  SCENES.outro = (t0, o = {}) => {
+    const s = scene(t0, 'var(--acc)', [540, 1100], 0.22);
     pattern(s.root, 'rgba(255,255,255,.14)');
     const icon = el('img', 'abs', s.root, { width: '190px', height: '190px', left: px(445), top: px(250), borderRadius: '48px', boxShadow: '0 30px 60px -10px rgba(0,0,0,.4)' });
     icon.src = 'assets/icon.png';
     const lines = [
       new Line(s.root, { html: 'Cep Defteri', y: 480, size: 190, color: '#FFFCF6', delay: 0.35 }),
-      new Line(s.root, { html: 'Verin telefonunda kalır.', y: 720, size: 58, color: 'var(--soft)', delay: 0.9, weight: 600, stagger: 0.07 }),
-      new Line(s.root, { html: '*İnternet gerekmez.*', y: 810, size: 78, color: '#FFFCF6', itColor: '#FFFCF6', delay: 1.3, stagger: 0.1 }),
+      new Line(s.root, { html: o.sub || 'Verin telefonunda kalır.', y: 720, size: 58, color: 'var(--soft)', delay: 0.9, weight: 600, stagger: 0.07 }),
+      new Line(s.root, { html: `*${o.accent || 'İnternet gerekmez.'}*`, y: 810, size: 78, color: '#FFFCF6', itColor: '#FFFCF6', delay: 1.3, stagger: 0.1 }),
     ];
     const btn = el('div', 'abs', s.root, { left: px(540 - 270), top: '960px', width: '540px', height: '140px', borderRadius: '70px', background: '#FFFCF6', color: 'var(--acc)', fontSize: '66px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 24px 60px -12px rgba(0,0,0,.45)', letterSpacing: '-.02em' });
-    btn.textContent = 'Şimdi dene';
+    btn.textContent = o.cta || 'Şimdi dene';
     const m = new Mascot(s.root, { w: 896 });
     const conf = new Burst(s.root, { n: 44, t0: 0.15, ox: 540, oy: 1100, colors: ['#F8DCC8', '#FFE08A', '#FFFCF6', '#2F8F9D', '#F0874F'], speed: 1300, grav: 1900, life: 2.0, size: [28, 28] });
     s.update = (lt) => {
@@ -615,15 +617,14 @@ function buildAll() {
       m.put(540, 1960 + (1 - E.out(prog(lt, 0.2, 0.6))) * 800 - h.y, { sx: h.sx, sy: h.sy });
       conf.update(lt);
     };
-  }
+  };
 }
 
 /* ───────── Zaman çizelgesi ───────── */
-const FLASHES = [4.5, 25.5];
 let flash;
 window.renderAt = (t) => {
   if (!flash) flash = el('div', 'abs', stage, { inset: 0, background: '#fff', zIndex: 50, pointerEvents: 'none' });
-  flash.style.opacity = Math.max(0, ...FLASHES.map((f) => (t >= f ? Math.max(0, 1 - (t - f) / 0.18) : 0))) * 0.9;
+  flash.style.opacity = Math.max(0, ...scenes.filter((s) => s.flash).map((s) => (t >= s.t0 ? Math.max(0, 1 - (t - s.t0) / 0.18) : 0))) * 0.9;
   scenes.forEach((s, i) => {
     const next = scenes[i + 1];
     const endT = next ? next.t0 + 0.7 : 1e9;
@@ -632,13 +633,22 @@ window.renderAt = (t) => {
     if (!vis) return;
     const wp = i === 0 ? 1 : E.inOut(prog(t, s.t0, s.wdur));
     s.root.style.clipPath = wp >= 1 ? 'none' : `circle(${wp * 2600}px at ${s.wipe[0]}px ${s.wipe[1]}px)`;
-    s.update(t - s.t0, t);
+    s.update(t - s.t0 + s.skip, t);
   });
 };
 
 window.ready = (async () => {
   SP = await (await fetch('assets/sprites.json')).json();
-  buildAll();
+  const REELS = await (await fetch('reels.json')).json();
+  const name = new URLSearchParams(location.search).get('r') || 'tanitim';
+  const reel = REELS[name];
+  if (!reel) throw new Error('reels.json içinde yok: ' + name);
+  defineScenes();
+  for (const [type, t0, opts = {}] of reel.scenes) {
+    OPTS = opts;
+    SCENES[type](t0, opts);
+  }
+  window.REEL_END = reel.end;
   await document.fonts.load('800 100px Bricolage');
   await document.fonts.load('100px Pixel');
   await document.fonts.ready;

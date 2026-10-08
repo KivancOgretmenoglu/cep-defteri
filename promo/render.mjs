@@ -1,6 +1,6 @@
-/* Kullanım:
- *   node promo/render.mjs still 1.5 4.2 ...   → promo/out/still-<t>.png
- *   node promo/render.mjs video [audio.wav]   → promo/out/cep-defteri-reels.mp4
+/* Kullanım (reels adları reels.json'da):
+ *   node promo/render.mjs still <reels> 1.5 4.2 ...  → promo/out/still-<reels>-<t>.png
+ *   node promo/render.mjs video <reels>              → promo/out/<reels>.mp4 (ses: out/<reels>.wav varsa)
  */
 import { chromium } from 'playwright-core';
 import { spawn } from 'node:child_process';
@@ -12,8 +12,8 @@ import { fileURLToPath } from 'node:url';
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(DIR, 'out');
 fs.mkdirSync(OUT, { recursive: true });
-const FPS = 30, DURATION = 29.5;
-const [mode, ...args] = process.argv.slice(2);
+const FPS = 30;
+const [mode, reel = 'tanitim', ...args] = process.argv.slice(2);
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.png': 'image/png', '.woff2': 'font/woff2' };
 const server = http.createServer((req, res) => {
@@ -28,17 +28,19 @@ const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromi
 const page = await (await browser.newContext({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 })).newPage();
 page.on('pageerror', (e) => console.log('PAGE ERROR', e.message));
 page.on('console', (m) => m.type() === 'error' && console.log('console.error', m.text()));
-await page.goto(`http://127.0.0.1:${port}/`);
+await page.goto(`http://127.0.0.1:${port}/?r=${encodeURIComponent(reel)}`);
 await page.evaluate(() => window.ready);
+const DURATION = await page.evaluate(() => window.REEL_END);
 
 if (mode === 'still') {
   for (const t of args.map(Number)) {
     await page.evaluate((x) => window.renderAt(x), t);
-    await page.screenshot({ path: path.join(OUT, `still-${t.toFixed(2)}.png`) });
+    await page.screenshot({ path: path.join(OUT, `still-${reel}-${t.toFixed(2)}.png`) });
   }
 } else {
-  const audio = args[0];
-  const outFile = path.join(OUT, 'cep-defteri-reels.mp4');
+  const wav = path.join(OUT, `${reel}.wav`);
+  const audio = fs.existsSync(wav) ? wav : null;
+  const outFile = path.join(OUT, `${reel}.mp4`);
   const ff = spawn('ffmpeg', [
     '-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
     ...(audio ? ['-i', audio] : []),

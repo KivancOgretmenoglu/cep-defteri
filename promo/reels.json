@@ -1,0 +1,40 @@
+{
+  "tanitim": {
+    "title": "Uzun tanıtım (sabitlenmiş gönderi)",
+    "end": 29.5,
+    "scenes": [
+      ["hook", 0],
+      ["brand", 4.5, { "flash": true }],
+      ["quickAdd", 7.5],
+      ["daily", 12.5],
+      ["bills", 15.5],
+      ["savings", 19.5],
+      ["mascots", 22.5],
+      ["outro", 25.5, { "flash": true }]
+    ]
+  },
+  "ay-sonu": {
+    "title": "Ayın 1'i / 15'i / 30'u",
+    "end": 9.5,
+    "scenes": [
+      ["hook", 0],
+      ["outro", 4.5, { "flash": true, "sub": "Ay sonu sürprizlerine son.", "accent": "Bütçeni cebine koy.", "cta": "Takipte kal" }]
+    ]
+  },
+  "5-saniye": {
+    "title": "Harcamanı 5 saniyede yaz",
+    "end": 10.0,
+    "scenes": [
+      ["quickAdd", 0, { "poster": true, "skip": 0.5 }],
+      ["outro", 5.5, { "flash": true, "sub": "Kayıt girmek bu kadar kolay.", "accent": "Gerisini Fıstık halleder.", "cta": "Takipte kal" }]
+    ]
+  },
+  "bugun-ne-kadar": {
+    "title": "Bugün ne kadar harcayabilirim?",
+    "end": 10.0,
+    "scenes": [
+      ["daily", 0, { "poster": true, "skip": 0.5 }],
+      ["outro", 5.5, { "flash": true, "sub": "Yaklaşan ödemeler düşülür,", "accent": "kalanı senin.", "cta": "Takipte kal" }]
+    ]
+  }
+}

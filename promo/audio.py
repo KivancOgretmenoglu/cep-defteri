@@ -1,17 +1,23 @@
-"""Cep Defteri Reels: müzik + ses tasarımı → promo/out/music.wav (29,5 sn, 120 BPM).
+"""Cep Defteri Reels: müzik + ses tasarımı.
 
-Her efekt sentezlenir (örnek dosya yok). Üç kanal: müzik, efekt, ortam; efektler hafif yankıya
-gönderilir, müzik büyük efektlerin altında kısılır (sidechain), en sonda yumuşak sınırlayıcı.
-Zamanlar reel.js'teki sahne zamanlarıyla eşleşir (T.s2 = 4.5 … T.s8 = 25.5).
+Kullanım: python3 promo/audio.py <reels>   → promo/out/<reels>.wav
+Sahneler ve zamanları reels.json'dan okunur (görüntüyle aynı kaynak). Her efekt sentezlenir
+(örnek dosya yok). Üç kanal: müzik, efekt, ortam; efektler hafif yankıya gönderilir, müzik
+büyük efektlerin altında kısılır (sidechain), en sonda yumuşak sınırlayıcı.
 """
+import json
 import os
+import sys
 import wave
 
 import numpy as np
 from scipy.signal import butter, sosfilt, fftconvolve
 
+HERE = os.path.dirname(os.path.abspath(__file__))
+REEL_NAME = sys.argv[1] if len(sys.argv) > 1 else 'tanitim'
+REEL = json.load(open(os.path.join(HERE, 'reels.json'), encoding='utf-8'))[REEL_NAME]
 SR = 44100
-DUR = 29.5
+DUR = REEL['end']
 N = int(SR * DUR)
 BEAT = 0.5
 rng = np.random.default_rng(11)
@@ -512,7 +518,13 @@ def fanfare(t0):
             put(SFX, pluck(m + interval, d, 'square', 0.35, cut=4000, v=0.09, vib=0.01 if i == 3 else 0), st)
 
 
-# ═════════ 1) GİRİŞ (0 – 4,5 sn) ═════════
+# ═════════ SAHNE SESLERİ ═════════
+# Her fonksiyon sahnenin başladığı an (t0) ve atlanan süreyle (skip) çağrılır;
+# içerdeki zamanlar reel.js'teki sahne içi zamanlarla (lt) aynıdır.
+def at(t0, skip):
+    return lambda rel: t0 + rel - skip
+
+
 def groove(length, transpose=0):
     """Ayın 1'i: neşeli funk zemini"""
     buf = np.zeros((int(length * SR) + SR, 2))
@@ -526,67 +538,154 @@ def groove(length, transpose=0):
             put(buf, clap(0.8), tb)
         put(buf, hat(0.25), tb + 0.25)
         root = roots[min(b // 2, 2)] + transpose
-        for k, (off, oc) in enumerate([(0, 0), (0.125, 12), (0.25, 0), (0.375, 12)]):
+        for off, oc in [(0, 0), (0.125, 12), (0.25, 0), (0.375, 12)]:
             put(buf, bass(root + oc, 0.11, 0.42), tb + off)
-        chord = [root + 24 + x for x in (4, 7, 10, 14)]
-        for m in chord:  # vuruş arası akor
+        for m in [root + 24 + x for x in (4, 7, 10, 14)]:  # vuruş arası akor
             put(buf, pluck(m, 0.12, 'square', 0.3, cut=5000, v=0.05), tb + 0.25, pan=0.3)
     return buf[: int(length * SR)]
 
 
-g1 = groove(1.5)
-put(MUS, g1, 0.0, 1.0)
-# Ayın 15'i: aynı zemin, boğuk ve yavaşlayan ("parti bitiyor")
-g2 = groove(1.0, transpose=-1)
-g2m = np.stack([lp(g2[:, c], 650, 3) for c in range(2)], 1)
-wob = 1 + 0.012 * np.sin(2 * np.pi * 2.5 * np.arange(len(g2m)) / SR)
-spd = np.linspace(1.0, 0.94, len(g2m)) * wob
-g2v = np.stack([varispeed(g2m[:, c], spd) for c in range(2)], 1)
-put(MUS, g2v * 1.3, 1.5)
-put(AMB, hp(noise(1.0), 3000) * 0.025 * (rng.random(int(SR)) > 0.995) * 10, 1.5)  # plak cızırtısı
+def cue_hook(t0, skip=0, o=None):
+    T = at(t0, skip)
+    g1 = groove(1.5)
+    put(MUS, g1, T(0.0))
+    # Ayın 15'i: aynı zemin, boğuk ve yavaşlayan ("parti bitiyor")
+    g2 = groove(1.0, transpose=-1)
+    g2m = np.stack([lp(g2[:, c], 650, 3) for c in range(2)], 1)
+    wob = 1 + 0.012 * np.sin(2 * np.pi * 2.5 * np.arange(len(g2m)) / SR)
+    spd = np.linspace(1.0, 0.94, len(g2m)) * wob
+    put(MUS, np.stack([varispeed(g2m[:, c], spd) for c in range(2)], 1) * 1.3, T(1.5))
+    put(AMB, hp(noise(1.0), 3000) * 0.025 * (rng.random(int(SR)) > 0.995) * 10, T(1.5))  # plak cızırtısı
+    put(SFX, cash_register(), T(0.0), 0.95, pan=-0.1)
+    put(SFX, popper(), T(0.05), 0.5, pan=0.4)
+    for k in range(5):  # para hışırtısı
+        put(SFX, bp(noise(0.12), 2500, 8000) * expd(0.12, 25) * 0.25, T(0.3 + k * 0.23), pan=rng.uniform(-0.8, 0.8))
+    put(SFX, meow(1.15, 0.38), T(0.85), 0.6, pan=0.1)
+    put(SFX, paper_tear(), T(1.42), 1.0, pan=-0.2)
+    put(SFX, stereo_move(whoosh(0.35, 400, 4000), 0.4, -0.8), T(1.45), 0.6)
+    put(SFX, gulp(), T(1.62), 0.9)
+    for i, tc in enumerate([1.7, 1.9, 2.1, 2.3]):  # paralar uçup gidiyor
+        put(SFX, pling(1568 / (1.12 ** i), 0.32), T(tc), pan=-0.5 if i < 2 else 0.5)
+        put(SFX, stereo_move(whoosh(0.25, 800, 5000), 0, -0.9 if i < 2 else 0.9), T(tc + 0.05), 0.35)
+    put(SFX, paper_tear(0.3), T(2.42), 1.0, pan=-0.2)
+    put(SFX, stereo_move(whoosh(0.35, 400, 4000), 0.4, -0.8), T(2.45), 0.6)
+    # Ayın 30'u: gök gürültüsü, yağmur, trombon; 3,45'te bant durması
+    bed = np.zeros((int(1.2 * SR), 2))
+    put(bed, thunder(), 0.0, 0.9)
+    put(bed, np.stack([rain(1.2), rain(1.2)], 1), 0.0, 1.0)
+    put(bed, sad_trombone(), 0.08, 0.95)
+    put(bed, creak(), 0.27, 0.8, pan=0.3)
+    put(bed, stereo_move(flutter(0.85), 0.3, -0.3), 0.33, 0.9)
+    cut = int(0.95 * SR)
+    tail = np.stack([varispeed(bed[cut:, c], np.linspace(1, 0.05, int(0.16 * SR))) for c in range(2)], 1)
+    tail *= np.linspace(1, 0, len(tail))[:, None]
+    put(SFX, np.concatenate([bed[:cut], tail]), T(2.5))
+    # plak cızırtısı: ilk zemini ileri-geri sür
+    src = g1[:, 0] + g1[:, 1]
+    d_sc = 0.32
+    ts = tt(d_sc)
+    pos = int(0.4 * SR) + (np.sin(2 * np.pi * ts / d_sc * 2 - np.pi / 2) + 1) * 0.045 * SR
+    scr = np.interp(pos, np.arange(len(src)), src)
+    scr = hp(scr, 300) * 1.4 + sweep_bp(noise(d_sc), 1500 + 1200 * np.abs(np.gradient(pos)), q=2) * 0.6
+    put(SFX, scr * np.sin(np.pi * ts / d_sc) ** 0.3, T(3.46), 0.9)
+    # "Tanıdık geldi mi?" çarpmaları + gerilim yükselişi
+    for i, tw in enumerate([3.58, 3.80, 4.02]):
+        put(SFX, slam_hit(1 + i * 0.25), T(tw), 0.85)
+    put(SFX, riser(0.48), T(4.02), 0.8)
 
-# efektler
-put(SFX, cash_register(), 0.0, 0.95, pan=-0.1)
-put(SFX, popper(), 0.05, 0.5, pan=0.4)
-for k in range(5):  # para hışırtısı
-    put(SFX, bp(noise(0.12), 2500, 8000) * expd(0.12, 25) * 0.25, 0.3 + k * 0.23, pan=rng.uniform(-0.8, 0.8))
-put(SFX, meow(1.15, 0.38), 0.85, 0.6, pan=0.1)  # keyifli miyav
-put(SFX, paper_tear(), 1.42, 1.0, pan=-0.2)
-put(SFX, stereo_move(whoosh(0.35, 400, 4000), 0.4, -0.8), 1.45, 0.6)
-put(SFX, gulp(), 1.62, 0.9)
-for i, tc in enumerate([1.7, 1.9, 2.1, 2.3]):  # paralar uçup gidiyor
-    put(SFX, pling(1568 / (1.12 ** i), 0.32), tc, pan=-0.5 if i < 2 else 0.5)
-    put(SFX, stereo_move(whoosh(0.25, 800, 5000), 0, -0.9 if i < 2 else 0.9), tc + 0.05, 0.35)
-put(SFX, paper_tear(0.3), 2.42, 1.0, pan=-0.2)
-put(SFX, stereo_move(whoosh(0.35, 400, 4000), 0.4, -0.8), 2.45, 0.6)
-# Ayın 30'u: bant durması gibi tüm sesler kesilir, gök gürültüsü + yağmur
-bed = np.zeros((int(1.2 * SR), 2))
-put(bed, thunder(), 0.0, 0.9)
-put(bed, np.stack([rain(1.2), rain(1.2)], 1), 0.0, 1.0)
-put(bed, sad_trombone(), 0.08, 0.95)
-put(bed, creak(), 0.27, 0.8, pan=0.3)
-put(bed, stereo_move(flutter(0.85), 0.3, -0.3), 0.33, 0.9)
-# 3,45'te bant durması (perde düşerek)
-cut = int(0.95 * SR)
-stop_len = int(0.16 * SR)
-tail = np.stack([varispeed(bed[cut:, c], np.linspace(1, 0.05, stop_len)) for c in range(2)], 1)
-tail *= np.linspace(1, 0, len(tail))[:, None]
-bed = np.concatenate([bed[:cut], tail])
-put(SFX, bed, 2.5)
-# plak cızırtısı: ilk grooveu ileri-geri sür
-src = g1[:, 0] + g1[:, 1]
-d_sc = 0.32
-ts = tt(d_sc)
-pos = int(0.4 * SR) + (np.sin(2 * np.pi * ts / d_sc * 2 - np.pi / 2) + 1) * 0.045 * SR
-scr = np.interp(pos, np.arange(len(src)), src)
-scr = hp(scr, 300) * 1.4 + sweep_bp(noise(d_sc), 1500 + 1200 * np.abs(np.gradient(pos)), q=2) * 0.6
-put(SFX, scr * np.sin(np.pi * ts / d_sc) ** 0.3, 3.46, 0.9)
-# "Tanıdık geldi mi?" çarpmaları + gerilim yükselişi
-for i, tw in enumerate([3.58, 3.80, 4.02]):
-    put(SFX, slam_hit(1 + i * 0.25), tw, 0.85)
-put(SFX, riser(0.48), 4.02, 0.8)
 
-# ═════════ 2) ANA MÜZİK (4,5 – 29,5 sn) ═════════
+def cue_brand(t0, skip=0, o=None):
+    T = at(t0, skip)
+    put(SFX, popper(), T(0.12), 0.6, pan=-0.3)
+    put(SFX, bloop(400, 1500, 0.1, 0.5), T(0.16))
+    put(SFX, popper(), T(0.36), 0.55, pan=0.35)
+    for tw, f1 in [(0.55, 3000), (0.85, 4500), (1.22, 3000)]:
+        put(SFX, stereo_move(whoosh(0.3, 300, f1), -0.3, 0.3), T(tw - 0.12), 0.45)
+    put(SFX, meow(1.0, 0.5), T(0.95), 0.75, pan=0.1)
+    put(SFX, boing(0.4, 0.25), T(1.75), pan=0.1)
+
+
+def cue_quickAdd(t0, skip=0, o=None):
+    T = at(t0, skip)
+    if not (o or {}).get('poster'):
+        put(SFX, stereo_move(whoosh(0.45, 150, 1800), 0, 0), T(0.3), 0.45)
+        put(SFX, bloop(300, 900, 0.1, 0.35), T(0.9), pan=-0.6)  # maskot balonu
+    put(SFX, ui_tap(), T(1.0))
+    put(SFX, key_click(0.7), T(1.6), pan=-0.1)
+    put(SFX, key_click(0.7), T(1.7), pan=0.1)
+    for k, tk in enumerate(np.arange(1.0, 3.45, 0.25)):  # kronometre
+        put(SFX, tick(k % 2 == 0, 0.28), T(tk), pan=0.55)
+    put(SFX, ui_tap(), T(2.5), pan=0.25)
+    put(SFX, bloop(700, 1400, 0.06, 0.25), T(2.53), pan=0.25)
+    put(SFX, ui_tap(0.7), T(3.3))
+    put(SFX, ding_ding(), T(3.45), 0.75)
+    put(SFX, popper(), T(3.47), 0.6)
+    put(SFX, mrrp(), T(3.65), 0.8, pan=-0.5)
+
+
+def cue_daily(t0, skip=0, o=None):
+    T = at(t0, skip)
+    if not (o or {}).get('poster'):
+        put(SFX, stereo_move(whoosh(0.45, 150, 1800), 0.4, 0.4), T(0.4), 0.45)
+    for i in range(4):
+        put(SFX, stereo_move(whoosh(0.2, 600, 4000), -0.9, -0.3), T(0.85 + 0.28 * i), 0.35)
+        if i:
+            put(SFX, bloop(900 / (1.1 ** i), 500 / (1.1 ** i), 0.09, 0.35), T(0.92 + 0.28 * i), pan=-0.5)
+    put(SFX, bloop(1100, 1500, 0.07, 0.35), T(0.92), pan=-0.5)  # ilk satır (artı)
+    put(SFX, slam_hit(0.8), T(2.15), 0.55)
+    put(SFX, slot_roll(0.85), T(2.2), 0.7)
+    put(SFX, cash_register(), T(3.05), 0.7)
+    put(SFX, meow(1.1, 0.35), T(2.45), 0.45, pan=0.6)
+
+
+def cue_bills(t0, skip=0, o=None):
+    T = at(t0, skip)
+    for tc, pn in [(0.9, -0.7), (1.35, 0.7), (1.8, -0.7)]:
+        put(SFX, stereo_move(whoosh(0.3, 500, 3500), pn * 1.2, pn * 0.4), T(tc - 0.05), 0.5)
+    for ts_ in [1.45, 1.9, 2.35]:
+        put(SFX, stamp(), T(ts_), 0.95)
+    put(SFX, boing(0.45, 0.3), T(1.4), pan=0.5)
+    put(SFX, fm_bell(1318.5, 1.0, 0.25), T(2.7), pan=0.2)
+
+
+def cue_savings(t0, skip=0, o=None):
+    T = at(t0, skip)
+    put(SFX, stereo_move(whoosh(0.5, 120, 1500), -0.5, -0.5), T(0.5), 0.4)
+    put(SFX, stereo_move(whoosh(0.5, 120, 1500), 0.5, 0.5), T(0.8), 0.4)
+    put(SFX, bloop(500, 1200, 0.08, 0.4), T(1.1))
+    for k, tc in enumerate(np.arange(1.2, 2.2, 0.083)):  # biriken paralar
+        put(SFX, pling(1046.5 * 2 ** (k / 12), 0.13, 0.25), T(tc), pan=0.3 * np.sin(k))
+    put(SFX, bloop(400, 1000, 0.08, 0.35), T(1.7))
+    t_b = tt(0.9)
+    sw = np.sin(2 * np.pi * phase(glide(300, 1200, 0.9, 0.7))) * (0.6 + 0.4 * np.sin(2 * np.pi * 16 * t_b)) * np.sin(np.pi * t_b / 0.9) ** 0.5 * 0.12
+    put(SFX, sw, T(1.9))
+    put(SFX, fm_bell(2093, 1.0, 0.25), T(2.8))
+
+
+def cue_mascots(t0, skip=0, o=None):
+    T = at(t0, skip)
+    voices = [(meow(1.0, 0.45), -0.6), (hoot(), 0.0), (chitter(), 0.6), (sniff(), -0.3), (woof(), 0.3)]
+    for i, (vc, pn) in enumerate(voices):
+        tc = 0.55 + 0.28 * i
+        put(SFX, bloop(350 + 60 * i, 1100 + 120 * i, 0.08, 0.35), T(tc), pan=pn)
+        put(SFX, vc, T(tc + 0.12), 0.75, pan=pn)
+
+
+def cue_outro(t0, skip=0, o=None):
+    T = at(t0, skip)
+    put(SFX, popper(), T(0.12), 0.7, pan=-0.5)
+    put(SFX, popper(), T(0.2), 0.7, pan=0.5)
+    put(SFX, bloop(400, 1500, 0.1, 0.5), T(0.16))
+    fanfare(T(0.35))
+    put(SFX, stereo_move(whoosh(0.3, 300, 3000), -0.3, 0.3), T(0.8), 0.4)
+    put(SFX, bloop(350, 1300, 0.12, 0.55), T(1.7))
+    put(SFX, fm_bell(2637, 1.2, 0.2), T(1.75), pan=0.3)
+    put(SFX, meow(1.2, 0.5), T(2.25), 0.8)
+
+
+CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
+
+# ═════════ ANA MÜZİK ═════════
 CHORDS = [(36, [60, 64, 67, 71]), (43, [59, 62, 67, 74]), (45, [60, 64, 69, 72]), (41, [60, 65, 69, 72])]
 MEL_A = [
     [(0, 72, .5), (.5, 76, .5), (1, 79, .75), (2, 76, .5), (2.5, 79, .5), (3, 84, .5), (3.5, 83, .5)],
@@ -600,150 +699,104 @@ MEL_B = [  # sakin bölüm: seyrek
     [(0, 76, 1), (1.5, 72, .5), (2, 76, 1.5)],
     [(0, 77, 1), (1.5, 81, .5), (2, 79, 1.5)],
 ]
-duck = np.ones(N)  # kick sidechain pompası (bas + pad)
+duck = np.ones(N)  # kick sidechain pompası
 
 
 def music_bar(bi, t0, mel=None, drums=True, fill=False, length=4):
     root, ch = CHORDS[bi % 4]
     beats = length
-    # pad + bas
     put(MUS, pad(ch, beats * BEAT), t0, 1.0)
     for k in range(beats * 2):
         oc = 12 if k % 4 == 3 else 0
         put(MUS, bass(root + oc, BEAT * 0.45), t0 + k * BEAT / 2, 0.9)
-    # arpej (stereo)
-    for k in range(beats * 4):
+    for k in range(beats * 4):  # arpej (stereo)
         m = ch[[0, 1, 2, 3, 2, 1, 2, 3][k % 8]] + 12
         put(MUS, pluck(m, 0.1, 'square', 0.25, cut=4500, v=0.035), t0 + k * BEAT / 4, pan=-0.45 if k % 2 else 0.45)
-    # melodi + yankı (3/16 gecikme, karşı kanal)
-    if mel:
+    if mel:  # melodi + yankı (3/16 gecikme, karşı kanal)
         for b, m, d in mel[bi % 4]:
             if b >= beats:
                 continue
             n = pluck(m, d * BEAT * 0.95, 'square', 0.5, cut=5000, v=0.085, vib=0.006)
-            put(MUS, n, t0 + b * BEAT, pan=0.0)
+            put(MUS, n, t0 + b * BEAT)
             put(MUS, lp(n, 2500), t0 + b * BEAT + 0.375, 0.35, pan=0.6)
     if drums:
         for b in range(beats):
-            put(MUS, kick(0.95), t0 + b * BEAT)
-            i = int((t0 + b * BEAT) * SR)
-            dl = int(0.22 * SR)
-            duck[i : i + dl] = np.minimum(duck[i : i + dl], 1 - 0.55 * np.exp(-np.arange(min(dl, N - i)) / SR * 14))
+            tb = t0 + b * BEAT
+            put(MUS, kick(0.95), tb)
+            i = int(tb * SR)
+            if 0 <= i < N:
+                dl = min(int(0.22 * SR), N - i)
+                duck[i : i + dl] = np.minimum(duck[i : i + dl], 1 - 0.55 * np.exp(-np.arange(dl) / SR * 14))
             if b % 2 == 1:
-                put(MUS, snare(0.55), t0 + b * BEAT)
-                put(MUS, clap(0.45), t0 + b * BEAT)
-            put(MUS, hat(0.22), t0 + b * BEAT + 0.25, pan=0.3)
-            put(MUS, hat(0.12), t0 + b * BEAT + 0.125, pan=-0.3)
-            put(MUS, hat(0.12), t0 + b * BEAT + 0.375, pan=-0.3)
+                put(MUS, snare(0.55), tb)
+                put(MUS, clap(0.45), tb)
+            put(MUS, hat(0.22), tb + 0.25, pan=0.3)
+            put(MUS, hat(0.12), tb + 0.125, pan=-0.3)
+            put(MUS, hat(0.12), tb + 0.375, pan=-0.3)
         if fill:  # son vuruşta trampet geçişi
             for k in range(6):
                 put(MUS, snare(0.25 + 0.08 * k), t0 + (beats - 1) * BEAT + k * BEAT / 6, pan=(k - 3) * 0.15)
 
 
-t = 4.5
-plan = [  # (melodi, geçiş)
-    (MEL_A, False), (MEL_A, False),  # 4,5–8,5   tanıtım
-    (MEL_B, False), (MEL_B, False),  # 8,5–12,5  5 saniyede yaz
-    (MEL_A, False), (MEL_A, False),  # 12,5–16,5
-    (MEL_B, False), (MEL_B, False),  # 16,5–20,5
-    (MEL_A, False), (MEL_A, False),  # 20,5–24,5
-]
-for bi, (mel, fill) in enumerate(plan):
-    music_bar(bi, t, mel, fill=fill)
-    t += 2.0
-# 24,5–25,5: yarım ölçü, trampet geçişiyle kapanışa
-music_bar(10, 24.5, MEL_A, fill=True, length=2)
-# 25,5–28,5: final (bir buçuk ölçü)
-music_bar(0, 25.5, MEL_A, length=4)
-music_bar(1, 27.5, MEL_A, length=2)
-# son akor 28,5
-for m in [48, 60, 64, 67, 72, 76]:
-    put(MUS, pluck(m, 1.0, 'square', 0.4, cut=3500, v=0.06), 28.5)
-put(MUS, kick(1.0), 28.5)
-put(MUS, crash(0.6), 28.5)
-for c in range(2):
-    MUS[:, c] *= np.where(np.arange(N) / SR >= 4.5, duck, 1.0)
+def music_main(start, end, fill_before=()):
+    """start'tan bitişe ölçü ölçü; son vuruş (end − 1 sn) akor + zil ile kapanır."""
+    hit = end - 1.0
+    t, bi = start, 0
+    while t < hit - 1e-6:
+        beats = int(round(min(4, (hit - t) / BEAT)))
+        if beats <= 0:
+            break
+        fill = any(abs((t + beats * BEAT) - f) < 1e-3 for f in fill_before)
+        music_bar(bi, t, MEL_A if (bi // 2) % 2 == 0 else MEL_B, fill=fill, length=beats)
+        t += beats * BEAT
+        bi += 1
+    for m in [48, 60, 64, 67, 72, 76]:
+        put(MUS, pluck(m, 1.0, 'square', 0.4, cut=3500, v=0.06), hit)
+    put(MUS, kick(1.0), hit)
+    put(MUS, crash(0.5), hit, pan=0.2)
 
-# ═════════ 3) SAHNE EFEKTLERİ ═════════
-put(SFX, boom(1.0), 4.5, 0.95)
-put(SFX, popper(), 4.62, 0.6, pan=-0.3)
-put(SFX, bloop(400, 1500, 0.1, 0.5), 4.66)
-put(SFX, popper(), 4.86, 0.55, pan=0.35)
-for tw, f1 in [(5.05, 3000), (5.35, 4500), (5.72, 3000)]:
-    put(SFX, stereo_move(whoosh(0.3, 300, f1), -0.3, 0.3), tw - 0.12, 0.45)
-put(SFX, meow(1.0, 0.5), 5.45, 0.75, pan=0.1)
-put(SFX, boing(0.4, 0.25), 6.25, pan=0.1)
 
-# S3 · 5 saniyede yaz (7,5)
-put(SFX, stereo_move(whoosh(0.55, 200, 2500), -0.6, 0.6), 7.45, 0.6)
-put(SFX, stereo_move(whoosh(0.45, 150, 1800), 0, 0), 7.8, 0.45)
-put(SFX, bloop(300, 900, 0.1, 0.35), 8.4, pan=-0.6)  # maskot balonu
-put(SFX, ui_tap(), 8.5)
-put(SFX, key_click(0.7), 9.1, pan=-0.1)
-put(SFX, key_click(0.7), 9.2, pan=0.1)
-for k, tk in enumerate(np.arange(8.5, 10.95, 0.25)):  # kronometre
-    put(SFX, tick(k % 2 == 0, 0.28), tk, pan=0.55)
-put(SFX, ui_tap(), 10.0, pan=0.25)
-put(SFX, bloop(700, 1400, 0.06, 0.25), 10.03, pan=0.25)
-put(SFX, ui_tap(0.7), 10.8)
-put(SFX, ding_ding(), 10.95, 0.75)
-put(SFX, popper(), 10.97, 0.6)
-put(SFX, mrrp(), 11.15, 0.8, pan=-0.5)
-
-# S4 · Bugün ne kadar? (12,5)
-put(SFX, stereo_move(whoosh(0.55, 200, 2500), 0.6, -0.6), 12.45, 0.6)
-put(SFX, stereo_move(whoosh(0.45, 150, 1800), 0.4, 0.4), 12.9, 0.45)
-for i in range(4):
-    put(SFX, stereo_move(whoosh(0.2, 600, 4000), -0.9, -0.3), 13.35 + 0.28 * i, 0.35)
-    put(SFX, bloop(900 / (1.1 ** i), 500 / (1.1 ** i), 0.09, 0.35 if i else 0.0), 13.42 + 0.28 * i, pan=-0.5)
-put(SFX, bloop(1100, 1500, 0.07, 0.35), 13.42, pan=-0.5)  # ilk satır (artı)
-put(SFX, slam_hit(0.8), 14.65, 0.55)
-put(SFX, slot_roll(0.85), 14.7, 0.7)
-put(SFX, cash_register(), 15.55, 0.7)
-put(SFX, meow(1.1, 0.35), 14.95, 0.45, pan=0.6)
-
-# S5 · Faturalar (15,5)
-put(SFX, stereo_move(whoosh(0.55, 200, 2500), -0.6, 0.6), 15.45, 0.6)
-for tc, pn in [(16.4, -0.7), (16.85, 0.7), (17.3, -0.7)]:
-    put(SFX, stereo_move(whoosh(0.3, 500, 3500), pn * 1.2, pn * 0.4), tc - 0.05, 0.5)
-for ts_ in [16.95, 17.4, 17.85]:
-    put(SFX, stamp(), ts_, 0.95)
-put(SFX, boing(0.45, 0.3), 16.9, pan=0.5)
-put(SFX, fm_bell(1318.5, 1.0, 0.25), 18.2, pan=0.2)
-
-# S6 · Birikim (19,5)
-put(SFX, stereo_move(whoosh(0.55, 200, 2500), 0.6, -0.6), 19.45, 0.6)
-put(SFX, stereo_move(whoosh(0.5, 120, 1500), -0.5, -0.5), 20.0, 0.4)
-put(SFX, stereo_move(whoosh(0.5, 120, 1500), 0.5, 0.5), 20.3, 0.4)
-put(SFX, bloop(500, 1200, 0.08, 0.4), 20.6)
-for k, tc in enumerate(np.arange(20.7, 21.7, 0.083)):  # biriken paralar
-    put(SFX, pling(1046.5 * 2 ** (k / 12 * 1.0), 0.13, 0.25), tc, pan=0.3 * np.sin(k))
-put(SFX, bloop(400, 1000, 0.08, 0.35), 21.2)
-t_b = tt(0.9)
-sw = np.sin(2 * np.pi * phase(glide(300, 1200, 0.9, 0.7))) * (0.6 + 0.4 * np.sin(2 * np.pi * 16 * t_b)) * np.sin(np.pi * t_b / 0.9) ** 0.5 * 0.12
-put(SFX, sw, 21.4)
-put(SFX, fm_bell(2093, 1.0, 0.25), 22.3)
-
-# S7 · Maskotlar (22,5)
-put(SFX, stereo_move(whoosh(0.55, 200, 2500), -0.6, 0.6), 22.45, 0.6)
-voices = [(meow(1.0, 0.45), -0.6), (hoot(), 0.0), (chitter(), 0.6), (sniff(), -0.3), (woof(), 0.3)]
-for i, (vc, pn) in enumerate(voices):
-    tc = 23.05 + 0.28 * i
-    put(SFX, bloop(350 + 60 * i, 1100 + 120 * i, 0.08, 0.35), tc, pan=pn)
-    put(SFX, vc, tc + 0.12, 0.75, pan=pn)
-
-# S8 · Kapanış (25,5)
-put(SFX, riser(0.5), 25.0, 0.5)
-put(SFX, boom(1.0), 25.5, 0.95)
-put(SFX, popper(), 25.62, 0.7, pan=-0.5)
-put(SFX, popper(), 25.7, 0.7, pan=0.5)
-put(SFX, bloop(400, 1500, 0.1, 0.5), 25.66)
-fanfare(25.85)
-put(SFX, stereo_move(whoosh(0.3, 300, 3000), -0.3, 0.3), 26.3, 0.4)
-put(SFX, bloop(350, 1300, 0.12, 0.55), 27.2)
-put(SFX, fm_bell(2637, 1.2, 0.2), 27.25, pan=0.3)
-put(SFX, meow(1.2, 0.5), 27.75, 0.8)
-put(SFX, crash(0.5), 28.5, pan=0.2)
+# ═════════ REELS'İ KUR ═════════
+scenes = REEL['scenes']
+prev = None
+music_start = None
+outro_starts = []
+for sc in scenes:
+    typ, t0 = sc[0], sc[1]
+    opts = sc[2] if len(sc) > 2 else {}
+    skip = opts.get('skip', 0)
+    if typ != 'hook' and music_start is None:
+        music_start = t0
+    if opts.get('flash'):
+        if prev is not None and prev != 'hook':
+            put(SFX, riser(0.5), t0 - 0.5, 0.5)  # kancanın kendi yükselişi var
+        put(SFX, boom(1.0), t0, 0.95)
+    elif prev is not None:
+        put(SFX, stereo_move(whoosh(0.55, 200, 2500), -0.6, 0.6), t0 - 0.05, 0.6)  # sahne geçişi
+    if typ == 'outro':
+        outro_starts.append(t0)
+    CUES[typ](t0, skip, opts)
+    prev = typ
+if music_start is not None:
+    # müzik ölçüleri her flaşlı sahnede yeniden hizalanır (vuruş tam patlamaya düşsün)
+    flashes = [sc[1] for sc in scenes if len(sc) > 2 and sc[2].get('flash') and sc[1] > music_start]
+    seg_starts = [music_start] + flashes
+    seg_ends = flashes + [DUR]
+    for i, (a, b) in enumerate(zip(seg_starts, seg_ends)):
+        if i < len(seg_starts) - 1:
+            # ara bölüm: bitişte kapanış vuruşu yok, sonraki bölüme trampet geçişiyle bağlanır
+            t, bi = a, 0
+            while t < b - 1e-6:
+                beats = int(round(min(4, (b - t) / BEAT)))
+                if beats <= 0:
+                    break
+                music_bar(bi, t, MEL_A if (bi // 2) % 2 == 0 else MEL_B, fill=abs(t + beats * BEAT - b) < 1e-3, length=beats)
+                t += beats * BEAT
+                bi += 1
+        else:
+            music_main(a, b)
+    for c in range(2):
+        MUS[:, c] *= np.where(np.arange(N) / SR >= music_start, duck, 1.0)
 
 # ═════════ MİKS ═════════
 ir = reverb_ir()
@@ -759,10 +812,10 @@ mix = np.stack([hp(mix[:, c], 28) for c in range(2)], 1)
 peak = np.abs(mix).max()
 mix = np.tanh(mix / peak * 1.8) / np.tanh(1.8) * 0.93
 fade = np.ones(N)
-fade[-int(0.5 * SR):] = np.linspace(1, 0, int(0.5 * SR))
+fade[-int(0.4 * SR):] = np.linspace(1, 0, int(0.4 * SR))
 mix *= fade[:, None]
 
-out = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'out', 'music.wav')
+out = os.path.join(HERE, 'out', f'{REEL_NAME}.wav')
 os.makedirs(os.path.dirname(out), exist_ok=True)
 with wave.open(out, 'wb') as w:
     w.setnchannels(2)
