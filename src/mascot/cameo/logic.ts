@@ -10,11 +10,11 @@ export const CHANCE = 0.1;
 /** İki sahne arası en az 5 dakika. */
 export const MIN_GAP_MS = 5 * 60_000;
 /** İlk açılışlarda hiç çıkmaz. */
-export const MIN_OPENS = 3;
+export const MIN_OPENS = 2;
 /** Şanssız seri: bu kadar açılış sahnesiz geçtiyse bir sonraki kesin kurulur. */
-export const PITY_OPENS = 30;
-/** Arka plandan bu kadar süre sonra dönüş yeni bir "açılış" sayılır. */
-export const REOPEN_AFTER_MS = 2 * 60_000;
+export const PITY_OPENS = 15;
+/** Arka plandan bu kadar süre sonra dönüş yeni bir "açılış" sayılır (Android uygulamayı bellekte tutar). */
+export const REOPEN_AFTER_MS = 10_000;
 
 export interface CameoCounters {
   /** Toplam açılış */
@@ -23,8 +23,10 @@ export interface CameoCounters {
   sinceLast: number;
   /** Son sahnenin başladığı an (ms) */
   lastAt: number;
+  /** Zar tuttu ama sahne gösterilemedi: bir sonraki açılışa devreder */
+  pending: boolean;
 }
-export const FRESH: CameoCounters = { opens: 0, sinceLast: 0, lastAt: 0 };
+export const FRESH: CameoCounters = { opens: 0, sinceLast: 0, lastAt: 0, pending: false };
 
 export const KEY = 'cd.cameo.v1';
 
@@ -32,7 +34,7 @@ export function parseCounters(raw: string | null): CameoCounters {
   try {
     const o = raw ? JSON.parse(raw) : null;
     const n = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : 0);
-    return o && typeof o === 'object' ? { opens: n(o.opens), sinceLast: n(o.sinceLast), lastAt: n(o.lastAt) } : { ...FRESH };
+    return o && typeof o === 'object' ? { opens: n(o.opens), sinceLast: n(o.sinceLast), lastAt: n(o.lastAt), pending: o.pending === true } : { ...FRESH };
   } catch {
     return { ...FRESH };
   }
@@ -43,12 +45,12 @@ export function registerOpen(c: CameoCounters, now: number, rand: () => number):
   const counters = { ...c, opens: c.opens + 1, sinceLast: c.sinceLast + 1 };
   if (counters.opens < MIN_OPENS) return { counters, armed: false };
   if (now - counters.lastAt < MIN_GAP_MS) return { counters, armed: false };
-  const armed = counters.sinceLast >= PITY_OPENS || rand() < CHANCE;
-  return { counters, armed };
+  const armed = counters.pending || counters.sinceLast >= PITY_OPENS || rand() < CHANCE;
+  return { counters: { ...counters, pending: armed }, armed };
 }
 
 /** Sahne gösterilince sayaçları sıfırla. */
-export const markShown = (c: CameoCounters, now: number): CameoCounters => ({ ...c, sinceLast: 0, lastAt: now });
+export const markShown = (c: CameoCounters, now: number): CameoCounters => ({ ...c, sinceLast: 0, lastAt: now, pending: false });
 
 /** Saate uyan sahneler, rastgele sırada (bu açılışın "oyun planı"). */
 export function planOpen(hour: number, rand: () => number): SceneId[] {
@@ -60,23 +62,9 @@ export function planOpen(hour: number, rand: () => number): SceneId[] {
   return ids;
 }
 
-export interface ScreenCtx {
-  screen: Screen;
-  txCount: number;
-  /** Ana ekranda "saklanma" sahnesinin oturacağı bir kart bulunuyor mu */
-  ledgeOk: boolean;
-}
-
 /** Plan sırasına göre bu ekrana uyan ilk sahne (yoksa null). */
-export function sceneForScreen(plan: SceneId[], ctx: ScreenCtx): SceneId | null {
-  for (const id of plan) {
-    const d = SCENES[id];
-    if (d.screen !== ctx.screen) continue;
-    if (id === 'ball' && ctx.txCount > 0) continue;
-    if (id === 'hide' && !ctx.ledgeOk) continue;
-    return id;
-  }
-  return null;
+export function sceneForScreen(plan: SceneId[], screen: Screen): SceneId | null {
+  return plan.find((id) => SCENES[id].screens.includes(screen)) ?? null;
 }
 
 export interface BlockCtx {

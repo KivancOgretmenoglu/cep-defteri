@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { MASCOT_KEYS } from '../characters';
 import { blockedReason, CHANCE, markShown, MIN_GAP_MS, MIN_OPENS, parseCounters, PITY_OPENS, planOpen, registerOpen, sceneForScreen, showDelayMs, stayMs, FRESH } from './logic';
-import { captionFor, guestsFor, hourFits, SCENES, SCENE_IDS } from './scenes';
+import { CAMEO_SCREENS, captionFor, guestsFor, hourFits, SCENES, SCENE_IDS } from './scenes';
 
-const base = { opens: 10, sinceLast: 5, lastAt: 0 };
+const base = { opens: 10, sinceLast: 5, lastAt: 0, pending: false };
 const NOW = 10 * 60 * 60_000;
 
 describe('saat tablosu', () => {
@@ -23,6 +23,10 @@ describe('saat tablosu', () => {
     expect(morning).not.toContain('sleep');
     expect(morning).not.toContain('cards');
     expect(morning).toContain('coffee');
+  });
+  it('06–24 arası her okunur ekranda en az bir sahne çıkabilir', () => {
+    for (let h = 6; h < 24; h++)
+      for (const s of CAMEO_SCREENS) expect(SCENE_IDS.some((id) => hourFits(SCENES[id], h) && SCENES[id].screens.includes(s)), `${s} ${h}`).toBe(true);
     const evening = planOpen(19, () => 0.1);
     expect(evening).toContain('sleep');
     expect(new Set(evening).size).toBe(evening.length);
@@ -52,8 +56,13 @@ describe('açılış sayacı ve aralık', () => {
   });
   it('sayaçlar her açılışta artar; sahne gösterilince sinceLast sıfırlanır', () => {
     const r = registerOpen(base, NOW, () => 0.99);
-    expect(r.counters).toEqual({ opens: 11, sinceLast: 6, lastAt: 0 });
-    expect(markShown(r.counters, NOW)).toEqual({ opens: 11, sinceLast: 0, lastAt: NOW });
+    expect(r.counters).toEqual({ opens: 11, sinceLast: 6, lastAt: 0, pending: false });
+    expect(markShown({ ...r.counters, pending: true }, NOW)).toEqual({ opens: 11, sinceLast: 0, lastAt: NOW, pending: false });
+  });
+  it('tutan ama gösterilemeyen zar sonraki açılışa devreder', () => {
+    const r = registerOpen(base, NOW, () => 0);
+    expect(r.counters.pending).toBe(true);
+    expect(registerOpen(r.counters, NOW, () => 0.99).armed).toBe(true);
   });
   it('uzun şanssız seri sonunda kesin kurulur (gap uygunsa)', () => {
     expect(registerOpen({ ...base, sinceLast: PITY_OPENS - 1 }, NOW, () => 0.99).armed).toBe(true);
@@ -61,7 +70,7 @@ describe('açılış sayacı ve aralık', () => {
   it('bozuk localStorage içeriği sıfıra döner', () => {
     expect(parseCounters(null)).toEqual(FRESH);
     expect(parseCounters('{oops')).toEqual(FRESH);
-    expect(parseCounters('{"opens":"x","sinceLast":-3,"lastAt":5}')).toEqual({ opens: 0, sinceLast: 0, lastAt: 5 });
+    expect(parseCounters('{"opens":"x","sinceLast":-3,"lastAt":5}')).toEqual({ opens: 0, sinceLast: 0, lastAt: 5, pending: false });
   });
   it('gösterim gecikmesi 3–6 sn, kalma 12–20 sn', () => {
     expect(showDelayMs(() => 0)).toBe(3000);
@@ -72,22 +81,15 @@ describe('açılış sayacı ve aralık', () => {
 });
 
 describe('ekrana uygun sahne', () => {
-  const ok = { txCount: 4, ledgeOk: true };
-  it('yalnız kendi ekranında', () => {
-    expect(sceneForScreen(['sleep'], { ...ok, screen: 'reports' })).toBe('sleep');
-    expect(sceneForScreen(['sleep'], { ...ok, screen: 'home' })).toBeNull();
-    expect(sceneForScreen(['cards', 'coins'], { ...ok, screen: 'invest' })).toBe('coins');
-  });
-  it('top sahnesi yalnız boş işlem listesinde', () => {
-    expect(sceneForScreen(['ball'], { screen: 'tx', txCount: 3, ledgeOk: true })).toBeNull();
-    expect(sceneForScreen(['ball'], { screen: 'tx', txCount: 0, ledgeOk: true })).toBe('ball');
-  });
-  it('saklanma sahnesi kart yoksa atlanır, sıradaki ana ekran sahnesi gelir', () => {
-    expect(sceneForScreen(['hide', 'coffee'], { screen: 'home', txCount: 4, ledgeOk: false })).toBe('coffee');
-    expect(sceneForScreen(['hide', 'coffee'], { screen: 'home', txCount: 4, ledgeOk: true })).toBe('hide');
+  it('yalnız kendi ekranlarında', () => {
+    expect(sceneForScreen(['sleep'], 'reports')).toBe('sleep');
+    expect(sceneForScreen(['sleep'], 'home')).toBeNull();
+    expect(sceneForScreen(['cards', 'coins'], 'invest')).toBe('coins');
+    expect(sceneForScreen(['ball'], 'tx')).toBe('ball');
+    expect(sceneForScreen(['hide', 'coffee'], 'home')).toBe('hide');
   });
   it('okunur olmayan ekranlarda hiçbir sahne yok', () => {
-    for (const s of ['settings', 'balance', 'people'] as const) expect(sceneForScreen(SCENE_IDS, { ...ok, screen: s })).toBeNull();
+    for (const s of ['settings', 'balance', 'people'] as const) expect(sceneForScreen(SCENE_IDS, s)).toBeNull();
   });
 });
 

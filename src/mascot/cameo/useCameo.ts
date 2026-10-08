@@ -82,7 +82,6 @@ export function useCameo() {
   const { screen, sheet } = useNav();
   const enabled = useStore((s) => s.data.settings.cameos !== false);
   const noAccounts = useStore((s) => s.data.accounts.length === 0);
-  const txCount = useStore((s) => s.data.txs.length);
   const main = characterOf(useStore((s) => s.data.settings.mascot?.key)).key;
   const lang = useStore((s) => s.data.settings.lang ?? 'tr') as Lang;
 
@@ -136,7 +135,7 @@ export function useCameo() {
     return () => clearTimeout(id);
   }, [active?.leaving]);
 
-  const ctxKey = `${screen}|${sheet ? 1 : 0}|${enabled}|${noAccounts}|${txCount === 0}|${openN}|${poll}`;
+  const ctxKey = `${screen}|${sheet ? 1 : 0}|${enabled}|${noAccounts}|${openN}|${poll}`;
 
   // Uygun ekranda bekle, sonra göster
   useEffect(() => {
@@ -145,7 +144,7 @@ export function useCameo() {
     const arm = () => {
       const block = blockedReason({ enabled, noAccounts, sheetOpen: !!sheet, typing: isTyping(), hidden: document.visibilityState === 'hidden', busy: isBusy() });
       if (block) return null;
-      return sceneForScreen(p, { screen, txCount: forced.current ? 0 : txCount, ledgeOk: forced.current ? true : !!findLedgeCard() });
+      return sceneForScreen(p, screen);
     };
     if (!arm()) {
       const again = setTimeout(() => setPoll((n) => n + 1), 2500);
@@ -179,7 +178,7 @@ export function useCameo() {
     };
   }, [live, exit]);
   useEffect(() => {
-    if (live && (sheet || !enabled || noAccounts || screen !== shownOn.current || SCENES[active!.id].screen !== screen)) exit();
+    if (live && (sheet || !enabled || noAccounts || screen !== shownOn.current || !SCENES[active!.id].screens.includes(screen))) exit();
   }, [live, sheet, enabled, noAccounts, screen, active, exit]);
 
   return { active, dismiss: exit };
