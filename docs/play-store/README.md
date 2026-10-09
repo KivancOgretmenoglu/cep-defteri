@@ -13,7 +13,7 @@ Bu klasör Google Play Console'da doldurman gereken her şeyi içerir: metinler,
 1. **Geliştirici hesabı:** <https://play.google.com/console> → kişisel hesap → 25 $ tek seferlik ücret → kimlik doğrulama (birkaç saat ile 2 gün sürebilir).
 2. **GitHub Pages'i aç** (gizlilik politikası adresi için): GitHub'da depo → *Settings* → *Pages* → *Build and deployment / Source*: **GitHub Actions**. Sonraki gönderimde `…github.io/cep-defteri/privacy.html` yayına girer.
    - Depo gizliyse Pages ücretsiz planda çalışmayabilir; o durumda depoyu herkese açık yap ya da `privacy.html`'i başka bir yere (ör. Google Sites, Notion herkese açık sayfa) kopyala.
-3. **`privacy.html` içindeki `[İLETİŞİM_EPOSTASI]` / `[CONTACT_EMAIL]`** yerlerine Play Store'da göstermek istediğin e-postayı yaz (kişisel e-postanı göstermek istemezsen uygulama için ayrı bir Gmail aç). Bunu bana söylersen ben de güncellerim.
+3. **Geliştirici adı:** `Fıstık Stüdyo` · **İletişim e-postası:** `cep.defteri2026@gmail.com` (gizlilik politikasına da yazıldı).
 
 ## 1. Uygulamayı oluştur
 
@@ -49,7 +49,7 @@ Play Console → **Uygulama oluştur**
 
 ### İçerik derecelendirmesi anketi (IARC)
 
-- E-posta: geliştirici e-postan
+- E-posta: cep.defteri2026@gmail.com
 - Kategori: **Referans, Haber veya Eğitici değil → "Diğer tüm uygulama türleri" / Utility, Productivity**
 - Şiddet, cinsellik, küfür, uyuşturucu, kumar, korku: **hepsi Hayır**
 - Kullanıcılar arası etkileşim / içerik paylaşımı: **Hayır** (yalnızca kullanıcının kendi yedek/kart görselini paylaşma menüsü var; uygulama içi sohbet yok)
@@ -159,7 +159,7 @@ Also: monthly budget and category limits, monthly report card, reports, tags, ex
 | Öne çıkan grafik | `graphics/feature-tr.png` (EN girişine `feature-en.png`) | 1024×500 |
 | Telefon ekran görüntüleri (2–8) | `graphics/tr/*.png` (EN girişine `graphics/en/*.png`) | 1080×1920 |
 
-**Kategori:** Finans · **Etiketler:** Bütçe, Kişisel finans · **E-posta:** geliştirici e-postan
+**Kategori:** Finans · **Etiketler:** Bütçe, Kişisel finans · **E-posta:** cep.defteri2026@gmail.com
 
 ## 4. Kapalı test (12 kişi × 14 gün)
 
