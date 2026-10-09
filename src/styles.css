@@ -1587,6 +1587,80 @@ fieldset.block {
   max-width: 420px;
   color: var(--ink-2);
 }
+.empty__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.empty__action {
+  margin-top: 4px;
+}
+/* Canlı sahneli boş durum: 360 px telefonda tek ekrana sığacak kadar sıkı */
+.empty--scene {
+  gap: 6px;
+  padding: 12px 4px 8px;
+}
+.empty--scene h3 {
+  font-size: 18px;
+  text-wrap: balance;
+}
+.empty--scene .empty__text {
+  max-width: 340px;
+  font-size: 15px;
+  text-wrap: pretty;
+}
+/* Liste içi (Özet > Son kayıtlar): maskot solda, metin ve düğme sağda */
+.empty--compact {
+  flex-direction: row;
+  align-items: center;
+  text-align: left;
+  gap: 12px;
+  padding: 4px 0;
+}
+.empty--compact .empty__copy {
+  align-items: flex-start;
+  gap: 4px;
+}
+.empty--compact h3 {
+  font-size: 16px;
+}
+.empty--compact .empty__text {
+  font-size: 14px;
+}
+.empty--compact .mascot-live {
+  flex: none;
+}
+.empty--compact .mascot-live::after {
+  display: none;
+}
+
+/* Tembel yüklenen ekran parçası beklenirken: kart biçimli iskelet (sayfa zıplamaz) */
+.skel__head {
+  height: 34px;
+  width: 46%;
+  border-radius: 10px;
+  background: var(--surface-3);
+}
+.skel__card {
+  min-height: 180px;
+  opacity: 0.7;
+}
+.skel__card--short {
+  min-height: 110px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .skel {
+    animation: skel-in 0.3s 0.15s both;
+  }
+  @keyframes skel-in {
+    from { opacity: 0; }
+  }
+}
+.chunk-error {
+  align-items: flex-start;
+}
 
 /* ───────── İlerleme ───────── */
 .progress {

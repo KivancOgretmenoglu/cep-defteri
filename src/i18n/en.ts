@@ -8,6 +8,7 @@ import { ringsEn } from './rings.en';
 import { planEn } from './plan.en';
 import { guideEn } from './guide.en';
 import { polishEn } from './polish.en';
+import { emptyEn } from './empty.en';
 
 export const en: Dict = {
   ...hintsEn,
@@ -194,8 +195,6 @@ export const en: Dict = {
   'people.owesYou': "owes you",
   'people.youOweThem': "you owe them",
   'home.recent': "Recent activity",
-  'home.noTxPre': "Nothing logged yet. Tap",
-  'home.noTxPost': "at the bottom right to add your first entry in seconds.",
   'mood.noAccount.text': "Hi! Let's start by adding an account where your money lives.",
   'mood.noAccount.why': "It can be a bank account or cash. There's no everyday account yet, so there's nothing to comment on.",
   'mood.noTx.text': "Your account is ready; log your first entry and we're off.",
@@ -438,8 +437,6 @@ export const en: Dict = {
   'txs.spending': "Spending",
   'txs.toInvest': "Invested",
   'txs.count': (v) => plural(v.n, 'entry', 'entries'),
-  'txs.emptyTitle': "Your ledger is empty",
-  'txs.emptyBody': "Amount, category and account are all you need. The rest is optional.",
   'txs.noMatchTitle': "Nothing matches this filter",
   'txs.noMatchBody': "Try another month or different filters.",
   'common.backHome': "Back to Home",
@@ -463,9 +460,7 @@ export const en: Dict = {
   'bal.asTable': "Show as table",
   'bal.balance': "Balance",
   'people.person': "Person",
-  'people.emptyTitle': "No debts either way",
   'people.addPerson': "Add person",
-  'people.emptyBody': "Add friends you split meals with, lend to, or who pay for you. These don't count as income or spending; they just track who owes whom.",
   'people.total': "Total",
   'people.owedToYou': "Owed to you",
   'people.owedToYouHint': "added to your balance when paid",
@@ -541,8 +536,6 @@ export const en: Dict = {
   'bud.reserveRemoved': "Savings buffer removed",
   'bud.reserveAria': "Savings buffer ({unit})",
   'bud.barAria': "Planned paid {paid}, planned pending {pending}, other spending {other}, budget {budget}",
-  'inv.emptyTitle': "Investments live in a separate account",
-  'inv.emptyBody': "Money you invest isn't spending: it leaves your everyday balance and shows up here as a contribution. You enter the current value yourself, whenever you like.",
   'inv.currentValue': "current value",
   'inv.editAccount': "Edit account",
   'inv.openingValue': "Opening value",
@@ -611,8 +604,6 @@ export const en: Dict = {
   'rep.c.budgetWhy': "Good/bad is judged only against the budget you set.",
   'rep.c.noBudgetWhy': "There's no budget set, so I don't call things better or worse; I just show the differences.",
   'rep.uncategorized': "Uncategorized",
-  'rep.emptyTitle': "Nothing to look at yet",
-  'rep.emptyBody': "Log a few entries and I'll show you here where your money comes from and goes.",
   'rep.cardTitle': "{month} report card",
   'rep.cardSub': "Month summary, shareable image",
   'rep.thisPeriod': "This period",
@@ -1016,5 +1007,6 @@ export const en: Dict = {
   ...planEn,
   ...guideEn,
   ...polishEn,
+  ...emptyEn,
   // @end
 };

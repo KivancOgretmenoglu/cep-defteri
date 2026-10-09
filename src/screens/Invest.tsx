@@ -11,7 +11,7 @@ import { commit } from '../store/store';
 import { Amount, Chip, Progress, SectionHead } from '../ui/kit';
 import { openSheet } from '../ui/nav';
 import { useData } from '../ui/hooks';
-import { MascotNote, EmptyState, LiveMascot } from '../mascot/MascotNote';
+import { MascotNote, SceneEmpty, LiveMascot } from '../mascot/MascotNote';
 import { refreshPrices, usePrices } from '../store/prices';
 import { agoText, formatQty, unitName, unitShort } from '../sheets/AssetFields';
 import type { AssetHolding, AssetPosition } from '../domain/ledger';
@@ -59,9 +59,7 @@ export function Invest() {
       <div className="screen">
         <header className="screen-head"><h1>{t('nav.invest')}</h1></header>
         <section className="card">
-          <EmptyState outfit="suit" mood="curious" title={t('inv.emptyTitle')} action={<button className="btn btn--primary" onClick={() => openSheet({ kind: 'account', kindPreset: 'investment' })}>{t('home.addInvestAccount')}</button>}>
-            {t('inv.emptyBody')}
-          </EmptyState>
+          <SceneEmpty scene="invest" onAction={() => openSheet({ kind: 'account', kindPreset: 'investment' })} />
         </section>
       </div>
     );

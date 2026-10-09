@@ -1,24 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { HintHost } from './mascot/hints';
-import { CameoHost } from './mascot/cameo/Cameo';
-import { ScrollPeek } from './mascot/peek/ScrollPeek';
 import { CelebrateHost } from './ui/Celebrate';
-import { GuideHost } from './guide/Coach';
 import { resumeTxDraft } from './sheets/txDraft';
 import { Plus, House, ListOrdered, CalendarRange, ChartColumn, Sprout, Settings as Gear, AlertTriangle, FlaskConical, Undo2, X, HandCoins } from 'lucide-react';
 import { dismissWarning, hideToast, setMode, undo, useStore } from './store/store';
 import { go, openSheet, useNav, closeSheet, type Screen } from './ui/nav';
 import { Home } from './screens/Home';
-import { Transactions } from './screens/Transactions';
-import { Budget } from './screens/Budget';
-import { Invest } from './screens/Invest';
-import { Reports } from './screens/Reports';
-import { Settings } from './screens/Settings';
-import { Onboarding } from './screens/Onboarding';
-import { Balance } from './screens/Balance';
-import { People } from './screens/People';
-import { OccurrenceSheet, CancelPlanSheet } from './sheets/PlanSheets';
-import { ReportCardSheet } from './sheets/ReportCardSheet';
 import { LockGate } from './lock/LockGate';
 import { useNativeSync } from './native/useNativeSync';
 import { useMascotTheme } from './mascot/theme';
@@ -29,8 +16,33 @@ import { TxSheet, RefundSheet, ConfirmSheet } from './sheets/TxSheet';
 import { useT } from './i18n';
 import './ui/motion.css';
 import type { Key } from './i18n/core';
-import { AccountSheet, BudgetSheet, CategorySheet, GoalSheet, LimitSheet, PlanSheet, ValuationSheet } from './sheets/OtherSheets';
-import { FloorSheet } from './sheets/FloorSheet';
+import { ChunkBoundary, ScreenSkeleton, lazyNamed, preloadLazy } from './ui/lazy';
+
+// İlk Özet çizimi için gerekmeyenler ayrı parçalarda; ilk çizimden sonra boşta önceden indirilir.
+// Sıra önemli: önce sekmeler ve en sık açılan sayfalar.
+// İlk açılış yalnız yeni kullanıcıda gerekir; kayıtlı kullanıcının ilk çizimini yavaşlatmasın.
+const Onboarding = lazyNamed(() => import('./screens/Onboarding'), 'Onboarding');
+const Transactions = lazyNamed(() => import('./screens/Transactions'), 'Transactions');
+const Budget = lazyNamed(() => import('./screens/Budget'), 'Budget');
+const Invest = lazyNamed(() => import('./screens/Invest'), 'Invest');
+const AccountSheet = lazyNamed(() => import('./sheets/OtherSheets'), 'AccountSheet');
+const BudgetSheet = lazyNamed(() => import('./sheets/OtherSheets'), 'BudgetSheet');
+const CategorySheet = lazyNamed(() => import('./sheets/OtherSheets'), 'CategorySheet');
+const GoalSheet = lazyNamed(() => import('./sheets/OtherSheets'), 'GoalSheet');
+const LimitSheet = lazyNamed(() => import('./sheets/OtherSheets'), 'LimitSheet');
+const PlanSheet = lazyNamed(() => import('./sheets/OtherSheets'), 'PlanSheet');
+const ValuationSheet = lazyNamed(() => import('./sheets/OtherSheets'), 'ValuationSheet');
+const GuideHost = lazyNamed(() => import('./guide/Coach'), 'GuideHost');
+const CameoHost = lazyNamed(() => import('./mascot/cameo/Cameo'), 'CameoHost');
+const ScrollPeek = lazyNamed(() => import('./mascot/peek/ScrollPeek'), 'ScrollPeek');
+const Reports = lazyNamed(() => import('./screens/Reports'), 'Reports');
+const People = lazyNamed(() => import('./screens/People'), 'People');
+const Balance = lazyNamed(() => import('./screens/Balance'), 'Balance');
+const Settings = lazyNamed(() => import('./screens/Settings'), 'Settings');
+const OccurrenceSheet = lazyNamed(() => import('./sheets/PlanSheets'), 'OccurrenceSheet');
+const CancelPlanSheet = lazyNamed(() => import('./sheets/PlanSheets'), 'CancelPlanSheet');
+const ReportCardSheet = lazyNamed(() => import('./sheets/ReportCardSheet'), 'ReportCardSheet');
+const FloorSheet = lazyNamed(() => import('./sheets/FloorSheet'), 'FloorSheet');
 
 const NAV: { screen: Screen; label: Key; icon: typeof House; phone: boolean }[] = [
   { screen: 'home', label: 'nav.home', icon: House, phone: true },
@@ -85,6 +97,18 @@ function SheetHost() {
   useEffect(() => {
     if (!sheet) resumeTxDraft();
   }, [sheet]);
+  // Tembel yüklenen sayfa birkaç ms gecikebilir; bu sırada hiçbir şey çizilmez (sayfa kendi animasyonuyla açılır).
+  return (
+    <ChunkBoundary quiet resetKey={sheet}>
+      <Suspense fallback={null}>
+        <SheetBody />
+      </Suspense>
+    </ChunkBoundary>
+  );
+}
+
+function SheetBody() {
+  const { sheet } = useNav();
   if (!sheet) return null;
   switch (sheet.kind) {
     case 'add':
@@ -171,6 +195,8 @@ export function App() {
   }, [sheet]);
 
   const enterDir = useEnterDir(screen);
+  // İlk çizimden sonra, tarayıcı boştayken diğer ekranların parçalarını indir.
+  useEffect(() => preloadLazy(), []);
   const Main = { home: Home, tx: Transactions, budget: Budget, invest: Invest, reports: Reports, settings: Settings, balance: Balance, people: People }[screen];
 
   return (
@@ -222,7 +248,18 @@ export function App() {
             <span>{t('app.saveFailed')}</span>
           </div>
         )}
-        {showOnboarding ? <Onboarding /> : <div key={screen} className={`screen-enter screen-enter--${enterDir}`}><Main /></div>}
+        {showOnboarding ? (
+          <ChunkBoundary>
+            <Suspense fallback={<ScreenSkeleton />}><Onboarding /></Suspense>
+          </ChunkBoundary>
+        ) : (
+          // Suspense dışarıda: yeni ekran parçası hazır olunca anahtarlı kap yeni takılır, giriş animasyonu içerikle oynar.
+          <ChunkBoundary resetKey={screen}>
+            <Suspense fallback={<ScreenSkeleton />}>
+              <div key={screen} className={`screen-enter screen-enter--${enterDir}`}><Main /></div>
+            </Suspense>
+          </ChunkBoundary>
+        )}
       </main>
 
       {!showOnboarding && (
@@ -248,10 +285,14 @@ export function App() {
       <SheetHost />
       <Toast />
       <HintHost />
-      <CameoHost />
-      <ScrollPeek />
       <CelebrateHost />
-      <GuideHost />
+      <ChunkBoundary quiet>
+        <Suspense fallback={null}>
+          <CameoHost />
+          <ScrollPeek />
+          <GuideHost />
+        </Suspense>
+      </ChunkBoundary>
     </div>
     </LockGate>
   );

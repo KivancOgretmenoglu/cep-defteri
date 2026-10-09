@@ -10,7 +10,7 @@ import { useStore } from '../store/store';
 import { useDevice } from '../store/device';
 import { useT, type BoundT } from '../i18n';
 import { isNative } from '../platform';
-import { downloadBackup } from '../screens/Settings';
+import { downloadBackup } from '../screens/dataActions';
 import { backupReminder, SNOOZE_DAYS, type BackupReminder as Reminder } from './backupPlan';
 import './backupReminder.css';
 

@@ -18,7 +18,7 @@ import { SpendingChart } from '../ui/SpendingChart';
 import { addDays } from '../domain/dates';
 import { Amount, AnimatedMoney, Progress, SectionHead } from '../ui/kit';
 import { useListSettle } from '../ui/motion';
-import { MascotNote } from '../mascot/MascotNote';
+import { MascotNote, SceneEmpty } from '../mascot/MascotNote';
 import { Rings } from '../ui/Rings';
 import { TxRow } from '../ui/TxRow';
 import { go, openSheet } from '../ui/nav';
@@ -305,7 +305,7 @@ export function Home() {
         <section className="card" aria-labelledby="recent-h">
           <SectionHead id="recent-h" title={t('home.recent')} action={data.txs.length > 0 && <button className="link" onClick={() => go('tx', { filter: {} })}>{t('common.all')} <ChevronRight size={16} /></button>} />
           {recent.length === 0 ? (
-            <p className="muted">{t('home.noTxPre')} <b>+</b> {t('home.noTxPost')}</p>
+            <SceneEmpty scene="home" compact onAction={() => openSheet({ kind: 'add', preset: { type: 'expense' } })} />
           ) : (
             <ul className="tx-list" ref={recentRef}>
               {recent.map((t) => (

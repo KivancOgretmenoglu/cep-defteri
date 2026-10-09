@@ -10,9 +10,9 @@ import { monthEnd, monthStart } from '../domain/dates';
 import { MonthSwitcher, SectionHead } from '../ui/kit';
 import { go, openSheet, useNav } from '../ui/nav';
 import { useData, useLookups } from '../ui/hooks';
-import { MascotNote, EmptyState } from '../mascot/MascotNote';
+import { MascotNote, SceneEmpty } from '../mascot/MascotNote';
 import { CatIcon } from '../ui/icons';
-import { downloadCSV } from './Settings';
+import { downloadCSV } from './dataActions';
 import type { Mood } from '../domain/mood';
 
 function rangeText(c: Comparison['current']) {
@@ -82,6 +82,8 @@ export function Reports() {
   const catName = (id: ID) => (cats.get(id) ? catLabel(cats.get(id)) : t('rep.uncategorized'));
   const comment = reportComment(data, month, today, c, catName);
   const s = c.current;
+  // Seçili ayda hiç kayıt yoksa boş tablo yerine maskotlu boş durum.
+  const monthEmpty = !data.txs.some((x) => monthOf(x.date) === month);
 
   const spendRows = [...s.spendingByCategory.entries()].filter(([, v]) => v !== 0).sort((a, b) => b[1] - a[1]);
   const incomeRows = [...s.incomeBySource.entries()].sort((a, b) => b[1] - a[1]);
@@ -98,7 +100,7 @@ export function Reports() {
       <div className="screen">
         <header className="screen-head"><div className="head-with-back"><button className="icon-btn only-phone" onClick={() => go('home')} aria-label={t('common.backHome')}><ArrowLeft size={20} /></button><h1>{t('nav.reports')}</h1></div></header>
         <section className="card">
-          <EmptyState outfit="scholar" title={t('rep.emptyTitle')}>{t('rep.emptyBody')}</EmptyState>
+          <SceneEmpty scene="reports" onAction={() => openSheet({ kind: 'add', preset: { type: 'expense' } })} />
         </section>
       </div>
     );
@@ -111,112 +113,131 @@ export function Reports() {
         <MonthSwitcher month={month} onChange={setMonth} max={current} />
       </header>
 
-      <MascotNote mood={comment.mood} text={comment.text} why={comment.why} outfit="scholar" size={84} />
-      {month < current && (
-        <button className="report-prompt" onClick={() => openSheet({ kind: 'reportCard', month })}>
-          <ScrollText size={20} aria-hidden />
-          <span><b>{t('rep.cardTitle', { month: monthLabel(month) })}</b><small>{t('rep.cardSub')}</small></span>
-          <ChevronRight size={18} aria-hidden />
-        </button>
+      {monthEmpty ? (
+        <section className="card">
+          <SceneEmpty
+            scene="reportsMonth"
+            vars={{ month: monthLabel(month) }}
+            cta={month < current ? 'empty.reportsMonth.ctaBack' : undefined}
+            onAction={() => (month < current ? setMonth(current) : openSheet({ kind: 'add', preset: { type: 'expense' } }))}
+          />
+        </section>
+      ) : (
+        <>
+        <MascotNote mood={comment.mood} text={comment.text} why={comment.why} outfit="scholar" size={84} />
+        {month < current && (
+          <button className="report-prompt" onClick={() => openSheet({ kind: 'reportCard', month })}>
+            <ScrollText size={20} aria-hidden />
+            <span><b>{t('rep.cardTitle', { month: monthLabel(month) })}</b><small>{t('rep.cardSub')}</small></span>
+            <ChevronRight size={18} aria-hidden />
+          </button>
+        )}
+
+        </>
       )}
 
       <div className="report-grid">
-        <section className="card" aria-labelledby="sum-h">
-          <SectionHead id="sum-h" title={c.partial ? `${monthLabel(month)} · ${shortDate(s.from)}–${shortDate(s.to)}` : monthLabel(month)} />
-          <table className="cmp-table">
-            <thead>
-              <tr>
-                <th scope="col"></th>
-                <th scope="col">{t('rep.thisPeriod')}<small>{rangeText(c.current)}</small></th>
-                <th scope="col">{t('rep.previous')}<small>{rangeText(c.previous)}</small></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><th scope="row">{t('tx.income')}</th><td className="tone-pos">{formatMoney(s.income)}</td><td>{c.previousComplete ? formatMoney(c.previous.income) : '—'}</td></tr>
-              <tr><th scope="row">{t('txs.spending')}</th><td>{formatMoney(s.spending)}</td><td>{c.previousComplete ? formatMoney(c.previous.spending) : '—'}</td></tr>
-              <tr><th scope="row">{t('home.statInvest')}</th><td className="tone-invest">{formatMoney(s.contributions)}</td><td>{c.previousComplete ? formatMoney(c.previous.contributions) : '—'}</td></tr>
-              <tr><th scope="row">{t('rep.net')}</th><td>{formatMoney(s.income - s.spending, { sign: true })}</td><td>{c.previousComplete ? formatMoney(c.previous.income - c.previous.spending, { sign: true }) : '—'}</td></tr>
-            </tbody>
-          </table>
-          {!c.previousComplete && <p className="note-line">{t('rep.prevHidden')}</p>}
-          {c.partial && <p className="note-line">{t('rep.partialNote', { range: rangeText(c.previous) })}</p>}
-        </section>
+        {!monthEmpty && (
+          <>
+            <section className="card" aria-labelledby="sum-h">
+              <SectionHead id="sum-h" title={c.partial ? `${monthLabel(month)} · ${shortDate(s.from)}–${shortDate(s.to)}` : monthLabel(month)} />
+              <table className="cmp-table">
+                <thead>
+                  <tr>
+                    <th scope="col"></th>
+                    <th scope="col">{t('rep.thisPeriod')}<small>{rangeText(c.current)}</small></th>
+                    <th scope="col">{t('rep.previous')}<small>{rangeText(c.previous)}</small></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">{t('tx.income')}</th><td className="tone-pos">{formatMoney(s.income)}</td><td>{c.previousComplete ? formatMoney(c.previous.income) : '—'}</td></tr>
+                  <tr><th scope="row">{t('txs.spending')}</th><td>{formatMoney(s.spending)}</td><td>{c.previousComplete ? formatMoney(c.previous.spending) : '—'}</td></tr>
+                  <tr><th scope="row">{t('home.statInvest')}</th><td className="tone-invest">{formatMoney(s.contributions)}</td><td>{c.previousComplete ? formatMoney(c.previous.contributions) : '—'}</td></tr>
+                  <tr><th scope="row">{t('rep.net')}</th><td>{formatMoney(s.income - s.spending, { sign: true })}</td><td>{c.previousComplete ? formatMoney(c.previous.income - c.previous.spending, { sign: true }) : '—'}</td></tr>
+                </tbody>
+              </table>
+              {!c.previousComplete && <p className="note-line">{t('rep.prevHidden')}</p>}
+              {c.partial && <p className="note-line">{t('rep.partialNote', { range: rangeText(c.previous) })}</p>}
+            </section>
 
-        <section className="card" aria-labelledby="cat-h">
-          <SectionHead id="cat-h" title={t('rep.spendCats')} />
-          {spendRows.length === 0 ? <p className="muted">{t('rep.noSpend')}</p> : (
-            <ul className="bars">
-              {spendRows.map(([id, v]) => {
-                const cat = cats.get(id);
-                const prev = c.previous.spendingByCategory.get(id) ?? 0;
-                return (
-                  <li key={id}>
-                    <button className="bar-row" onClick={() => go('tx', { filter: { month, categoryId: id, kind: 'expense' } })}>
-                      <span className="bar-row__head">
-                        <span className="bar-row__name" style={{ '--cat': cat?.color } as React.CSSProperties}>
-                          <CatIcon icon={cat?.icon ?? 'dots'} size={15} /> {catName(id)}
+            <section className="card" aria-labelledby="cat-h">
+              <SectionHead id="cat-h" title={t('rep.spendCats')} />
+              {spendRows.length === 0 ? <p className="muted">{t('rep.noSpend')}</p> : (
+                <ul className="bars">
+                  {spendRows.map(([id, v]) => {
+                    const cat = cats.get(id);
+                    const prev = c.previous.spendingByCategory.get(id) ?? 0;
+                    return (
+                      <li key={id}>
+                        <button className="bar-row" onClick={() => go('tx', { filter: { month, categoryId: id, kind: 'expense' } })}>
+                          <span className="bar-row__head">
+                            <span className="bar-row__name" style={{ '--cat': cat?.color } as React.CSSProperties}>
+                              <CatIcon icon={cat?.icon ?? 'dots'} size={15} /> {catName(id)}
+                            </span>
+                            <span className="bar-row__val">
+                              {formatMoney(v)}
+                              {c.meaningful && <small className="bar-row__delta">{prev === 0 ? t('rep.prevZero') : `${formatMoney(v - prev, { sign: true })}`}</small>}
+                            </span>
+                          </span>
+                          <span className="bar"><span className="bar__fill" style={{ width: `${(Math.max(v, 0) / maxSpend) * 100}%`, background: cat?.color }} /></span>
+                          <ChevronRight size={16} className="bar-row__chev" aria-hidden />
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+              {s.refunds > 0 && <p className="note-line">{t('rep.refundsNote', { amount: formatMoney(s.refunds) })}</p>}
+            </section>
+
+            <section className="card" aria-labelledby="inc-h">
+              <SectionHead id="inc-h" title={t('rep.incomeSources')} />
+              {incomeRows.length === 0 ? <p className="muted">{t('rep.noIncome')}</p> : (
+                <ul className="bars">
+                  {incomeRows.map(([id, v]) => {
+                    const cat = cats.get(id);
+                    return (
+                      <li key={id}>
+                        <button className="bar-row" onClick={() => go('tx', { filter: { month, categoryId: id, kind: 'income' } })}>
+                          <span className="bar-row__head">
+                            <span className="bar-row__name" style={{ '--cat': cat?.color } as React.CSSProperties}><CatIcon icon={cat?.icon ?? 'dots'} size={15} /> {catName(id)}</span>
+                            <span className="bar-row__val">{formatMoney(v)}</span>
+                          </span>
+                          <span className="bar"><span className="bar__fill" style={{ width: `${(v / maxInc) * 100}%`, background: cat?.color }} /></span>
+                          <ChevronRight size={16} className="bar-row__chev" aria-hidden />
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+              <p className="note-line">{t('rep.incomeNote')}</p>
+            </section>
+
+            {tagRows.length > 0 && (
+              <section className="card" aria-labelledby="tag-h">
+                <SectionHead id="tag-h" title={t('csv.tags')} />
+                <ul className="bars">
+                  {tagRows.map((r) => (
+                    <li key={r.tag}>
+                      <button className="bar-row" onClick={() => go('tx', { filter: { tag: r.tag } })}>
+                        <span className="bar-row__head">
+                          <span className="bar-row__name">#{r.tag}</span>
+                          <span className="bar-row__val">
+                            {formatMoney(r.month.spending)}
+                            <small className="bar-row__delta">{t('rep.allTime', { amount: formatMoney(r.all.spending) })}</small>
+                          </span>
                         </span>
-                        <span className="bar-row__val">
-                          {formatMoney(v)}
-                          {c.meaningful && <small className="bar-row__delta">{prev === 0 ? t('rep.prevZero') : `${formatMoney(v - prev, { sign: true })}`}</small>}
-                        </span>
-                      </span>
-                      <span className="bar"><span className="bar__fill" style={{ width: `${(Math.max(v, 0) / maxSpend) * 100}%`, background: cat?.color }} /></span>
-                      <ChevronRight size={16} className="bar-row__chev" aria-hidden />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-          {s.refunds > 0 && <p className="note-line">{t('rep.refundsNote', { amount: formatMoney(s.refunds) })}</p>}
-        </section>
+                        <ChevronRight size={16} className="bar-row__chev" aria-hidden />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                <p className="note-line">{t('rep.tagsNote')}</p>
+              </section>
+            )}
 
-        <section className="card" aria-labelledby="inc-h">
-          <SectionHead id="inc-h" title={t('rep.incomeSources')} />
-          {incomeRows.length === 0 ? <p className="muted">{t('rep.noIncome')}</p> : (
-            <ul className="bars">
-              {incomeRows.map(([id, v]) => {
-                const cat = cats.get(id);
-                return (
-                  <li key={id}>
-                    <button className="bar-row" onClick={() => go('tx', { filter: { month, categoryId: id, kind: 'income' } })}>
-                      <span className="bar-row__head">
-                        <span className="bar-row__name" style={{ '--cat': cat?.color } as React.CSSProperties}><CatIcon icon={cat?.icon ?? 'dots'} size={15} /> {catName(id)}</span>
-                        <span className="bar-row__val">{formatMoney(v)}</span>
-                      </span>
-                      <span className="bar"><span className="bar__fill" style={{ width: `${(v / maxInc) * 100}%`, background: cat?.color }} /></span>
-                      <ChevronRight size={16} className="bar-row__chev" aria-hidden />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-          <p className="note-line">{t('rep.incomeNote')}</p>
-        </section>
-
-        {tagRows.length > 0 && (
-          <section className="card" aria-labelledby="tag-h">
-            <SectionHead id="tag-h" title={t('csv.tags')} />
-            <ul className="bars">
-              {tagRows.map((r) => (
-                <li key={r.tag}>
-                  <button className="bar-row" onClick={() => go('tx', { filter: { tag: r.tag } })}>
-                    <span className="bar-row__head">
-                      <span className="bar-row__name">#{r.tag}</span>
-                      <span className="bar-row__val">
-                        {formatMoney(r.month.spending)}
-                        <small className="bar-row__delta">{t('rep.allTime', { amount: formatMoney(r.all.spending) })}</small>
-                      </span>
-                    </span>
-                    <ChevronRight size={16} className="bar-row__chev" aria-hidden />
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <p className="note-line">{t('rep.tagsNote')}</p>
-          </section>
+          </>
         )}
 
         <section className="card" aria-labelledby="trend-h">

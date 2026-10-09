@@ -14,7 +14,7 @@ import { Chip, FormError, MoneyInput } from '../ui/kit';
 import { parseMoney } from '../i18n/format';
 import { getLang, suggestLang } from '../i18n/lang';
 import { useT } from '../i18n';
-import { RestorePicker, startDemo } from './Settings';
+import { RestorePicker, startDemo } from './dataActions';
 
 const zeroOk = (raw: string) => (raw.trim() === '' || /^0+([.,]0*)?$/.test(raw.trim()) ? 0 : parseMoney(raw));
 
@@ -165,7 +165,7 @@ function BalanceStep({ onBack }: { onBack: () => void }) {
         <button className="btn btn--ghost btn--block" onClick={onBack}>{t('onb.back')}</button>
       </section>
       <div className="onboard__alt">
-        <button className="btn btn--ghost" onClick={() => startDemo(today)}><FlaskConical size={17} /> {t('onb.tryDemo')}</button>
+        <button className="btn btn--ghost" onClick={() => void startDemo(today)}><FlaskConical size={17} /> {t('onb.tryDemo')}</button>
         <RestorePicker compact />
       </div>
       <p className="note-line center">{t('onb.privacy')}</p>

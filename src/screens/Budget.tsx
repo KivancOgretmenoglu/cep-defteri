@@ -11,7 +11,7 @@ import { commit } from '../store/store';
 import { Chip, Progress, SectionHead, Segmented, inputFromMoney } from '../ui/kit';
 import { go, openSheet } from '../ui/nav';
 import { useData, useLookups } from '../ui/hooks';
-import { MascotNote, EmptyState } from '../mascot/MascotNote';
+import { MascotNote, EmptyState, SceneEmpty } from '../mascot/MascotNote';
 import { CatIcon } from '../ui/icons';
 import { DueRow } from '../ui/DueRow';
 import type { Mood } from '../domain/mood';
@@ -89,9 +89,13 @@ export function Budget() {
 
       {b.budget === null ? (
         <section className="card">
-          <EmptyState outfit="planner" mood="calm" title={t('bud.emptyTitle')} action={<button className="btn btn--primary" onClick={() => openSheet({ kind: 'budget' })}>{t('bud.setBudget')}</button>}>
-            {t('bud.emptyBody')}
-          </EmptyState>
+          {data.plans.length === 0 ? (
+            <SceneEmpty scene="budget" onAction={() => openSheet({ kind: 'budget' })} />
+          ) : (
+            <EmptyState outfit="planner" mood="calm" title={t('bud.emptyTitle')} action={<button className="btn btn--primary" onClick={() => openSheet({ kind: 'budget' })}>{t('bud.setBudget')}</button>}>
+              {t('bud.emptyBody')}
+            </EmptyState>
+          )}
           <FloorRow />
         </section>
       ) : (

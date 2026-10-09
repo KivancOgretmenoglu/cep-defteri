@@ -14,7 +14,7 @@ import { TxRow, txView } from '../ui/TxRow';
 import { setFilter, useNav, openSheet, type TxFilter } from '../ui/nav';
 import { useData, useLookups } from '../ui/hooks';
 import { useListSettle } from '../ui/motion';
-import { EmptyState } from '../mascot/MascotNote';
+import { EmptyState, SceneEmpty } from '../mascot/MascotNote';
 
 const KINDS: { value: NonNullable<TxFilter['kind']>; label: Key }[] = [
   { value: 'all', label: 'common.all' },
@@ -167,9 +167,9 @@ export function Transactions() {
 
       {groups.length === 0 ? (
         data.txs.length === 0 ? (
-          <EmptyState outfit="ledger" title={t('txs.emptyTitle')} action={<button className="btn btn--primary" onClick={() => openSheet({ kind: 'add' })}>{t('home.firstEntry')}</button>}>
-            {t('txs.emptyBody')}
-          </EmptyState>
+          <section className="card">
+            <SceneEmpty scene="tx" onAction={() => openSheet({ kind: 'add', preset: { type: 'expense' } })} />
+          </section>
         ) : (
           <EmptyState outfit="ledger" mood="calm" title={t('txs.noMatchTitle')}>
             {t('txs.noMatchBody')}

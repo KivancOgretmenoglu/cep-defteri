@@ -11,6 +11,7 @@ import { ringsTr } from './rings.tr';
 import { planTr } from './plan.tr';
 import { guideTr } from './guide.tr';
 import { polishTr } from './polish.tr';
+import { emptyTr } from './empty.tr';
 
 export const tr = {
   ...hintsTr,
@@ -197,8 +198,6 @@ export const tr = {
   'people.owesYou': "sana borçlu",
   'people.youOweThem': "ona borçlusun",
   'home.recent': "Son işlemler",
-  'home.noTxPre': "Henüz işlem yok. Sağ alttaki",
-  'home.noTxPost': "ile ilk kaydını birkaç saniyede girebilirsin.",
   'mood.noAccount.text': "Merhaba! Önce paranın durduğu bir hesap ekleyelim.",
   'mood.noAccount.why': "Banka ya da nakit olabilir. Henüz günlük hesap yok, yorum yapacak veri yok.",
   'mood.noTx.text': "Hesabın hazır; ilk kaydı girince başlıyoruz.",
@@ -441,8 +440,6 @@ export const tr = {
   'txs.spending': "Harcama",
   'txs.toInvest': "Yatırıma",
   'txs.count': "{n} kayıt",
-  'txs.emptyTitle': "Defter henüz boş",
-  'txs.emptyBody': "Tutar, kategori ve hesap yeterli. Gerisi isteğe bağlı.",
   'txs.noMatchTitle': "Bu filtrede kayıt yok",
   'txs.noMatchBody': "Ayı ya da filtreleri değiştirebilirsin.",
   'common.backHome': "Özete dön",
@@ -466,9 +463,7 @@ export const tr = {
   'bal.asTable': "Tablo olarak göster",
   'bal.balance': "Bakiye",
   'people.person': "Kişi",
-  'people.emptyTitle': "Kimseye borç yok, kimseden alacak yok",
   'people.addPerson': "Kişi ekle",
-  'people.emptyBody': "Yemeği bölüştüğün, borç verdiğin ya da senin yerine ödeme yapan arkadaşlarını ekle. Bu hareketler gelir ya da gider sayılmaz; yalnızca kimin kime borçlu olduğunu tutar.",
   'people.total': "Toplam",
   'people.owedToYou': "Sana borçlu olanlar",
   'people.owedToYouHint': "gelince bakiyene eklenir",
@@ -544,8 +539,6 @@ export const tr = {
   'bud.reserveRemoved': "Birikim payı kaldırıldı",
   'bud.reserveAria': "Birikim payı ({unit})",
   'bud.barAria': "Planlı ödenen {paid}, planlı bekleyen {pending}, diğer harcama {other}, bütçe {budget}",
-  'inv.emptyTitle': "Yatırım hesabı ayrı tutulur",
-  'inv.emptyBody': "Yatırıma gönderdiğin para harcama sayılmaz; günlük bakiyenden çıkar, buraya katkı olarak eklenir. Güncel değeri istediğin zaman elle girersin.",
   'inv.currentValue': "güncel değer",
   'inv.editAccount': "Hesabı düzenle",
   'inv.openingValue': "Açılış değeri",
@@ -614,8 +607,6 @@ export const tr = {
   'rep.c.budgetWhy': "İyi/kötü değerlendirmesi yalnızca senin koyduğun bütçeye göre yapılır.",
   'rep.c.noBudgetWhy': "Bütçe tanımlı olmadığı için iyileşme ya da kötüleşme yorumu yapmıyorum, yalnızca farkları gösteriyorum.",
   'rep.uncategorized': "Kategorisiz",
-  'rep.emptyTitle': "İnceleyecek kayıt yok",
-  'rep.emptyBody': "Birkaç işlem girince paranın nereden gelip nereye gittiğini burada göstereceğim.",
   'rep.cardTitle': "{month} karnesi",
   'rep.cardSub': "Ayın özeti, paylaşılabilir resim",
   'rep.thisPeriod': "Bu dönem",
@@ -1019,5 +1010,6 @@ export const tr = {
   ...planTr,
   ...guideTr,
   ...polishTr,
+  ...emptyTr,
   // @end
 } satisfies Record<string, Entry>;
