@@ -14,10 +14,10 @@ const celebrated = new Set<string>();
 
 const COLORS = ['var(--accent)', 'var(--accent-line)', 'var(--pos)', 'var(--invest)', 'var(--warn)'];
 
-/** Ekrandaki hedef halkasının (yoksa ekranın üst-orta bölgesinin) üstünde patlama. */
-export function burst(count = 20) {
+/** Verilen öğenin, yoksa ekrandaki hedef halkasının (o da yoksa ekranın üst-orta bölgesinin) üstünde patlama. */
+export function burst(count = 20, at?: Element | null) {
   if (typeof document === 'undefined' || prefersReducedMotion()) return;
-  const anchor = document.querySelector<SVGElement>('.ring--goal')?.getBoundingClientRect();
+  const anchor = (at ?? document.querySelector<SVGElement>('.ring--goal'))?.getBoundingClientRect();
   const onScreen = anchor && anchor.width > 0 && anchor.top > 0 && anchor.bottom < window.innerHeight;
   const x = onScreen ? anchor.left + anchor.width / 2 : window.innerWidth / 2;
   const y = onScreen ? anchor.top + anchor.height / 2 : window.innerHeight * 0.38;

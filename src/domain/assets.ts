@@ -1,13 +1,20 @@
 /**
  * Altın ve döviz tutan yatırım hesapları için birim bilgisi ve miktar/değer hesapları (saf fonksiyonlar).
  *
- * Model:
- *  - Hesap TL yerine bir varlık birimi tutar (Account.asset). Katkı/çekim işlemi TL tutarın yanında
- *    o anda alınan/satılan miktarı (Tx.qty) ve birim fiyatı (Tx.unitPrice) saklar.
- *  - Elde tutulan miktar = açılış miktarı + katkılarla alınan − çekimlerle satılan.
- *  - Güncel değer = miktar × güncel ALIŞ fiyatı (kuyumcu/döviz bürosu senden bu fiyata alır;
- *    yani bugün satsan eline geçecek tutar). Fiyat yoksa son işlem fiyatı kullanılır.
+ * Model (çok türlü varlık hesabı):
+ *  - Yatırım hesabı TL yerine "altın/döviz" modunda olabilir (Account.asset). Böyle bir hesap aynı anda
+ *    birden çok birim tutar: ör. 5 gram 24 ayar + 10 gram 22 ayar bilezik + 2 çeyrek + 150 USD.
+ *  - Takip başlangıcındaki birikim, birim başına bir açılış kalemidir (Account.asset.opening:
+ *    { unit, qty, price }[]). Açılış değeri (openingBalance) = Σ qty × price.
+ *  - Katkı/çekim işlemi TL tutarın yanında hangi birimin (Tx.unit), ne kadar alındığını/satıldığını
+ *    (Tx.qty) ve birim fiyatını (Tx.unitPrice) saklar.
+ *  - Birim başına miktar = açılış + katkılarla alınan − çekimlerle satılan. Hiçbir anda eksiye düşemez
+ *    (elinde olmayanı satamazsın).
+ *  - Güncel değer = Σ birim miktarı × o birimin güncel ALIŞ fiyatı (kuyumcu/döviz bürosu senden bu fiyata
+ *    alır; yani bugün satsan eline geçecek tutar). Bir birimin fiyatı yoksa son işlem/açılış fiyatı.
  *  - Hedefler ve net katkı TL üzerinden ölçülmeye devam eder.
+ *  - Eski sürümün tek birimli hesapları (asset: { kind, unit } + openingQty/openingPrice) yüklenirken
+ *    src/domain/migrate.ts ile bu yapıya çevrilir.
  */
 import type { Money } from './money';
 
@@ -16,9 +23,17 @@ export type FxUnit = 'USD' | 'EUR' | 'GBP';
 export type AssetUnit = GoldUnit | FxUnit;
 export type AssetKind = 'gold' | 'fx';
 
-export interface AssetSpec {
-  kind: AssetKind;
+/** Açılış kalemi: takip başlangıcında elde olan miktar ve o günkü birim fiyat (kuruş). */
+export interface AssetLot {
   unit: AssetUnit;
+  qty: number;
+  price: Money;
+}
+
+/** Yatırım hesabının altın/döviz modu. Varlığı yeterlidir; açılış kalemleri boş olabilir. */
+export interface AssetAccount {
+  /** Birim başına en fazla bir kalem. */
+  opening: AssetLot[];
 }
 
 export const GOLD_UNITS: GoldUnit[] = ['gram', 'ceyrek', 'yarim', 'tam', 'cumhuriyet', 'bilezik22'];
@@ -28,11 +43,25 @@ export const ALL_UNITS: AssetUnit[] = [...GOLD_UNITS, ...FX_UNITS];
 export const unitKind = (u: AssetUnit): AssetKind => ((FX_UNITS as string[]).includes(u) ? 'fx' : 'gold');
 export const isAssetUnit = (v: unknown): v is AssetUnit => typeof v === 'string' && (ALL_UNITS as string[]).includes(v);
 
-export function isAssetSpec(v: unknown): v is AssetSpec {
+export const isQty = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v > 0 && v < 1e9;
+
+/** Açılış kalemi doğru mu: bilinen birim, miktar > 0, fiyat > 0 tam kuruş. */
+export function isAssetLot(v: unknown): v is AssetLot {
   if (typeof v !== 'object' || v === null) return false;
   const o = v as Record<string, unknown>;
-  return isAssetUnit(o.unit) && o.kind === unitKind(o.unit);
+  return isAssetUnit(o.unit) && isQty(o.qty) && Number.isSafeInteger(o.price) && (o.price as number) > 0;
 }
+
+/** Hesabın varlık bilgisi doğru mu: kalemler geçerli ve her birim en fazla bir kez. */
+export function isAssetAccount(v: unknown): v is AssetAccount {
+  if (typeof v !== 'object' || v === null || Array.isArray(v)) return false;
+  const o = (v as Record<string, unknown>).opening;
+  if (!Array.isArray(o) || !o.every(isAssetLot)) return false;
+  return new Set(o.map((l) => l.unit)).size === o.length;
+}
+
+/** Birimleri sabit sırada dizer (altınlar, sonra dövizler). */
+export const unitOrder = (a: AssetUnit, b: AssetUnit) => ALL_UNITS.indexOf(a) - ALL_UNITS.indexOf(b);
 
 /** Miktarın kaç ondalıkla tutulacağı: gram 0,001; sikke ve döviz 0,01. */
 export function qtyDecimals(u: AssetUnit): number {
@@ -57,8 +86,6 @@ export function roundQty(q: number, u: AssetUnit): number {
   const f = 10 ** qtyDecimals(u);
   return Math.round((q + Number.EPSILON * Math.sign(q)) * f) / f;
 }
-
-export const isQty = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v > 0 && v < 1e9;
 
 /** TL tutar ÷ birim fiyat → miktar (birimin ondalığına yuvarlı). Fiyat ≤ 0 ise null. */
 export function qtyFromAmount(amount: Money, unitPrice: Money, u: AssetUnit): number | null {

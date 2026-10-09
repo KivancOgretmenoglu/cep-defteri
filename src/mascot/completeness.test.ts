@@ -69,6 +69,24 @@ describe('her maskot her tabloda', () => {
     }
   });
 
+  it('takım elbise (Yatırım ekranı): her maskotta ceket, gömlek, kravat ve çanta tuvalde', () => {
+    for (const k of MASCOT_KEYS) {
+      const fig = compose(k, 'calm', 'suit').figure;
+      const has = (c: string) => fig.some((r) => r[4] === c);
+      expect(has('#454E6B'), `${k} ceket`).toBe(true);
+      expect(has('#FFFFFF'), `${k} gömlek`).toBe(true);
+      expect(has('#7A4A2A'), `${k} çanta`).toBe(true);
+      // Ceket boyundan yukarı taşmaz (yüz/yanak boyanmaz)
+      const neckY = CHARACTERS[k].anchors.neck.y + OY;
+      expect(fig.filter((r) => r[4] === '#454E6B').every((r) => r[1] >= neckY), k).toBe(true);
+      for (const [x, y, w, h] of fig) {
+        expect(x).toBeGreaterThanOrEqual(0);
+        expect(x + w).toBeLessThanOrEqual(32);
+        expect(y + h).toBeLessThanOrEqual(30);
+      }
+    }
+  });
+
   it('Android: simge takma adı, eklenti anahtarı, araç dizileri ve renkleri', () => {
     const manifest = read(`${MAIN}/AndroidManifest.xml`);
     const plugin = read(`${JAVA}/AppIconPlugin.java`);

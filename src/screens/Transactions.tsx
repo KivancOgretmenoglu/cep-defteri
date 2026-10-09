@@ -1,8 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import type { Tx } from '../domain/types';
 import { monthEnd, monthOf, monthStart, type MonthKey } from '../domain/dates';
-import { catName, formatMoney, lower, relativeDay } from '../i18n/format';
+import { catName, formatMoney, relativeDay } from '../i18n/format';
+import { categoryName } from '../domain/defaults';
+import { searchTxs } from '../domain/search';
+import '../ui/polish.css';
 import { useT } from '../i18n';
 import type { Key } from '../i18n/core';
 import { allTags, rangeSummary, transferKind, refundCategory } from '../domain/ledger';
@@ -31,10 +34,15 @@ export function Transactions() {
   const month: MonthKey | 'all' = filter.month ?? (filter.accountId || filter.tag ? 'all' : monthOf(today));
   const kind = filter.kind ?? 'all';
   const [q, setQ] = useState('');
+  // Telefonda arama alanı başlıktaki simgeyle açılır; geniş ekranda hep görünür (polish.css).
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (searchOpen) searchRef.current?.focus();
+  }, [searchOpen]);
 
   const list = useMemo(() => {
-    const needle = lower(q.trim());
-    return data.txs
+    const base = data.txs
       .filter((t) => month === 'all' || (t.date >= monthStart(month) && t.date <= monthEnd(month)))
       .filter((t) => {
         if (kind === 'all') return true;
@@ -48,12 +56,15 @@ export function Transactions() {
       .filter((t) => !filter.accountId || t.accountId === filter.accountId || t.toAccountId === filter.accountId)
       .filter((t) => !filter.tag || t.tags?.includes(filter.tag))
       .filter((t) => !filter.categoryId || (t.type === 'refund' ? refundCategory(t, lookups.txById) : t.categoryId) === filter.categoryId)
-      .filter((t) => {
-        if (!needle) return true;
-        const v = txView(t, lookups.accounts, lookups.cats, lookups.txById);
-        return lower(`${v.title} ${v.sub} ${formatMoney(t.amount)} ${(t.tags ?? []).map((x) => '#' + x).join(' ')}`).includes(needle);
-      })
       .sort((a, b) => (a.date === b.date ? b.seq - a.seq : a.date < b.date ? 1 : -1));
+    // Arama: not, kategori (yerel ve kayıtlı ad), hesap adları, etiketler ve tutar.
+    return searchTxs(base, q, t.lang === 'en' ? 'en' : 'tr', (x) => {
+      const v = txView(x, lookups.accounts, lookups.cats, lookups.txById);
+      const c = lookups.cats.get((x.type === 'refund' ? refundCategory(x, lookups.txById) : x.categoryId) ?? '');
+      const names = c ? `${catName(c)} ${c.name} ${categoryName(c, 'en')}` : '';
+      const accs = `${lookups.accounts.get(x.accountId)?.name ?? ''} ${x.toAccountId ? lookups.accounts.get(x.toAccountId)?.name ?? '' : ''}`;
+      return `${x.note ?? ''} ${v.title} ${v.sub} ${names} ${accs} ${(x.tags ?? []).join(' ')}`;
+    });
   }, [data, month, kind, filter.accountId, filter.categoryId, filter.tag, q, lookups, t]);
   const tagList = useMemo(() => allTags(data).slice(0, 12), [data]);
 
@@ -84,6 +95,19 @@ export function Transactions() {
     <div className="screen">
       <header className="screen-head">
         <h1>{t('nav.tx')}</h1>
+        <button
+          type="button"
+          className={`icon-btn search-toggle ${searchOpen || q ? 'is-on' : ''}`}
+          aria-label={searchOpen ? t('txs.searchClose') : t('txs.searchOpen')}
+          aria-expanded={searchOpen || !!q}
+          aria-controls="tx-search"
+          onClick={() => {
+            if (searchOpen) setQ('');
+            setSearchOpen(!searchOpen);
+          }}
+        >
+          {searchOpen ? <X size={20} /> : <Search size={20} />}
+        </button>
         {month === 'all' ? (
           <button className="chip" onClick={() => setFilter({ ...filter, month: monthOf(today) })}>{t('txs.allTime')} · {t('txs.byMonth')}</button>
         ) : (
@@ -92,9 +116,14 @@ export function Transactions() {
       </header>
 
       <div className="toolbar">
-        <label className="search">
+        <label className={`search search--collapsible ${searchOpen || q ? 'is-open' : ''}`} id="tx-search">
           <Search size={18} aria-hidden />
-          <input type="search" placeholder={t('txs.searchPh')} value={q} onChange={(e) => setQ(e.target.value)} aria-label={t('txs.searchLabel')} />
+          <input ref={searchRef} type="search" enterKeyHint="search" placeholder={t('txs.searchPh')} value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => { if (e.key === 'Escape') { setQ(''); setSearchOpen(false); } }} aria-label={t('txs.searchLabel')} />
+          {q && (
+            <button type="button" className="search__clear" aria-label={t('txs.searchClear')} onClick={() => { setQ(''); searchRef.current?.focus(); }}>
+              <X size={16} />
+            </button>
+          )}
         </label>
         <div className="chip-row chip-row--scroll" role="group" aria-label={t('txs.typeFilter')}>
           {KINDS.map((k) => (

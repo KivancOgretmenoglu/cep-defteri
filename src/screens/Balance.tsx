@@ -7,16 +7,26 @@ import { useT } from '../i18n';
 import type { Key } from '../i18n/core';
 import { balanceProjection, balanceSeries, isDaily, periodEndFor, trackingStart } from '../domain/ledger';
 import * as A from '../domain/actions';
-import { planGap } from '../domain/planLine';
+import { spendingGap, spendingPlan, type SpendingPlan, type SpendingGap } from '../domain/spendingPlan';
 import { commit } from '../store/store';
 import { mascotEvent } from '../mascot/events';
 import { BalanceChart } from '../ui/BalanceChart';
+import { SpendingChart } from '../ui/SpendingChart';
 import { Chip, HIDDEN } from '../ui/kit';
 import { go, openSheet } from '../ui/nav';
 import { useData } from '../ui/hooks';
 import { EmptyState } from '../mascot/MascotNote';
 
 type Range = '1m' | '3m' | '6m' | 'all';
+type View = 'spend' | 'balance';
+const VIEW_KEY = 'cep.chartView';
+function initialView(): View {
+  try {
+    return localStorage.getItem(VIEW_KEY) === 'balance' ? 'balance' : 'spend';
+  } catch {
+    return 'spend';
+  }
+}
 const RANGES: { v: Range; label: Key; days: number | null }[] = [
   { v: '1m', label: 'bal.1m', days: 30 },
   { v: '3m', label: 'bal.3m', days: 91 },
@@ -32,7 +42,17 @@ export function Balance() {
   const [range, setRange] = useState<Range>('1m');
   const [acc, setAcc] = useState<ID | 'all'>('all');
   const [showProj, setShowProj] = useState(true);
+  const [mode, setModeState] = useState<View>(initialView);
+  const setMode = (v: View) => {
+    setModeState(v);
+    try {
+      localStorage.setItem(VIEW_KEY, v);
+    } catch {
+      /* yalnız kolaylık */
+    }
+  };
   const start = trackingStart(data);
+  const sp = useMemo(() => spendingPlan(data, today), [data, today]);
 
   const view = useMemo(() => {
     if (!start) return null;
@@ -48,16 +68,13 @@ export function Balance() {
     for (const t of data.txs) if (idSet.has(t.accountId) || idSet.has(t.toAccountId ?? '')) txCount.set(t.date, (txCount.get(t.date) ?? 0) + 1);
     const low = history.reduce((m, p) => (p.balance < m.balance ? p : m), history[0]);
     const projLow = projection.reduce((m, p) => (p.balance < m.balance ? p : m), projection[0]);
-    // Harcama planı çizgisi: yalnız tüm günlük hesaplar görünümünde; dönem başı bakiyesiyle başlar.
-    const gap = acc === 'all' ? planGap(data, today) : null;
-    const plan = gap ? [{ date: addDays(gap.line.from, -1), balance: gap.line.start }, ...gap.line.points] : [];
-    return { history, projection, txCount, from, end, low, projLow, gap, plan };
+    return { history, projection, txCount, from, end, low, projLow };
   }, [data, today, range, acc, start, daily]);
 
   if (!view || daily.length === 0) {
     return (
       <div className="screen">
-        <header className="screen-head"><h1>{t('balance.title')}</h1></header>
+        <header className="screen-head"><h1>{t('spend.screenTitle')}</h1></header>
         <section className="card">
           <EmptyState outfit="scholar" title={t('bal.emptyTitle')}>{t('bal.emptyBody')}</EmptyState>
         </section>
@@ -76,7 +93,7 @@ export function Balance() {
       <header className="screen-head">
         <div className="head-with-back">
           <button className="icon-btn" onClick={() => go('home')} aria-label={t('common.backHome')}><ArrowLeft size={20} /></button>
-          <h1>{t('balance.title')}</h1>
+          <h1>{t('spend.screenTitle')}</h1>
         </div>
         <button
           className="icon-btn"
@@ -91,6 +108,17 @@ export function Balance() {
         </button>
       </header>
 
+      <div className="segmented spend-view" role="radiogroup" aria-label={t('spend.view')}>
+        {(['spend', 'balance'] as const).map((v) => (
+          <button key={v} role="radio" aria-checked={mode === v} className={mode === v ? 'is-on' : ''} onClick={() => setMode(v)}>
+            {t(v === 'spend' ? 'spend.tabSpend' : 'spend.tabBalance')}
+          </button>
+        ))}
+      </div>
+
+      {mode === 'spend' && sp && <SpendingCard sp={sp} gap={spendingGap(data, today, sp)} hide={hide} today={today} floor={data.settings.monthEndFloor ?? null} />}
+
+      {mode === 'balance' && <>
       <div className="chip-row" role="group" aria-label={t('csv.account')}>
         <Chip on={acc === 'all'} onClick={() => setAcc('all')}>{t('bal.allDaily')}</Chip>
         {daily.map((a) => (
@@ -118,7 +146,6 @@ export function Balance() {
         <BalanceChart
           history={view.history}
           projection={showProj ? view.projection : []}
-          plan={view.plan}
           today={today}
           hide={hide}
           txCount={view.txCount}
@@ -130,9 +157,7 @@ export function Balance() {
             <input type="checkbox" checked={showProj} onChange={(e) => setShowProj(e.target.checked)} />
             <i className="bchart__key is-proj" /> {t('bal.projection', { date: shortDate(view.end, today) })}
           </label>
-          {view.gap && <span><i className="bchart__key is-plan" /> {t('plan.legend')}</span>}
         </div>
-        {acc === 'all' && <PlanSummary gap={view.gap} hide={hide} />}
         <dl className="kv">
           <div><dt>{t('bal.lowest')}</dt><dd>{money(view.low.balance)} <small className="muted">{shortDate(view.low.date, today)}</small></dd></div>
           {showProj && view.projection.length > 1 && (
@@ -143,7 +168,6 @@ export function Balance() {
           )}
         </dl>
         <p className="note-line">{t('bal.dashedNote')}</p>
-        {view.gap && <p className="note-line">{t('plan.note')}</p>}
         <details className="details">
           <summary>{t('bal.asTable')}</summary>
           <table className="cmp-table">
@@ -156,36 +180,62 @@ export function Balance() {
           </table>
         </details>
       </section>
+      </>}
     </div>
   );
 }
 
-/** Plan çizgisine göre bugünkü durumun metin özeti (erişilebilirlik) ya da çizgi yoksa ekleme çağrısı. */
-function PlanSummary({ gap, hide }: { gap: ReturnType<typeof planGap>; hide: boolean }) {
+/** Harcama görünümü: birikimli harcama eğrisi, plan çizgisi ve bugünkü farkın metin özeti. */
+function SpendingCard({ sp, gap, hide, today, floor }: { sp: SpendingPlan; gap: SpendingGap | null; hide: boolean; today: ISODate; floor: number | null }) {
   const t = useT();
-  if (!gap) {
-    return (
-      <div className="plan-cta">
-        <p className="note-line">{t('plan.ctaHint')}</p>
-        <button className="btn btn--secondary btn--small" onClick={() => openSheet({ kind: 'floor' })}><Plus size={16} /> {t('plan.cta')}</button>
+  const total = sp.spending[sp.spending.length - 1]?.value ?? 0;
+  const money = (v: number) => (hide ? hiddenMoney() : formatMoney(v));
+  return (
+    <section className="card">
+      <div className="spend-head">
+        <div>
+          <p className="label">{t('spend.label')} · {t('spend.period', { from: shortDate(sp.from), to: shortDate(sp.to) })}</p>
+          <p className="bal-head__now">{money(total)}</p>
+        </div>
       </div>
-    );
-  }
+      <SpendingChart from={sp.from} to={sp.to} spending={sp.spending} plan={sp.plan} today={today} hide={hide} label={t('spend.chartLabel')} />
+      <div className="bal-legend">
+        <span><i className="bchart__key" /> {t('spend.actual')}</span>
+        {sp.plan.length > 0 && <span><i className="bchart__key schart__key is-plan" /> {t('spend.legendPlan')}</span>}
+      </div>
+      {gap ? <SpendSummary gap={gap} hide={hide} floor={floor} /> : (
+        <div className="plan-cta">
+          <p className="note-line">{t('spend.ctaHint')}</p>
+          <div className="btn-row" style={{ alignItems: "center" }}>
+            <button className="btn btn--secondary btn--small" onClick={() => go('budget')}><Plus size={16} /> {t('spend.cta')}</button>
+            <button className="link" onClick={() => openSheet({ kind: 'floor' })}>{t('spend.ctaFloor')}</button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function SpendSummary({ gap, hide, floor }: { gap: SpendingGap; hide: boolean; floor: number | null }) {
+  const t = useT();
   const amount = formatMoney(Math.abs(gap.diff));
   const text =
     Math.abs(gap.diff) < 100
-      ? t('plan.on')
+      ? t('spend.on')
       : gap.diff > 0
-        ? hide ? t('plan.aboveHidden') : t('plan.above', { amount })
-        : hide ? t('plan.belowHidden') : t('plan.below', { amount });
+        ? hide ? t('spend.overHidden') : t('spend.over', { amount })
+        : hide ? t('spend.underHidden') : t('spend.under', { amount });
+  const fromFloor = gap.sp.source === 'floor';
   return (
     <div className="plan-summary">
-      <p className={`plan-summary__text ${gap.state === 'below' ? 'is-below' : ''}`} role="status">{text}</p>
+      <p className={`plan-summary__text ${gap.state === 'over' ? 'is-over' : ''}`} role="status">{text}</p>
       <p className="note-line">
-        {t('plan.target')}: {hide ? hiddenMoney() : formatMoney(gap.target)} · {t('plan.floorAt', { date: shortDate(gap.line.to) })}: {formatMoney(gap.line.floor)}{' '}
-        <button className="link" onClick={() => openSheet({ kind: 'floor' })}><Pencil size={14} /> {t('plan.edit')}</button>
+        {t('spend.target')}: {hide ? hiddenMoney() : formatMoney(gap.target)} · {t('spend.allowance')} ({t(fromFloor ? 'spend.fromFloor' : 'spend.fromBudget')}): {hide ? hiddenMoney() : formatMoney(gap.sp.allowance)}{' '}
+        <button className="link" onClick={() => (fromFloor ? openSheet({ kind: 'floor' }) : go('budget'))}><Pencil size={14} /> {t('spend.edit')}</button>
       </p>
-      {!gap.line.reachable && <p className="note-line plan-summary__warn">{t('plan.unreachable')}</p>}
+      {!gap.sp.reachable && <p className="note-line plan-summary__warn">{t('spend.unreachable')}</p>}
+      <p className="note-line">{t('spend.note')}</p>
+      {fromFloor && floor !== null && <p className="note-line">{t('spend.noteFloor', { floor: hide ? hiddenMoney() : formatMoney(floor) })}</p>}
     </div>
   );
 }

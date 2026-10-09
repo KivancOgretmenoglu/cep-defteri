@@ -345,6 +345,7 @@ export const OUTFIT_ACTIONS: Partial<Record<string, ActionName[]>> = {
   newyear: ['dance'],
   bayram: ['wave'],
   pajama: ['yawn'],
+  suit: ['coins', 'nod'],
 };
 
 /** Hareketi azaltılmış görünüm: yalnız kısa bir yüz ifadesi. */

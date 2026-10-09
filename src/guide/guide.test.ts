@@ -28,13 +28,24 @@ describe('rehber adımları', () => {
 
   it('hedefi olmayan adımlar atlanır (ileri ve geri)', () => {
     const steps = filterSteps(GUIDE_STEPS, { native: false });
-    const absent = new Set(['why', 'eye', 'rings']);
+    const absent = new Set(['why', 'eye', 'reports', 'rings']);
     const present = (s: { id: string }) => !absent.has(s.id);
     const why = steps.findIndex((s) => s.id === 'why');
     expect(steps[nextPresent(steps, why, 1, present)].id).toBe('floor');
     expect(steps[nextPresent(steps, why, -1, present)].id).toBe('newCat');
     expect(nextPresent(steps, steps.length - 1, 1, () => false)).toBe(-1);
     expect(nextPresent(steps, 0, -1, () => false)).toBe(-1);
+  });
+
+  it('yatırım adımı Yatırım sekmesini, raporlar adımı Özet başlığındaki simgeyi gösterir', () => {
+    const inv = GUIDE_STEPS.find((x) => x.id === 'invest')!;
+    expect(inv.target?.names).toEqual(['invest-tab']);
+    const rep = GUIDE_STEPS.find((x) => x.id === 'reports')!;
+    expect(rep.screen).toBe('home');
+    expect(rep.target?.names).toEqual(['reports']);
+    // Başlıkta göz ile yan yana: art arda gelir
+    const s = ids(GUIDE_STEPS);
+    expect(s.indexOf('reports')).toBe(s.indexOf('eye') + 1);
   });
 
   it('her adımın her maskotta tr ve en satırı var, kısa', () => {

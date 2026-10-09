@@ -122,9 +122,9 @@ const shade = (hex: string, amt: number) => {
 };
 
 type Hat = 'beanie' | 'cap' | 'straw' | 'fedora' | 'hardhat' | 'santa' | 'visor' | 'headphones' | 'nightcap' | 'pjcap';
-type Neck = 'scarf' | 'scarfRed' | 'bowtie' | 'bowtieGold' | 'collar' | 'pjcollar';
+type Neck = 'scarf' | 'scarfRed' | 'bowtie' | 'bowtieGold' | 'collar' | 'pjcollar' | 'suit';
 type Face = 'glasses' | 'sunglasses';
-type Item = 'receipt' | 'notebook' | 'clipboard' | 'pot' | 'box' | 'book' | 'icecream';
+type Item = 'receipt' | 'notebook' | 'clipboard' | 'pot' | 'box' | 'book' | 'icecream' | 'briefcase';
 
 export interface Outfit {
   name: { tr: string; en: string };
@@ -156,6 +156,8 @@ export const OUTFITS: Record<string, Outfit> = {
   summer: { name: { tr: 'Yaz', en: 'Summer' }, face: 'sunglasses', hold: { side: 'r', item: 'icecream' } },
   /** Gece 22:00–05:59, ana ekranda (bkz. seasonal.homeOutfit) */
   pajama: { name: { tr: 'Pijama', en: 'Pajamas' }, hat: 'pjcap', neck: 'pjcollar' },
+  /** Yatırım ekranı: takım elbise + kravat + evrak çantası */
+  suit: { name: { tr: 'Takım elbise', en: 'Suit' }, neck: 'suit', hold: { side: 'l', item: 'briefcase' } },
 };
 export const HOME_OUTFITS = ['plain', 'winter', 'cap', 'headphones', 'bowtie'] as const;
 
@@ -254,7 +256,53 @@ function hatRects(ch: Character, hat: Hat, lift: boolean): R[] {
   return r;
 }
 
+/**
+ * Takım elbise: boyundan aşağı gövde pikselleri (kontur hariç) ceket rengine boyanır, ortada V yaka (gömlek),
+ * iki yanda açık renk yaka kenarı ve kravat. Gövde sütun aralığı karaktere göre (kuyruk/kanat/palamut dışarıda kalır).
+ */
+const SUIT_FIT: Record<MascotKey, { x0: number; x1: number; tie: string }> = {
+  fistik: { x0: 5, x1: 18, tie: '#C2453E' },
+  bilge: { x0: 6, x1: 17, tie: '#C2453E' },
+  ceviz: { x0: 5, x1: 15, tie: '#3E8A8C' },
+  diken: { x0: 6, x1: 17, tie: '#C2453E' },
+  karamel: { x0: 5, x1: 18, tie: '#C2453E' },
+  pamuk: { x0: 5, x1: 17, tie: '#D9487A' },
+};
+const SUIT = '#454E6B';
+const LAPEL = '#7581A6';
+const SHIRT = '#FFFFFF';
+
+function suitRects(ch: Character): R[] {
+  const fit = SUIT_FIT[ch.key];
+  const g = bodyGrid(ch.key);
+  const y0 = ch.anchors.neck.y;
+  const m = Math.round(ch.anchors.neck.x);
+  const r: R[] = [];
+  let last = y0;
+  for (let y = y0; y < g.length; y++) {
+    for (let x = fit.x0; x <= fit.x1; x++) {
+      const c = g[y][x];
+      if (!c || c === INK) continue;
+      r.push(at(x, y, 1, 1, SUIT));
+      last = y;
+    }
+  }
+  // V yaka: gömlek üçgeni, açık renk yaka kenarları, kravat (düğüm + uç)
+  const shirt: [number, number, number][] = [[0, m - 2, 4], [1, m - 2, 4], [2, m - 1, 2]];
+  for (const [dy, x, w] of shirt) if (y0 + dy <= last) r.push(at(x, y0 + dy, w, 1, SHIRT));
+  const lapel: [number, number][] = [[0, m - 3], [0, m + 2], [1, m - 3], [1, m + 2], [2, m - 2], [2, m + 1]];
+  for (const [dy, x] of lapel) if (y0 + dy <= last && g[y0 + dy][x] && g[y0 + dy][x] !== INK) r.push(at(x, y0 + dy, 1, 1, LAPEL));
+  r.push(at(m - 1, y0, 2, 1, shade(fit.tie, -0.2)));
+  const tipEnd = Math.min(last, y0 + 4);
+  if (tipEnd > y0) r.push(at(m - 1, y0 + 1, 2, tipEnd - y0, fit.tie));
+  if (tipEnd < last) r.push(at(m - 1, tipEnd + 1, 2, 1, shade(fit.tie, -0.2)));
+  // Düğme
+  if (last - y0 >= 5) r.push(at(m - 1, last - 1, 1, 1, '#2C3247'));
+  return r;
+}
+
 function neckRects(ch: Character, neck: Neck): R[] {
+  if (neck === 'suit') return suitRects(ch);
   const { x: cx, y, w } = ch.anchors.neck;
   const l = Math.round(cx - w / 2);
   const r: R[] = [];
@@ -317,6 +365,9 @@ export function itemRects(ch: Character, side: 'l' | 'r', item: Item): R[] {
       return [r(-1, 1, 6, 6, '#A57A52'), r(-1, 1, 6, 1, '#8A6440'), r(0, 3, 3, 2, CREAM), r(1, 4, 1, 1, '#3E8A8C')];
     case 'book':
       return [r(-1, 2, 7, 5, '#5B4FA0'), r(0, 2, 2, 4, CREAM), r(3, 2, 2, 4, CREAM), r(2, 2, 1, 5, '#3E3480'), r(0, 3, 2, 1, '#B9AE9B'), r(3, 4, 2, 1, '#B9AE9B')];
+    case 'briefcase':
+      // Elde sarkan evrak çantası: tutma noktasının biraz altında, gövdeye yaslı
+      return [r(0, 5, 6, 5, '#7A4A2A'), r(0, 5, 6, 1, '#9C6238'), r(0, 9, 6, 1, '#5E3820'), r(1, 4, 1, 1, '#3B2A20'), r(4, 4, 1, 1, '#3B2A20'), r(1, 3, 4, 1, '#3B2A20'), r(2, 7, 2, 1, GOLD)];
     case 'icecream':
       return [r(1, 0, 3, 3, '#F2A3C0'), r(1, 0, 1, 1, '#FBD3E2'), r(1, 3, 3, 1, '#D9A86A'), r(2, 4, 1, 3, '#D9A86A')];
   }

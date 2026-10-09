@@ -6,9 +6,9 @@ import type { Mood } from '../domain/mood';
 import type { Screen } from '../ui/nav';
 
 /** Rehber içeriği değişince artır: mevcut kullanıcılara bir kez "Yeni şeyler ekledik" kartı çıkar. */
-export const GUIDE_VERSION = 2;
+export const GUIDE_VERSION = 3;
 
-export type StepId = 'add' | 'amount' | 'newCat' | 'why' | 'eye' | 'rings' | 'floor' | 'invest' | 'widget' | 'tile' | 'settings';
+export type StepId = 'add' | 'amount' | 'newCat' | 'why' | 'eye' | 'reports' | 'rings' | 'floor' | 'invest' | 'widget' | 'tile' | 'settings';
 
 export interface GuideStep {
   id: StepId;
@@ -35,9 +35,10 @@ export const GUIDE_STEPS: GuideStep[] = [
   { id: 'newCat', screen: 'home', sheet: 'add', target: first('newCat'), mood: 'calm' },
   { id: 'why', screen: 'home', target: first('why'), mood: 'thoughtful' },
   { id: 'eye', screen: 'home', target: first('eye'), mood: 'calm' },
+  { id: 'reports', screen: 'home', target: first('reports'), mood: 'curious' },
   { id: 'rings', screen: 'home', target: first('rings', 'chart'), mood: 'happy' },
   { id: 'floor', screen: 'budget', target: first('floor'), mood: 'thoughtful' },
-  { id: 'invest', screen: 'home', target: { names: ['invest'], mode: 'union' }, mood: 'curious' },
+  { id: 'invest', screen: 'home', target: first('invest-tab'), mood: 'curious' },
   { id: 'widget', screen: 'home', body: 'widget', mood: 'happy' },
   { id: 'tile', screen: 'home', body: 'tile', apkOnly: true, mood: 'curious' },
   { id: 'settings', screen: 'home', target: first('settings'), mood: 'celebrate' },

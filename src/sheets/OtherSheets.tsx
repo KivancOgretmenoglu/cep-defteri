@@ -11,10 +11,7 @@ import { closeSheet, openSheet } from '../ui/nav';
 import { Chip, Field, FormError, MoneyInput, Segmented, Sheet, inputFromMoney } from '../ui/kit';
 import { CATEGORY_COLORS, CATEGORY_ICONS, CatIcon } from '../ui/icons';
 import { dailyAccounts, useData, useLookups } from '../ui/hooks';
-import type { AssetSpec } from '../domain/assets';
-import { parseQty, qtyToInput } from '../domain/assets';
-import { getLang } from '../i18n/lang';
-import { AssetPicker, OpeningHoldings, useManualPrice } from './AssetFields';
+import { AssetModePicker, OpeningLots, lotRowsFrom, newLotRow, parseLotRows, useManualPrice, type LotRow } from './AssetFields';
 
 const parseSigned = (raw: string) => {
   const t = raw.trim();
@@ -39,24 +36,21 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
   const [priorKnown, setPriorKnown] = useState(acc?.priorContribution != null);
   const [prior, setPrior] = useState(inputFromMoney(acc?.priorContribution ?? null));
   const [err, setErr] = useState<string | null>(null);
-  // Altın/döviz: birim ve "mevcut birikimimi ekle" (açılış miktarı + fiyat)
-  const [asset, setAsset] = useState<AssetSpec | null>(acc?.asset ?? null);
-  const [haveSome, setHaveSome] = useState(!!acc?.openingQty);
-  const [openQty, setOpenQty] = useState(acc?.openingQty && acc.asset ? qtyToInput(acc.openingQty, acc.asset.unit, getLang()) : '');
-  const [openPrice, setOpenPrice] = useState(inputFromMoney(acc?.openingPrice ?? null));
+  // Altın/döviz modu ve "mevcut birikimimi ekle" (tür tür açılış miktarı + fiyat)
+  const [assetMode, setAssetMode] = useState(!!acc?.asset);
+  const [haveSome, setHaveSome] = useState(!!acc?.asset?.opening.length);
+  const [lotRows, setLotRows] = useState<LotRow[]>(() => (acc?.asset?.opening.length ? lotRowsFrom(acc.asset.opening) : [newLotRow()]));
   const assetLocked = !!acc && (data.txs.some((t) => t.accountId === acc.id || t.toAccountId === acc.id) || data.valuations.some((v) => v.accountId === acc.id));
-  const isAsset = kind === 'investment' && !!asset;
+  const isAsset = kind === 'investment' && assetMode;
 
   function save() {
     let ob = isAsset ? 0 : parseSigned(opening);
     if (ob === null) return setErr(T('kit.amountFormat'));
-    let oq: number | null = null;
-    let op: number | null = null;
-    if (isAsset && haveSome && openQty.trim()) {
-      oq = parseQty(openQty, getLang());
-      if (oq === null) return setErr(T('err.assetQty'));
-      op = parseMoney(openPrice);
-      if (op === null) return setErr(T('err.assetPrice'));
+    let asset: A.AccountDraft['asset'] = null;
+    if (isAsset) {
+      const r = haveSome ? parseLotRows(lotRows) : { lots: [] };
+      if ('error' in r) return setErr(T(r.error));
+      asset = { opening: r.lots };
     }
     if (kind === 'person') ob = owesDir === 'none' ? 0 : owesDir === 'they' ? Math.abs(ob) : -Math.abs(ob);
     let pc: number | null = null;
@@ -64,7 +58,7 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
       pc = prior.trim() ? parseSigned(prior) : 0;
       if (pc === null || pc < 0) return setErr(T('acc.priorFormat'));
     }
-    const draft: A.AccountDraft = { name, kind, openingBalance: ob, openingDate, priorContribution: pc, asset: kind === 'investment' ? asset : null, openingQty: oq, openingPrice: op };
+    const draft: A.AccountDraft = { name, kind, openingBalance: ob, openingDate, priorContribution: pc, asset };
     const e = acc ? commit((d) => A.updateAccount(d, acc.id, draft), T('acc.updated')) : commit((d) => A.addAccount(d, draft).data, T('acc.added', { name: name.trim() }));
     if (e) setErr(e);
     else closeSheet();
@@ -115,7 +109,7 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
           ]}
         />
       )}
-      {kind === 'investment' && <AssetPicker value={asset} onChange={(v) => { if (v?.unit !== asset?.unit) setOpenPrice(''); setAsset(v); }} locked={assetLocked} />}
+      {kind === 'investment' && <AssetModePicker value={assetMode} onChange={setAssetMode} locked={assetLocked} />}
       <Field label={kind === 'person' ? T('acc.personName') : T('acc.name')}>
         <input className="input" value={name} maxLength={40} onChange={(e) => setName(e.target.value)} placeholder={kind === 'cash' ? T('acc.ph.cash') : kind === 'bank' ? T('acc.ph.bank') : kind === 'person' ? T('acc.ph.person') : T('acc.ph.inv')} />
       </Field>
@@ -130,7 +124,7 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
           <div className="chip-row">
             <Chip on={haveSome} onClick={() => setHaveSome(!haveSome)}>{T('asset.haveSome')}</Chip>
           </div>
-          {haveSome && <OpeningHoldings unit={asset!.unit} qty={openQty} price={openPrice} onQty={setOpenQty} onPrice={setOpenPrice} />}
+          {haveSome && <OpeningLots rows={lotRows} onChange={setLotRows} />}
         </div>
       ) : (
       <MoneyInput

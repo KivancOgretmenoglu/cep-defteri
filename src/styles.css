@@ -732,6 +732,10 @@ kbd {
 .acc-row--invest svg {
   color: var(--invest);
 }
+.acc-list--invest {
+  margin-top: 4px;
+  border-top: 1px dashed var(--line);
+}
 .acc-total {
   display: flex;
   justify-content: space-between;
@@ -1514,7 +1518,8 @@ fieldset.block {
   gap: 10px;
   max-width: 560px;
   padding: 8px 8px 8px 16px;
-  border-radius: var(--radius-toast);
+  /* İki satırlık bildirimde köşeler metni kesmesin */
+  border-radius: min(var(--radius-toast), 24px);
   background: var(--ink);
   color: var(--paper);
   box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.45);
@@ -2469,6 +2474,33 @@ fieldset.block {
 }
 .bchart__tip .bchart__key {
   border-top-color: var(--accent-line);
+}
+/* Harcama grafiği (birikimli harcama + kesik plan çizgisi) */
+.schart__plan {
+  stroke: var(--invest);
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+  stroke-linecap: butt;
+  opacity: 0.95;
+}
+.schart__key.is-plan {
+  border-top: 2px dashed var(--invest);
+}
+.bchart__tip .schart__key.is-plan {
+  border-top-color: var(--invest-soft);
+}
+.plan-summary__text.is-over {
+  color: var(--warn);
+}
+.spend-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+}
+.spend-view {
+  margin-bottom: 12px;
 }
 .bal-head {
   display: flex;

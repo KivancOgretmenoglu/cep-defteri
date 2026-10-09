@@ -22,3 +22,73 @@
 .inv-ev__main small.inv-ev__qty {
   font-variant-numeric: tabular-nums;
 }
+
+/* Tür tür açılış kalemleri (hesap sayfası) */
+.lot-rows {
+  list-style: none;
+  margin: 8px 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.lot-row {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  background: var(--surface);
+}
+.lot-row__head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.lot-row__unit {
+  flex: 1;
+  min-width: 0;
+}
+.chip__qty {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}
+
+/* Yatırım ekranı: tür tür miktar ve değer */
+.asset-breakdown {
+  list-style: none;
+  margin: 8px 0 4px;
+  padding: 0;
+}
+.asset-breakdown__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 7px 0;
+  border-top: 1px solid var(--line);
+}
+.asset-breakdown__row:first-child {
+  border-top: 0;
+}
+.asset-breakdown__name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-weight: 600;
+}
+.asset-breakdown__name small {
+  font-weight: 400;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.asset-breakdown__val {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--invest);
+}
+.asset-breakdown__row--total {
+  border-top: 1.5px solid var(--line-strong);
+}
+.asset-breakdown__row--total .asset-breakdown__val {
+  color: inherit;
+}

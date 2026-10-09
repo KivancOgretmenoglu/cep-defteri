@@ -11,10 +11,11 @@ import { commit } from '../store/store';
 import { Amount, Chip, Progress, SectionHead } from '../ui/kit';
 import { openSheet } from '../ui/nav';
 import { useData } from '../ui/hooks';
-import { MascotNote, EmptyState } from '../mascot/MascotNote';
+import { MascotNote, EmptyState, LiveMascot } from '../mascot/MascotNote';
 import { refreshPrices, usePrices } from '../store/prices';
-import { agoText, formatQty, unitShort } from '../sheets/AssetFields';
-import type { AssetHolding } from '../domain/ledger';
+import { agoText, formatQty, unitName, unitShort } from '../sheets/AssetFields';
+import type { AssetHolding, AssetPosition } from '../domain/ledger';
+import { roundQty, unitOrder, type AssetLot, type AssetUnit } from '../domain/assets';
 
 export function Invest() {
   const t = useT();
@@ -38,25 +39,27 @@ export function Invest() {
     const only = { ...data, txs: data.txs.filter((t) => t.type === 'transfer' && (t.accountId === accountId || t.toAccountId === accountId)) };
     const m = rangeSummary(only, monthStart(month), monthEnd(month));
     const events = [
-      ...only.txs.map((t) => ({ kind: transferKind(t, accounts), date: t.date, seq: t.seq, amount: t.amount, id: t.id, note: t.note, other: accounts.get(t.accountId === accountId ? t.toAccountId! : t.accountId)?.name, qty: t.qty, unitPrice: t.unitPrice })),
+      ...only.txs.map((t) => ({ kind: transferKind(t, accounts), date: t.date, seq: t.seq, amount: t.amount, id: t.id, note: t.note, other: accounts.get(t.accountId === accountId ? t.toAccountId! : t.accountId)?.name, unit: t.unit, qty: t.qty, unitPrice: t.unitPrice, lots: undefined as AssetLot[] | undefined })),
       // Altın/döviz hesabında elle değer kaydı yoktur; geçmiş noktaları işlemlerin kendisidir.
-      ...st.history.filter((v) => !st.asset || v.isOpening).map((v) => ({ kind: v.isOpening ? 'opening' : 'value', date: v.date, seq: v.seq, amount: v.value, id: v.id ?? 'opening', note: undefined, other: undefined, qty: v.isOpening ? st.account.openingQty : undefined, unitPrice: v.isOpening ? st.account.openingPrice : undefined })),
+      ...st.history.filter((v) => !st.asset || v.isOpening).map((v) => ({ kind: v.isOpening ? 'opening' : 'value', date: v.date, seq: v.seq, amount: v.value, id: v.id ?? 'opening', note: undefined, other: undefined, unit: undefined, qty: undefined, unitPrice: undefined, lots: v.isOpening ? st.account.asset?.opening : undefined })),
     ].sort((a, b) => (a.date === b.date ? b.seq - a.seq : a.date < b.date ? 1 : -1));
     const goals = data.goals.filter((g) => g.accountId === accountId).map((g) => goalProgress(data, g)!);
     return { st, m, events, goals };
   }, [data, accountId, month, book]);
-  // Tüm altın/döviz hesaplarındaki miktarlar: "12,5 gram · 3 çeyrek"
-  const holdings = data.accounts
-    .filter((a) => isInvestment(a) && a.asset && !a.archived)
-    .map((a) => investmentState(data, a.id, book)!.asset!)
-    .filter((h) => h.qty > 0);
+  // Tüm altın/döviz hesaplarındaki miktarlar, tür tür toplanmış: "15 gram · 3 çeyrek · 150 USD"
+  const totals = new Map<AssetUnit, number>();
+  for (const a of data.accounts) {
+    if (!isInvestment(a) || !a.asset || a.archived) continue;
+    for (const p of investmentState(data, a.id, book)!.asset!.positions) totals.set(p.unit, (totals.get(p.unit) ?? 0) + p.qty);
+  }
+  const holdings = [...totals].sort((a, b) => unitOrder(a[0], b[0])).map(([unit, qty]) => ({ unit, qty: roundQty(qty, unit) }));
 
   if (!accountId || !view) {
     return (
       <div className="screen">
         <header className="screen-head"><h1>{t('nav.invest')}</h1></header>
         <section className="card">
-          <EmptyState outfit="gardener" mood="curious" title={t('inv.emptyTitle')} action={<button className="btn btn--primary" onClick={() => openSheet({ kind: 'account', kindPreset: 'investment' })}>{t('home.addInvestAccount')}</button>}>
+          <EmptyState outfit="suit" mood="curious" title={t('inv.emptyTitle')} action={<button className="btn btn--primary" onClick={() => openSheet({ kind: 'account', kindPreset: 'investment' })}>{t('home.addInvestAccount')}</button>}>
             {t('inv.emptyBody')}
           </EmptyState>
         </section>
@@ -70,14 +73,18 @@ export function Invest() {
   return (
     <div className="screen">
       <header className="screen-head">
-        <h1>{t('nav.invest')}</h1>
+        <div className="head-with-back invest-head">
+          <h1>{t('nav.invest')}</h1>
+          {/* Yatırım ekranının maskotu takım elbiseli; toplamlar gizliyse gizli ajan */}
+          <LiveMascot outfit={data.settings.hideTotals ? 'spy' : 'suit'} mood="happy" size={56} />
+        </div>
         {invAccounts.length > 1 && (
           <div className="chip-row">
             {invAccounts.map((a) => <Chip key={a.id} on={a.id === accountId} onClick={() => setSel(a.id)}>{a.name}</Chip>)}
           </div>
         )}
         {holdings.length > 0 && !data.settings.hideTotals && (
-          <p className="muted invest-holdings">{t('asset.holding')}: {holdings.map((h) => formatQty(t, h.qty, h.spec.unit)).join(' · ')}</p>
+          <p className="muted invest-holdings">{t('asset.holding')}: {holdings.map((h) => formatQty(t, h.qty, h.unit)).join(' · ')}</p>
         )}
       </header>
 
@@ -89,7 +96,7 @@ export function Invest() {
           </div>
           <Amount value={st.currentValue} size="xl" tone="invest" hide={data.settings.hideTotals} />
           {st.asset ? (
-            <AssetLine asset={st.asset} failed={prices.failed} loading={prices.loading} hide={data.settings.hideTotals} />
+            <AssetBreakdown asset={st.asset} failed={prices.failed} loading={prices.loading} hide={data.settings.hideTotals} />
           ) : (
           <p className="invest-hero__date">
             {st.lastValuation.isOpening ? t('inv.openingValue') : t('inv.lastValue')}: {data.settings.hideTotals ? hiddenMoney() : formatMoney(st.lastValuation.value)} · {shortDate(st.lastValuation.date, today)}
@@ -121,7 +128,7 @@ export function Invest() {
             <MascotNote
               compact
               size={64}
-              outfit="gardener"
+              outfit={data.settings.hideTotals ? 'spy' : 'suit'}
               mood={reached ? 'celebrate' : 'happy'}
               text={reached ? t('inv.goalDone', { goal: reached.goal.title, amount: formatMoney(reached.current) }) : t('inv.goalNear', { goal: near!.goal.title, pct: pctForm(near!.pct, 'locYou') })}
               why={t('inv.goalWhy')}
@@ -149,7 +156,7 @@ export function Invest() {
 
         <section className="card" aria-labelledby="chart-h">
           <SectionHead id="chart-h" title={t('inv.chartTitle')} />
-          <ValueChart history={[...st.history.map((h) => ({ date: h.date, value: h.value })), ...(st.asset && st.asset.price !== null ? [{ date: today, value: st.currentValue }] : [])]} />
+          <ValueChart history={[...st.history.map((h) => ({ date: h.date, value: h.value })), ...(st.asset && st.asset.positions.some((p) => p.price !== null) ? [{ date: today, value: st.currentValue }] : [])]} />
           <p className="note-line">{st.asset ? t('asset.chartNote') : t('inv.chartNote')}</p>
         </section>
 
@@ -165,8 +172,11 @@ export function Invest() {
                   {e.kind === 'investment-internal' && <>{t('inv.ev.internal')}</>}
                   {e.kind === 'value' && <>{t('inv.ev.value')} <small>{t('inv.ev.valueHint')}</small></>}
                   {e.kind === 'opening' && <>{t('inv.ev.opening')} <small>{t('inv.ev.openingHint')}</small></>}
-                  {st.asset && e.qty !== undefined && e.unitPrice !== undefined && (
-                    <small className="inv-ev__qty">{e.kind === 'opening' ? t('asset.ev.openingQty', { qty: formatQty(t, e.qty, st.asset.spec.unit) }) : t('asset.ev.qty', { qty: formatQty(t, e.qty, st.asset.spec.unit), unit: unitShort(t, st.asset.spec.unit), price: formatMoney(e.unitPrice) })}</small>
+                  {st.asset && e.unit && e.qty !== undefined && e.unitPrice !== undefined && (
+                    <small className="inv-ev__qty">{unitName(t, e.unit)}: {t('asset.ev.qty', { qty: formatQty(t, e.qty, e.unit), unit: unitShort(t, e.unit), price: formatMoney(e.unitPrice) })}</small>
+                  )}
+                  {st.asset && e.lots && e.lots.length > 0 && (
+                    <small className="inv-ev__qty">{t('asset.ev.openingQty', { qty: e.lots.map((l) => formatQty(t, l.qty, l.unit)).join(' + ') })}</small>
                   )}
                 </span>
                 <span className="inv-ev__amt">
@@ -188,25 +198,43 @@ export function Invest() {
   );
 }
 
-/** Altın/döviz hesabı: miktar ve değerlemede kullanılan fiyat (kaynağı ve yaşıyla). */
-function AssetLine({ asset, failed, loading, hide }: { asset: AssetHolding; failed: boolean; loading: boolean; hide: boolean }) {
+/** Altın/döviz hesabı: tür tür miktar ve değer, toplam, fiyatların yaşı ve kaynağı, yenile. */
+function AssetBreakdown({ asset, failed, loading, hide }: { asset: AssetHolding; failed: boolean; loading: boolean; hide: boolean }) {
   const t = useT();
-  const unit = asset.spec.unit;
-  const u = unitShort(t, unit);
-  const at = asset.priceAt;
-  const ago = typeof at === 'number' ? agoText(t, at) : typeof at === 'string' ? shortDate(at) : '';
-  const src = asset.priceSource === 'estimate' ? t('asset.src.estimate') : asset.priceSource === 'manual' ? t('asset.src.manual') : asset.priceSource === 'last-tx' ? t('asset.src.lastTx') : '';
+  const srcText = (p: AssetPosition) => (p.priceSource === 'estimate' ? t('asset.src.estimate') : p.priceSource === 'manual' ? t('asset.src.manual') : p.priceSource === 'last-tx' ? t('asset.src.lastTx') : '');
+  // En eski güncel fiyat zamanı: "Fiyatlar: 5 dk önce"
+  const liveAts = asset.positions.map((p) => p.priceAt).filter((x): x is number => typeof x === 'number');
+  const oldest = liveAts.length ? Math.min(...liveAts) : null;
+  if (asset.positions.length === 0) return <p className="note-line">{t('asset.noHoldingsYet')}</p>;
   return (
     <>
-      <p className="invest-hero__qty"><b>{hide ? '•••' : formatQty(t, asset.qty, unit)}</b></p>
-      {asset.price !== null && (
-        <p className="invest-hero__date">
-          {t('asset.priceLine', { unit: u, price: formatMoney(asset.price), ago })}
-          {src && <> · {src}</>}
-          {' '}
-          <button className="link link--small" disabled={loading} onClick={() => void refreshPrices({ force: true })}>{loading ? t('asset.refreshing') : t('asset.refresh')}</button>
-        </p>
-      )}
+      <ul className="asset-breakdown" aria-label={t('asset.breakdown')}>
+        {asset.positions.map((p) => {
+          const src = p.priceSource !== 'live' ? srcText(p) : '';
+          return (
+            <li key={p.unit} className="asset-breakdown__row">
+              <span className="asset-breakdown__name">
+                {unitName(t, p.unit)}
+                <small>
+                  {p.price !== null ? t('asset.ev.qty', { qty: hide ? '•••' : formatQty(t, p.qty, p.unit), unit: unitShort(t, p.unit), price: formatMoney(p.price) }) : `${hide ? '•••' : formatQty(t, p.qty, p.unit)} · ${t('asset.noPriceShort')}`}
+                  {src && <> · {src}</>}
+                </small>
+              </span>
+              <span className="asset-breakdown__val">{hide ? hiddenMoney() : p.price !== null ? formatMoney(p.value) : '—'}</span>
+            </li>
+          );
+        })}
+        {asset.positions.length > 1 && (
+          <li className="asset-breakdown__row asset-breakdown__row--total">
+            <span className="asset-breakdown__name">{t('asset.total')}</span>
+            <span className="asset-breakdown__val">{hide ? hiddenMoney() : formatMoney(asset.value)}</span>
+          </li>
+        )}
+      </ul>
+      <p className="invest-hero__date">
+        {oldest !== null && <>{t('asset.pricesAgo', { ago: agoText(t, oldest) })} </>}
+        <button className="link link--small" disabled={loading} onClick={() => void refreshPrices({ force: true })}>{loading ? t('asset.refreshing') : t('asset.refresh')}</button>
+      </p>
       {failed && <p className="note-line">{t('asset.fetchFailed')}</p>}
       <p className="note-line">{t('asset.valueNote')}</p>
     </>

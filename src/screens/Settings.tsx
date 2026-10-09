@@ -23,6 +23,7 @@ import { appIconSupported, setAppIcon } from '../native/appIcon';
 import { MascotSettings } from '../mascot/MascotSettings';
 import { startGuide } from '../guide/state';
 import { characterOf } from '../mascot/characters';
+import { FeedbackSettings } from '../ui/Feedback';
 
 async function download(name: string, content: string, type: string): Promise<boolean> {
   try {
@@ -246,6 +247,8 @@ export function Settings() {
             </>
           )}
         </section>
+
+        <FeedbackSettings />
 
         {mode === 'real' && (
           <section className="card" aria-labelledby="s-wipe">

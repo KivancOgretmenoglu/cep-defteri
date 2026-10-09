@@ -36,9 +36,9 @@ const NAV: { screen: Screen; label: Key; icon: typeof House; phone: boolean }[] 
   { screen: 'home', label: 'nav.home', icon: House, phone: true },
   { screen: 'tx', label: 'nav.tx', icon: ListOrdered, phone: true },
   { screen: 'budget', label: 'nav.budget', icon: CalendarRange, phone: true },
-  { screen: 'invest', label: 'nav.invest', icon: Sprout, phone: false },
+  { screen: 'invest', label: 'nav.invest', icon: Sprout, phone: true },
   { screen: 'people', label: 'nav.people', icon: HandCoins, phone: false },
-  { screen: 'reports', label: 'nav.reports', icon: ChartColumn, phone: true },
+  { screen: 'reports', label: 'nav.reports', icon: ChartColumn, phone: false },
   { screen: 'settings', label: 'nav.settings', icon: Gear, phone: false },
 ];
 
@@ -191,7 +191,7 @@ export function App() {
           <ul>
             {NAV.map((n) => (
               <li key={n.screen}>
-                <button data-tab={n.screen} data-tour={n.screen === 'settings' ? 'settings' : undefined} className={`rail__item ${screen === n.screen ? 'is-on' : ''}`} aria-current={screen === n.screen ? 'page' : undefined} onClick={() => go(n.screen)}>
+                <button data-tab={n.screen} data-tour={n.screen === 'settings' ? 'settings' : n.screen === 'invest' ? 'invest-tab' : n.screen === 'reports' ? 'reports' : undefined} className={`rail__item ${screen === n.screen ? 'is-on' : ''}`} aria-current={screen === n.screen ? 'page' : undefined} onClick={() => go(n.screen)}>
                   <n.icon size={20} aria-hidden /> {t(n.label)}
                 </button>
               </li>
@@ -238,7 +238,7 @@ export function App() {
             <Plus size={28} strokeWidth={2.5} />
           </button>
           {NAV.filter((n) => n.phone).slice(2).map((n) => (
-            <button key={n.screen} data-tab={n.screen} className={`tabbar__item ${screen === n.screen ? 'is-on' : ''}`} aria-current={screen === n.screen ? 'page' : undefined} onClick={() => go(n.screen)}>
+            <button key={n.screen} data-tab={n.screen} data-tour={n.screen === 'invest' ? 'invest-tab' : undefined} className={`tabbar__item ${screen === n.screen ? 'is-on' : ''}`} aria-current={screen === n.screen ? 'page' : undefined} onClick={() => go(n.screen)}>
               <n.icon size={22} aria-hidden />
               <span>{t(n.label)}</span>
             </button>

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Download, ChevronRight, ScrollText } from 'lucide-react';
+import { ArrowLeft, Download, ChevronRight, ScrollText } from 'lucide-react';
 import type { Data, ID } from '../domain/types';
 import type { Money } from '../domain/money';
 import { addMonths, dayOfMonth, monthOf, type MonthKey } from '../domain/dates';
@@ -96,7 +96,7 @@ export function Reports() {
   if (data.txs.length === 0) {
     return (
       <div className="screen">
-        <header className="screen-head"><h1>{t('nav.reports')}</h1></header>
+        <header className="screen-head"><div className="head-with-back"><button className="icon-btn only-phone" onClick={() => go('home')} aria-label={t('common.backHome')}><ArrowLeft size={20} /></button><h1>{t('nav.reports')}</h1></div></header>
         <section className="card">
           <EmptyState outfit="scholar" title={t('rep.emptyTitle')}>{t('rep.emptyBody')}</EmptyState>
         </section>
@@ -107,7 +107,7 @@ export function Reports() {
   return (
     <div className="screen">
       <header className="screen-head">
-        <h1>{t('nav.reports')}</h1>
+        <div className="head-with-back"><button className="icon-btn only-phone" onClick={() => go('home')} aria-label={t('common.backHome')}><ArrowLeft size={20} /></button><h1>{t('nav.reports')}</h1></div>
         <MonthSwitcher month={month} onChange={setMonth} max={current} />
       </header>
 

@@ -2,12 +2,13 @@
  * Misafir maskot sahnesi: küçük köşe konuğu. Çizim gerçek gövdelerden (render.ts → compose) gelir;
  * animasyonlar cameo.css'te adım adımdır, "hareketi azalt" tercihinde durağan poz kalır.
  */
-import { memo, useEffect, type ReactNode } from 'react';
+import { memo, useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { characterOf, type MascotKey } from '../characters';
 import { compose, OX, OY, type MascotLive, type R } from '../render';
 import { captionFor, SCENES, srLine, type SceneId } from './scenes';
 import { useCameo, type ActiveCameo } from './useCameo';
+import { CHAT_LINE_MS } from './chat';
 import './cameo.css';
 
 type Pose = 'open' | 'closed' | 'happy' | 'down';
@@ -163,6 +164,8 @@ function Art({ id, g }: { id: SceneId; g: MascotKey[] }) {
           </g>
         </svg>
       );
+    case 'chat':
+      return null;
     case 'coffee':
       return (
         <svg className="cameo__art" viewBox="0 0 28 26" width={SCENES.coffee.w} height={Math.round((SCENES.coffee.w * 26) / 28)} aria-hidden>
@@ -182,7 +185,56 @@ function Art({ id, g }: { id: SceneId; g: MascotKey[] }) {
 
 const T = { dismiss: { tr: 'Misafir maskotu kapat', en: 'Dismiss guest mascot' } };
 
+/**
+ * Sohbet: misafir, ana ekrandaki maskot notunun baloncuğuna (sağ alt köşe, ana maskotun karşısı) yürüyerek gelir;
+ * satırlar baloncuğun üstünde sırayla görünür (misafir, ana maskot, …), sonra misafir el sallayıp gider.
+ * Hareketi azalt tercihinde yürüme/zıplama yok; satırlar yine sırayla değişir.
+ */
+function ChatScene({ c, onDismiss }: { c: ActiveCameo; onDismiss: () => void }) {
+  const lines = c.chat ?? [];
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (i >= lines.length) return;
+    const id = setTimeout(() => setI((n) => n + 1), CHAT_LINE_MS);
+    return () => clearTimeout(id);
+  }, [i, lines.length]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onDismiss();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onDismiss]);
+  const bubble = c.anchor?.querySelector<HTMLElement>('.mascot-note__bubble');
+  if (!bubble) return null;
+  const guest = c.guests[0];
+  const ch = characterOf(guest);
+  const line = lines[i];
+  const waving = i >= lines.length;
+  const speaker = line ? (line.who === 'guest' ? ch.name[c.lang] : null) : null;
+  return createPortal(
+    <div className={`cameo-chat ${c.leaving ? 'is-gone' : ''} ${waving ? 'is-waving' : ''}`} data-scene="chat" style={{ ['--g-soft' as string]: ch.palette.soft, ['--g-line' as string]: ch.palette.line, ['--g-accent' as string]: ch.palette.accent }}>
+      <span className="sr-only" role="status" aria-live="polite">{line ? `${speaker ?? ''}${speaker ? ': ' : ''}${line.text}` : ''}</span>
+      <button type="button" className="cameo-chat__guest" tabIndex={-1} aria-hidden onClick={onDismiss} title={T.dismiss[c.lang]}>
+        <svg viewBox="0 0 24 24" width={SCENES.chat.w} height={SCENES.chat.w} aria-hidden>
+          <Sprite who={guest} pose={waving || line?.who === 'guest' ? 'happy' : 'open'} x={0} y={0} cls={waving ? 'cm-hop' : line?.who === 'guest' ? 'cm-talk' : undefined} />
+        </svg>
+      </button>
+      {line && (
+        <button type="button" tabIndex={-1} aria-hidden key={i} className={`cameo-chat__line is-${line.who}`} onClick={onDismiss} title={T.dismiss[c.lang]}>
+          {speaker && <em>{speaker}</em>}
+          {line.text}
+        </button>
+      )}
+    </div>,
+    bubble,
+  );
+}
+
 function Scene({ c, onDismiss }: { c: ActiveCameo; onDismiss: () => void }) {
+  if (c.id === 'chat') return <ChatScene c={c} onDismiss={onDismiss} />;
+  return <CornerScene c={c} onDismiss={onDismiss} />;
+}
+
+function CornerScene({ c, onDismiss }: { c: ActiveCameo; onDismiss: () => void }) {
   const def = SCENES[c.id];
   const names = c.guests.map((k) => characterOf(k).name[c.lang]).join(c.lang === 'tr' ? ' & ' : ' & ');
   const ledge = def.place === 'ledge';

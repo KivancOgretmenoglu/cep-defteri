@@ -7,6 +7,7 @@ import { defaultsEn } from './defaults.en';
 import { ringsEn } from './rings.en';
 import { planEn } from './plan.en';
 import { guideEn } from './guide.en';
+import { polishEn } from './polish.en';
 
 export const en: Dict = {
   ...hintsEn,
@@ -1014,5 +1015,6 @@ export const en: Dict = {
   ...ringsEn,
   ...planEn,
   ...guideEn,
+  ...polishEn,
   // @end
 };

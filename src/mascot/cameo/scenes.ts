@@ -5,8 +5,9 @@
 import type { Screen } from '../../ui/nav';
 import { CHARACTERS, type Lang, type MascotKey } from '../characters';
 
-export type SceneId = 'hide' | 'cards' | 'coins' | 'sleep' | 'ball' | 'coffee';
-export type Place = 'ledge' | 'br' | 'bl';
+export type SceneId = 'hide' | 'cards' | 'coins' | 'sleep' | 'ball' | 'coffee' | 'chat';
+/** note: ana ekrandaki maskot notunun yanında (sohbet) */
+export type Place = 'ledge' | 'br' | 'bl' | 'note';
 
 export interface SceneDef {
   id: SceneId;
@@ -32,6 +33,8 @@ export const SCENES: Record<SceneId, SceneDef> = {
   ball: { id: 'ball', screens: ['tx'], hours: [[6, 24]], pref: ['fistik', 'karamel', 'pamuk', 'ceviz', 'diken', 'bilge'], guests: 1, place: 'br', w: 84 },
   // Kahve: sabah ya da akşam
   coffee: { id: 'coffee', screens: ['home', 'budget', 'reports', 'invest'], hours: [[6, 10], [17, 21]], pref: ['diken', 'pamuk', 'fistik', 'bilge', 'karamel', 'ceviz'], guests: 1, place: 'bl', w: 84 },
+  // Sohbet: misafir ana maskotun yanına gelir, kısa bir karşılıklı konuşma (chat.ts). Misafir rastgele seçilir.
+  chat: { id: 'chat', screens: ['home'], hours: [[7, 23]], pref: ['karamel', 'pamuk', 'ceviz', 'bilge', 'diken', 'fistik'], guests: 1, place: 'note', w: 48 },
 };
 /** Sahnelerin çıkabildiği ekranlar */
 export const CAMEO_SCREENS: Screen[] = ['home', 'tx', 'budget', 'reports', 'invest'];
@@ -39,7 +42,7 @@ export const SCENE_IDS = Object.keys(SCENES) as SceneId[];
 
 /** Hata ayıklama: ?cameo=sleep gibi kısa adlar (ve kendi kimlikleri) */
 export const FORCE_ALIASES: Record<string, SceneId> = {
-  sleep: 'sleep', sleeper: 'sleep', cards: 'cards', coins: 'coins', hide: 'hide', hider: 'hide', ball: 'ball', coffee: 'coffee',
+  sleep: 'sleep', sleeper: 'sleep', cards: 'cards', coins: 'coins', hide: 'hide', hider: 'hide', ball: 'ball', coffee: 'coffee', chat: 'chat', talk: 'chat',
 };
 
 export const hourFits = (def: SceneDef, hour: number) => def.hours.some(([a, b]) => hour >= a && hour < b);
@@ -76,6 +79,8 @@ export function captionFor(id: SceneId, guests: MascotKey[], lang: Lang, hour: n
     }
     case 'ball':
       return tr ? 'Kısa bir mola. Top oynayalım mı?' : 'Quick break. Shall we play ball?';
+    case 'chat':
+      return tr ? 'Selam! Bir uğrayayım dedim.' : 'Hi! Thought I would drop by.';
     case 'coffee':
       if (hour < 12) return tr ? 'Günaydın! İlk kahve benden.' : 'Good morning! First coffee is on me.';
       return tr ? 'Kahve molası. Sen de bir nefes al!' : 'Coffee break. Take a breath too!';

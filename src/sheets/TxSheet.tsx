@@ -572,7 +572,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
                   account={accounts.get(invId)!}
                   dir={dir}
                   amount={amount}
-                  initial={editing?.qty !== undefined && editing.unitPrice && init.tab === 'invest' && init.dir === dir && (editing.toAccountId === invId || editing.accountId === invId) ? { qty: editing.qty, unitPrice: editing.unitPrice } : undefined}
+                  initial={editing?.qty !== undefined && editing.unit && editing.unitPrice && init.tab === 'invest' && init.dir === dir && (editing.toAccountId === invId || editing.accountId === invId) ? { unit: editing.unit, qty: editing.qty, unitPrice: editing.unitPrice } : undefined}
                   editingTxId={editing?.id}
                   onChange={setAssetVal}
                 />

@@ -4,7 +4,7 @@
  */
 import type { Account, Category, Data, Goal, ID, Plan, Tx, Valuation } from './types';
 import { sum, type Money } from './money';
-import { roundQty, valueOf, type AssetSpec } from './assets';
+import { roundQty, unitOrder, valueOf, type AssetUnit } from './assets';
 import type { PriceBook, PriceSource } from './prices';
 import {
   addDays, addMonths, dayInMonth, weekStart, dayOfMonth, daysInMonth, diffDays, inRange, monthEnd, monthOf, monthStart,
@@ -117,12 +117,12 @@ export interface InvestmentState {
   /** currentValue − basis (taban biliniyorsa). Getiri oranı uydurulmaz. */
   valueDiff: Money | null;
   history: ValuationPoint[];
-  /** Yalnız altın/döviz hesabı: elde tutulan miktar ve değerlemede kullanılan fiyat. */
+  /** Yalnız altın/döviz hesabı: birim başına miktar, fiyat ve değer. */
   asset?: AssetHolding;
 }
 
-export interface AssetHolding {
-  spec: AssetSpec;
+export interface AssetPosition {
+  unit: AssetUnit;
   /** Açılış + alınan − satılan (birim). */
   qty: number;
   /** Değerlemede kullanılan birim fiyat (alış); hiç fiyat yoksa null. */
@@ -131,28 +131,90 @@ export interface AssetHolding {
   priceAt: number | ISODate | null;
   /** 'last-tx': güncel fiyat yok, son işlem (veya açılış) fiyatı kullanıldı. */
   priceSource: PriceSource | 'last-tx' | null;
+  /** qty × price (fiyat yoksa 0). */
+  value: Money;
+}
+
+export interface AssetHolding {
+  /** Elde olan birimler (miktar > 0), sabit sırada (altınlar, sonra dövizler). */
+  positions: AssetPosition[];
+  /** Σ pozisyon değeri. */
+  value: Money;
+}
+
+const byTime = (a: Point, b: Point) => (a.date === b.date ? a.seq - b.seq : a.date < b.date ? -1 : 1);
+
+/** Hesaba giren/çıkan altın/döviz işlemleri (birimi olanlar), kronolojik. */
+export function assetTxsOf(data: Data, accountId: ID, exceptTxId?: ID): Tx[] {
+  return data.txs
+    .filter((t) => t.type === 'transfer' && t.unit !== undefined && t.qty !== undefined && t.id !== exceptTxId && (t.toAccountId === accountId || t.accountId === accountId))
+    .sort(byTime);
+}
+
+/** İşlemin hesaptaki miktar etkisi (+ alındı, − satıldı). */
+const qtyEffect = (t: Tx, accountId: ID) => (t.toAccountId === accountId ? t.qty! : -t.qty!);
+
+/** Hesabın birim başına güncel miktarı (isteğe bağlı olarak bir işlem hariç). Sıfır olanlar da döner. */
+export function assetQuantities(data: Data, account: Account, exceptTxId?: ID): Map<AssetUnit, number> {
+  const q = new Map<AssetUnit, number>();
+  for (const l of account.asset?.opening ?? []) q.set(l.unit, l.qty);
+  for (const t of assetTxsOf(data, account.id, exceptTxId)) q.set(t.unit!, (q.get(t.unit!) ?? 0) + qtyEffect(t, account.id));
+  for (const [u, v] of q) q.set(u, roundQty(v, u));
+  return q;
 }
 
 /**
- * Varlık hesabının miktarı ve son bilinen işlem fiyatı. Miktar, katkıda +qty, çekimde −qty.
+ * Belirli bir anda (tarih + sıra) o birimden çekilebilecek en fazla miktar: o andaki miktar ile sonraki
+ * her andaki miktarın en küçüğü (sonraki bir çekim karşılıksız kalmasın diye).
+ */
+export function availableQty(data: Data, account: Account, unit: AssetUnit, at: { date: ISODate; seq: number }, exceptTxId?: ID): number {
+  let run = account.asset?.opening.find((l) => l.unit === unit)?.qty ?? 0;
+  let atPoint: number | null = null;
+  let min = Infinity;
+  for (const t of assetTxsOf(data, account.id, exceptTxId)) {
+    if (t.unit !== unit) continue;
+    if (atPoint === null && after(t, at)) atPoint = run;
+    run += qtyEffect(t, account.id);
+    if (atPoint !== null) min = Math.min(min, run);
+  }
+  if (atPoint === null) atPoint = run;
+  return Math.max(0, roundQty(Math.min(atPoint, min), unit));
+}
+
+/** Kronolojik yürüyüşte bir birimin miktarının eksiye düştüğü ilk işlem; yoksa null. */
+export function assetOverdraft(data: Data, account: Account): { tx: Tx; unit: AssetUnit } | null {
+  const q = new Map<AssetUnit, number>();
+  for (const l of account.asset?.opening ?? []) q.set(l.unit, l.qty);
+  for (const t of assetTxsOf(data, account.id)) {
+    const v = roundQty((q.get(t.unit!) ?? 0) + qtyEffect(t, account.id), t.unit!);
+    if (v < 0) return { tx: t, unit: t.unit! };
+    q.set(t.unit!, v);
+  }
+  return null;
+}
+
+/**
+ * Varlık hesabının birim başına miktarı, fiyatı ve değeri. Miktar, katkıda +qty, çekimde −qty.
+ * Fiyat: önce `prices` (güncel alış), yoksa o birimin son işlem/açılış fiyatı.
  * (Yatırım hesapları arası transfer zaten yasak; kişi ↔ yatırım da.)
  */
 export function assetHolding(data: Data, account: Account, prices?: PriceBook): AssetHolding | undefined {
-  const spec = account.asset;
-  if (!spec || account.kind !== 'investment') return undefined;
-  let qty = account.openingQty ?? 0;
-  let last: { date: ISODate; seq: number; price: Money } | null = account.openingPrice ? { date: account.openingDate, seq: 0, price: account.openingPrice } : null;
-  for (const t of data.txs) {
-    if (t.type !== 'transfer' || t.qty === undefined) continue;
-    if (t.toAccountId === account.id) qty += t.qty;
-    else if (t.accountId === account.id) qty -= t.qty;
-    else continue;
-    if (t.unitPrice && (!last || after(t, last))) last = { date: t.date, seq: t.seq, price: t.unitPrice };
+  if (!account.asset || account.kind !== 'investment') return undefined;
+  const last = new Map<AssetUnit, { date: ISODate; seq: number; price: Money }>();
+  for (const l of account.asset.opening) last.set(l.unit, { date: account.openingDate, seq: 0, price: l.price });
+  for (const t of assetTxsOf(data, account.id)) if (t.unitPrice) last.set(t.unit!, { date: t.date, seq: t.seq, price: t.unitPrice });
+  const positions: AssetPosition[] = [];
+  for (const [unit, qty] of assetQuantities(data, account)) {
+    if (!(qty > 0)) continue;
+    const live = prices?.[unit];
+    const l = last.get(unit);
+    const p: Omit<AssetPosition, 'value'> = live
+      ? { unit, qty, price: live.buy, priceAt: live.at, priceSource: live.source }
+      : { unit, qty, price: l?.price ?? null, priceAt: l?.date ?? null, priceSource: l ? 'last-tx' : null };
+    positions.push({ ...p, value: p.price === null ? 0 : valueOf(qty, p.price) });
   }
-  qty = roundQty(qty, spec.unit);
-  const live = prices?.[spec.unit];
-  if (live) return { spec, qty, price: live.buy, priceAt: live.at, priceSource: live.source };
-  return { spec, qty, price: last?.price ?? null, priceAt: last?.date ?? null, priceSource: last ? 'last-tx' : null };
+  positions.sort((a, b) => unitOrder(a.unit, b.unit));
+  return { positions, value: sum(positions.map((p) => p.value)) };
 }
 
 /**
@@ -189,18 +251,26 @@ export function investmentState(data: Data, accountId: ID, prices?: PriceBook): 
 
   const asset = assetHolding(data, account, prices);
   if (asset) {
-    // Varlık hesabı: elle girilen değerleme kullanılmaz; değer = miktar × fiyat.
-    // Geçmiş çizgisi, her işlem anındaki miktar × o işlemin fiyatıdır.
-    let q = account.openingQty ?? 0;
-    const points: ValuationPoint[] = [opening];
-    const own = data.txs
-      .filter((t) => t.type === 'transfer' && t.qty !== undefined && (t.toAccountId === accountId || t.accountId === accountId))
-      .sort((a, b) => (a.date === b.date ? a.seq - b.seq : a.date < b.date ? -1 : 1));
-    for (const t of own) {
-      q += t.toAccountId === accountId ? t.qty! : -t.qty!;
-      if (t.unitPrice) points.push({ date: t.date, seq: t.seq, value: valueOf(Math.max(0, roundQty(q, asset.spec.unit)), t.unitPrice), isOpening: false });
+    // Varlık hesabı: elle girilen değerleme kullanılmaz; değer = Σ miktar × fiyat.
+    // Geçmiş çizgisi: her işlemden sonra, her birimin o andaki miktarı × o birimin o ana kadarki son fiyatı.
+    const q = new Map<AssetUnit, number>();
+    const px = new Map<AssetUnit, Money>();
+    for (const l of account.asset!.opening) {
+      q.set(l.unit, l.qty);
+      px.set(l.unit, l.price);
     }
-    const currentValue = asset.price === null ? 0 : valueOf(Math.max(0, asset.qty), asset.price);
+    const points: ValuationPoint[] = [opening];
+    for (const t of assetTxsOf(data, accountId)) {
+      q.set(t.unit!, (q.get(t.unit!) ?? 0) + qtyEffect(t, accountId));
+      if (t.unitPrice) px.set(t.unit!, t.unitPrice);
+      let v = 0;
+      for (const [u, n] of q) {
+        const p = px.get(u);
+        if (p) v += valueOf(Math.max(0, roundQty(n, u)), p);
+      }
+      points.push({ date: t.date, seq: t.seq, value: v, isOpening: false });
+    }
+    const currentValue = asset.value;
     return {
       account, contributed, withdrawn, netContribution, priorContribution: prior,
       lastValuation: opening, flowsSinceValuation: 0, currentValue, basis,

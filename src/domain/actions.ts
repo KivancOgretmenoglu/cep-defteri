@@ -7,9 +7,9 @@ import type { Account, Category, Data, Goal, ID, Lang, Plan, PlanRef, Settings, 
 import { translate, type Key, type Vars } from '../i18n/core';
 import { isMoney, type Money } from './money';
 import { isISODate, type ISODate } from './dates';
-import { accountIndex, installmentEnd, isDaily, isInvestment, isPerson, occKey, occurrences } from './ledger';
+import { accountIndex, assetOverdraft, assetQuantities, availableQty, installmentEnd, isDaily, isInvestment, isPerson, occKey, occurrences } from './ledger';
 import { addDays } from './dates';
-import { isAssetSpec, isQty, roundQty, valueOf, type AssetSpec } from './assets';
+import { isAssetLot, isAssetUnit, isQty, roundQty, unitOrder, valueOf, type AssetLot, type AssetUnit } from './assets';
 
 /**
  * Doğrulama hatası. Mesaj bir sözlük anahtarı + değişkenler olarak taşınır; arayüz sınırında
@@ -54,7 +54,8 @@ export interface TxDraft {
   refundOf?: ID;
   planRef?: PlanRef;
   tags?: string[];
-  /** Altın/döviz hesabı transferinde alınan/satılan miktar ve birim fiyat (zorunlu). */
+  /** Altın/döviz hesabı transferinde alınan/satılan birim, miktar ve birim fiyat (zorunlu). */
+  unit?: AssetUnit;
   qty?: number;
   unitPrice?: Money;
 }
@@ -70,15 +71,18 @@ export function assetSideOf(data: Data, d: { type: TxType; accountId: ID; toAcco
   return undefined;
 }
 
-/** Varlık hesabındaki miktar (isteğe bağlı olarak bir işlem hariç). */
-export function heldQty(data: Data, account: Account, exceptTxId?: ID): number {
-  let q = account.openingQty ?? 0;
-  for (const t of data.txs) {
-    if (t.id === exceptTxId || t.type !== 'transfer' || t.qty === undefined) continue;
-    if (t.toAccountId === account.id) q += t.qty;
-    else if (t.accountId === account.id) q -= t.qty;
-  }
-  return account.asset ? roundQty(q, account.asset.unit) : q;
+/** Varlık hesabındaki bir birimin güncel miktarı (isteğe bağlı olarak bir işlem hariç). */
+export function heldQty(data: Data, account: Account, unit: AssetUnit, exceptTxId?: ID): number {
+  return assetQuantities(data, account, exceptTxId).get(unit) ?? 0;
+}
+
+/** Bu değişiklikten sonra varlık hesaplarından birinde, bir anda, elde olandan fazlası satılmış olur mu? */
+function overdraws(next: Data, accountIds: (ID | undefined)[]): boolean {
+  const accounts = accountIndex(next);
+  return accountIds.some((id) => {
+    const a = id ? accounts.get(id) : undefined;
+    return !!a?.asset && !!assetOverdraft(next, a);
+  });
 }
 
 /** Etiketleri temizler: küçük harf, baştaki # yok, boşluk tekil, en fazla 5 etiket × 24 karakter. */
@@ -114,11 +118,13 @@ export function validateTx(data: Data, d: TxDraft, today: ISODate, editingId?: I
     if (d.categoryId || d.refundOf) fail('err.transferNoCat');
     const asset = assetSideOf(data, d);
     if (asset) {
+      if (!isAssetUnit(d.unit)) fail('err.assetUnit');
       if (!isQty(d.qty)) fail('err.assetQty');
       if (!isMoney(d.unitPrice) || d.unitPrice! <= 0) fail('err.assetPrice');
       if (asset.id === d.accountId) {
-        const held = heldQty(data, asset, editingId);
-        if (roundQty(d.qty!, asset.asset!.unit) > held) fail('err.assetTooMuch', { held: String(held) });
+        // Çekim: o tarihte (ve sonraki çekimleri karşılıksız bırakmadan) o birimden elde olan kadar.
+        const held = availableQty(data, asset, d.unit!, { date: d.date, seq: existing?.seq ?? data.nextSeq }, editingId);
+        if (roundQty(d.qty!, d.unit!) > held) fail('err.assetTooMuch', { held: String(held) });
       }
     }
   } else {
@@ -149,6 +155,15 @@ export function validateTx(data: Data, d: TxDraft, today: ISODate, editingId?: I
     if (firstRefund && d.date > firstRefund) fail('err.expenseAfterRefund');
   }
 
+  // Katkıyı küçültmek/silmek ya da birimini değiştirmek sonraki bir çekimi karşılıksız bırakamaz.
+  const oldAsset = existing ? assetSideOf(data, existing) : undefined;
+  const newAsset = assetSideOf(data, d);
+  if (oldAsset || newAsset) {
+    const sim: Tx = { id: editingId ?? '\u0000new', seq: existing?.seq ?? data.nextSeq, createdAt: 0, ...cleanDraft(d, data) };
+    const next = { ...data, txs: [...data.txs.filter((t) => t.id !== editingId), sim] };
+    if (overdraws(next, [oldAsset?.id, newAsset?.id])) fail('err.assetWouldOverdraw');
+  }
+
   if (d.planRef) {
     const plan = data.plans.find((p) => p.id === d.planRef!.planId);
     if (plan) {
@@ -166,7 +181,8 @@ function cleanDraft(d: TxDraft, data: Data): TxDraft {
   if (d.type === 'transfer') out.toAccountId = d.toAccountId;
   const asset = assetSideOf(data, d);
   if (asset) {
-    out.qty = roundQty(d.qty!, asset.asset!.unit);
+    out.unit = d.unit;
+    out.qty = d.unit && isQty(d.qty) ? roundQty(d.qty, d.unit) : d.qty;
     out.unitPrice = d.unitPrice;
   }
   else out.categoryId = d.categoryId;
@@ -207,7 +223,10 @@ export function deleteTx(data: Data, id: ID): { data: Data; removed: Tx[] } {
   const removed = data.txs.filter((t) => t.id === id || (t.type === 'refund' && t.refundOf === id));
   if (!removed.some((t) => t.id === id)) fail('err.txNotFound');
   const ids = new Set(removed.map((t) => t.id));
-  return { data: { ...data, txs: data.txs.filter((t) => !ids.has(t.id)) }, removed };
+  const next = { ...data, txs: data.txs.filter((t) => !ids.has(t.id)) };
+  // Altın/döviz alımı silinirse sonraki bir satış karşılıksız kalmamalı.
+  if (overdraws(next, removed.map((t) => assetSideOf(data, t)?.id))) fail('err.assetWouldOverdraw');
+  return { data: next, removed };
 }
 
 // ───────────────────────── Hesaplar ─────────────────────────
@@ -218,19 +237,21 @@ export interface AccountDraft {
   openingBalance: Money;
   openingDate: ISODate;
   priorContribution?: Money | null;
-  /** Yalnız yatırım: altın/döviz birimi; yoksa TL hesabı. */
-  asset?: AssetSpec | null;
-  /** Varlık hesabı: takip başlangıcındaki miktar ve o günkü birim fiyat. openingBalance bunlardan hesaplanır. */
-  openingQty?: number | null;
-  openingPrice?: Money | null;
+  /**
+   * Yalnız yatırım: altın/döviz modu ve takip başlangıcındaki kalemler (birim başına miktar + o günkü
+   * birim fiyat; boş olabilir). Yoksa/null ise TL hesabı. openingBalance kalemlerden hesaplanır.
+   */
+  asset?: { opening: AssetLot[] } | null;
 }
 
-/** Varlık hesabında açılış değeri miktar × fiyattır; taslaktaki openingBalance yok sayılır. */
-function assetFields(d: AccountDraft): Pick<Account, 'asset' | 'openingQty' | 'openingPrice'> & { openingBalance: Money } | null {
+/** Varlık hesabında açılış değeri Σ miktar × fiyattır; taslaktaki openingBalance yok sayılır. */
+function assetFields(d: AccountDraft): Pick<Account, 'asset'> & { openingBalance: Money } | null {
   if (d.kind !== 'investment' || !d.asset) return null;
-  const q = d.openingQty && d.openingQty > 0 ? roundQty(d.openingQty, d.asset.unit) : 0;
-  if (q > 0) return { asset: { kind: d.asset.kind, unit: d.asset.unit }, openingQty: q, openingPrice: d.openingPrice!, openingBalance: valueOf(q, d.openingPrice!) };
-  return { asset: { kind: d.asset.kind, unit: d.asset.unit }, openingBalance: 0 };
+  const opening = d.asset.opening
+    .map((l) => ({ unit: l.unit, qty: roundQty(l.qty, l.unit), price: l.price }))
+    .filter((l) => l.qty > 0)
+    .sort((a, b) => unitOrder(a.unit, b.unit));
+  return { asset: { opening }, openingBalance: opening.reduce((s, l) => s + valueOf(l.qty, l.price), 0) };
 }
 
 function validateAccount(data: Data, d: AccountDraft, editing?: Account) {
@@ -245,15 +266,16 @@ function validateAccount(data: Data, d: AccountDraft, editing?: Account) {
   if (d.priorContribution != null && (!isMoney(d.priorContribution) || d.priorContribution < 0))
     fail('err.priorInvalid');
   if (d.asset) {
-    if (d.kind !== 'investment' || !isAssetSpec(d.asset)) fail('err.assetInvalid');
-    if (d.openingQty != null && d.openingQty !== 0) {
-      if (!isQty(d.openingQty)) fail('err.assetQty');
-      if (!isMoney(d.openingPrice) || d.openingPrice! <= 0) fail('err.assetPrice');
+    if (d.kind !== 'investment' || !Array.isArray(d.asset.opening)) fail('err.assetInvalid');
+    for (const l of d.asset.opening) {
+      if (!isAssetUnit(l.unit)) fail('err.assetInvalid');
+      if (!isQty(l.qty)) fail('err.assetQty');
+      if (!isMoney(l.price) || l.price <= 0) fail('err.assetPrice');
+      if (!isAssetLot(l)) fail('err.assetInvalid');
     }
+    if (new Set(d.asset.opening.map((l) => l.unit)).size !== d.asset.opening.length) fail('err.assetDupUnit');
   }
 }
-
-const sameAsset = (a?: AssetSpec | null, b?: AssetSpec | null) => (a?.unit ?? null) === (b?.unit ?? null);
 
 export function addAccount(data: Data, d: AccountDraft, now = Date.now()): { data: Data; account: Account } {
   validateAccount(data, d);
@@ -297,19 +319,18 @@ export function updateAccount(data: Data, id: ID, d: AccountDraft): Data {
     fail('err.accountKindLocked');
   const first = earliestUse(data, id);
   if (first && d.openingDate > first) fail('err.openingAfterUse', { date: first });
-  const nextAsset = d.kind === 'investment' ? d.asset ?? null : null;
-  if (!sameAsset(acc.asset, nextAsset) && (data.txs.some((t) => t.accountId === id || t.toAccountId === id) || data.valuations.some((v) => v.accountId === id)))
+  // TL ↔ altın/döviz modu, kaydı olan hesapta değişemez (birimler ve açılış kalemleri değişebilir).
+  const nextIsAsset = d.kind === 'investment' && !!d.asset;
+  if (!!acc.asset !== nextIsAsset && (data.txs.some((t) => t.accountId === id || t.toAccountId === id) || data.valuations.some((v) => v.accountId === id)))
     fail('err.assetLocked');
   const next: Account = { ...acc, name: d.name.trim(), kind: d.kind, openingBalance: d.openingBalance, openingDate: d.openingDate };
   if (d.kind === 'investment') next.priorContribution = d.priorContribution ?? null;
   else delete next.priorContribution;
   delete next.asset;
-  delete next.openingQty;
-  delete next.openingPrice;
   const af = assetFields(d);
   if (af) {
     Object.assign(next, af);
-    if (heldQty({ ...data, accounts: data.accounts.map((a) => (a.id === id ? next : a)) }, next) < 0) fail('err.assetOpeningTooLow');
+    if (assetOverdraft({ ...data, accounts: data.accounts.map((a) => (a.id === id ? next : a)) }, next)) fail('err.assetOpeningTooLow');
   }
   return { ...data, accounts: data.accounts.map((a) => (a.id === id ? next : a)) };
 }
@@ -450,7 +471,7 @@ export function confirmOccurrence(
   data: Data,
   planId: ID,
   due: ISODate,
-  over: { amount?: Money; date?: ISODate; accountId?: ID; note?: string; qty?: number; unitPrice?: Money },
+  over: { amount?: Money; date?: ISODate; accountId?: ID; note?: string; unit?: AssetUnit; qty?: number; unitPrice?: Money },
   today: ISODate,
   now = Date.now(),
 ) {
@@ -468,6 +489,7 @@ export function confirmOccurrence(
   };
   if (plan.kind === 'transfer') {
     draft.toAccountId = plan.toAccountId;
+    draft.unit = over.unit;
     draft.qty = over.qty;
     draft.unitPrice = over.unitPrice;
   }

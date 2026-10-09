@@ -18,7 +18,7 @@ import { availability, budgetStatus, goalProgress, isDaily, monthSummary, upcomi
 import { categoryName } from './defaults';
 import { translator } from '../i18n/core';
 import { spendingImprovement } from './rings';
-import { planGap } from './planLine';
+import { spendingGap } from './spendingPlan';
 
 export type Mood = 'curious' | 'calm' | 'happy' | 'thoughtful' | 'celebrate';
 export type MoodFocus = 'accounts' | 'add' | 'available' | 'upcoming' | 'budget' | 'goal' | 'none';
@@ -110,21 +110,21 @@ export function mascotMood(data: Data, today: ISODate, lang: Lang = 'tr'): MoodR
     };
   }
 
-  // 3b) Harcama planı çizgisinin belirgin biçimde altında (kullanıcı ay sonu tabanı belirlediyse).
-  //     Planlı ödemeler çizgide vade gününde basamak olduğundan kira günü tek başına bunu tetiklemez.
-  //     Taban ulaşılamazsa (çizgi düz) bu yargı verilmez; grafikte not gösterilir.
-  const gap = planGap(data, today);
-  const gapWhy = (key: 'mood.planBelow.why' | 'mood.planAbove.why') =>
+  // 3b) Birikimli harcama, harcama planının belirgin biçimde üstünde (bütçe ya da ay sonu tabanı varsa).
+  //     Planlı ödemeler planda vade gününde basamak olduğundan kira günü tek başına bunu tetiklemez;
+  //     yatırım aktarımları harcama sayılmaz. Planlı ödemeler hakkı tek başına dolduruyorsa yargı yok.
+  const gap = spendingGap(data, today);
+  const gapWhy = (key: 'mood.spendOver.why' | 'mood.spendUnder.why') =>
     t(key, {
       target: tlb(gap!.target),
       actual: tlb(gap!.actual),
       gap: tlb(Math.abs(gap!.diff)),
       threshold: tlb(gap!.threshold),
-      floor: tl(gap!.line.floor),
-      date: sd(gap!.line.to),
+      allowance: tlb(gap!.sp.allowance),
+      date: sd(gap!.sp.to),
     });
-  if (gap && gap.line.reachable && gap.state === 'below') {
-    return { mood: 'thoughtful', text: t('mood.planBelow.text'), why: gapWhy('mood.planBelow.why'), focus: 'available' };
+  if (gap && gap.sp.reachable && gap.state === 'over') {
+    return { mood: 'thoughtful', text: t('mood.spendOver.text'), why: gapWhy('mood.spendOver.why'), focus: data.settings.monthlyBudget ? 'budget' : 'available' };
   }
 
   // 4) Yaklaşan ödemeler ayrılınca kullanılabilir para daralıyor (bütçe tanımlıysa ölçülebilir).
@@ -167,9 +167,6 @@ export function mascotMood(data: Data, today: ISODate, lang: Lang = 'tr'): MoodR
       focus: 'none',
     };
   }
-  if (gap && gap.line.reachable && gap.state === 'above') {
-    return { mood: 'happy', text: t('mood.planAbove.text'), why: gapWhy('mood.planAbove.why'), focus: 'available' };
-  }
   if (budget.state === 'on-track' && budget.flexUsedPct !== null) {
     return {
       mood: 'happy',
@@ -177,6 +174,10 @@ export function mascotMood(data: Data, today: ISODate, lang: Lang = 'tr'): MoodR
       why: t('mood.onTrack.why', { used: p(budget.flexUsedPct, 'acc'), elapsed: p(budget.elapsedPct, 'poss') }),
       focus: 'budget',
     };
+  }
+  // Bütçe temposu (yüzdeli) daha bilgilendirici olduğundan harcama planı mutlu satırı ondan sonra gelir.
+  if (gap && gap.sp.reachable && gap.state === 'under') {
+    return { mood: 'happy', text: t('mood.spendUnder.text'), why: gapWhy('mood.spendUnder.why'), focus: 'none' };
   }
   if (budget.state === 'watch' && budget.flexUsedPct !== null) {
     return {

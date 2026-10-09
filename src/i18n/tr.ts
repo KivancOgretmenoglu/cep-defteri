@@ -10,6 +10,7 @@ import { defaultsTr } from './defaults.tr';
 import { ringsTr } from './rings.tr';
 import { planTr } from './plan.tr';
 import { guideTr } from './guide.tr';
+import { polishTr } from './polish.tr';
 
 export const tr = {
   ...hintsTr,
@@ -1017,5 +1018,6 @@ export const tr = {
   ...ringsTr,
   ...planTr,
   ...guideTr,
+  ...polishTr,
   // @end
 } satisfies Record<string, Entry>;

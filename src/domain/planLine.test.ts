@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { emptyData } from './defaults';
 import * as A from './actions';
 import { planGap, planLine, planPeriod, suggestedFloor } from './planLine';
-import { mascotMood } from './mood';
 import { parseBackup, serializeBackup } from './backup';
 import type { Data } from './types';
 
@@ -68,7 +67,6 @@ describe('harcama planı çizgisi', () => {
     const g = planGap(d, TODAY)!;
     expect(g.actual).toBe(TL(7000));
     expect(g.state).toBe('above');
-    expect(mascotMood(d, TODAY).mood).not.toBe('thoughtful');
   });
 
   it('taban, planlardan sonra bile başlangıçtan yüksekse çizgi düz ve ulaşılamaz', () => {
@@ -135,49 +133,5 @@ describe('ayar doğrulama', () => {
     delete bad.data.settings.monthEndFloor;
     const old = parseBackup(JSON.stringify(bad));
     expect(old.ok && old.data.settings.monthEndFloor).toBeNull();
-  });
-});
-
-describe('maskot: plan çizgisi kuralı', () => {
-  function spent() {
-    let { d, bank, rent } = withPlans();
-    d = A.confirmOccurrence(d, rent, '2026-10-10', {}, TODAY).data;
-    d = A.addTx(d, { type: 'expense', amount: TL(6000), date: '2026-10-13', accountId: bank, categoryId: 'e-food' }, TODAY).data;
-    return d;
-  }
-  it('çizginin belirgin altında: düşünceli, tek kısa cümle, gerekçe ve kural why içinde', () => {
-    const m = mascotMood(spent(), TODAY);
-    expect(m.mood).toBe('thoughtful');
-    expect(m.text).toContain('Plan çizgisinin altına');
-    expect(m.text).not.toMatch(/\d/);
-    expect(m.why).toContain('1.000 TL');
-    expect(m.why).toContain('Kural');
-    expect(mascotMood(spent(), TODAY, 'en').text).toContain('plan line');
-  });
-  it('bakiye gizliyken tutarlar görünmez', () => {
-    const d = A.updateSettings(spent(), { hideTotals: true });
-    const m = mascotMood(d, TODAY);
-    expect(m.mood).toBe('thoughtful');
-    expect(m.text).toContain('Plan çizgisinin altına');
-    expect(m.why).not.toContain('1.000 TL');
-    expect(m.why).not.toContain('3.855');
-  });
-  it('fark küçükse (eşik altında) bu kural tetiklenmez', () => {
-    let { d, bank, rent } = withPlans();
-    d = A.confirmOccurrence(d, rent, '2026-10-10', {}, TODAY).data;
-    // hedef ≈ 3.855 TL; eşik 800 TL. 3.400 TL harcama → bakiye 3.600 (≈255 TL altında)
-    d = A.addTx(d, { type: 'expense', amount: TL(3400), date: '2026-10-13', accountId: bank, categoryId: 'e-food' }, TODAY).data;
-    expect(planGap(d, TODAY)!.state).toBe('on');
-    expect(mascotMood(d, TODAY).text).not.toContain('Plan çizgisi');
-  });
-  it('ulaşılamaz tabanda yargı yok', () => {
-    const d = A.updateSettings(spent(), { monthEndFloor: TL(20000) });
-    expect(mascotMood(d, TODAY).text).not.toContain('Plan çizgisi');
-  });
-  it('ödemeler bakiyeyi aşıyorsa o uyarı önce gelir', () => {
-    let d = spent();
-    const bank = d.accounts.find((a) => a.kind === 'bank')!.id;
-    d = A.addPlan(d, { kind: 'expense', title: 'Fatura', amount: TL(5000), accountId: bank, categoryId: 'e-bills', freq: 'once', startDate: '2026-10-25' }).data;
-    expect(mascotMood(d, TODAY).text).toContain('Yaklaşan ödemeler');
   });
 });

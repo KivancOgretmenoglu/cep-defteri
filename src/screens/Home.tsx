@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
-import { Settings, ChevronRight, Plus, Sprout, Info, Eye, EyeOff, HandCoins, ScrollText, ChartLine } from 'lucide-react';
+import { Settings, ChevronRight, Plus, Sprout, Info, Eye, EyeOff, HandCoins, ScrollText, ChartLine, ChartColumn } from 'lucide-react';
 import { monthOf } from '../domain/dates';
 import { formatMoney, hiddenMoney, monthLabel, monthName, shortDate } from '../i18n/format';
 import { useT } from '../i18n';
 import {
-  availability, balanceSeries, budgetStatus, cashBalance, dailyBalance, debtTotals, investmentState, investmentTotal, isDaily, isInvestment, monthSummary, pendingReportCard, personBalances, upcomingOutflows, pendingUntil, trackingStart,
+  availability, balanceSeries, budgetStatus, cashBalance, dailyBalance, debtTotals, investmentTotal, isDaily, isInvestment, monthSummary, pendingReportCard, personBalances, upcomingOutflows, pendingUntil, trackingStart,
 } from '../domain/ledger';
 import { usePrices } from '../store/prices';
 import * as A from '../domain/actions';
@@ -13,7 +13,8 @@ import { mascotEvent } from '../mascot/events';
 import { BalanceChart } from '../ui/BalanceChart';
 import { DueRow } from '../ui/DueRow';
 import { mascotMood } from '../domain/mood';
-import { planLine } from '../domain/planLine';
+import { spendingPlan } from '../domain/spendingPlan';
+import { SpendingChart } from '../ui/SpendingChart';
 import { addDays } from '../domain/dates';
 import { Amount, AnimatedMoney, Progress, SectionHead } from '../ui/kit';
 import { useListSettle } from '../ui/motion';
@@ -43,11 +44,11 @@ export function Home() {
     const start = trackingStart(data);
     const from = start && start > addDays(today, -29) ? start : addDays(today, -29);
     const spark = start ? balanceSeries(data, from, today) : [];
-    // Küçük grafikte de harcama planı çizgisi (bugüne kadarki kısmı görünür).
-    const pl = start ? planLine(data, today) : null;
-    const sparkPlan = pl ? [{ date: addDays(pl.from, -1), balance: pl.start }, ...pl.points] : [];
+    // Küçük grafik: plan (bütçe ya da ay sonu tabanı) varsa bu dönemin harcama eğrisi ve planı; yoksa bakiye.
+    const sp = start ? spendingPlan(data, today) : null;
+    const spend = sp && sp.source !== null ? sp : null;
     const card = pendingReportCard(data, today);
-    return { av, mood, sum, budget, up, soon, spark, sparkPlan, card };
+    return { av, mood, sum, budget, up, soon, spark, spend, card };
   }, [data, today, month, lang]);
   const { av, mood, sum, budget, soon } = d;
   const dailyAccs = data.accounts.filter((a) => isDaily(a) && (!a.archived || cashBalance(data, a.id) !== 0));
@@ -76,6 +77,9 @@ export function Home() {
           <h1 className="wordmark">Cep Defteri</h1>
         </div>
         <div className="head-actions">
+          <button className="icon-btn only-phone" data-tour="reports" onClick={() => go('reports')} aria-label={t('nav.reports')} title={t('nav.reports')}>
+            <ChartColumn size={22} />
+          </button>
           <button className="icon-btn" data-tour="eye" onClick={toggleHide} aria-pressed={hide} aria-label={hide ? t('home.showBalances') : t('home.hideBalances')} title={hide ? t('home.showBalances') : t('home.hideBalances')}>
             {hide ? <EyeOff size={22} /> : <Eye size={22} />}
           </button>
@@ -226,9 +230,14 @@ export function Home() {
 
         <section className="card" aria-labelledby="acc-h">
           <SectionHead id="acc-h" title={t('home.accounts')} action={<button className="link" onClick={() => openSheet({ kind: 'account' })}><Plus size={16} /> {t('common.add')}</button>} />
-          {d.spark.length > 1 && (
+          {d.spend ? (
+            <button className="spark-btn" data-tour="chart" onClick={() => go('balance')} aria-label={t('spend.homeOpen')}>
+              <SpendingChart from={d.spend.from} to={d.spend.to} spending={d.spend.spending} plan={d.spend.plan} today={today} hide={hide} compact height={64} label={t('spend.homeLabel')} />
+              <span className="spark-btn__label"><ChartLine size={15} aria-hidden /> {t('spend.homeLabel')} <ChevronRight size={15} aria-hidden /></span>
+            </button>
+          ) : d.spark.length > 1 && (
             <button className="spark-btn" data-tour="chart" onClick={() => go('balance')} aria-label={t('home.openHistory')}>
-              <BalanceChart history={d.spark} plan={d.sparkPlan} today={today} hide={hide} compact height={64} label={t('home.sparkLabel')} />
+              <BalanceChart history={d.spark} today={today} hide={hide} compact height={64} label={t('home.sparkLabel')} />
               <span className="spark-btn__label"><ChartLine size={15} aria-hidden /> {t('balance.title')} <ChevronRight size={15} aria-hidden /></span>
             </button>
           )}
@@ -254,35 +263,20 @@ export function Home() {
             )}
           </ul>
           {invAccs.length > 0 && (
-            <>
-              <h3 data-tour="invest" className="sub-label"><Sprout size={14} aria-hidden /> {t('home.investSeparate')}</h3>
-              <ul className="acc-list" data-tour="invest">
-                {invAccs.map((a) => {
-                  const st = investmentState(data, a.id, priceBook)!;
-                  return (
-                    <li key={a.id}>
-                      <button className="acc-row acc-row--invest" onClick={() => go('invest')}>
-                        <Sprout size={18} aria-hidden />
-                        <span className="acc-row__name">
-                          {a.name}
-                          <small>{t('home.valueAsOf', { date: shortDate(st.lastValuation.date, today) })}{st.flowsSinceValuation !== 0 ? t('home.plusLater') : ''}</small>
-                        </span>
-                        <Amount value={st.currentValue} tone="invest" hide={hide} animate />
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-              <p className="acc-net">
-                {t('home.dailyPlusInvest')} = <b>{H(daily + invTotal)}</b>
-                <small>{t('home.investNotSpendable')}</small>
-              </p>
-            </>
-          )}
-          {invAccs.length === 0 && dailyAccs.length > 0 && (
-            <button className="link link--small" data-tour="invest" onClick={() => openSheet({ kind: 'account', kindPreset: 'investment' })}>
-              <Sprout size={14} /> {t('home.addInvestAccount')}
-            </button>
+            // Yatırımın kendi sekmesi var; burada tek satırlık özet ve kısayol yeter.
+            <ul className="acc-list acc-list--invest">
+              <li>
+                <button className="acc-row acc-row--invest" onClick={() => go('invest')}>
+                  <Sprout size={18} aria-hidden />
+                  <span className="acc-row__name">
+                    {t('home.investSeparate')}{invAccs.length > 1 ? ` · ${invAccs.length}` : ''}
+                    <small>{t('home.dailyPlusInvest')} = {H(daily + invTotal)}</small>
+                  </span>
+                  <Amount value={invTotal} tone="invest" hide={hide} animate />
+                  <ChevronRight size={16} aria-hidden />
+                </button>
+              </li>
+            </ul>
           )}
         </section>
 

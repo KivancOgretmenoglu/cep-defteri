@@ -2,7 +2,7 @@
  * Misafir maskot yaşam döngüsü. Açılış başına en fazla BİR sahne:
  * açılışta zar atılır (counters localStorage'da, uygulama verisinde değil), saate uyan sahneler
  * sıralanır, ilk uygun ekranda 3–6 sn sonra gösterilir, 12–20 sn sonra (ya da dokununca) çekilir.
- * Hata ayıklama: ?cameo=sleep|cards|coins|hide|ball|coffee ya da localStorage 'cd.cameo.force'.
+ * Hata ayıklama: ?cameo=sleep|cards|coins|hide|ball|coffee|chat ya da localStorage 'cd.cameo.force'.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useStore } from '../../store/store';
@@ -10,6 +10,7 @@ import { useNav } from '../../ui/nav';
 import { characterOf, type Lang, type MascotKey } from '../characters';
 import { blockedReason, markShown, parseCounters, planOpen, registerOpen, sceneForScreen, showDelayMs, stayMs, KEY, REOPEN_AFTER_MS } from './logic';
 import { FORCE_ALIASES, guestsFor, SCENES, type SceneId } from './scenes';
+import { CHAT_LINE_MS, chatGuest, chatLines, pickDialogue, type ChatLine } from './chat';
 
 export interface ActiveCameo {
   id: SceneId;
@@ -18,8 +19,21 @@ export interface ActiveCameo {
   lang: Lang;
   /** Kapanış animasyonu sürüyor */
   leaving: boolean;
-  /** Ana ekran sahnesi için oturacağı kart */
+  /** Ana ekran sahnesi için oturacağı kart (sohbette: ana maskot notu) */
   anchor: HTMLElement | null;
+  /** Sohbet sahnesinin satırları (misafir, ana maskot, …) */
+  chat?: ChatLine[];
+}
+
+const NOTE_SEL = '.screen--home .mascot-note';
+/** Ana ekran maskot notu ekranda tamamen görünüyorsa (sohbetin geleceği yer). */
+export function findNote(): HTMLElement | null {
+  if (typeof document === 'undefined') return null;
+  const el = document.querySelector<HTMLElement>(NOTE_SEL);
+  if (!el) return null;
+  const r = (el.querySelector<HTMLElement>('.mascot-note__bubble') ?? el).getBoundingClientRect();
+  // Misafir baloncuğun içinde, sağ alt köşede durur: baloncuk ekranda tamamen görünmeli ve yeterince yüksek olmalı.
+  return r.top >= 60 && r.bottom <= window.innerHeight - 80 && r.height >= 56 ? el : null;
 }
 
 const LEDGE_SEL = '.screen--home section.card';
@@ -78,6 +92,8 @@ const isTyping = () => {
 };
 
 const EXIT_MS = 400;
+/** Sohbet sonunda el sallama süresi */
+export const CHAT_WAVE_MS = 1400;
 
 export function useCameo() {
   const { screen, sheet } = useNav();
@@ -85,6 +101,7 @@ export function useCameo() {
   const noAccounts = useStore((s) => s.data.accounts.length === 0);
   const main = characterOf(useStore((s) => s.data.settings.mascot?.key)).key;
   const lang = useStore((s) => s.data.settings.lang ?? 'tr') as Lang;
+  const customName = useStore((s) => s.data.settings.mascot?.name?.trim());
 
   const [active, setActive] = useState<ActiveCameo | null>(null);
   const [poll, setPoll] = useState(0); // meşgulken (ipucu/bildirim) birkaç saniyede bir yeniden dene
@@ -145,7 +162,8 @@ export function useCameo() {
     const arm = () => {
       const block = blockedReason({ enabled, noAccounts, sheetOpen: !!sheet, typing: isTyping(), hidden: document.visibilityState === 'hidden', busy: isBusy() });
       if (block) return null;
-      return sceneForScreen(p, screen);
+      // Sohbet yalnız maskot notu görünürken; değilse plandaki bir sonraki sahne.
+      return sceneForScreen(findNote() ? p : p.filter((x) => x !== 'chat'), screen);
     };
     if (!arm()) {
       const again = setTimeout(() => setPoll((n) => n + 1), 2500);
@@ -160,6 +178,14 @@ export function useCameo() {
       const hour = new Date(now).getHours();
       if (!forced.current) save(markShown(load(), now));
       shownOn.current = screen;
+      if (scene === 'chat') {
+        const guest = chatGuest(main, Math.random);
+        const d = new Date(now);
+        const ctx = { hour, weekday: d.getDay(), dom: d.getDate(), dim: new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate() };
+        const chat = chatLines(pickDialogue(guest, ctx, Math.random), lang, guest, customName || characterOf(main).name[lang]);
+        setActive({ id: scene, guests: [guest], hour, lang, leaving: false, anchor: findNote(), chat });
+        return;
+      }
       setActive({ id: scene, guests: guestsFor(scene, main), hour, lang, leaving: false, anchor: scene === 'hide' ? findLedgeCard() : null });
     }, forced.current ? 1200 : showDelayMs(Math.random));
     return () => clearTimeout(id);
@@ -170,13 +196,16 @@ export function useCameo() {
   const live = !!active && !active.leaving;
   useEffect(() => {
     if (!live) return;
-    const id = setTimeout(exit, forced.current ? 60_000 : stayMs(Math.random));
+    // Sohbet: satırlar bitince el sallayıp çıkar (zorlanmışsa da aynı; ekran görüntüsü için ?cameo=chat).
+    const chatMs = active?.chat ? active.chat.length * CHAT_LINE_MS + CHAT_WAVE_MS : 0;
+    const id = setTimeout(exit, chatMs || (forced.current ? 60_000 : stayMs(Math.random)));
     const onFocus = () => isTyping() && exit();
     document.addEventListener('focusin', onFocus);
     return () => {
       clearTimeout(id);
       document.removeEventListener('focusin', onFocus);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [live, exit]);
   useEffect(() => {
     if (live && (sheet || !enabled || noAccounts || screen !== shownOn.current || !SCENES[active!.id].screens.includes(screen))) exit();

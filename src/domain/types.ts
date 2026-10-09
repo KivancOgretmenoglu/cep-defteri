@@ -1,6 +1,6 @@
 import type { Money } from './money';
 import type { ISODate } from './dates';
-import type { AssetSpec } from './assets';
+import type { AssetAccount, AssetUnit } from './assets';
 
 export type ID = string;
 
@@ -29,14 +29,11 @@ export interface Account {
    */
   priorContribution?: Money | null;
   /**
-   * Yalnız yatırım hesabı: TL yerine altın/döviz tutuyorsa birimi (src/domain/assets.ts).
-   * Yoksa klasik TL hesabıdır. Geçmişi olan hesapta değiştirilemez.
+   * Yalnız yatırım hesabı: TL yerine altın/döviz tutuyorsa (src/domain/assets.ts). Aynı hesapta birden çok
+   * birim olabilir; `opening` takip başlangıcındaki kalemlerdir (birim başına miktar + fiyat) ve
+   * openingBalance = Σ qty × price. Yoksa klasik TL hesabıdır. Kaydı olan hesapta mod değiştirilemez.
    */
-  asset?: AssetSpec;
-  /** Varlık hesabı: takip başlangıcında elde olan miktar (birim cinsinden). */
-  openingQty?: number;
-  /** Varlık hesabı: açılış miktarının değerlendiği birim fiyat (kuruş). openingBalance = openingQty × openingPrice. */
-  openingPrice?: Money;
+  asset?: AssetAccount;
   archived?: boolean;
   createdAt: number;
 }
@@ -83,7 +80,9 @@ export interface Tx {
   planRef?: PlanRef; // planlı bir kalemin gerçekleşmesi
   /** Serbest etiketler (ör. "erasmus", "tatil"); küçük harf, tekil. */
   tags?: string[];
-  /** Varlık (altın/döviz) hesabına giren/çıkan transferde: alınan/satılan miktar (birim, ondalıklı olabilir). */
+  /** Varlık (altın/döviz) hesabına giren/çıkan transferde: alınan/satılan birim (qty ve unitPrice ile birlikte). */
+  unit?: AssetUnit;
+  /** Varlık hesabı transferinde alınan/satılan miktar (unit cinsinden, ondalıklı olabilir). */
   qty?: number;
   /** Varlık hesabı transferinde işlem anındaki birim fiyat (kuruş). amount ≈ qty × unitPrice. */
   unitPrice?: Money;
