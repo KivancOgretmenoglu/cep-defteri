@@ -179,4 +179,4 @@ Also: monthly budget and category limits, monthly report card, reports, tags, ex
 
 - **Sürüm numarası:** Her yeni AAB'nin `versionCode`'u bir öncekinden büyük olmalı. CI bunu derleme numarasından (1.0.N) otomatik veriyor; sadece en yeni dosyayı yükle.
 - **APK'yı GitHub'dan kuranlar:** Play Store sürümü farklı bir anahtarla (Google'ın imzası) gelir. GitHub'dan kurulan uygulamanın üzerine Play sürümü kurulamaz: önce *Ayarlar → Yedek indir*, eski uygulamayı kaldır, Play'den kur, *Yedekten geri yükle*.
-- **İzin beyanları:** Play Console bazı izinler için beyan isteyebilir (ör. kesin alarm). CI günlüğündeki "İzinleri listele" adımı birleşmiş manifestteki izinleri yazar; sorulursa oraya bakarız.
+- **İzinler:** INTERNET, POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED, USE_BIOMETRIC/USE_FINGERPRINT, VIBRATE, WAKE_LOCK (eski Android'de dosya). Hiçbiri özel beyan gerektirmez. Kesin alarm (SCHEDULE_EXACT_ALARM) bilerek kaldırıldı; bildirimler birkaç dakika kayabilir. CI günlüğündeki "İzinleri listele" adımı güncel listeyi yazar.

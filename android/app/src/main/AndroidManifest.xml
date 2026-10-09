@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application
         android:allowBackup="true"
@@ -159,6 +160,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Bildirimler (Android 13+ çalışma anında izin sorulur) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Bildirim eklentisinin eklediği kesin alarm izni kaldırılır: Play yalnız alarm/takvim uygulamalarına izin veriyor.
+         Eklenti izin yoksa kendiliğinden normal (birkaç dakika kayabilen) zamanlamaya geçer. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" tools:node="remove" />
     <!-- Otomatik yedeği Belgeler klasörüne yazmak için yalnız eski Android sürümlerinde gerekir -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
