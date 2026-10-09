@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowDownLeft, ArrowUpRight, Plus, RefreshCw, Target, Pencil, Trash2 } from 'lucide-react';
+import { Archive, ArchiveRestore, ArrowDownLeft, ArrowUpRight, Plus, RefreshCw, Target, Pencil, Trash2 } from 'lucide-react';
 import type { ID } from '../domain/types';
 import type { Money } from '../domain/money';
 import { monthEnd, monthOf, monthStart } from '../domain/dates';
 import { formatMoney, hiddenMoney, pctForm, pctPlain, shortDate } from '../i18n/format';
 import { useT } from '../i18n';
-import { accountIndex, goalProgress, investmentState, isInvestment, rangeSummary, transferKind } from '../domain/ledger';
+import { accountIndex, goalProgress, investmentLists, investmentState, isInvestment, rangeSummary, transferKind } from '../domain/ledger';
 import * as A from '../domain/actions';
 import { commit } from '../store/store';
 import { Amount, Chip, Progress, SectionHead } from '../ui/kit';
@@ -27,9 +27,34 @@ export function Invest() {
   useEffect(() => {
     if (hasAsset) void refreshPrices();
   }, [hasAsset]);
-  const invAccounts = data.accounts.filter((a) => isInvestment(a) && (!a.archived || investmentState(data, a.id, book)!.currentValue !== 0));
+  // Arşivlenen hesap (değeri olsa bile) ana listeden ve toplamlardan çıkar; en altta katlanır bölümde durur.
+  const { active: invAccounts, archived: archivedAccs } = investmentLists(data);
   const [sel, setSel] = useState<ID | null>(null);
-  const accountId = sel && invAccounts.some((a) => a.id === sel) ? sel : invAccounts[0]?.id;
+  // Arşivden açılan hesap ayrı tutulur: görüntülenen hesap arşivlenince ana görünüm aktif bir hesaba geçer.
+  const [archSel, setArchSel] = useState<ID | null>(null);
+  const accountId = archSel && archivedAccs.some((a) => a.id === archSel) ? archSel : sel && invAccounts.some((a) => a.id === sel) ? sel : invAccounts[0]?.id;
+  const openArchived = (id: ID) => {
+    setArchSel(id);
+    window.scrollTo?.({ top: 0, behavior: 'smooth' });
+  };
+  const archivedSection = archivedAccs.length > 0 && (
+    <section className="card card--span" aria-label={t('accdel.archivedSection', { n: archivedAccs.length })}>
+      <details className="archived-accs" data-testid="archived-accs">
+        <summary>{t('accdel.archivedSection', { n: archivedAccs.length })}</summary>
+        <ul className="acc-list">
+          {archivedAccs.map((a) => (
+            <li key={a.id}>
+              <button className="acc-row" onClick={() => openArchived(a.id)}>
+                <Archive size={18} aria-hidden />
+                <span className="acc-row__name">{a.name}</span>
+                <Amount value={investmentState(data, a.id, book)!.currentValue} tone="invest" hide={data.settings.hideTotals} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      </details>
+    </section>
+  );
   const month = monthOf(today);
 
   const view = useMemo(() => {
@@ -61,12 +86,14 @@ export function Invest() {
         <section className="card">
           <SceneEmpty scene="invest" onAction={() => openSheet({ kind: 'account', kindPreset: 'investment' })} />
         </section>
+        {archivedSection}
       </div>
     );
   }
   const { st, m, events, goals } = view;
   const reached = goals.find((g) => g.reached);
   const near = goals.find((g) => !g.reached && g.pct >= 80);
+  const isArchived = !!st.account.archived;
 
   return (
     <div className="screen">
@@ -78,7 +105,7 @@ export function Invest() {
         </div>
         {invAccounts.length > 1 && (
           <div className="chip-row">
-            {invAccounts.map((a) => <Chip key={a.id} on={a.id === accountId} onClick={() => setSel(a.id)}>{a.name}</Chip>)}
+            {invAccounts.map((a) => <Chip key={a.id} on={a.id === accountId} onClick={() => { setSel(a.id); setArchSel(null); }}>{a.name}</Chip>)}
           </div>
         )}
         {holdings.length > 0 && !data.settings.hideTotals && (
@@ -87,6 +114,15 @@ export function Invest() {
       </header>
 
       <div className="invest-grid">
+        {isArchived && (
+          <section className="card card--span callout archived-banner" role="status">
+            <span>{t('accdel.archivedBanner')}</span>
+            <span className="btn-row">
+              <button className="btn btn--secondary btn--small" onClick={() => { const id = st.account.id; commit((d) => A.setAccountArchived(d, id, false), t('acc.unarchived')); setSel(id); setArchSel(null); }}><ArchiveRestore size={16} /> {t('acc.unarchive')}</button>
+              {invAccounts.length > 0 && <button className="btn btn--ghost btn--small" onClick={() => setArchSel(null)}>{t('accdel.backToActive')}</button>}
+            </span>
+          </section>
+        )}
         <section className="card invest-hero" aria-labelledby="inv-h">
           <div className="invest-hero__top">
             <h2 id="inv-h" className="label">{st.account.name} · {t('inv.currentValue')}</h2>
@@ -191,6 +227,7 @@ export function Invest() {
             ))}
           </ul>
         </section>
+        {archivedSection}
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ import type { Account, Category, Data, Goal, ID, Lang, Plan, PlanRef, Settings, 
 import { translate, type Key, type Vars } from '../i18n/core';
 import { isMoney, type Money } from './money';
 import { isISODate, type ISODate } from './dates';
-import { accountIndex, assetOverdraft, assetQuantities, availableQty, installmentEnd, isDaily, isInvestment, isPerson, occKey, occurrences } from './ledger';
+import { accountIndex, assetOverdraft, assetQuantities, availableQty, cashBalance, installmentEnd, isDaily, isInvestment, isPerson, occKey, occurrences } from './ledger';
 import { addDays } from './dates';
 import { isAssetLot, isAssetUnit, isQty, roundQty, unitOrder, valueOf, type AssetLot, type AssetUnit } from './assets';
 
@@ -344,6 +344,74 @@ export function deleteAccount(data: Data, id: ID): Data {
   if (isAccountUsed(data, id)) fail('err.accountUsed');
   const settings = data.settings.lastAccountId === id ? { ...data.settings, lastAccountId: null } : data.settings;
   return { ...data, settings, accounts: data.accounts.filter((a) => a.id !== id) };
+}
+
+/** Hesapla birlikte silinecek kayıtlar (yalnız yatırım ve kişi hesapları; günlük hesaplarda giderler de silineceği için yok). */
+export interface AccountCascade {
+  /** Silinecek işlemler: hesaba/hesaptan aktarımlar, hesabın kendi kayıtları ve bunlara bağlı iadeler. */
+  txIds: Set<ID>;
+  /** Bunların aktarım olanları (sayım için). */
+  transfers: number;
+  valuationIds: Set<ID>;
+  planIds: Set<ID>;
+  goalIds: Set<ID>;
+  /** Günlük hesap kimliği → silmeden sonra bakiyesindeki değişim (yalnız sıfırdan farklı olanlar). */
+  dailyEffects: { accountId: ID; delta: Money }[];
+}
+
+function cascadeSets(data: Data, id: ID) {
+  const txIds = new Set(data.txs.filter((t) => t.accountId === id || t.toAccountId === id).map((t) => t.id));
+  // Silinen bir gidere bağlı iadeler de gider (iade yalnız gidere bağlanır, zincir tek basamaklıdır).
+  for (const t of data.txs) if (t.type === 'refund' && t.refundOf && txIds.has(t.refundOf)) txIds.add(t.id);
+  const valuationIds = new Set(data.valuations.filter((v) => v.accountId === id).map((v) => v.id));
+  const planIds = new Set(data.plans.filter((p) => p.accountId === id || p.toAccountId === id).map((p) => p.id));
+  const goalIds = new Set(data.goals.filter((g) => g.accountId === id).map((g) => g.id));
+  return { txIds, valuationIds, planIds, goalIds };
+}
+
+function applyCascade(data: Data, id: ID, s: ReturnType<typeof cascadeSets>): Data {
+  const txs = data.txs
+    .filter((t) => !s.txIds.has(t.id))
+    .map((t) => {
+      if (!t.planRef || !s.planIds.has(t.planRef.planId)) return t;
+      const { planRef: _drop, ...rest } = t;
+      return rest as Tx;
+    });
+  const settings = data.settings.lastAccountId === id ? { ...data.settings, lastAccountId: null } : data.settings;
+  return {
+    ...data,
+    settings,
+    accounts: data.accounts.filter((a) => a.id !== id),
+    txs,
+    valuations: data.valuations.filter((v) => !s.valuationIds.has(v.id)),
+    plans: data.plans.filter((p) => !s.planIds.has(p.id)),
+    goals: data.goals.filter((g) => !s.goalIds.has(g.id)),
+  };
+}
+
+/** Silmeden önce kullanıcıya gösterilecek özet: kaç kayıt gider ve günlük hesap bakiyeleri nasıl değişir. */
+export function accountCascadePreview(data: Data, id: ID): AccountCascade {
+  const acc = data.accounts.find((a) => a.id === id) ?? fail('err.accountNotFound');
+  if (isDaily(acc)) fail('accdel.err.daily');
+  const s = cascadeSets(data, id);
+  const after = applyCascade(data, id, s);
+  const dailyEffects = data.accounts
+    .filter(isDaily)
+    .map((a) => ({ accountId: a.id, delta: cashBalance(after, a.id) - cashBalance(data, a.id) }))
+    .filter((e) => e.delta !== 0);
+  const transfers = data.txs.filter((t) => s.txIds.has(t.id) && t.type === 'transfer').length;
+  return { ...s, transfers, dailyEffects };
+}
+
+/**
+ * Yatırım ya da kişi hesabını tüm geçmişiyle siler: hesaba/hesaptan bütün işlemler (ve onlara bağlı iadeler),
+ * değerlemeler, planlar ve hedefler. Silinen bir plana bağlı kalan işlemlerin plan bağı kaldırılır.
+ * Günlük hesaplar için yoktur: onların geçmişi giderlerdir, arşivlenir.
+ */
+export function deleteAccountCascade(data: Data, id: ID): Data {
+  const acc = data.accounts.find((a) => a.id === id) ?? fail('err.accountNotFound');
+  if (isDaily(acc)) fail('accdel.err.daily');
+  return applyCascade(data, id, cascadeSets(data, id));
 }
 
 // ───────────────────────── Yatırım değerlemesi ─────────────────────────

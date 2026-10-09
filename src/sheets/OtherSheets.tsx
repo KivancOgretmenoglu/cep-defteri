@@ -11,6 +11,7 @@ import { closeSheet, openSheet } from '../ui/nav';
 import { Chip, Field, FormError, MoneyInput, Segmented, Sheet, inputFromMoney } from '../ui/kit';
 import { CATEGORY_COLORS, CATEGORY_ICONS, CatIcon } from '../ui/icons';
 import { dailyAccounts, useData, useLookups } from '../ui/hooks';
+import { usePrices } from '../store/prices';
 import { AssetModePicker, OpeningLots, lotRowsFrom, newLotRow, parseLotRows, useManualPrice, type LotRow } from './AssetFields';
 
 const parseSigned = (raw: string) => {
@@ -63,10 +64,22 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
     if (e) setErr(e);
     else closeSheet();
   }
+  // İkinci adım (onay) ekranı: arşivleme (hesapta hâlâ değer varsa) ya da hareketleriyle silme.
+  const [confirm, setConfirm] = useState<null | 'archive' | 'delete'>(null);
+  const priceBook = usePrices().book;
+  const invValue = acc && isInvestment(acc) ? investmentState(data, acc.id, priceBook)!.currentValue : 0;
+  const canCascade = !!acc && used && !isDaily(acc);
   function archive() {
     if (!acc) return;
+    if (!acc.archived && invValue !== 0 && confirm !== 'archive') return setConfirm('archive');
     commit((d) => A.setAccountArchived(d, acc.id, !acc.archived), acc.archived ? T('acc.unarchived') : T('acc.archivedToast'));
     closeSheet();
+  }
+  function removeAll() {
+    if (!acc) return;
+    const e = commit((d) => A.deleteAccountCascade(d, acc.id), T('acc.deleted'));
+    if (e) { setConfirm(null); setErr(e); }
+    else closeSheet();
   }
   function remove() {
     if (!acc) return;
@@ -75,6 +88,24 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
     else closeSheet();
   }
   const balanceNow = acc && isDaily(acc) ? cashBalance(data, acc.id) : null;
+
+  if (acc && confirm === 'archive') {
+    return (
+      <Sheet
+        title={T('accdel.archiveTitle')}
+        onClose={() => setConfirm(null)}
+        footer={
+          <div className="sheet-actions">
+            <button className="btn btn--ghost" onClick={() => setConfirm(null)}>{T('common.cancel')}</button>
+            <button className="btn btn--primary btn--grow" onClick={archive}><Archive size={18} /> {T('accdel.archiveBtn')}</button>
+          </div>
+        }
+      >
+        <p>{T('accdel.archiveBody', { amount: formatMoney(invValue) })}</p>
+      </Sheet>
+    );
+  }
+  if (acc && confirm === 'delete') return <CascadeConfirm accountId={acc.id} onCancel={() => setConfirm(null)} onConfirm={removeAll} />;
 
   return (
     <Sheet
@@ -157,8 +188,61 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
       {balanceNow !== null && (
         <p className="note-line">{T('acc.balanceNow', { amount: formatMoney(balanceNow) })}</p>
       )}
-      {acc?.archived && <p className="note-line">{T('acc.archivedNote')}</p>}
+      {acc?.archived && <p className="note-line">{isInvestment(acc) ? T('accdel.archivedNoteInv') : T('acc.archivedNote')}</p>}
       <FormError msg={err} />
+      {canCascade && (
+        <div className="danger-zone">
+          <button className="btn btn--ghost btn--danger btn--small" onClick={() => setConfirm('delete')}>
+            <Trash2 size={16} /> {T('accdel.deleteAll')}
+          </button>
+        </div>
+      )}
+    </Sheet>
+  );
+}
+
+/** Hesabı hareketleriyle silmeden önce: ne kadar kayıt gideceği ve günlük hesap bakiyelerine etkisi. */
+function CascadeConfirm({ accountId, onCancel, onConfirm }: { accountId: ID; onCancel: () => void; onConfirm: () => void }) {
+  const T = useT();
+  const { data } = useData();
+  const acc = data.accounts.find((a) => a.id === accountId);
+  if (!acc) return null;
+  const p = A.accountCascadePreview(data, accountId);
+  const otherTx = p.txIds.size - p.transfers;
+  const counts = [
+    p.transfers > 0 && T('accdel.cnt.transfers', { n: p.transfers }),
+    otherTx > 0 && T('accdel.cnt.otherTx', { n: otherTx }),
+    p.valuationIds.size > 0 && T('accdel.cnt.valuations', { n: p.valuationIds.size }),
+    p.planIds.size > 0 && T('accdel.cnt.plans', { n: p.planIds.size }),
+    p.goalIds.size > 0 && T('accdel.cnt.goals', { n: p.goalIds.size }),
+  ].filter((x): x is string => !!x);
+  const name = (id: ID) => data.accounts.find((a) => a.id === id)?.name ?? '';
+  return (
+    <Sheet
+      title={T('accdel.confirmTitle')}
+      onClose={onCancel}
+      footer={
+        <div className="sheet-actions">
+          <button className="btn btn--ghost" onClick={onCancel}>{T('common.cancel')}</button>
+          <button className="btn btn--danger btn--grow" onClick={onConfirm}><Trash2 size={18} /> {T('accdel.confirmBtn')}</button>
+        </div>
+      }
+    >
+      <p>{T('accdel.confirmLead', { name: acc.name })}</p>
+      <ul className="cascade-list">
+        {counts.map((c) => <li key={c}>{c}</li>)}
+      </ul>
+      <div className="callout">
+        <p>{T('accdel.balanceNote')}</p>
+        {p.dailyEffects.length === 0 ? (
+          <p><b>{T('accdel.noEffect')}</b></p>
+        ) : (
+          p.dailyEffects.map((e) => (
+            <p key={e.accountId}><b>{T(e.delta > 0 ? 'accdel.effectUp' : 'accdel.effectDown', { name: name(e.accountId), amount: formatMoney(Math.abs(e.delta)) })}</b></p>
+          ))
+        )}
+      </div>
+      <p className="note-line">{T('accdel.undoHint')}</p>
     </Sheet>
   );
 }

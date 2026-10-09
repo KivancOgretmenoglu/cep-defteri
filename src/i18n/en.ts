@@ -9,6 +9,7 @@ import { planEn } from './plan.en';
 import { guideEn } from './guide.en';
 import { polishEn } from './polish.en';
 import { emptyEn } from './empty.en';
+import { accdelEn } from './accdel.en';
 
 export const en: Dict = {
   ...hintsEn,
@@ -48,7 +49,7 @@ export const en: Dict = {
   'err.priorInvalid': "The earlier contribution isn't valid.",
   'err.accountNotFound': "Couldn't find that account.",
   'err.accountKindLocked': "An account with entries can't change type; it would break past reports.",
-  'err.accountUsed': "This account has entries. You can archive it instead of deleting.",
+  'err.accountUsed': "This account has entries. You can archive it, or for investment/person accounts delete it together with its entries.",
   'err.valuationOnlyInv': "Values can only be entered for investment accounts.",
   'err.valueNegative': "The value can't be negative.",
   'err.valueFuture': "The value date can't be after today.",
@@ -1008,5 +1009,6 @@ export const en: Dict = {
   ...guideEn,
   ...polishEn,
   ...emptyEn,
+  ...accdelEn,
   // @end
 };

@@ -307,9 +307,18 @@ export function investmentAccounts(data: Data): Account[] {
   return data.accounts.filter(isInvestment);
 }
 
-/** Tüm yatırım hesaplarının güncel değer toplamı. */
+/** Yatırım ekranının listeleri: ana liste (arşivlenmemiş) ve en alttaki "Arşivlenmiş hesaplar" bölümü. */
+export function investmentLists(data: Data): { active: Account[]; archived: Account[] } {
+  const inv = investmentAccounts(data);
+  return { active: inv.filter((a) => !a.archived), archived: inv.filter((a) => !!a.archived) };
+}
+
+/**
+ * Arşivlenmemiş yatırım hesaplarının güncel değer toplamı. Arşivlenen hesap, listelerden ve
+ * "toplam yatırım değeri" gösterimlerinden çıkar (geçmiş akışları raporlarda kalır); geri alınınca döner.
+ */
 export function investmentTotal(data: Data, prices?: PriceBook): Money {
-  return sum(investmentAccounts(data).map((a) => investmentState(data, a.id, prices)?.currentValue ?? 0));
+  return sum(investmentAccounts(data).filter((a) => !a.archived).map((a) => investmentState(data, a.id, prices)?.currentValue ?? 0));
 }
 
 /** Bir değerlemenin, o hesap için hangi hareketleri kapsadığını açıklamak için: değerlemeden sonraki net akış. */

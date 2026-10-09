@@ -12,6 +12,7 @@ import { planTr } from './plan.tr';
 import { guideTr } from './guide.tr';
 import { polishTr } from './polish.tr';
 import { emptyTr } from './empty.tr';
+import { accdelTr } from './accdel.tr';
 
 export const tr = {
   ...hintsTr,
@@ -51,7 +52,7 @@ export const tr = {
   'err.priorInvalid': "Önceki katkı geçersiz.",
   'err.accountNotFound': "Hesap bulunamadı.",
   'err.accountKindLocked': "Kaydı olan bir hesabın türü değiştirilemez; geçmiş raporlar bozulurdu.",
-  'err.accountUsed': "Bu hesabın kayıtları var. Silmek yerine arşivleyebilirsin.",
+  'err.accountUsed': "Bu hesabın kayıtları var. Arşivleyebilir ya da yatırım/kişi hesabıysa kayıtlarıyla birlikte silebilirsin.",
   'err.valuationOnlyInv': "Değer yalnızca yatırım hesabı için girilir.",
   'err.valueNegative': "Değer negatif olamaz.",
   'err.valueFuture': "Değer tarihi bugünden sonra olamaz.",
@@ -1011,5 +1012,6 @@ export const tr = {
   ...guideTr,
   ...polishTr,
   ...emptyTr,
+  ...accdelTr,
   // @end
 } satisfies Record<string, Entry>;
