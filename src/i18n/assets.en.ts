@@ -12,7 +12,7 @@ export const assetsEn: Record<keyof typeof assetsTr, string> = {
   'asset.unit.EUR': "Euro",
   'asset.unit.GBP': "British pound",
   'asset.short.gram': "g",
-  'asset.short.ceyrek': "quarter",
+  'asset.short.ceyrek': "qtr",
   'asset.short.yarim': "half",
   'asset.short.tam': "full",
   'asset.short.cumhuriyet': "Republic",

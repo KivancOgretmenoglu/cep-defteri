@@ -1316,7 +1316,10 @@ fieldset.block {
   font-weight: 600;
   line-height: 1.15;
   color: var(--ink-2);
-  overflow-wrap: anywhere;
+  /* Uzun adlar heceden bölünür ("Subscrip-tions"), kelime ortasından değil */
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  overflow-wrap: break-word;
 }
 .cat-btn.is-on {
   border-color: var(--cat);
