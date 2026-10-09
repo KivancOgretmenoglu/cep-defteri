@@ -96,13 +96,14 @@
   opacity: calc(var(--sky-stars) * var(--sky-star-max));
 }
 
-/* Güneş / ay: başlığın ortasındaki boşlukta, saate göre bir yay üzerinde */
+/* Güneş / ay: ay etiketi ile başlık simgeleri arasındaki ölçülmüş şeritte (Sky.tsx useSunLane), saate göre
+   soldan sağa ve küçük bir yay üzerinde. Ölçüm gelmeden önce eski merkez konumuna düşer. */
 .sky-body {
   position: absolute;
   width: 16px;
   height: 16px;
-  left: calc(50% + var(--sky-x) * (50% - 130px));
-  top: calc(8px + var(--sky-off, 0px) + var(--sky-y) * 30px);
+  left: calc(var(--sun-l, 45%) + var(--sky-x) * var(--sun-w, 0px));
+  top: calc(var(--sun-top, calc(8px + var(--sky-off, 0px))) + (var(--sky-y) - 0.5) * 10px);
   transition:
     left 2.4s var(--ease-gentle),
     top 2.4s var(--ease-gentle);

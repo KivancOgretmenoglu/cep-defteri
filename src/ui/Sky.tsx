@@ -3,7 +3,7 @@
  * ve saate göre yükselip alçalan piksel güneş/ay. Renkler kâğıt zeminiyle ve maskotun vurgusuyla karıştırılır
  * (sky.css), böylece her karakter paletinde ve iki temada da metin okunur kalır.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { skyBand, skyBody, type SkyBand } from '../mascot/seasonal';
 import './sky.css';
 
@@ -55,6 +55,45 @@ function Pixel({ rows, cls }: { rows: string[]; cls: string }) {
   );
 }
 
+const SUN_PX = 16;
+
+/**
+ * Güneş/ayın gezineceği şerit: ay etiketinin (eyebrow) sağı ile başlık simgelerinin (head-actions) solu arası.
+ * Ekranda ölçülür; simge sayısı, dil, yazı boyutu ya da telefon genişliği değişse de güneş simgelerle çakışmaz.
+ * Değerler bant öğesine CSS değişkeni olarak yazılır (--sun-l, --sun-w, --sun-top; px).
+ */
+function useSunLane() {
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const sky = ref.current;
+    const head = sky?.parentElement;
+    if (!sky || !head) return;
+    const measure = () => {
+      const eyebrow = head.querySelector<HTMLElement>('.eyebrow');
+      const actions = head.querySelector<HTMLElement>('.head-actions');
+      if (!eyebrow) return;
+      const box = sky.getBoundingClientRect();
+      const e = eyebrow.getBoundingClientRect();
+      // Yazının gerçek genişliği (blok öğe satır boyu uzanabilir)
+      const range = document.createRange();
+      range.selectNodeContents(eyebrow);
+      const textRight = range.getBoundingClientRect().right || e.right;
+      const left = textRight - box.left + 14;
+      const right = (actions ? actions.getBoundingClientRect().left : box.right - 24) - box.left - 14;
+      const width = Math.max(0, right - left - SUN_PX);
+      sky.style.setProperty('--sun-l', `${Math.round(left)}px`);
+      sky.style.setProperty('--sun-w', `${Math.round(width)}px`);
+      sky.style.setProperty('--sun-top', `${Math.round(e.top - box.top + e.height / 2 - SUN_PX / 2)}px`);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(head);
+    document.fonts?.ready.then(measure).catch(() => {});
+    return () => ro.disconnect();
+  }, []);
+  return ref;
+}
+
 /** Bant; başlığın (position: relative) ilk çocuğu olarak konur. */
 export function Sky() {
   const now = useNow();
@@ -71,8 +110,9 @@ export function Sky() {
     '--sky-x': body.x,
     '--sky-y': body.y,
   } as React.CSSProperties;
+  const ref = useSunLane();
   return (
-    <div className="sky" data-band={band} style={style} aria-hidden="true">
+    <div ref={ref} className="sky" data-band={band} style={style} aria-hidden="true">
       <span className="sky__stars" />
       <span className={`sky-body sky-body--${body.kind}`}>
         <Pixel rows={body.kind === 'sun' ? SUN : MOON} cls={body.kind} />
