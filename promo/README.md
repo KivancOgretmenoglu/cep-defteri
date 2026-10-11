@@ -41,6 +41,17 @@ Her sahne: `[tür, başlangıç saniyesi, seçenekler]`.
 | `subsStory` | Unuttuğun abonelikler → dedektif Fıstık İPTAL damgaları | 5 sn |
 | `debtStory` | Karamel: "Yarın veririm" → 3 ay sonra "Hangi 120?" | 5,6 sn |
 | `examStory` | Sınav haftası gecesi → hatırlatma → sınav haftası modu | 5,4 sn |
+| `pov` | Telefon ekranı adımları (`steps`: `img`, `scroll`, `seq`), `taps`, `chips`, `stopwatch`, `mascot` | serbest |
+| `chat` | Grup sohbeti (`people`, `messages`, `typing`) | serbest |
+| `talk` | Konuşan kafa Fıstık (`poses`, `talk`, `shake`) | serbest |
+| `lineup` | Beş maskot sıra hâlinde | 2,5 sn |
+| `end` | Logosuz kapanış: Fıstık (+ `friend`) ve @cep_defteri | 3 sn |
+
+### Organik (reklam gibi durmayan) reelsler
+Reels düzeyinde `boxes` (Instagram yazı kutusu: `[başla, bitir, html, y]`), `captions` (otomatik altyazı),
+`handheld` (elde çekim titremesi), `babble` (Fıstık altyazıyla konuşur), `musicGain`, `noMusicVariant`
+(trend ses eklemek için `<ad>-muziksiz.wav`; mp4'e `ffmpeg -map` ile eklenir). Açıklama metinleri ve hook
+testleri: `brand/reels-metinleri.md`.
 
 Seçenekler:
 - `poster`: girişler ilk karede tamamlanmış olur. Videonun ilk sahnesinde kullanılır, çünkü ilk kare kapak olur.

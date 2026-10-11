@@ -878,6 +878,109 @@ def cue_examStory(t0, skip=0, o=None):
     put(SFX, bloop(900, 300, 0.15, 0.4), T(4.3))
 
 
+
+
+# ───────── organik sahneler (native.js) ─────────
+def cue_pov(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    if o.get('rise'):
+        put(SFX, stereo_move(whoosh(0.4, 150, 1800), 0, 0), T(0.0), 0.4)
+    for i, st in enumerate(o.get('steps', [])):
+        if i and st.get('t', 0) >= 0:
+            put(SFX, stereo_move(whoosh(0.28, 500, 4000), 0.8, -0.8), T(st['t'] - 0.03), 0.45)
+        for j, (ts, _) in enumerate(st.get('seq', [])):
+            if j == 1:  # tutar yazılıyor
+                put(SFX, key_click(0.7), T(ts - 0.12), pan=-0.1)
+                put(SFX, key_click(0.7), T(ts - 0.04), pan=0.1)
+    for tp in o.get('taps', []):
+        put(SFX, ui_tap(), T(tp['t']))
+    if o.get('stopwatch'):
+        a, b = o['stopwatch'][0], o['stopwatch'][1]
+        for k, tk in enumerate(np.arange(a, b, 0.25)):
+            put(SFX, tick(k % 2 == 0, 0.26), T(tk), pan=0.5)
+        put(SFX, ding_ding(), T(b), 0.7)
+        put(SFX, popper(), T(b + 0.02), 0.45)
+    for i, c in enumerate(o.get('chips', [])):
+        put(SFX, bloop(700 + 100 * i, 1400, 0.07, 0.35), T(c['t'] + 0.05), pan=-0.4)
+    m = o.get('mascot')
+    if m:
+        if m.get('enter') is not None:
+            put(SFX, boing(0.35, 0.22), T(m['enter']), pan=0.5)
+        if m.get('cheer') is not None:
+            put(SFX, meow(1.15, 0.35), T(m['cheer'] + 0.1), 0.5, pan=-0.5 if m.get('x', 230) < 540 else 0.5)
+    c = o.get('confetti')
+    if c and c['t'] >= 0:
+        put(SFX, popper(), T(c['t']), 0.5)
+
+
+def cue_chat(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    for t, who, _ in o.get('messages', []):
+        if t < 0:
+            continue
+        if who == 'me':
+            put(SFX, bloop(900, 1500, 0.06, 0.38), T(t), pan=0.4)
+        else:
+            put(SFX, bloop(520, 820, 0.07, 0.34), T(t), pan=-0.3)
+    if o.get('typing'):
+        a, b = o['typing'][0], o['typing'][1]
+        for tk in np.arange(a + 0.05, b - 0.05, 0.11):
+            put(SFX, key_click(0.35), T(tk), pan=0.3)
+
+
+def cue_talk(t0, skip=0, o=None):
+    T = at(t0, skip)
+    for a, b in (o or {}).get('shake', []):
+        put(SFX, stereo_move(whoosh(0.18, 800, 3000), -0.5, 0.5), T(a), 0.3)
+
+
+def cue_lineup(t0, skip=0, o=None):
+    T = at(t0, skip)
+    voices = [(hoot(), -0.7), (chitter(), -0.35), (meow(1.0, 0.4), 0.0), (sniff(), 0.35), (woof(), 0.7)]
+    for i, (vc, pn) in enumerate(voices):
+        tc = 0.1 + i * 0.16
+        put(SFX, bloop(350 + 60 * i, 1100 + 120 * i, 0.08, 0.3), T(tc), pan=pn)
+        put(SFX, vc, T(tc + 0.15), 0.55, pan=pn)
+
+
+def cue_end(t0, skip=0, o=None):
+    T = at(t0, skip)
+    put(SFX, fm_bell(1568, 1.0, 0.22), T(0.5), pan=0.2)
+    put(SFX, meow(1.15, 0.45), T(0.25), 0.6)
+    if (o or {}).get('friend') == 'karamel':
+        put(SFX, voice([300, 340, 280], [(500, 1100), (600, 1150)], 0.25, breath=0.3, v=0.45), T(0.6), 0.5, pan=-0.5)
+
+
+# Fıstık'ın "konuşması": altyazıdaki her sözcük çıkarken ünlülerine göre minik heceler
+VOWELS = {'a': (800, 1250), 'e': (520, 1900), 'ı': (420, 1500), 'i': (320, 2300), 'o': (520, 900), 'ö': (460, 1550), 'u': (340, 850), 'ü': (330, 1750)}
+
+
+def cap_step(a, b, n):
+    return min(0.2, ((b - a) * 0.72) / n)
+
+
+def babble(captions, base=640):
+    for cap in captions:
+        a, b, text = cap[0], cap[1], cap[2]
+        words = text.split(' ')
+        step = cap_step(a, b, len(words))
+        for i, w in enumerate(words):
+            vs = [c for c in w.lower() if c in VOWELS][:3] or ['a']
+            for j, v in enumerate(vs):
+                d = min(0.075, step / len(vs) * 0.9)
+                f = base * rng.uniform(0.88, 1.22) * (1.08 if w.endswith('?') and j == len(vs) - 1 else 1)
+                F1, F2 = VOWELS[v]
+                x = voice([f, f * 1.08, f * 0.95], [(F1, F2), (F1, F2)], d, kind='square', breath=0.08, vib=0.0, v=0.32)
+                put(SFX, x, a + i * step + j * d, 1.0, pan=0.0)
+
+
+def cue_boxes(boxes):
+    for bx in boxes:
+        if bx[0] > 0:
+            put(SFX, bloop(620, 980, 0.05, 0.22), bx[0])
+
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
 # ═════════ ANA MÜZİK ═════════
@@ -972,6 +1075,9 @@ for sc in scenes:
         outro_starts.append(t0)
     CUES[typ](t0, skip, opts)
     prev = typ
+if REEL.get('babble'):
+    babble(REEL.get('captions', []))
+cue_boxes(REEL.get('boxes', []))
 if music_start is not None:
     # müzik ölçüleri her flaşlı sahnede yeniden hizalanır (vuruş tam patlamaya düşsün)
     flashes = [sc[1] for sc in scenes if len(sc) > 2 and sc[2].get('flash') and sc[1] > music_start]
@@ -1019,21 +1125,36 @@ sfx = SFX + wet * 0.18
 env = np.abs(sfx).max(1)
 env = lp(env, 8, 1).clip(0, None)
 gain = 1 - 0.45 * np.clip(env / 0.35, 0, 1)  # efekt geldiğinde müzik kısılır
-mus = MUS * gain[:, None]
+mus = MUS * gain[:, None] * REEL.get('musicGain', 1.0)
 mus_wet = np.stack([fftconvolve(mus[:, c], ir[:, c] * 0.5)[:N] for c in range(2)], 1)
-mix = mus * 0.55 + mus_wet * 0.05 + sfx * 0.9 + AMB
-mix = np.stack([hp(mix[:, c], 28) for c in range(2)], 1)
-peak = np.abs(mix).max()
-mix = np.tanh(mix / peak * 1.8) / np.tanh(1.8) * 0.93
-fade = np.ones(N)
-fade[-int(0.4 * SR):] = np.linspace(1, 0, int(0.4 * SR))
-mix *= fade[:, None]
 
-out = os.path.join(HERE, 'out', f'{REEL_NAME}.wav')
-os.makedirs(os.path.dirname(out), exist_ok=True)
-with wave.open(out, 'wb') as w:
-    w.setnchannels(2)
-    w.setsampwidth(2)
-    w.setframerate(SR)
-    w.writeframes((mix * 32767).astype('<i2').tobytes())
-print('yazıldı', out)
+
+def master(mix, target_db=-15.5):
+    """Ortalama yüksekliği hedefe getirir (Reels için ≈ −14 LUFS), sonra yumuşak sınırlar."""
+    mix = np.stack([hp(mix[:, c], 28) for c in range(2)], 1)
+    blk = int(0.4 * SR)
+    e = np.array([np.sqrt((mix[i:i + blk] ** 2).mean()) for i in range(0, N - blk, blk)])
+    loud = e[e > e.max() * 0.1]  # sessiz bölümler ortalamayı düşürmesin
+    rms = np.sqrt((loud ** 2).mean()) if len(loud) else 1e-3
+    mix = mix * (10 ** (target_db / 20) / rms)
+    mix = np.tanh(mix * 1.1) / 1.1 * 0.97
+    fade = np.ones(N)
+    fade[-int(0.4 * SR):] = np.linspace(1, 0, int(0.4 * SR))
+    return mix * fade[:, None]
+
+
+def write(mix, name):
+    out = os.path.join(HERE, 'out', f'{name}.wav')
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    with wave.open(out, 'wb') as w:
+        w.setnchannels(2)
+        w.setsampwidth(2)
+        w.setframerate(SR)
+        w.writeframes((mix * 32767).astype('<i2').tobytes())
+    print('yazıldı', out)
+
+
+write(master(mus * 0.55 + mus_wet * 0.05 + sfx * 0.9 + AMB), REEL_NAME)
+if REEL.get('noMusicVariant'):
+    # Instagram'da trend ses eklemek için: yalnız efektler ve konuşma
+    write(master(sfx * 0.9 + AMB, -17.0), f'{REEL_NAME}-muziksiz')

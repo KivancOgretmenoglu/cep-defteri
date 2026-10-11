@@ -635,6 +635,8 @@ window.renderAt = (t) => {
     s.root.style.clipPath = wp >= 1 ? 'none' : `circle(${wp * 2600}px at ${s.wipe[0]}px ${s.wipe[1]}px)`;
     s.update(t - s.t0 + s.skip, t);
   });
+  if (typeof updateOverlays === 'function') updateOverlays(t);
+  if (window.REEL_HANDHELD) handheld(t);
 };
 
 window.ready = (async () => {
@@ -646,11 +648,14 @@ window.ready = (async () => {
   if (!reel) throw new Error('reels.json içinde yok: ' + name);
   defineScenes();
   if (typeof defineStories === 'function') defineStories();
+  if (typeof defineNative === 'function') defineNative();
   for (const [type, t0, opts = {}] of reel.scenes) {
     OPTS = opts;
     SCENES[type](t0, opts);
   }
   window.REEL_END = reel.end;
+  if (typeof setupOverlays === 'function') setupOverlays(reel);
+  window.REEL_HANDHELD = !!reel.handheld;
   await document.fonts.load('800 100px Bricolage');
   await document.fonts.load('100px Pixel');
   await document.fonts.ready;
