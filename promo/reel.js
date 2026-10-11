@@ -561,8 +561,9 @@ function defineScenes() {
       ['fistik', 'Fıstık', 'sokak kedisi', 200, 640],
       ['bilge', 'Bilge', 'baykuş', 540, 640],
       ['ceviz', 'Ceviz', 'sincap', 880, 640],
-      ['diken', 'Diken', 'kirpi', 370, 1130],
-      ['karamel', 'Karamel', 'sokak köpeği', 710, 1130],
+      ['diken', 'Diken', 'kirpi', 200, 1130],
+      ['karamel', 'Karamel', 'sokak köpeği', 540, 1130],
+      ['pamuk', 'Pamuk', 'tavşan', 880, 1130],
     ];
     const cards = defs.map(([key, name, sp, cx, top], i) => {
       const pal = SP.__meta.pal[key];
@@ -649,6 +650,7 @@ window.ready = (async () => {
   defineScenes();
   if (typeof defineStories === 'function') defineStories();
   if (typeof defineNative === 'function') defineNative();
+  if (typeof defineHooks === 'function') defineHooks();
   for (const [type, t0, opts = {}] of reel.scenes) {
     OPTS = opts;
     SCENES[type](t0, opts);

@@ -199,17 +199,22 @@ function defineNative() {
   SCENES.lineup = (t0, o = {}) => {
     const s = scene(t0, o.bg || 'var(--paper)', o.wipe || [540, 1300], o.wdur ?? 0.35);
     pattern(s.root);
-    const keys = ['bilge', 'ceviz', 'fistik', 'diken', 'karamel'];
-    const xs = [170, 355, 540, 725, 910], bots = [1460, 1400, 1370, 1400, 1460];
-    const ms = keys.map((k) => new Mascot(s.root, { who: k, w: 320 }));
+    const keys = ['bilge', 'ceviz', 'fistik', 'pamuk', 'diken', 'karamel'];
+    const two = o.rows === 2;  // iki sıra: daha büyük maskotlar
+    const xs = two ? [200, 540, 880, 200, 540, 880] : [130, 294, 458, 622, 786, 950];
+    const bots = two ? [1090, 1060, 1090, 1530, 1500, 1530] : [1470, 1415, 1385, 1385, 1415, 1470];
+    const ms = keys.map((k) => new Mascot(s.root, { who: k, w: two ? 384 : 288 }));
+    const note = o.note ? el('div', 'pill', s.root, { left: '50%', top: px(o.noteY ?? 640), transform: 'translateX(-50%)', fontSize: '40px', color: 'var(--acc)', whiteSpace: 'nowrap' }) : null;
+    if (note) note.textContent = o.note;
     s.update = (lt) => {
       ms.forEach((m, i) => {
-        const t = 0.1 + i * 0.16;
+        const t = 0.1 + i * 0.14;
         const p = E.back(prog(lt, t, 0.35));
         const h = hop(lt, 0.6, lt > t + 0.3 ? 40 : 0, i * 0.12);
         m.set('happy', lt > t + 0.3 ? (Math.floor(lt / 0.22 + i) % 2 ? 'wave' : 'up') : null, blink(lt, i * 0.3));
-        m.put(xs[i], bots[i] + (1 - p) * 700 - h.y, { sx: h.sx, sy: h.sy, flip: i > 2 });
+        m.put(xs[i], bots[i] + (1 - p) * 700 - h.y, { sx: h.sx, sy: h.sy, flip: two ? i % 3 === 2 : i > 2 });
       });
+      if (note) note.style.opacity = prog(lt, 0.9, 0.3);
     };
   };
 

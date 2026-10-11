@@ -47,6 +47,23 @@ Her sahne: `[tür, başlangıç saniyesi, seçenekler]`.
 | `lineup` | Beş maskot sıra hâlinde | 2,5 sn |
 | `end` | Logosuz kapanış: Fıstık (+ `friend`) ve @cep_defteri | 3 sn |
 
+### Müzik türleri
+Reels düzeyinde `"musicPlan": [[başla, bitir, tür], ...]`. Türler: `chip` (8-bit, 120 BPM), `lofi` (84 BPM,
+elektrik piyano, plak cızırtısı, bant titremesi), `horror` (uğultu, uyumsuz yaylı, hızlanan kalp atışı),
+`quiz` (yarışma programı: 132 BPM swing, bakır nefesliler, yürüyen bas). Bölümler arasında boşluk bırakılabilir
+(ör. korku vuruşundan sonra sessizlik). Plan yoksa eski chiptune düzeni kullanılır.
+
+### Yaratıcı hook sahneleri (`hooks.js`)
+| Tür | İçerik |
+|---|---|
+| `dread` | Karanlık oda, 3-2-1 geri sayım, titreyen Fıstık, banka ekranı çarpması (`scare`) |
+| `coffeeQuiz` | Yarışma sahnesi, geri sayım halkası, cevap sayacı, bayılan sunucu (`reveal`, `up`, `price`) |
+| `persona` | Altı siluet → maskot kartları tek tek (`c0`, `d`); özellik yazıları `boxes` ile |
+
+### Ekranlar
+`assets/ui2/` uygulamanın güncel hâlidir: uygulamayı çalıştırıp `node promo/tools/capture.mjs` ile yenilenir.
+`assets/ui/` eski arayüzden kalmıştır (önceki reelslerde kullanılıyor).
+
 ### Organik (reklam gibi durmayan) reelsler
 Reels düzeyinde `boxes` (Instagram yazı kutusu: `[başla, bitir, html, y]`), `captions` (otomatik altyazı),
 `handheld` (elde çekim titremesi), `babble` (Fıstık altyazıyla konuşur), `musicGain`, `noMusicVariant`

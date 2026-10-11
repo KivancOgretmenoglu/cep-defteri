@@ -53,7 +53,7 @@ Herkes bütçe tutmanın sıkıcı olduğunu söylüyor. Bence değil:
 
 1) Harcamayı yazmak 5 saniye
 2) Bugün ne kadar harcayabileceğini söylüyor
-3) Maskotu var, hem de 5 tane 🐱🦉🐿️🦔🐶
+3) Maskotu var, hem de 6 tane 🐱🦉🐿️🦔🐶🐰
 
 Asıl sıkıcı olan, ayın 30'unda bakiyeye bakmak. Katılıyor musun? 👇
 
@@ -70,3 +70,66 @@ Asıl sıkıcı olan, ayın 30'unda bakiyeye bakmak. Katılıyor musun? 👇
 - İlk saat önemli: yayından sonraki bir saat içinde yorumlara cevap ver.
 - İstatistiklerde ilk 3 saniyedeki kaydırıp geçme oranına bak. Yüksekse hook'u değiştir, video aynı kalsın.
 - İlk karede hook yazısı hazır; kapak olarak da ilk kareyi seçebilirsin.
+
+---
+
+## 4 · korku-filmi (hook türü: görsel hook + gerilim)
+
+**Açıklama:**
+```
+Banka uygulamasını açmadan önceki o 3 saniye 😶
+
+Bu filmi her ay çekiyorsan, bakmadan önce kaç paran kaldığını bilmek iyi gelir. Yaklaşan ödemeler düşülmüş hâliyle, günde ne kadar harcayabileceğinle.
+
+Her ay bu filmi çeken arkadaşına at 👀
+
+#öğrencihayatı #bütçe #aysonu #üniversite #parayönetimi
+```
+
+**Test için alternatif hook'lar:**
+- "Ayın 20'sinde bakiye kontrolü"
+- "POV: bakiyene bakmaya cesaretin yok"
+
+---
+
+## 5 · kahve-tahmin (hook türü: soru + etkileşim)
+
+**Açıklama:**
+```
+Günde 1 kahve. Yılda kaç lira? Önce tahmin et, sonra izle ☕
+
+Cevap: 65 TL × 365 gün = 23.725 TL.
+Kahveyi bırakma, sadece say. Kategoriye limit koyunca yaklaştığında haber veriyor.
+
+Tahminini yorumlara yaz, en yakın kim? 👇
+
+#kahve #öğrencibütçesi #bütçe #tasarruf #üniversite
+```
+
+**Test için alternatif hook'lar:**
+- "Bu kahve sana yılda kaça patlıyor?"
+- "Günlük kahvenin yıllık faturası"
+
+---
+
+## 6 · hangi-hayvansin (hook türü: kişilik testi)
+
+**Açıklama:**
+```
+Harcama tarzına göre hangi hayvansın? 🐱🦉🐿️🦔🐶🐰
+
+1. Fıstık: "son kez" deyip her gün kantine giden
+2. Bilge: her kuruşu tabloya yazan
+3. Ceviz: bozuk parayı bile biriktiren
+4. Diken: "ihtiyacım yok" deyip hiçbir şey almayan
+5. Karamel: hesabı hep ödeyip geri istemeyi unutan
+6. Pamuk: "hak ettim" deyip kendine ödül alan
+
+Sen hangisisin? Arkadaşını etiketle 👇
+
+#kişiliktesti #öğrencihayatı #bütçe #üniversite #maskot
+```
+
+**Test için alternatif hook'lar:**
+- "Arkadaş grubundaki herkes bunlardan biri"
+- "Ben 6 numarayım, sen?"

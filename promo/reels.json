@@ -812,7 +812,7 @@
       [
         9.7,
         11.9,
-        "Üç: maskotu var. Hem de beş tane."
+        "Üç: maskotu var. Hem de altı tane."
       ],
       [
         12.1,
@@ -986,6 +986,266 @@
       ]
     ],
     "musicGain": 0.75,
-    "noMusicVariant": true
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        14.6,
+        "quiz"
+      ]
+    ]
+  },
+  "korku-filmi": {
+    "title": "Hook: banka uygulamasını açmadan önceki 3 saniye (korku)",
+    "end": 11.6,
+    "handheld": true,
+    "musicGain": 0.8,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        3.3,
+        "horror"
+      ],
+      [
+        4.8,
+        11.6,
+        "lofi"
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        3.3,
+        "Banka uygulamasını açmadan<br>önceki <b>3 saniye</b>",
+        230
+      ],
+      [
+        3.3,
+        4.8,
+        "Ayın daha <b>20'si</b>.",
+        250
+      ],
+      [
+        4.8,
+        8.6,
+        "Sürpriz olmasın:<br><b>kaç paran kaldığını her an bil</b>",
+        250
+      ],
+      [
+        8.6,
+        11.6,
+        "Her ay bu filmi çeken<br><b>arkadaşına at</b>",
+        250
+      ]
+    ],
+    "scenes": [
+      [
+        "dread",
+        0,
+        {
+          "scare": 3.3
+        }
+      ],
+      [
+        "pov",
+        4.8,
+        {
+          "rise": true,
+          "steps": [
+            {
+              "t": 0,
+              "img": "assets/ui2/home.png"
+            }
+          ],
+          "chips": [
+            {
+              "t": 1.0,
+              "html": "<span>Ekim sonuna kadar</span><b style='color:#1F6F78'>günde ~231 TL</b>",
+              "x": 40,
+              "y": 1250
+            }
+          ],
+          "mascot": {
+            "x": 880,
+            "w": 448,
+            "enter": 0.6,
+            "cheer": 1.3
+          }
+        }
+      ],
+      [
+        "end",
+        8.6,
+        {}
+      ]
+    ]
+  },
+  "kahve-tahmin": {
+    "title": "Hook: günde 1 kahve, yılda kaç lira? (yarışma)",
+    "end": 13.0,
+    "handheld": true,
+    "musicGain": 0.8,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        13.0,
+        "quiz"
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        3.0,
+        "Günde 1 kahve.<br>Yılda kaç lira? <b>Tahmin et</b>",
+        230
+      ],
+      [
+        5.2,
+        7.0,
+        "Kahveyi bırakma.<br><b>Sadece say.</b>",
+        250
+      ],
+      [
+        7.0,
+        10.2,
+        "Kategoriye limit koy,<br><b>yaklaşınca haber versin</b>",
+        250
+      ],
+      [
+        10.2,
+        13.0,
+        "Tahminini yorumlara yaz,<br><b>en yakın kim?</b>",
+        250
+      ]
+    ],
+    "scenes": [
+      [
+        "coffeeQuiz",
+        0,
+        {
+          "reveal": 3.0,
+          "up": 5.2,
+          "price": 65
+        }
+      ],
+      [
+        "pov",
+        7.0,
+        {
+          "rise": true,
+          "steps": [
+            {
+              "t": 0,
+              "scroll": {
+                "src": "assets/ui2/full-butce.png",
+                "nav": "assets/ui2/nav-butce.png",
+                "from": 420,
+                "to": 560,
+                "dur": 1.4
+              }
+            }
+          ],
+          "mascot": {
+            "outfit": "suit",
+            "x": 880,
+            "w": 448,
+            "enter": 0.8,
+            "cheer": 1.4
+          }
+        }
+      ],
+      [
+        "end",
+        10.2,
+        {
+          "outfit": "suit"
+        }
+      ]
+    ]
+  },
+  "hangi-hayvansin": {
+    "title": "Hook: harcama tarzına göre hangi hayvansın? (test)",
+    "end": 13.8,
+    "handheld": true,
+    "musicGain": 0.85,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        13.8,
+        "lofi"
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        1.8,
+        "Harcama tarzına göre<br><b>hangi hayvansın?</b>",
+        230
+      ],
+      [
+        1.8,
+        3.35,
+        "“Son kez” deyip<br>her gün kantine giden",
+        250
+      ],
+      [
+        3.35,
+        4.9,
+        "Her kuruşu<br>tabloya yazan",
+        250
+      ],
+      [
+        4.9,
+        6.45,
+        "Bozuk parayı bile<br>biriktiren",
+        250
+      ],
+      [
+        6.45,
+        8.0,
+        "“İhtiyacım yok” deyip<br>hiçbir şey almayan",
+        250
+      ],
+      [
+        8.0,
+        9.55,
+        "Hesabı hep ödeyip<br>geri istemeyi unutan",
+        250
+      ],
+      [
+        9.55,
+        11.1,
+        "“Hak ettim” deyip<br>kendine ödül alan",
+        250
+      ],
+      [
+        11.1,
+        13.8,
+        "Sen hangisisin?<br><b>Arkadaşını etiketle</b>",
+        230
+      ]
+    ],
+    "scenes": [
+      [
+        "persona",
+        0,
+        {
+          "c0": 1.8,
+          "d": 1.55
+        }
+      ],
+      [
+        "lineup",
+        11.1,
+        {
+          "note": "Cep Defteri'nde maskotunu sen seçiyorsun",
+          "noteY": 520,
+          "rows": 2
+        }
+      ]
+    ]
   }
 }

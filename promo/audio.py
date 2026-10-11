@@ -938,9 +938,9 @@ def cue_talk(t0, skip=0, o=None):
 
 def cue_lineup(t0, skip=0, o=None):
     T = at(t0, skip)
-    voices = [(hoot(), -0.7), (chitter(), -0.35), (meow(1.0, 0.4), 0.0), (sniff(), 0.35), (woof(), 0.7)]
+    voices = [(hoot(), -0.7), (chitter(), -0.4), (meow(1.0, 0.4), -0.1), (squeak(), 0.1), (sniff(), 0.4), (woof(), 0.7)]
     for i, (vc, pn) in enumerate(voices):
-        tc = 0.1 + i * 0.16
+        tc = 0.1 + i * 0.14
         put(SFX, bloop(350 + 60 * i, 1100 + 120 * i, 0.08, 0.3), T(tc), pan=pn)
         put(SFX, vc, T(tc + 0.15), 0.55, pan=pn)
 
@@ -980,6 +980,110 @@ def cue_boxes(boxes):
     for bx in boxes:
         if bx[0] > 0:
             put(SFX, bloop(620, 980, 0.05, 0.22), bx[0])
+
+# ───────── yaratıcı hook sesleri ─────────
+def squeak():
+    """tavşan: iki minik cıyak"""
+    out = np.zeros(int(0.35 * SR))
+    for off, f0 in ((0, 1500), (0.13, 1750)):
+        x = np.sin(2 * np.pi * phase(glide(f0, f0 * 1.35, 0.08))) * np.sin(np.pi * np.linspace(0, 1, int(0.08 * SR))) * 0.35
+        i = int(off * SR)
+        out[i : i + len(x)] += x
+    return out
+
+
+def scare_sting():
+    """korku filmi ani vuruşu: uyumsuz yaylı küme + gürültü + alt vuruş"""
+    d = 1.4
+    t = tt(d)
+    x = sum(wave_(phase(np.full(len(t), f)), 'saw') for f in (311, 330, 349, 466, 494, 523, 698, 740))
+    x = sweep_lp(x, 6000 * np.exp(-t * 2) + 600) * np.exp(-t * 2.2) * 0.16
+    x += bp(noise(d), 800, 7000) * np.exp(-t * 6) * 0.7
+    k = kick(1.0)
+    x[: len(k)] += k * 1.2
+    return np.tanh(x * 1.3)
+
+
+def inhale(d=0.3):
+    t = tt(d)
+    return sweep_bp(noise(d), 600 + 2500 * (t / d), q=2) * (t / d) ** 2 * 0.6
+
+
+def woodblock(hi=True):
+    f = 1250 if hi else 900
+    return (np.sin(2 * np.pi * f * tt(0.06)) + 0.4 * np.sin(2 * np.pi * f * 2.7 * tt(0.06))) * expd(0.06, 60) * 0.45
+
+
+def drumroll(d):
+    out = np.zeros(int(d * SR) + SR)
+    tm = 0.0
+    while tm < d:
+        s_ = lp(snare(0.12 + 0.5 * tm / d), 6000)[: int(0.08 * SR)]
+        i = int(tm * SR)
+        out[i : i + len(s_)] += s_
+        tm += 0.045
+    return out[: int(d * SR)]
+
+
+def applause(d=1.6):
+    out = np.zeros(int(d * SR))
+    for _ in range(int(d * 140)):
+        c = bp(noise(0.03), 900, 5000) * expd(0.03, 120) * rng.uniform(0.1, 0.35)
+        i = rng.integers(0, len(out) - len(c))
+        out[i : i + len(c)] += c
+    env = np.minimum(1, np.linspace(0, 6, len(out))) * np.linspace(1, 0.2, len(out))
+    return out * env
+
+
+def slide_whistle(f0=1700, f1=260, d=0.6):
+    x = np.sin(2 * np.pi * phase(glide(f0, f1, d, 0.7)) + 0.3 * np.sin(2 * np.pi * 6 * tt(d)))
+    return x * adsr(int(d * SR), 0.02, 0.1, 0.8, 0.1) * 0.25
+
+
+def cue_dread(t0, skip=0, o=None):
+    T = at(t0, skip)
+    S = (o or {}).get('scare', 3.3)
+    for t in (1.0, 2.0):
+        put(SFX, np.sin(2 * np.pi * phase(glide(90, 38, 0.6))) * expd(0.6, 4) * 0.9, T(t))
+    put(SFX, inhale(0.32), T(S - 0.33), 0.8)
+    put(SFX, scare_sting(), T(S), 0.95)
+    put(SFX, voice([900, 1250, 600], [(800, 1300), (700, 1200), (500, 1000)], 0.6, breath=0.25, v=0.6), T(S + 0.05), 0.55)  # "aaaa!"
+    put(SFX, slide_whistle(900, 200, 0.7), T(S + 0.55), 0.6)
+
+
+def cue_coffeeQuiz(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    R_ = o.get('reveal', 3.0)
+    for k, tk in enumerate(np.arange(0.0, R_ - 0.9, 0.5)):
+        put(SFX, woodblock(k % 2 == 0), T(tk), pan=0.4)
+    put(SFX, drumroll(1.0), T(R_ - 1.0), 0.7)
+    put(SFX, crash(0.8), T(R_))
+    put(SFX, popper(), T(R_ + 0.02), 0.6)
+    put(SFX, slot_roll(0.75), T(R_ + 0.02), 0.5)
+    put(SFX, ding_ding(), T(R_ + 0.8), 0.7)
+    put(SFX, applause(1.8), T(R_ + 0.1), 0.8)
+    put(SFX, slide_whistle(), T(R_ + 0.45), 0.9)
+    put(SFX, kick(0.8), T(R_ + 1.0), 0.6)  # yere düşüş
+    put(SFX, boing(0.4, 0.3), T(o.get('up', 5.2)), pan=0.5)
+    put(SFX, meow(1.15, 0.4), T(o.get('up', 5.2) + 0.2), 0.6, pan=0.5)
+
+
+def mascot_voice(k):
+    return {'fistik': meow(1.0, 0.4), 'bilge': hoot(), 'ceviz': chitter(), 'diken': sniff(), 'karamel': woof(), 'pamuk': squeak()}[k]
+
+
+def cue_persona(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    C0, D = o.get('c0', 1.8), o.get('d', 1.55)
+    for i in range(6):
+        put(SFX, bloop(500 + 40 * i, 900 + 60 * i, 0.06, 0.18), T(0.05 + i * 0.05), pan=(i % 3 - 1) * 0.6)
+    for i, k in enumerate(['fistik', 'bilge', 'ceviz', 'diken', 'karamel', 'pamuk']):
+        tc = C0 + i * D
+        put(SFX, stereo_move(whoosh(0.25, 500, 4000), 0.8, -0.3), T(tc - 0.04), 0.4)
+        put(SFX, fm_bell(1046.5 * 2 ** (i / 12 * 2), 0.6, 0.18), T(tc + 0.18))
+        put(SFX, mascot_voice(k), T(tc + 0.35), 0.7)
 
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
@@ -1054,6 +1158,159 @@ def music_main(start, end, fill_before=()):
     put(MUS, crash(0.5), hit, pan=0.2)
 
 
+# ═════════ MÜZİK TÜRLERİ ═════════
+# reels.json → "musicPlan": [[başla, bitir, tür], ...]. Türler: chip (varsayılan), lofi, horror, quiz.
+def seg_bus(a, b):
+    return np.zeros((int((b - a) * SR) + 2 * SR, 2))
+
+
+def ep_note(m, d, v=0.12):
+    """elektrik piyano (FM, tını + tremolo)"""
+    t = tt(d)
+    f = freq(m)
+    idx = 1.6 * np.exp(-t * 3.5) + 0.3
+    x = np.sin(2 * np.pi * f * t + idx * np.sin(2 * np.pi * f * t)) + 0.25 * np.sin(2 * np.pi * 2 * f * t) * np.exp(-t * 6)
+    x *= np.exp(-t * 1.6) * (1 + 0.12 * np.sin(2 * np.pi * 4.5 * t))
+    x *= adsr(len(x), 0.004, 0.1, 1.0, 0.12)
+    return x * v
+
+
+def lofi(a, b, last=True):
+    BPM = 84
+    bt = 60 / BPM
+    sw = 0.62  # swing: 8'liklerin ikincisi geç
+    bus = seg_bus(a, b)
+    L = b - a
+    chords = [(41, [57, 60, 64, 67]), (40, [55, 59, 62, 67]), (38, [57, 60, 62, 65]), (36, [55, 59, 64, 67])]  # Fmaj9 Em7 Dm9 Cmaj7
+    mel = [[(1.5, 72), (2.5, 76)], [(0.5, 74), (2.0, 71)], [(1.0, 69), (2.5, 72)], [(0.5, 67), (3.0, 64)]]
+    nbar = int(np.ceil(L / (4 * bt)))
+    for bi in range(nbar):
+        t0 = bi * 4 * bt
+        root, ch = chords[bi % 4]
+        for k, m in enumerate(ch):  # akor, hafif arpejli
+            put(bus, ep_note(m, 4 * bt * 0.95, 0.09), t0 + k * 0.018, pan=(k - 1.5) * 0.25)
+        for off, m in [(0, root), (2.5 * bt, root + 7), (3 * bt, root)]:
+            x = np.sin(2 * np.pi * freq(m) * tt(bt * 0.9)) * adsr(int(bt * 0.9 * SR), 0.01, 0.2, 0.7, 0.08)
+            put(bus, np.tanh(x * 1.5) * 0.4, t0 + off)
+        for off, m in mel[bi % 4]:
+            put(bus, ep_note(m + 12, bt * 1.2, 0.05), t0 + off * bt, pan=0.3)
+            put(bus, lp(ep_note(m + 12, bt * 1.2, 0.05), 2000), t0 + off * bt + 0.75 * bt, 0.4, pan=-0.4)
+        for beat in range(4):
+            tb = t0 + beat * bt
+            if beat in (0,) or (beat == 2 and bi % 2):
+                put(bus, kick(0.55) * 0.9, tb)
+            if beat == 2 and not bi % 2:
+                put(bus, kick(0.45), tb + 0.5 * bt * (sw * 2 - 1) + bt * 0.5)
+            if beat in (1, 3):
+                sn = lp(snare(0.5), 3500)
+                put(bus, sn, tb)
+            for e8 in range(2):
+                put(bus, hat(0.12 if e8 else 0.18), tb + (sw * bt if e8 else 0), pan=0.25)
+    # plak cızırtısı ve bant hışırtısı
+    n = len(bus)
+    cr = np.zeros(n)
+    idx = rng.choice(n, int(L * 18), replace=False)
+    cr[idx] = rng.uniform(0.05, 0.25, len(idx))
+    cr = hp(np.convolve(cr, np.exp(-np.arange(30) / 5), 'same'), 1500)
+    hiss = lp(noise(n / SR), 5000)[:n] * 0.012
+    bus += np.stack([cr + hiss, cr * 0.8 + hiss], 1)
+    # bant titremesi (wow) + kısık tepe
+    spd = 1 + 0.0035 * np.sin(2 * np.pi * 0.55 * np.arange(n) / SR)
+    bus = np.stack([lp(varispeed(bus[:, c], spd), 6500) for c in range(2)], 1)
+    put(MUS, bus[: int(L * SR)] * 1.25, a)
+
+
+def horror(a, b, last=True):
+    L = b - a
+    t = tt(L + 0.5)
+    n = len(t)
+    k = t / L
+    drone = sum(wave_(phase(np.full(n, f)), 'saw') for f in (55, 55.4, 58.3, 82.4 * 0.998))
+    drone = sweep_lp(drone, 250 + 700 * k ** 2) * 0.22
+    cluster = sum(np.sin(2 * np.pi * f * (1 + 0.004 * np.sin(2 * np.pi * (5 + i) * t)) * t) for i, f in enumerate((1760, 1864.7, 1975.5)))
+    cluster *= 0.03 * k ** 1.5
+    sub = np.sin(2 * np.pi * 36 * t) * 0.25 * (0.5 + 0.5 * k)
+    bed = drone + cluster + sub
+    bed[: int(0.15 * SR)] *= np.linspace(0, 1, int(0.15 * SR))
+    put(MUS, np.stack([bed, np.roll(bed, 300)], 1)[: int(L * SR)], a)
+    # kalp atışı, giderek hızlanır
+    tm = 0.05
+    while tm < L - 0.15:
+        gap = lerp_(0.85, 0.36, tm / L)
+        for j, v in ((0, 0.9), (0.16, 0.6)):
+            h = np.sin(2 * np.pi * phase(glide(70, 40, 0.18))) * expd(0.18, 16) * v
+            put(MUS, h, a + tm + j)
+        tm += gap
+
+
+def lerp_(x, y, k):
+    return x + (y - x) * min(1, max(0, k))
+
+
+def brass(ms, d, v=0.1):
+    t = tt(d)
+    x = sum(wave_(phase(np.full(len(t), freq(m) * det)), 'saw') for m in ms for det in (0.997, 1.003))
+    x = sweep_lp(x, 700 + 3800 * np.exp(-t * 9) + 300) * adsr(len(t), 0.012, 0.08, 0.7, 0.05)
+    return x * v / len(ms)
+
+
+def quiz(a, b, last=True):
+    """yarışma programı: swing, bakır nefesli vuruşlar, yürüyen bas, ride"""
+    BPM = 132
+    bt = 60 / BPM
+    sw = 0.66
+    L = b - a
+    bus = seg_bus(a, b)
+    prog_ = [(46, [62, 65, 70]), (43, [62, 67, 70]), (48, [63, 67, 72]), (41, [60, 65, 69])]  # Bb Gm Cm F
+    walk = [[0, 4, 7, 9], [0, 3, 7, 5], [0, 3, 7, 6], [0, 4, 7, -1]]
+    end = L - (1.0 if last else 0)
+    nbar = int(np.ceil(end / (4 * bt)))
+    for bi in range(nbar):
+        t0 = bi * 4 * bt
+        root, ch = prog_[bi % 4]
+        for beat in range(4):
+            tb = t0 + beat * bt
+            if tb >= end:
+                break
+            m = root + walk[bi % 4][beat]
+            x = (wave_(phase(np.full(int(bt * SR), freq(m))), 'tri') * 0.6 + np.sin(2 * np.pi * freq(m) * tt(bt))) * expd(bt, 5)
+            put(bus, lp(x, 900) * 0.42, tb)
+            put(bus, hp(noise(0.25), 5000) * expd(0.25, 9) * 0.16 + np.sin(2 * np.pi * 5200 * tt(0.25)) * expd(0.25, 12) * 0.02, tb, pan=0.4)  # ride
+            if beat % 2 == 1:
+                put(bus, hp(noise(0.12), 5000) * expd(0.12, 30) * 0.12, tb + sw * bt, pan=0.4)
+                put(bus, lp(snare(0.32), 4000), tb)
+            if beat == 0:
+                put(bus, kick(0.6), tb)
+        for off in (1 + sw, 3 + sw):  # nefesli vuruşlar
+            if t0 + off * bt < end:
+                put(bus, brass([m + 12 for m in ch], bt * 0.45, 0.32), t0 + off * bt)
+    if last:
+        put(bus, brass([58, 62, 65, 70, 74], 1.2, 0.5), end)
+        put(bus, crash(0.5), end, pan=0.2)
+        put(bus, kick(1.0), end)
+    put(MUS, bus[: int(L * SR)] * 1.1, a)
+
+
+def chip(a, b, last=True):
+    t, bi = a, 0
+    hit = b - (1.0 if last else 0)
+    while t < hit - 1e-6:
+        beats = int(round(min(4, (hit - t) / BEAT)))
+        if beats <= 0:
+            break
+        music_bar(bi, t, MEL_A if (bi // 2) % 2 == 0 else MEL_B, length=beats)
+        t += beats * BEAT
+        bi += 1
+    if last:
+        for m in [48, 60, 64, 67, 72, 76]:
+            put(MUS, pluck(m, 1.0, 'square', 0.4, cut=3500, v=0.06), hit)
+        put(MUS, kick(1.0), hit)
+        put(MUS, crash(0.5), hit, pan=0.2)
+
+
+STYLES = {'lofi': lofi, 'horror': horror, 'quiz': quiz, 'chip': chip}
+
+
 # ═════════ REELS'İ KUR ═════════
 scenes = REEL['scenes']
 prev = None
@@ -1078,7 +1335,13 @@ for sc in scenes:
 if REEL.get('babble'):
     babble(REEL.get('captions', []))
 cue_boxes(REEL.get('boxes', []))
-if music_start is not None:
+PLAN = REEL.get('musicPlan')
+if PLAN:
+    for i, (a, b, style) in enumerate(PLAN):
+        STYLES[style](a, b, last=(i == len(PLAN) - 1))
+    for c in range(2):  # chip türünün kick pompası
+        MUS[:, c] *= duck
+elif music_start is not None:
     # müzik ölçüleri her flaşlı sahnede yeniden hizalanır (vuruş tam patlamaya düşsün)
     flashes = [sc[1] for sc in scenes if len(sc) > 2 and sc[2].get('flash') and sc[1] > music_start]
     seg_starts = [music_start] + flashes
@@ -1138,6 +1401,11 @@ def master(mix, target_db=-15.5):
     rms = np.sqrt((loud ** 2).mean()) if len(loud) else 1e-3
     mix = mix * (10 ** (target_db / 20) / rms)
     mix = np.tanh(mix * 1.1) / 1.1 * 0.97
+    # örnekler arası tepe (true peak) ≤ −1 dBFS: AAC'ye çevrilirken kırpılmasın
+    from scipy.signal import resample_poly
+    tp = max(np.abs(resample_poly(mix[:, c], 4, 1)).max() for c in range(2))
+    if tp > 0.89:
+        mix *= 0.89 / tp
     fade = np.ones(N)
     fade[-int(0.4 * SR):] = np.linspace(1, 0, int(0.4 * SR))
     return mix * fade[:, None]
