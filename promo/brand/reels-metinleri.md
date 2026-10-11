@@ -98,7 +98,7 @@ Her ay bu filmi çeken arkadaşına at 👀
 ```
 Günde 1 kahve. Yılda kaç lira? Önce tahmin et, sonra izle ☕
 
-Cevap: 65 TL × 365 gün = 23.725 TL.
+Cevap: 175 TL × 365 gün = 63.875 TL.
 Kahveyi bırakma, sadece say. Kategoriye limit koyunca yaklaştığında haber veriyor.
 
 Tahminini yorumlara yaz, en yakın kim? 👇
