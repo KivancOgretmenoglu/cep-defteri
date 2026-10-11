@@ -13,7 +13,7 @@ export const ringsEn = {
   'rings.goalAltAmt': "\"{goal}\" goal: {cur} / {target} ({pct}%).",
   'rings.goalDone': "Goal \"{goal}\" reached.",
   'rings.pctShort': "{pct}%",
-  'mood.better.text': "This month you've spent {amount} less than last month at the same point.",
-  'mood.better.textHidden': "This month you've spent less than last month at the same point.",
+  'mood.better.text': "You've spent {amount} less than at this point last month.",
+  'mood.better.textHidden': "You've spent less than at this point last month.",
   'mood.better.why': "Rule: this month's spending is at least 10% below last month's spending up to the same day (refunds deducted, both months within tracking).",
 } satisfies Record<string, string>;

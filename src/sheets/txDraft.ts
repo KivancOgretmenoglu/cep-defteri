@@ -55,3 +55,12 @@ export function takeTxDraft(): TxSnap | null {
 export function discardTxDraft() {
   draft = null;
 }
+
+/**
+ * Bir kaydın kopyasını yeni kayıt olarak açar (satırı sağa kaydırma): form, "+ Yeni" dönüşündeki
+ * taslak geri yükleme yoluyla doldurulur; TxSheet'e ek bir dal gerekmez. Otomatik kaydedilmez.
+ */
+export function openTxPrefilled(snap: Omit<TxSnap, 'target' | 'catIds' | 'accIds'>, ids: { catIds: ID[]; accIds: ID[] }) {
+  draft = { snap: { ...snap, target: 'accountId', ...ids }, back: { kind: 'add' }, ready: true };
+  openSheet({ kind: 'add' });
+}

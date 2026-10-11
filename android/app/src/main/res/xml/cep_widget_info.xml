@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Ana ekran aracı tanımı. Güncelleme zamanlayıcısı yok: uygulama veri değişince kendisi yeniler. -->
+<!--
+    Ana ekran aracı tanımı. Maskotun sahnesi tüm aracı kaplar; boyut + en/boy oranına göre düzen (CepWidgetProvider.pickSize):
+      küçük  (2×1)              widget_small   mini sahne + maskot büstü + tutar
+      geniş  (3×1, 4×1, 5×1)    widget_cep     şerit sahne + maskot + tutar/dönem + maskot renginde "+"
+      kare   (2×2, 3×2, 3×3)    widget_square  kare sahne + üstte tutar + altta büyük maskot + küçük "+"
+      orta   (4×2, 5×2)         widget_medium  geniş sahne + maskot + tutar/dönem + "Gider" / "Gelir"
+      büyük  (4×3, 4×4, 5×3+)   widget_large   uzun sahne + canlanan maskot + bugünkü harcama + tek dokunuşla kayıt çipleri
+    Android 12+ boyuta duyarlı RemoteViews kullanır; daha eskilerde düzen onAppWidgetOptionsChanged'de seçilir.
+    Güncelleme zamanlayıcısı yok: uygulama veri değişince kendisi yeniler (geçici pozlar için AlarmManager).
+-->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/widget_description"
-    android:initialLayout="@layout/widget_cep"
+    android:initialLayout="@layout/widget_medium"
     android:minWidth="180dp"
-    android:minHeight="80dp"
-    android:minResizeWidth="180dp"
-    android:minResizeHeight="70dp"
+    android:minHeight="110dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="40dp"
     android:previewImage="@drawable/widget_preview"
-    android:previewLayout="@layout/widget_cep"
+    android:previewLayout="@layout/widget_medium"
     android:resizeMode="horizontal|vertical"
     android:targetCellWidth="3"
-    android:targetCellHeight="1"
+    android:targetCellHeight="2"
     android:updatePeriodMillis="0"
     android:widgetCategory="home_screen" />

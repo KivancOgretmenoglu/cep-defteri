@@ -1,110 +1,27 @@
-import { useEffect, useRef, useState } from 'react';
-import { Download, Upload, Plus, ChevronRight, ShieldCheck, FlaskConical, RotateCcw, Trash2, FileSpreadsheet } from 'lucide-react';
-import type { Data, Lang, ThemePref } from '../domain/types';
+import { useEffect, useState } from 'react';
+import { Download, Plus, ChevronRight, ShieldCheck, FlaskConical, RotateCcw, Trash2, FileSpreadsheet } from 'lucide-react';
+import type { Lang, ThemePref } from '../domain/types';
 import { emptyData } from '../domain/defaults';
-import { buildDemo } from '../domain/demo';
-import { parseBackup, serializeBackup, transactionsCSV, valuationsCSV } from '../domain/backup';
+import { valuationsCSV } from '../domain/backup';
 import * as A from '../domain/actions';
 import { catName, formatMoney, hiddenMoney, intlLocale } from '../i18n/format';
-import { t as tNow, useT } from '../i18n';
-import { getLang } from '../i18n/lang';
+import { useT } from '../i18n';
 import { cashBalance, investmentState } from '../domain/ledger';
-import { commit, getState, replaceData, setMode, showToast, useStore } from '../store/store';
+import { usePrices } from '../store/prices';
+import { PriceSettings } from './PriceSettings';
+import { commit, replaceData, setMode, showToast, useStore } from '../store/store';
 import * as storage from '../store/storage';
 import { SectionHead, Segmented } from '../ui/kit';
 import { go, openSheet } from '../ui/nav';
 import { useData } from '../ui/hooks';
 import { CatIcon, ACCOUNT_ICONS } from '../ui/icons';
-import { isNative, saveFile } from '../platform';
-import { SecuritySettings, NotificationSettings, AutoBackupSettings } from '../native/NativeSettings';
+import { SecuritySettings, NotificationSettings, AutoBackupSettings, WidgetSettings } from '../native/NativeSettings';
 import { appIconSupported, setAppIcon } from '../native/appIcon';
 import { MascotSettings } from '../mascot/MascotSettings';
-import { Tour } from '../mascot/Tour';
-import { tourText } from '../mascot/tourLines';
+import { startGuide } from '../guide/state';
 import { characterOf } from '../mascot/characters';
-
-async function download(name: string, content: string, type: string): Promise<boolean> {
-  try {
-    const r = await saveFile(name, content, type);
-    return r !== 'cancelled';
-  } catch {
-    showToast(tNow('set.fileSaveFailed'), { tone: 'error' });
-    return false;
-  }
-}
-const stamp = (today: string) => today;
-
-export function downloadCSV(data: Data) {
-  download(`cep-defteri-islemler-${stamp(getState().today)}.csv`, transactionsCSV(data, getLang()), 'text/csv;charset=utf-8');
-}
-
-export async function downloadBackup() {
-  const { data, mode, today } = getState();
-  const ok = await download(`cep-defteri-yedek-${mode === 'demo' ? 'ORNEK-' : ''}${stamp(today)}.json`, serializeBackup(data), 'application/json');
-  if (!ok) return;
-  if (mode === 'real') commit((d) => A.updateSettings(d, { lastBackupAt: Date.now() }), undefined);
-  showToast(isNative() ? tNow('set.backupReadyNative') : tNow('set.backupDownloaded'));
-}
-
-/** Yedek dosyası seçme + önizleme + onay. Ayarlar ve ilk açılış ekranında kullanılır. */
-export function RestorePicker({ compact = false }: { compact?: boolean }) {
-  const ref = useRef<HTMLInputElement>(null);
-  const [pending, setPending] = useState<{ data: Data; exportedAt: string | null; name: string } | null>(null);
-  const [err, setErr] = useState<string | null>(null);
-  const mode = useStore((s) => s.mode);
-  const t = useT();
-  async function onFile(f: File | undefined) {
-    setErr(null);
-    if (!f) return;
-    const text = await f.text();
-    const r = parseBackup(text, getLang());
-    if (!r.ok) return setErr(r.error);
-    setPending({ data: r.data, exportedAt: r.exportedAt, name: f.name });
-  }
-  function apply() {
-    if (!pending) return;
-    if (mode === 'demo') setMode('real');
-    replaceData(pending.data, { stash: true });
-    setPending(null);
-    showToast(tNow('set.restored'), { ms: 5000 });
-    go('home');
-  }
-  return (
-    <div className="restore">
-      <input ref={ref} type="file" accept="application/json,.json" hidden onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = ''; }} />
-      {!pending && (
-        <button className={`btn ${compact ? 'btn--ghost' : 'btn--secondary'}`} onClick={() => ref.current?.click()}>
-          <Upload size={17} /> {t('set.restore')}
-        </button>
-      )}
-      {pending && (
-        <div className="callout">
-          <p>
-            <b>{pending.name}</b>
-            {pending.exportedAt && <> · {new Date(pending.exportedAt).toLocaleString(intlLocale())}</>}
-            <br />
-            {t('set.restoreCounts', { a: pending.data.accounts.length, tx: pending.data.txs.length, p: pending.data.plans.length, v: pending.data.valuations.length })}
-          </p>
-          <p>{mode === 'demo' ? t('set.restoreReplaceReal') : t('set.restoreReplaceCurrent')}</p>
-          <div className="btn-row">
-            <button className="btn btn--ghost" onClick={() => setPending(null)}>{t('common.cancel')}</button>
-            <button className="btn btn--primary" onClick={apply}>{t('set.restoreConfirm')}</button>
-          </div>
-        </div>
-      )}
-      {err && <p className="form-error" role="alert">{err}</p>}
-    </div>
-  );
-}
-
-export function startDemo(today: string) {
-  // Örnek veride de kullanıcının seçtiği maskot ve tema kalır.
-  const demo = buildDemo(today, getLang());
-  const cur = getState().data.settings;
-  setMode('demo', { ...demo, settings: { ...demo.settings, mascot: cur.mascot, theme: cur.theme } });
-  showToast(tNow('set.demoStarted'), { ms: 5000 });
-  go('home');
-}
+import { FeedbackSettings } from '../ui/Feedback';
+import { download, downloadBackup, downloadCSV, RestorePicker, startDemo } from './dataActions';
 
 export function Settings() {
   const t = useT();
@@ -118,6 +35,7 @@ export function Settings() {
     storage.requestPersistence().then(setPersisted);
   }, []);
   const lastBackup = data.settings.lastBackupAt;
+  const priceBook = usePrices().book;
 
   return (
     <div className="screen">
@@ -128,7 +46,7 @@ export function Settings() {
           <ul className="acc-list">
             {data.accounts.map((a) => {
               const I = ACCOUNT_ICONS[a.kind];
-              const val = a.kind === 'investment' ? investmentState(data, a.id)!.currentValue : cashBalance(data, a.id);
+              const val = a.kind === 'investment' ? investmentState(data, a.id, priceBook)!.currentValue : cashBalance(data, a.id);
               return (
                 <li key={a.id}>
                   <button className="acc-row" onClick={() => openSheet({ kind: 'account', accountId: a.id })}>
@@ -224,9 +142,11 @@ export function Settings() {
           )}
         </section>
 
+        <PriceSettings />
         <SecuritySettings />
         <NotificationSettings />
         <AutoBackupSettings />
+        <WidgetSettings />
 
         <section className="card" aria-labelledby="s-demo">
           <SectionHead id="s-demo" title={t('app.demoTitle')} />
@@ -238,10 +158,12 @@ export function Settings() {
           ) : (
             <>
               <p className="muted">{t('set.demoOff')}</p>
-              <button className="btn btn--secondary" onClick={() => startDemo(today)}><FlaskConical size={17} /> {t('set.tryDemo')}</button>
+              <button className="btn btn--secondary" onClick={() => void startDemo(today)}><FlaskConical size={17} /> {t('set.tryDemo')}</button>
             </>
           )}
         </section>
+
+        <FeedbackSettings />
 
         {mode === 'real' && (
           <section className="card" aria-labelledby="s-wipe">
@@ -295,14 +217,16 @@ function IconFollowRow() {
   );
 }
 
-/** Ayarlar > Maskot: ilk açılış rehberini tam ekran yeniden açar; bitince/geçince kapanır. */
+/** Ayarlar > Maskot: spot ışıklı rehberi 1. adımdan başlatır (Özet'e geçer, gerçek düğmeleri gösterir). */
 function TourReplay() {
-  const lang = useStore((s) => s.data.settings.lang ?? 'tr');
-  const [open, setOpen] = useState(false);
+  const t = useT();
   return (
-    <>
-      <button type="button" className="btn btn--secondary" onClick={() => setOpen(true)}>{tourText('replay', lang)}</button>
-      {open && <div className="tour-overlay"><Tour onDone={() => setOpen(false)} /></div>}
-    </>
+    <div className="setting-row">
+      <span>
+        {t('guide.replay')}
+        <small>{t('guide.replayHint')}</small>
+      </span>
+      <button type="button" className="btn btn--secondary btn--small" onClick={startGuide}>{t('guide.show')}</button>
+    </div>
   );
 }

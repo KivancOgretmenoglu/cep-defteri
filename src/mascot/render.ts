@@ -43,6 +43,8 @@ export interface MascotLive {
   props?: R[];
   /** Figürden bağımsız parçacıklar */
   over?: R[];
+  /** Figürün ARKASINDA çizilen parçacıklar (ör. arkadan geçen otobüs) */
+  under?: R[];
   /** Bu satırın altını kırp (saklanıp bakma) */
   clipY?: number;
   zzz?: boolean;
@@ -119,10 +121,10 @@ const shade = (hex: string, amt: number) => {
   return '#' + ((ch(n >> 16) << 16) | (ch((n >> 8) & 255) << 8) | ch(n & 255)).toString(16).padStart(6, '0');
 };
 
-type Hat = 'beanie' | 'cap' | 'straw' | 'fedora' | 'hardhat' | 'santa' | 'visor' | 'headphones' | 'nightcap';
-type Neck = 'scarf' | 'scarfRed' | 'bowtie' | 'bowtieGold' | 'collar';
+type Hat = 'beanie' | 'cap' | 'straw' | 'fedora' | 'hardhat' | 'santa' | 'visor' | 'headphones' | 'nightcap' | 'pjcap';
+type Neck = 'scarf' | 'scarfRed' | 'bowtie' | 'bowtieGold' | 'collar' | 'pjcollar' | 'suit';
 type Face = 'glasses' | 'sunglasses';
-type Item = 'receipt' | 'notebook' | 'clipboard' | 'pot' | 'box' | 'book' | 'icecream';
+type Item = 'receipt' | 'notebook' | 'clipboard' | 'pot' | 'box' | 'book' | 'icecream' | 'briefcase';
 
 export interface Outfit {
   name: { tr: string; en: string };
@@ -152,6 +154,10 @@ export const OUTFITS: Record<string, Outfit> = {
   newyear: { name: { tr: 'Yılbaşı', en: 'New Year' }, hat: 'santa', neck: 'scarfRed' },
   bayram: { name: { tr: 'Bayramlık', en: 'Holiday best' }, neck: 'bowtieGold', sparkle: true },
   summer: { name: { tr: 'Yaz', en: 'Summer' }, face: 'sunglasses', hold: { side: 'r', item: 'icecream' } },
+  /** Gece 22:00–05:59, ana ekranda (bkz. seasonal.homeOutfit) */
+  pajama: { name: { tr: 'Pijama', en: 'Pajamas' }, hat: 'pjcap', neck: 'pjcollar' },
+  /** Yatırım ekranı: takım elbise + kravat + evrak çantası */
+  suit: { name: { tr: 'Takım elbise', en: 'Suit' }, neck: 'suit', hold: { side: 'l', item: 'briefcase' } },
 };
 export const HOME_OUTFITS = ['plain', 'winter', 'cap', 'headphones', 'bowtie'] as const;
 
@@ -222,6 +228,21 @@ function hatRects(ch: Character, hat: Hat, lift: boolean): R[] {
       box(l + w + 1, y - 2, 2, 2, CREAM);
       break;
     }
+    case 'pjcap': {
+      // Çizgili, yana sarkan uyku şapkası + ponpon (pijamayla takım)
+      const b = '#6F82C8';
+      const st = '#B8C4EE';
+      box(l, y - 1, w, 1, CREAM);
+      box(l + 1, y - 3, w - 2, 2, b);
+      for (let i = 2; i < w - 1; i += 3) box(l + i, y - 3, 1, 2, st);
+      box(l + 3, y - 4, w - 4, 1, b);
+      box(l + 5, y - 5, w - 6, 1, st);
+      box(l + w - 1, y - 4, 2, 1, b);
+      box(l + w + 1, y - 3, 1, 2, st);
+      box(l + w + 1, y - 1, 2, 2, CREAM);
+      box(l + w + 2, y - 1, 1, 1, '#E3D9C6');
+      break;
+    }
     case 'headphones': {
       const c = '#9B7BC6';
       box(l, y - 2, w, 1, c);
@@ -235,7 +256,53 @@ function hatRects(ch: Character, hat: Hat, lift: boolean): R[] {
   return r;
 }
 
+/**
+ * Takım elbise: boyundan aşağı gövde pikselleri (kontur hariç) ceket rengine boyanır, ortada V yaka (gömlek),
+ * iki yanda açık renk yaka kenarı ve kravat. Gövde sütun aralığı karaktere göre (kuyruk/kanat/palamut dışarıda kalır).
+ */
+const SUIT_FIT: Record<MascotKey, { x0: number; x1: number; tie: string }> = {
+  fistik: { x0: 5, x1: 18, tie: '#C2453E' },
+  bilge: { x0: 6, x1: 17, tie: '#C2453E' },
+  ceviz: { x0: 5, x1: 15, tie: '#3E8A8C' },
+  diken: { x0: 6, x1: 17, tie: '#C2453E' },
+  karamel: { x0: 5, x1: 18, tie: '#C2453E' },
+  pamuk: { x0: 5, x1: 17, tie: '#D9487A' },
+};
+const SUIT = '#454E6B';
+const LAPEL = '#7581A6';
+const SHIRT = '#FFFFFF';
+
+function suitRects(ch: Character): R[] {
+  const fit = SUIT_FIT[ch.key];
+  const g = bodyGrid(ch.key);
+  const y0 = ch.anchors.neck.y;
+  const m = Math.round(ch.anchors.neck.x);
+  const r: R[] = [];
+  let last = y0;
+  for (let y = y0; y < g.length; y++) {
+    for (let x = fit.x0; x <= fit.x1; x++) {
+      const c = g[y][x];
+      if (!c || c === INK) continue;
+      r.push(at(x, y, 1, 1, SUIT));
+      last = y;
+    }
+  }
+  // V yaka: gömlek üçgeni, açık renk yaka kenarları, kravat (düğüm + uç)
+  const shirt: [number, number, number][] = [[0, m - 2, 4], [1, m - 2, 4], [2, m - 1, 2]];
+  for (const [dy, x, w] of shirt) if (y0 + dy <= last) r.push(at(x, y0 + dy, w, 1, SHIRT));
+  const lapel: [number, number][] = [[0, m - 3], [0, m + 2], [1, m - 3], [1, m + 2], [2, m - 2], [2, m + 1]];
+  for (const [dy, x] of lapel) if (y0 + dy <= last && g[y0 + dy][x] && g[y0 + dy][x] !== INK) r.push(at(x, y0 + dy, 1, 1, LAPEL));
+  r.push(at(m - 1, y0, 2, 1, shade(fit.tie, -0.2)));
+  const tipEnd = Math.min(last, y0 + 4);
+  if (tipEnd > y0) r.push(at(m - 1, y0 + 1, 2, tipEnd - y0, fit.tie));
+  if (tipEnd < last) r.push(at(m - 1, tipEnd + 1, 2, 1, shade(fit.tie, -0.2)));
+  // Düğme
+  if (last - y0 >= 5) r.push(at(m - 1, last - 1, 1, 1, '#2C3247'));
+  return r;
+}
+
 function neckRects(ch: Character, neck: Neck): R[] {
+  if (neck === 'suit') return suitRects(ch);
   const { x: cx, y, w } = ch.anchors.neck;
   const l = Math.round(cx - w / 2);
   const r: R[] = [];
@@ -249,6 +316,13 @@ function neckRects(ch: Character, neck: Neck): R[] {
     const c = neck === 'bowtie' ? '#C2453E' : GOLD;
     const m = Math.round(cx);
     r.push(at(m - 3, y, 2, 3, c), at(m + 1, y, 2, 3, c), at(m - 1, y + 1, 2, 1, shade(c, -0.3)));
+  } else if (neck === 'pjcollar') {
+    // Pijama yakası: açık mavi çizgiler + iki düğme
+    const b = '#6F82C8';
+    const m = Math.round(cx);
+    r.push(at(l, y, w, 2, '#B8C4EE'));
+    for (let i = 0; i < w; i += 2) r.push(at(l + i, y, 1, 2, b));
+    r.push(at(m - 1, y + 1, 2, 1, CREAM), at(m - 1, y + 2, 1, 1, CREAM), at(m - 1, y + 4, 1, 1, CREAM));
   } else if (neck === 'collar') {
     const coat = '#B8976A';
     r.push(at(l, y, 3, 3, coat), at(l + w - 3, y, 3, 3, coat), at(l + 1, y + 1, 1, 2, shade(coat, -0.22)), at(l + w - 2, y + 1, 1, 2, shade(coat, -0.22)));
@@ -291,6 +365,9 @@ export function itemRects(ch: Character, side: 'l' | 'r', item: Item): R[] {
       return [r(-1, 1, 6, 6, '#A57A52'), r(-1, 1, 6, 1, '#8A6440'), r(0, 3, 3, 2, CREAM), r(1, 4, 1, 1, '#3E8A8C')];
     case 'book':
       return [r(-1, 2, 7, 5, '#5B4FA0'), r(0, 2, 2, 4, CREAM), r(3, 2, 2, 4, CREAM), r(2, 2, 1, 5, '#3E3480'), r(0, 3, 2, 1, '#B9AE9B'), r(3, 4, 2, 1, '#B9AE9B')];
+    case 'briefcase':
+      // Elde sarkan evrak çantası: tutma noktasının biraz altında, gövdeye yaslı
+      return [r(0, 5, 6, 5, '#7A4A2A'), r(0, 5, 6, 1, '#9C6238'), r(0, 9, 6, 1, '#5E3820'), r(1, 4, 1, 1, '#3B2A20'), r(4, 4, 1, 1, '#3B2A20'), r(1, 3, 4, 1, '#3B2A20'), r(2, 7, 2, 1, GOLD)];
     case 'icecream':
       return [r(1, 0, 3, 3, '#F2A3C0'), r(1, 0, 1, 1, '#FBD3E2'), r(1, 3, 3, 1, '#D9A86A'), r(2, 4, 1, 3, '#D9A86A')];
   }
@@ -340,6 +417,19 @@ function pawRects(ch: Character, pose: PawPose): R[] {
   }
 }
 
+/** Gövde ızgarasından kulak bölgeleri (yalnız `maxY` satırının üstü), tuval biriminde. */
+function earRects(key: MascotKey, boxes: [number, number, number, number][], maxY: number): R[] {
+  const g = bodyGrid(key);
+  const out: R[] = [];
+  for (const [x0, y0, x1, y1] of boxes)
+    for (let y = y0; y < Math.min(y1, maxY); y++)
+      for (let x = x0; x < x1; x++) {
+        const c = g[y]?.[x];
+        if (c) out.push(at(x, y, 1, 1, c));
+      }
+  return out;
+}
+
 const NIGHT_Z = (x: number, y: number, c: string): R[] => [[x, y, 3, 1, c], [x + 1, y + 1, 1, 1, c], [x, y + 2, 1, 1, c], [x, y + 3, 3, 1, c]];
 
 export interface Scene {
@@ -368,7 +458,11 @@ export function compose(key: MascotKey, mood: Mood, outfitKey: string, L: Mascot
   figure.push(...eyeRects(ch, mood, L.eyes ?? 'mood', L.look).map(shiftUp));
   if (o.face && L.faceDy !== null) figure.push(...faceRects(ch, o.face, L.faceDy ?? 0).map(shiftUp));
   const hat = L.nightcap && !o.hat ? 'nightcap' : o.hat;
-  if (hat) figure.push(...hatRects(ch, hat, !!L.hatLift).map(shiftUp));
+  if (hat) {
+    figure.push(...hatRects(ch, hat, !!L.hatLift).map(shiftUp));
+    // Uzun kulaklar şapkanın önünde kalır (yalnız şapka satırının üstü; kenar kulak dibini örter).
+    if (ch.anchors.ears) figure.push(...earRects(key, ch.anchors.ears, ch.anchors.head.y - 1).map(shiftUp));
+  }
   if (o.hold) figure.push(...itemRects(ch, o.hold.side, o.hold.item));
   if (L.coffee && !(o.hold && o.hold.side === L.coffee)) figure.push(...cup(ch, L.coffee));
   figure.push(...pawRects(ch, L.paws ?? (mood === 'celebrate' ? 'up' : null)));

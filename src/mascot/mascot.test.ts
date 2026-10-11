@@ -15,8 +15,8 @@ const contrast = (a: string, b: string) => {
 };
 
 describe('maskot karakterleri', () => {
-  it('beş karakter; 24×24 gövde; tema renkleri okunabilir', () => {
-    expect(MASCOT_KEYS).toHaveLength(5);
+  it('altı karakter; 24×24 gövde; tema renkleri okunabilir', () => {
+    expect(MASCOT_KEYS).toHaveLength(6);
     for (const k of MASCOT_KEYS) {
       const g = bodyGrid(k);
       expect(g).toHaveLength(S);
@@ -46,7 +46,7 @@ describe('maskot karakterleri', () => {
   });
 
   it('hareketler kısa ve hareket azaltmada tek kareye iner', () => {
-    const names: ActionName[] = ['stretch', 'hop', 'wave', 'turn', 'peek', 'sneeze', 'yawn', 'dance', 'lookaround', 'glasses', 'water', 'write', 'pages', 'music', 'shiver', 'captip', 'spylook', 'glint', 'psst', 'study', 'tailwag', 'earflap', 'stash', 'curl', 'leaf', 'tilt', 'giggle', 'jump', 'spin', 'hey', 'dizzy', 'tickle', 'note', 'coins', 'sprout', 'confetti', 'wiggle', 'shrug', 'disguise', 'undisguise', 'nod'];
+    const names: ActionName[] = ['stretch', 'hop', 'wave', 'turn', 'peek', 'sneeze', 'yawn', 'dance', 'lookaround', 'glasses', 'water', 'write', 'pages', 'music', 'shiver', 'captip', 'spylook', 'glint', 'psst', 'study', 'tailwag', 'earflap', 'stash', 'curl', 'leaf', 'tilt', 'bowfix', 'nibble', 'giggle', 'jump', 'spin', 'hey', 'dizzy', 'tickle', 'note', 'coins', 'sprout', 'confetti', 'wiggle', 'shrug', 'disguise', 'undisguise', 'nod'];
     for (const k of MASCOT_KEYS)
       for (const n of names) {
         const fs = buildAction(n, { who: k, outfit: 'gardener', sprout: 0 });

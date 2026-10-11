@@ -35,7 +35,12 @@
   --shadow-card: var(--shadow);
   --border-card: 1px solid var(--line);
   --press-scale: 0.98;
-  --press-ease: 0.1s;
+  /* Hareket dili: tek yerde tanımlı eğriler. Piksel sprite'lar bilinçli olarak steps() kullanır. */
+  --ease-snappy: cubic-bezier(0.2, 0.9, 0.3, 1); /* hızlı çıkış: sayfalar, basma, bildirim */
+  --ease-gentle: cubic-bezier(0.4, 0.1, 0.2, 1); /* renk/zemin geçişleri */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* sayaç, halka dolumu */
+  --spring-bouncy: cubic-bezier(0.34, 1.56, 0.64, 1); /* hafif taşmalı yay */
+  --press-ease: 0.12s var(--ease-snappy);
   --font-display: 'Bricolage Grotesque Variable', 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
   --font-body: 'Atkinson Hyperlegible Next Variable', 'Atkinson Hyperlegible Next', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --tabbar-h: 68px;
@@ -239,6 +244,8 @@ kbd {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--line);
+  /* Kendi katmanında: arkadaki ekran animasyonları çubuğu yeniden yerleştirmesin */
+  transform: translateZ(0);
 }
 .tabbar__item {
   display: flex;
@@ -250,6 +257,13 @@ kbd {
   font-size: 12px;
   font-weight: 600;
   color: var(--ink-3);
+  transition: color 0.16s var(--ease-gentle);
+}
+.tabbar__item svg {
+  transition: transform 0.24s var(--spring-bouncy), color 0.16s var(--ease-gentle);
+}
+.tabbar__item:active svg {
+  transform: scale(0.88);
 }
 .tabbar__item.is-on {
   color: var(--ink);
@@ -269,7 +283,7 @@ kbd {
   place-items: center;
   box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--accent) 70%, transparent);
   transform: translateY(-10px);
-  transition: transform 0.15s;
+  transition: transform 0.22s var(--spring-bouncy);
 }
 .tabbar__add:active {
   transform: translateY(-8px) scale(0.96);
@@ -648,10 +662,13 @@ kbd {
   background: var(--surface-2);
   min-height: 92px;
   min-width: 0;
-  transition: background 0.15s;
+  transition: background 0.15s var(--ease-gentle), transform var(--press-ease);
 }
 .stat:hover {
   background: var(--surface-3);
+}
+.stat:active {
+  transform: scale(var(--press-scale));
 }
 .stat__label {
   font-size: 13px;
@@ -714,6 +731,10 @@ kbd {
 }
 .acc-row--invest svg {
   color: var(--invest);
+}
+.acc-list--invest {
+  margin-top: 4px;
+  border-top: 1px dashed var(--line);
 }
 .acc-total {
   display: flex;
@@ -934,7 +955,7 @@ kbd {
   font-weight: 700;
   font-size: 15.5px;
   white-space: nowrap;
-  transition: background 0.15s, transform var(--press-ease);
+  transition: background 0.15s var(--ease-gentle), transform var(--press-ease);
 }
 .btn:active {
   transform: scale(var(--press-scale));
@@ -1043,6 +1064,7 @@ kbd {
   color: var(--ink-2);
   padding: 0 6px;
   text-align: center;
+  transition: background-color 0.16s var(--ease-gentle), color 0.16s var(--ease-gentle), box-shadow 0.16s var(--ease-gentle);
 }
 .segmented button.is-on {
   background: var(--surface);
@@ -1083,6 +1105,10 @@ kbd {
   white-space: nowrap;
   color: var(--ink);
   position: relative;
+  transition: background-color 0.16s var(--ease-gentle), border-color 0.16s var(--ease-gentle), box-shadow 0.16s var(--ease-gentle), transform var(--press-ease);
+}
+.chip:active {
+  transform: scale(0.96);
 }
 .chip svg {
   color: var(--chip, var(--ink-3));
@@ -1294,7 +1320,10 @@ fieldset.block {
   font-weight: 600;
   line-height: 1.15;
   color: var(--ink-2);
-  overflow-wrap: anywhere;
+  /* Uzun adlar heceden bölünür ("Subscrip-tions"), kelime ortasından değil */
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  overflow-wrap: break-word;
 }
 .cat-btn.is-on {
   border-color: var(--cat);
@@ -1386,7 +1415,7 @@ fieldset.block {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  animation: fade-in 0.16s ease-out;
+  animation: fade-in 0.16s var(--ease-gentle);
 }
 .sheet {
   width: 100%;
@@ -1397,7 +1426,7 @@ fieldset.block {
   border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
   box-shadow: 0 -10px 40px -10px rgba(0, 0, 0, 0.35);
   outline: none;
-  animation: sheet-up 0.22s cubic-bezier(0.2, 0.9, 0.3, 1);
+  animation: sheet-up 0.24s var(--ease-snappy);
 }
 .sheet__grip {
   width: 40px;
@@ -1442,7 +1471,7 @@ fieldset.block {
     max-width: 540px;
     border-radius: 22px;
     max-height: min(88dvh, 860px);
-    animation: sheet-pop 0.18s ease-out;
+    animation: sheet-pop 0.2s var(--ease-snappy);
   }
   .sheet--wide {
     max-width: 720px;
@@ -1489,13 +1518,14 @@ fieldset.block {
   gap: 10px;
   max-width: 560px;
   padding: 8px 8px 8px 16px;
-  border-radius: var(--radius-toast);
+  /* İki satırlık bildirimde köşeler metni kesmesin */
+  border-radius: min(var(--radius-toast), 24px);
   background: var(--ink);
   color: var(--paper);
   box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.45);
   font-weight: 600;
   font-size: 15px;
-  animation: sheet-up 0.2s ease-out;
+  animation: sheet-up 0.24s var(--spring-bouncy);
 }
 .toast .icon-btn {
   color: color-mix(in srgb, var(--paper) 70%, transparent);
@@ -1556,6 +1586,80 @@ fieldset.block {
 .empty__text {
   max-width: 420px;
   color: var(--ink-2);
+}
+.empty__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.empty__action {
+  margin-top: 4px;
+}
+/* Canlı sahneli boş durum: 360 px telefonda tek ekrana sığacak kadar sıkı */
+.empty--scene {
+  gap: 6px;
+  padding: 12px 4px 8px;
+}
+.empty--scene h3 {
+  font-size: 18px;
+  text-wrap: balance;
+}
+.empty--scene .empty__text {
+  max-width: 340px;
+  font-size: 15px;
+  text-wrap: pretty;
+}
+/* Liste içi (Özet > Son kayıtlar): maskot solda, metin ve düğme sağda */
+.empty--compact {
+  flex-direction: row;
+  align-items: center;
+  text-align: left;
+  gap: 12px;
+  padding: 4px 0;
+}
+.empty--compact .empty__copy {
+  align-items: flex-start;
+  gap: 4px;
+}
+.empty--compact h3 {
+  font-size: 16px;
+}
+.empty--compact .empty__text {
+  font-size: 14px;
+}
+.empty--compact .mascot-live {
+  flex: none;
+}
+.empty--compact .mascot-live::after {
+  display: none;
+}
+
+/* Tembel yüklenen ekran parçası beklenirken: kart biçimli iskelet (sayfa zıplamaz) */
+.skel__head {
+  height: 34px;
+  width: 46%;
+  border-radius: 10px;
+  background: var(--surface-3);
+}
+.skel__card {
+  min-height: 180px;
+  opacity: 0.7;
+}
+.skel__card--short {
+  min-height: 110px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .skel {
+    animation: skel-in 0.3s 0.15s both;
+  }
+  @keyframes skel-in {
+    from { opacity: 0; }
+  }
+}
+.chunk-error {
+  align-items: flex-start;
 }
 
 /* ───────── İlerleme ───────── */
@@ -2414,8 +2518,63 @@ fieldset.block {
 .bchart__key.is-proj {
   border-top-style: dashed;
 }
+.plan-summary,
+.plan-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 10px;
+}
+.plan-summary__text {
+  font-weight: 700;
+  color: var(--ink);
+}
+.plan-summary__text.is-below,
+.plan-summary__warn {
+  color: var(--warn);
+}
+.bchart__line--plan {
+  stroke: var(--invest);
+  stroke-width: 2.5;
+  stroke-dasharray: 0.5 6;
+  opacity: 0.95;
+}
+.bchart__key.is-plan {
+  border-top: 3px dotted var(--invest);
+}
+.bchart__tip .bchart__key.is-plan {
+  border-top-color: var(--invest-soft);
+}
 .bchart__tip .bchart__key {
   border-top-color: var(--accent-line);
+}
+/* Harcama grafiği (birikimli harcama + kesik plan çizgisi) */
+.schart__plan {
+  stroke: var(--invest);
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+  stroke-linecap: butt;
+  opacity: 0.95;
+}
+.schart__key.is-plan {
+  border-top: 2px dashed var(--invest);
+}
+.bchart__tip .schart__key.is-plan {
+  border-top-color: var(--invest-soft);
+}
+.plan-summary__text.is-over {
+  color: var(--warn);
+}
+.spend-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+}
+.spend-view {
+  margin-bottom: 12px;
 }
 .bal-head {
   display: flex;
@@ -2736,7 +2895,17 @@ fieldset.block {
 .ring__fill {
   stroke: var(--accent);
   stroke-width: 7;
-  transition: stroke-dasharray 0.6s ease, stroke 0.3s ease;
+  /* İlk görünüş: 0'dan sırayla dolum. Sonraki değişimler (.is-settled): hafif taşmalı yay. */
+  transition:
+    stroke-dasharray 0.7s var(--ease-out) calc(var(--i, 0) * 90ms),
+    stroke 0.3s var(--ease-gentle),
+    opacity 0.2s var(--ease-gentle);
+}
+.rings__svg.is-settled .ring__fill {
+  transition:
+    stroke-dasharray 0.6s var(--spring-bouncy),
+    stroke 0.3s var(--ease-gentle),
+    opacity 0.2s var(--ease-gentle);
 }
 .ring--elapsed .ring__fill {
   stroke: var(--ink-3);
@@ -2798,7 +2967,159 @@ fieldset.block {
   color: var(--ink-2);
 }
 @media (prefers-reduced-motion: reduce) {
-  .ring__fill {
+  .ring__fill,
+  .rings__svg.is-settled .ring__fill {
     transition: none;
   }
+}
+
+/* ───────── Başarı konfetisi (src/ui/Celebrate.tsx) ───────── */
+.confetti {
+  position: fixed;
+  z-index: 70;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.confetti i {
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  opacity: 0;
+  /* piksel kare: maskot sanatıyla aynı dil */
+  image-rendering: pixelated;
+}
+
+/* ───────── Hareket azaltma: basma ölçeği ve yay geçişleri kapalı ───────── */
+@media (prefers-reduced-motion: reduce) {
+  html[data-mascot],
+  :root {
+    --press-scale: 1;
+  }
+  .chip:active,
+  .tabbar__item:active svg {
+    transform: none;
+  }
+  .confetti {
+    display: none;
+  }
+}
+
+/* Hızlı tutar önerileri (TxSheet): tutar alanının altında kompakt tek satır */
+.quick-row__group {
+  display: contents;
+}
+.chip--amount {
+  min-height: 40px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  background: var(--surface-2);
+}
+
+/* ───────── + düğmesi parıltısı ─────────
+   Etrafında yavaşça dönen ince bir ışık halkası ve ara sıra yayılan yumuşak nabız.
+   Bugün henüz kayıt yoksa (--nudge) nabız daha sık ve belirgin. Form açıkken ve hareket azaltıldığında yok. */
+@property --aura-a {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+.tabbar__add {
+  position: relative;
+  isolation: isolate;
+}
+.tabbar__add > svg {
+  position: relative;
+  z-index: 1;
+}
+.tabbar__aura {
+  position: absolute;
+  inset: -5px;
+  border-radius: calc(var(--radius-add) + 5px);
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-gentle, ease);
+}
+.tabbar__add--glow .tabbar__aura {
+  opacity: 1;
+  background: conic-gradient(
+    from var(--aura-a),
+    transparent 0deg 200deg,
+    color-mix(in srgb, var(--accent) 45%, transparent) 270deg,
+    var(--accent) 325deg,
+    color-mix(in srgb, var(--accent) 40%, white) 340deg,
+    transparent 352deg 360deg
+  );
+  /* Yalnız kenar: düğmenin köşe biçimini izleyen 2,5 px'lik halka */
+  padding: 3px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: aura-spin 4.5s linear infinite;
+}
+.tabbar__add--glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -2;
+  animation: aura-pulse 6s var(--ease-out, ease-out) infinite;
+}
+.tabbar__add--nudge::after {
+  animation-duration: 2.8s;
+}
+.tabbar__add--nudge .tabbar__aura {
+  animation-duration: 3s;
+}
+@keyframes aura-spin {
+  to { --aura-a: 360deg; }
+}
+@keyframes aura-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+  45%, 100% { box-shadow: 0 0 0 14px color-mix(in srgb, var(--accent) 0%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tabbar__add--glow .tabbar__aura,
+  .tabbar__add--glow::after {
+    animation: none;
+  }
+}
+
+/* Hesap sayfasında "hareketleriyle sil" ve onay listesi */
+.danger-zone {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line, rgba(127, 127, 127, 0.25));
+  display: flex;
+  justify-content: flex-start;
+}
+.cascade-list {
+  margin: 4px 0 12px;
+  padding-left: 20px;
+}
+.cascade-list li {
+  margin: 2px 0;
+}
+.archived-accs {
+  margin-top: 4px;
+}
+.archived-accs > summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 4px 0;
+}
+.archived-accs ul {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+.archived-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
 }

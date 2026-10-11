@@ -6,7 +6,7 @@ import { debtTotals, personBalances } from '../domain/ledger';
 import { Amount, SectionHead } from '../ui/kit';
 import { go, openSheet } from '../ui/nav';
 import { useData, useLookups } from '../ui/hooks';
-import { EmptyState } from '../mascot/MascotNote';
+import { SceneEmpty } from '../mascot/MascotNote';
 import { TxRow } from '../ui/TxRow';
 
 /** Arkadaşlarla borç/alacak defteri. */
@@ -33,9 +33,7 @@ export function People() {
 
       {people.length === 0 ? (
         <section className="card">
-          <EmptyState outfit="ledger" mood="calm" title={t('people.emptyTitle')} action={<button className="btn btn--primary" onClick={() => openSheet({ kind: 'account', kindPreset: 'person' })}>{t('people.addPerson')}</button>}>
-            {t('people.emptyBody')}
-          </EmptyState>
+          <SceneEmpty scene="people" onAction={() => openSheet({ kind: 'account', kindPreset: 'person' })} />
         </section>
       ) : (
         <>

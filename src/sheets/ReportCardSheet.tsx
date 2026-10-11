@@ -1,10 +1,13 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Share2 } from 'lucide-react';
 import { catName, formatMoney, monthLabel, monthName, pctForm, shortDate } from '../i18n/format';
 import { useT } from '../i18n';
 import { monthReport } from '../domain/ledger';
 import * as A from '../domain/actions';
-import { commit, showToast } from '../store/store';
+import { commit, getState, showToast } from '../store/store';
+import { burst } from '../ui/Celebrate';
+import { celebratedMonths, markMonthCelebrated, shouldCelebrateMonth } from '../ui/monthCelebrate';
+import '../ui/polish.css';
 import { Mascot } from '../mascot/Mascot';
 import { useMascot } from '../mascot/MascotNote';
 import { closeSheet, go } from '../ui/nav';
@@ -25,6 +28,21 @@ export function ReportCardSheet({ month }: { month: string }) {
   const b = r.budget;
   const within = b.budget !== null && b.spent <= b.budget;
   const mood = b.budget === null ? 'calm' : within ? 'celebrate' : 'thoughtful';
+
+  // Bütçe içinde biten ayın karnesi ilk açıldığında bir kez konfeti + maskot dansı. Aşan aylarda hiçbir şey.
+  const [party, setParty] = useState(false);
+  useEffect(() => {
+    const scope = getState().mode;
+    if (!shouldCelebrateMonth(month, { within, reportCardSeen: data.settings.reportCardSeen, celebrated: celebratedMonths(scope) })) return;
+    // İşaretleme zamanlayıcının içinde: StrictMode'un çift effect'i kutlamayı yutmasın.
+    const id = setTimeout(() => {
+      markMonthCelebrated(scope, month);
+      setParty(true);
+      burst(28, mascotRef.current);
+    }, 380);
+    return () => clearTimeout(id);
+    // Yalnız açılışta karar verilir.
+  }, []);
 
   const lines: [string, string][] = [
     [t('tx.income'), formatMoney(s.income)],
@@ -123,9 +141,10 @@ export function ReportCardSheet({ month }: { month: string }) {
       }
     >
       <div className="rcard">
-        <div className="rcard__mascot" ref={mascotRef}>
+        <div className={`rcard__mascot ${party ? 'rcard__mascot--party' : ''}`} ref={mascotRef}>
           <Mascot who={m.who} mood={mood} outfit="scholar" size={140} idle={false} lang={m.lang} name={m.name} />
         </div>
+        {party && <p className="rcard__cheer" role="status">{t('rc.celebrate')}</p>}
         <p className="rcard__comment">{comment}</p>
         <dl className="kv">
           {lines.map(([k, v]) => (

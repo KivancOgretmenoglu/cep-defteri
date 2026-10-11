@@ -1,80 +1,144 @@
-import { useMemo, useState } from 'react';
-import { ArrowDownLeft, ArrowUpRight, Plus, RefreshCw, Target, Pencil, Trash2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Archive, ArchiveRestore, ArrowDownLeft, ArrowUpRight, Plus, RefreshCw, Target, Pencil, Trash2 } from 'lucide-react';
 import type { ID } from '../domain/types';
 import type { Money } from '../domain/money';
 import { monthEnd, monthOf, monthStart } from '../domain/dates';
 import { formatMoney, hiddenMoney, pctForm, pctPlain, shortDate } from '../i18n/format';
 import { useT } from '../i18n';
-import { accountIndex, goalProgress, investmentState, isInvestment, rangeSummary, transferKind } from '../domain/ledger';
+import { accountIndex, goalProgress, investmentLists, investmentState, isInvestment, rangeSummary, transferKind } from '../domain/ledger';
 import * as A from '../domain/actions';
 import { commit } from '../store/store';
 import { Amount, Chip, Progress, SectionHead } from '../ui/kit';
 import { openSheet } from '../ui/nav';
 import { useData } from '../ui/hooks';
-import { MascotNote, EmptyState } from '../mascot/MascotNote';
+import { MascotNote, SceneEmpty, LiveMascot } from '../mascot/MascotNote';
+import { refreshPrices, usePrices } from '../store/prices';
+import { agoText, formatQty, unitName, unitShort } from '../sheets/AssetFields';
+import type { AssetHolding, AssetPosition } from '../domain/ledger';
+import { roundQty, unitOrder, type AssetLot, type AssetUnit } from '../domain/assets';
 
 export function Invest() {
   const t = useT();
   const { data, today } = useData();
-  const invAccounts = data.accounts.filter((a) => isInvestment(a) && (!a.archived || investmentState(data, a.id)!.currentValue !== 0));
+  const prices = usePrices();
+  const book = prices.book;
+  const hasAsset = data.accounts.some((a) => isInvestment(a) && a.asset);
+  // Altın/döviz hesabı varsa ekran açılınca fiyatlar (15 dk'dan eskiyse) yenilenir.
+  useEffect(() => {
+    if (hasAsset) void refreshPrices();
+  }, [hasAsset]);
+  // Arşivlenen hesap (değeri olsa bile) ana listeden ve toplamlardan çıkar; en altta katlanır bölümde durur.
+  const { active: invAccounts, archived: archivedAccs } = investmentLists(data);
   const [sel, setSel] = useState<ID | null>(null);
-  const accountId = sel && invAccounts.some((a) => a.id === sel) ? sel : invAccounts[0]?.id;
+  // Arşivden açılan hesap ayrı tutulur: görüntülenen hesap arşivlenince ana görünüm aktif bir hesaba geçer.
+  const [archSel, setArchSel] = useState<ID | null>(null);
+  const accountId = archSel && archivedAccs.some((a) => a.id === archSel) ? archSel : sel && invAccounts.some((a) => a.id === sel) ? sel : invAccounts[0]?.id;
+  const openArchived = (id: ID) => {
+    setArchSel(id);
+    window.scrollTo?.({ top: 0, behavior: 'smooth' });
+  };
+  const archivedSection = archivedAccs.length > 0 && (
+    <section className="card card--span" aria-label={t('accdel.archivedSection', { n: archivedAccs.length })}>
+      <details className="archived-accs" data-testid="archived-accs">
+        <summary>{t('accdel.archivedSection', { n: archivedAccs.length })}</summary>
+        <ul className="acc-list">
+          {archivedAccs.map((a) => (
+            <li key={a.id}>
+              <button className="acc-row" onClick={() => openArchived(a.id)}>
+                <Archive size={18} aria-hidden />
+                <span className="acc-row__name">{a.name}</span>
+                <Amount value={investmentState(data, a.id, book)!.currentValue} tone="invest" hide={data.settings.hideTotals} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      </details>
+    </section>
+  );
   const month = monthOf(today);
 
   const view = useMemo(() => {
     if (!accountId) return null;
-    const st = investmentState(data, accountId)!;
+    const st = investmentState(data, accountId, book)!;
     const accounts = accountIndex(data);
     const only = { ...data, txs: data.txs.filter((t) => t.type === 'transfer' && (t.accountId === accountId || t.toAccountId === accountId)) };
     const m = rangeSummary(only, monthStart(month), monthEnd(month));
     const events = [
-      ...only.txs.map((t) => ({ kind: transferKind(t, accounts), date: t.date, seq: t.seq, amount: t.amount, id: t.id, note: t.note, other: accounts.get(t.accountId === accountId ? t.toAccountId! : t.accountId)?.name })),
-      ...st.history.map((v) => ({ kind: v.isOpening ? 'opening' : 'value', date: v.date, seq: v.seq, amount: v.value, id: v.id ?? 'opening', note: undefined, other: undefined })),
+      ...only.txs.map((t) => ({ kind: transferKind(t, accounts), date: t.date, seq: t.seq, amount: t.amount, id: t.id, note: t.note, other: accounts.get(t.accountId === accountId ? t.toAccountId! : t.accountId)?.name, unit: t.unit, qty: t.qty, unitPrice: t.unitPrice, lots: undefined as AssetLot[] | undefined })),
+      // Altın/döviz hesabında elle değer kaydı yoktur; geçmiş noktaları işlemlerin kendisidir.
+      ...st.history.filter((v) => !st.asset || v.isOpening).map((v) => ({ kind: v.isOpening ? 'opening' : 'value', date: v.date, seq: v.seq, amount: v.value, id: v.id ?? 'opening', note: undefined, other: undefined, unit: undefined, qty: undefined, unitPrice: undefined, lots: v.isOpening ? st.account.asset?.opening : undefined })),
     ].sort((a, b) => (a.date === b.date ? b.seq - a.seq : a.date < b.date ? 1 : -1));
     const goals = data.goals.filter((g) => g.accountId === accountId).map((g) => goalProgress(data, g)!);
     return { st, m, events, goals };
-  }, [data, accountId, month]);
+  }, [data, accountId, month, book]);
+  // Tüm altın/döviz hesaplarındaki miktarlar, tür tür toplanmış: "15 gram · 3 çeyrek · 150 USD"
+  const totals = new Map<AssetUnit, number>();
+  for (const a of data.accounts) {
+    if (!isInvestment(a) || !a.asset || a.archived) continue;
+    for (const p of investmentState(data, a.id, book)!.asset!.positions) totals.set(p.unit, (totals.get(p.unit) ?? 0) + p.qty);
+  }
+  const holdings = [...totals].sort((a, b) => unitOrder(a[0], b[0])).map(([unit, qty]) => ({ unit, qty: roundQty(qty, unit) }));
 
   if (!accountId || !view) {
     return (
       <div className="screen">
         <header className="screen-head"><h1>{t('nav.invest')}</h1></header>
         <section className="card">
-          <EmptyState outfit="gardener" mood="curious" title={t('inv.emptyTitle')} action={<button className="btn btn--primary" onClick={() => openSheet({ kind: 'account', kindPreset: 'investment' })}>{t('home.addInvestAccount')}</button>}>
-            {t('inv.emptyBody')}
-          </EmptyState>
+          <SceneEmpty scene="invest" onAction={() => openSheet({ kind: 'account', kindPreset: 'investment' })} />
         </section>
+        {archivedSection}
       </div>
     );
   }
   const { st, m, events, goals } = view;
   const reached = goals.find((g) => g.reached);
   const near = goals.find((g) => !g.reached && g.pct >= 80);
+  const isArchived = !!st.account.archived;
 
   return (
     <div className="screen">
       <header className="screen-head">
-        <h1>{t('nav.invest')}</h1>
+        <div className="head-with-back invest-head">
+          <h1>{t('nav.invest')}</h1>
+          {/* Yatırım ekranının maskotu takım elbiseli; toplamlar gizliyse gizli ajan */}
+          <LiveMascot outfit={data.settings.hideTotals ? 'spy' : 'suit'} mood="happy" size={56} />
+        </div>
         {invAccounts.length > 1 && (
           <div className="chip-row">
-            {invAccounts.map((a) => <Chip key={a.id} on={a.id === accountId} onClick={() => setSel(a.id)}>{a.name}</Chip>)}
+            {invAccounts.map((a) => <Chip key={a.id} on={a.id === accountId} onClick={() => { setSel(a.id); setArchSel(null); }}>{a.name}</Chip>)}
           </div>
+        )}
+        {holdings.length > 0 && !data.settings.hideTotals && (
+          <p className="muted invest-holdings">{t('asset.holding')}: {holdings.map((h) => formatQty(t, h.qty, h.unit)).join(' · ')}</p>
         )}
       </header>
 
       <div className="invest-grid">
+        {isArchived && (
+          <section className="card card--span callout archived-banner" role="status">
+            <span>{t('accdel.archivedBanner')}</span>
+            <span className="btn-row">
+              <button className="btn btn--secondary btn--small" onClick={() => { const id = st.account.id; commit((d) => A.setAccountArchived(d, id, false), t('acc.unarchived')); setSel(id); setArchSel(null); }}><ArchiveRestore size={16} /> {t('acc.unarchive')}</button>
+              {invAccounts.length > 0 && <button className="btn btn--ghost btn--small" onClick={() => setArchSel(null)}>{t('accdel.backToActive')}</button>}
+            </span>
+          </section>
+        )}
         <section className="card invest-hero" aria-labelledby="inv-h">
           <div className="invest-hero__top">
             <h2 id="inv-h" className="label">{st.account.name} · {t('inv.currentValue')}</h2>
             <button className="icon-btn" onClick={() => openSheet({ kind: 'account', accountId })} aria-label={t('inv.editAccount')}><Pencil size={18} /></button>
           </div>
           <Amount value={st.currentValue} size="xl" tone="invest" hide={data.settings.hideTotals} />
+          {st.asset ? (
+            <AssetBreakdown asset={st.asset} failed={prices.failed} loading={prices.loading} hide={data.settings.hideTotals} />
+          ) : (
           <p className="invest-hero__date">
             {st.lastValuation.isOpening ? t('inv.openingValue') : t('inv.lastValue')}: {data.settings.hideTotals ? hiddenMoney() : formatMoney(st.lastValuation.value)} · {shortDate(st.lastValuation.date, today)}
             {st.flowsSinceValuation !== 0 && <> · {t('inv.flowsAdded', { amount: formatMoney(st.flowsSinceValuation, { sign: true }) })}</>}
           </p>
+          )}
           <div className="btn-row">
-            <button className="btn btn--primary" onClick={() => openSheet({ kind: 'valuation', accountId })}><RefreshCw size={17} /> {t('inv.updateValue')}</button>
+            <button className="btn btn--primary" onClick={() => openSheet({ kind: 'valuation', accountId })}><RefreshCw size={17} /> {st.asset ? t('asset.setPrice') : t('inv.updateValue')}</button>
             <button className="btn btn--secondary" onClick={() => openSheet({ kind: 'add', preset: { type: 'invest', direction: 'in', accountId } })}><ArrowDownLeft size={17} /> {t('inv.moveIn')}</button>
             <button className="btn btn--ghost" onClick={() => openSheet({ kind: 'add', preset: { type: 'invest', direction: 'out', accountId } })}><ArrowUpRight size={17} /> {t('inv.withdraw')}</button>
           </div>
@@ -98,7 +162,7 @@ export function Invest() {
             <MascotNote
               compact
               size={64}
-              outfit="gardener"
+              outfit={data.settings.hideTotals ? 'spy' : 'suit'}
               mood={reached ? 'celebrate' : 'happy'}
               text={reached ? t('inv.goalDone', { goal: reached.goal.title, amount: formatMoney(reached.current) }) : t('inv.goalNear', { goal: near!.goal.title, pct: pctForm(near!.pct, 'locYou') })}
               why={t('inv.goalWhy')}
@@ -126,8 +190,8 @@ export function Invest() {
 
         <section className="card" aria-labelledby="chart-h">
           <SectionHead id="chart-h" title={t('inv.chartTitle')} />
-          <ValueChart history={st.history.map((h) => ({ date: h.date, value: h.value }))} />
-          <p className="note-line">{t('inv.chartNote')}</p>
+          <ValueChart history={[...st.history.map((h) => ({ date: h.date, value: h.value })), ...(st.asset && st.asset.positions.some((p) => p.price !== null) ? [{ date: today, value: st.currentValue }] : [])]} />
+          <p className="note-line">{st.asset ? t('asset.chartNote') : t('inv.chartNote')}</p>
         </section>
 
         <section className="card card--span" aria-labelledby="hist-h">
@@ -142,6 +206,12 @@ export function Invest() {
                   {e.kind === 'investment-internal' && <>{t('inv.ev.internal')}</>}
                   {e.kind === 'value' && <>{t('inv.ev.value')} <small>{t('inv.ev.valueHint')}</small></>}
                   {e.kind === 'opening' && <>{t('inv.ev.opening')} <small>{t('inv.ev.openingHint')}</small></>}
+                  {st.asset && e.unit && e.qty !== undefined && e.unitPrice !== undefined && (
+                    <small className="inv-ev__qty">{unitName(t, e.unit)}: {t('asset.ev.qty', { qty: formatQty(t, e.qty, e.unit), unit: unitShort(t, e.unit), price: formatMoney(e.unitPrice) })}</small>
+                  )}
+                  {st.asset && e.lots && e.lots.length > 0 && (
+                    <small className="inv-ev__qty">{t('asset.ev.openingQty', { qty: e.lots.map((l) => formatQty(t, l.qty, l.unit)).join(' + ') })}</small>
+                  )}
                 </span>
                 <span className="inv-ev__amt">
                   {e.kind === 'contribution' ? '+' : e.kind === 'withdrawal' ? '−' : ''}
@@ -157,8 +227,52 @@ export function Invest() {
             ))}
           </ul>
         </section>
+        {archivedSection}
       </div>
     </div>
+  );
+}
+
+/** Altın/döviz hesabı: tür tür miktar ve değer, toplam, fiyatların yaşı ve kaynağı, yenile. */
+function AssetBreakdown({ asset, failed, loading, hide }: { asset: AssetHolding; failed: boolean; loading: boolean; hide: boolean }) {
+  const t = useT();
+  const srcText = (p: AssetPosition) => (p.priceSource === 'estimate' ? t('asset.src.estimate') : p.priceSource === 'manual' ? t('asset.src.manual') : p.priceSource === 'last-tx' ? t('asset.src.lastTx') : '');
+  // En eski güncel fiyat zamanı: "Fiyatlar: 5 dk önce"
+  const liveAts = asset.positions.map((p) => p.priceAt).filter((x): x is number => typeof x === 'number');
+  const oldest = liveAts.length ? Math.min(...liveAts) : null;
+  if (asset.positions.length === 0) return <p className="note-line">{t('asset.noHoldingsYet')}</p>;
+  return (
+    <>
+      <ul className="asset-breakdown" aria-label={t('asset.breakdown')}>
+        {asset.positions.map((p) => {
+          const src = p.priceSource !== 'live' ? srcText(p) : '';
+          return (
+            <li key={p.unit} className="asset-breakdown__row">
+              <span className="asset-breakdown__name">
+                {unitName(t, p.unit)}
+                <small>
+                  {p.price !== null ? t('asset.ev.qty', { qty: hide ? '•••' : formatQty(t, p.qty, p.unit), unit: unitShort(t, p.unit), price: formatMoney(p.price) }) : `${hide ? '•••' : formatQty(t, p.qty, p.unit)} · ${t('asset.noPriceShort')}`}
+                  {src && <> · {src}</>}
+                </small>
+              </span>
+              <span className="asset-breakdown__val">{hide ? hiddenMoney() : p.price !== null ? formatMoney(p.value) : '—'}</span>
+            </li>
+          );
+        })}
+        {asset.positions.length > 1 && (
+          <li className="asset-breakdown__row asset-breakdown__row--total">
+            <span className="asset-breakdown__name">{t('asset.total')}</span>
+            <span className="asset-breakdown__val">{hide ? hiddenMoney() : formatMoney(asset.value)}</span>
+          </li>
+        )}
+      </ul>
+      <p className="invest-hero__date">
+        {oldest !== null && <>{t('asset.pricesAgo', { ago: agoText(t, oldest) })} </>}
+        <button className="link link--small" disabled={loading} onClick={() => void refreshPrices({ force: true })}>{loading ? t('asset.refreshing') : t('asset.refresh')}</button>
+      </p>
+      {failed && <p className="note-line">{t('asset.fetchFailed')}</p>}
+      <p className="note-line">{t('asset.valueNote')}</p>
+    </>
   );
 }
 

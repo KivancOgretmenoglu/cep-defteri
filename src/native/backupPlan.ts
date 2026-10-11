@@ -76,3 +76,48 @@ export function backupNudgeDue(data: Data, nowMs: number, days = NUDGE_DAYS): bo
   if (data.settings.lastBackupAt == null) for (const x of [...data.accounts, ...data.txs]) since = Math.min(since, x.createdAt);
   return Number.isFinite(since) && nowMs - since >= days * 86_400_000;
 }
+
+// ───────── Ana ekrandaki yedek hatırlatması ─────────
+
+/** Otomatik yedeğin bu kadar gün başarısız kalması hatırlatma sebebidir (tek seferlik aksaklıklarda susar). */
+export const AUTO_FAIL_DAYS = 2;
+/** "Sonra" denince hatırlatma bu kadar gün susar. */
+export const SNOOZE_DAYS = 7;
+
+export interface BackupReminder {
+  /**
+   * web: veri yalnız bu tarayıcıda (tarayıcının kendi kopyaları da aynı depoda).
+   * phone: Android, otomatik yedek kapalı; veri yalnız telefonun uygulama deposunda.
+   * autoFailed: Android, otomatik yedek açık ama son günlerde yazılamadı.
+   */
+  kind: 'web' | 'phone' | 'autoFailed';
+  /** Kayıt (işlem) sayısı; 0 ise yalnız hesap/plan var. */
+  count: number;
+  /** Son elle alınan yedek dosyasından (autoFailed'da son başarılı otomatik yedekten) bu yana geçen gün; hiç yoksa null. */
+  days: number | null;
+}
+
+/**
+ * Dürüst yedek hatırlatması: verinin gerçekten yalnız bu cihazda olduğu ve bir süredir dışarı kopyalanmadığı durumlarda.
+ * Android'de günlük otomatik yedek açık ve çalışıyorsa hiç hatırlatmaz (Belgeler klasörü uygulama silinse de kalır).
+ */
+export function backupReminder(
+  data: Data,
+  env: { real: boolean; native: boolean; auto: { enabled: boolean; lastAt: number | null; lastError: string | null }; snoozedUntil?: number | null },
+  nowMs: number,
+): BackupReminder | null {
+  if (!env.real || !hasContent(data)) return null;
+  if (env.snoozedUntil && nowMs < env.snoozedUntil) return null;
+  const daysSince = (at: number | null) => (at == null ? null : Math.max(0, Math.floor((nowMs - at) / 86_400_000)));
+  const manual = data.settings.lastBackupAt;
+  const count = data.txs.length;
+  if (env.native && env.auto.enabled) {
+    if (!env.auto.lastError) return null;
+    const recentAuto = env.auto.lastAt != null && nowMs - env.auto.lastAt < AUTO_FAIL_DAYS * 86_400_000;
+    const recentManual = manual != null && nowMs - manual < SNOOZE_DAYS * 86_400_000;
+    if (recentAuto || recentManual) return null;
+    return { kind: 'autoFailed', count, days: daysSince(env.auto.lastAt) };
+  }
+  if (!backupNudgeDue(data, nowMs)) return null;
+  return { kind: env.native ? 'phone' : 'web', count, days: daysSince(manual) };
+}

@@ -11,7 +11,7 @@ import { commit } from '../store/store';
 import { Chip, Progress, SectionHead, Segmented, inputFromMoney } from '../ui/kit';
 import { go, openSheet } from '../ui/nav';
 import { useData, useLookups } from '../ui/hooks';
-import { MascotNote, EmptyState } from '../mascot/MascotNote';
+import { MascotNote, EmptyState, SceneEmpty } from '../mascot/MascotNote';
 import { CatIcon } from '../ui/icons';
 import { DueRow } from '../ui/DueRow';
 import type { Mood } from '../domain/mood';
@@ -68,8 +68,9 @@ export function Budget() {
     if (b.state === 'on-track' || b.state === 'watch' || b.state === 'tight')
       note = {
         mood: st.mood,
-        text: `${t('bud.note.pace', { elapsed: pctForm(b.elapsedPct, 'poss'), used: pctForm(b.flexUsedPct ?? 0, 'acc') })} ${b.remaining !== null && b.remaining > 0 ? t('bud.note.left', { amount: formatMoney(b.remaining), perDay: formatMoney(Math.floor(b.remaining / left)) }) : ''}`,
-        why: t('bud.note.paceWhy'),
+        // Balonda tek kısa cümle (kalan + günlük pay); tempo yüzdeleri "Neden böyle?" içinde.
+        text: b.remaining !== null && b.remaining > 0 ? t('bud.note.left', { amount: formatMoney(b.remaining), perDay: formatMoney(Math.floor(b.remaining / left)) }) : t('bud.note.pace', { elapsed: pctForm(b.elapsedPct, 'poss'), used: pctForm(b.flexUsedPct ?? 0, 'acc') }),
+        why: t('bud.note.paceWhy', { pace: t('bud.note.pace', { elapsed: pctForm(b.elapsedPct, 'poss'), used: pctForm(b.flexUsedPct ?? 0, 'acc') }) }),
       };
     else if (b.state === 'over')
       note = { mood: 'thoughtful', text: t('bud.note.over', { amount: formatMoney(b.spent - b.budget) }), why: t('bud.note.overWhy', { spent: formatMoney(b.spent), budget: formatMoney(b.budget) }) };
@@ -88,9 +89,14 @@ export function Budget() {
 
       {b.budget === null ? (
         <section className="card">
-          <EmptyState outfit="planner" mood="calm" title={t('bud.emptyTitle')} action={<button className="btn btn--primary" onClick={() => openSheet({ kind: 'budget' })}>{t('bud.setBudget')}</button>}>
-            {t('bud.emptyBody')}
-          </EmptyState>
+          {data.plans.length === 0 ? (
+            <SceneEmpty scene="budget" onAction={() => openSheet({ kind: 'budget' })} />
+          ) : (
+            <EmptyState outfit="planner" mood="calm" title={t('bud.emptyTitle')} action={<button className="btn btn--primary" onClick={() => openSheet({ kind: 'budget' })}>{t('bud.setBudget')}</button>}>
+              {t('bud.emptyBody')}
+            </EmptyState>
+          )}
+          <FloorRow />
         </section>
       ) : (
         <section className="card budget-card" aria-labelledby="budget-h">
@@ -109,6 +115,7 @@ export function Budget() {
           </dl>
           <p className="note-line">{t('bud.lineNote', { pct: pctPlain(b.elapsedPct) })}</p>
           {note && <MascotNote compact mood={note.mood} text={note.text} why={note.why} outfit="planner" size={64} />}
+          <FloorRow />
         </section>
       )}
 
@@ -221,6 +228,24 @@ export function Budget() {
         <ReserveRow />
         <button className="link" onClick={() => go('home')}>{t('common.backHome')}</button>
       </section>
+    </div>
+  );
+}
+
+/** Ay sonu tabanı (bakiye grafiğindeki harcama planı çizgisinin hedefi). */
+function FloorRow() {
+  const t = useT();
+  const { data } = useData();
+  const floor = data.settings.monthEndFloor ?? null;
+  return (
+    <div className="setting-row" data-tour="floor">
+      <span>
+        {t('bud.floor')}
+        <small>{t('bud.floorHint')}</small>
+      </span>
+      <button className="link" onClick={() => openSheet({ kind: 'floor' })}>
+        {floor === null ? <><Plus size={15} /> {t('bud.floorNone')}</> : <><Pencil size={15} /> {formatMoney(floor)}</>}
+      </button>
     </div>
   );
 }

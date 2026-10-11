@@ -5,7 +5,13 @@ import { Mascot } from './Mascot';
 import { useLively, type Lively } from './lively';
 import { HOME_OUTFITS } from './render';
 import { characterOf, type Lang } from './characters';
-import { examActive, seasonFor } from './seasonal';
+import { examActive, homeOutfit, pajamaTime, seasonFor } from './seasonal';
+import { useNow } from '../ui/Sky';
+import { Plus } from 'lucide-react';
+import { useT } from '../i18n';
+import type { Key, Vars } from '../i18n/core';
+import type { ActionName } from './actions';
+import { EMPTY_SCENES, sceneKeys, type EmptyScene } from './emptyScenes';
 import './mascot.css';
 
 const HOME = HOME_OUTFITS as readonly string[];
@@ -68,7 +74,11 @@ export function MascotNote({ mood, text, why, outfit, size = 92, action, compact
   const ref = useRef<HTMLButtonElement>(null);
   // Ana ekran maskotu (dolaptaki kıyafetlerden biri): bakiyeler gizliyse ajan, özel günlerde bayramlık.
   const home = HOME.includes(outfit) || outfit === 'spy';
-  const lv = useLively({ who: m.who, lang: m.lang, name: m.name, season: m.season, exam: m.exam, mood, outfit: outfit === 'spy' ? 'plain' : outfit, quips: m.quips, home, spy: home && hideTotals, priority: home ? 0 : 1, ref });
+  // Gece 22–06 ana ekran maskotu pijamalı (ajan > sınav > özel gün > pijama > seçilen kıyafet)
+  const night = pajamaTime(useNow());
+  const mine = outfit === 'spy' ? 'plain' : outfit;
+  const want = home ? homeOutfit({ spy: hideTotals, exam: m.exam, season: m.season, night, user: mine }) : mine;
+  const lv = useLively({ who: m.who, lang: m.lang, name: m.name, season: m.season, exam: m.exam, mood, outfit: want, quips: m.quips, home, spy: home && hideTotals, priority: home ? 0 : 1, ref });
 
   const seenPulse = useRef(pulse);
   const { play, lastEventAt } = lv;
@@ -91,7 +101,7 @@ export function MascotNote({ mood, text, why, outfit, size = 92, action, compact
         <p>{text}</p>
         <div className="mascot-note__foot">
           {why && (
-            <button className="link link--small" aria-expanded={open} onClick={() => setOpen(!open)}>
+            <button className="link link--small" data-tour="why" aria-expanded={open} onClick={() => setOpen(!open)}>
               {open ? TXT.hide[m.lang] : TXT.why[m.lang]}
             </button>
           )}
@@ -105,25 +115,71 @@ export function MascotNote({ mood, text, why, outfit, size = 92, action, compact
   );
 }
 
-/** Boş durumlar için maskot. */
-export function EmptyState({ outfit, mood = 'curious', title, children, action }: { outfit: string; mood?: Mood; title: string; children?: React.ReactNode; action?: React.ReactNode }) {
+/**
+ * Boş durumlar için maskot. `acts` verilirse maskot o ekrana özgü küçük bir sahneyi aralıklarla
+ * tekrarlar (yazmak, gözlük düzeltmek, bozuk para…). `compact`: yatay, küçük (liste içi) görünüm.
+ */
+export function EmptyState({ outfit, mood = 'curious', title, children, action, acts, compact = false }: { outfit: string; mood?: Mood; title: string; children?: React.ReactNode; action?: React.ReactNode; acts?: readonly ActionName[]; compact?: boolean }) {
   const m = useMascot();
   const ref = useRef<HTMLButtonElement>(null);
   const lv = useLively({ who: m.who, lang: m.lang, name: m.name, mood, outfit, quips: m.quips, priority: 2, ref });
+  const { play } = lv;
+  const actsKey = acts?.join(',') ?? '';
+  useEffect(() => {
+    const list = actsKey ? (actsKey.split(',') as ActionName[]) : [];
+    if (!list.length) return;
+    let i = 0;
+    let timer: ReturnType<typeof setTimeout>;
+    // İlk hareket ekran girişinden hemen sonra; sonra 5–8 sn arayla (sekme gizliyken oynamaz).
+    const tick = (ms: number) => {
+      timer = setTimeout(() => {
+        if (!document.hidden) play(list[i++ % list.length]);
+        tick(5000 + Math.random() * 3000);
+      }, ms);
+    };
+    tick(650);
+    return () => clearTimeout(timer);
+  }, [actsKey, play]);
+  const size = compact ? 72 : acts ? 104 : 120;
   return (
-    <div className="empty">
+    <div className={`empty ${acts ? 'empty--scene' : ''} ${compact ? 'empty--compact' : ''}`}>
       <div className="mascot-live">
         <button ref={ref} className="mascot-live__btn" aria-label={`${m.name}: ${TXT.poke[m.lang]}`} {...lv.bind}>
-          <Mascot who={m.who} mood={mood} outfit={lv.outfit} size={120} live={lv.live} uid={lv.uid} lang={m.lang} name={m.name} />
+          <Mascot who={m.who} mood={mood} outfit={lv.outfit} size={size} live={lv.live} uid={lv.uid} lang={m.lang} name={m.name} />
           <Pop lv={lv} />
         </button>
         <Quip lv={lv} float />
       </div>
-      <h3>{title}</h3>
-      {children && <div className="empty__text">{children}</div>}
-      {action}
+      <div className="empty__copy">
+        <h3>{title}</h3>
+        {children && <div className="empty__text">{children}</div>}
+        {action && <div className="empty__action">{action}</div>}
+      </div>
       <Announce lv={lv} />
     </div>
+  );
+}
+
+/** Ekrana özgü canlı boş durum: sahne + maskotun ağzından başlık/satır + tek birincil düğme. */
+export function SceneEmpty({ scene, onAction, cta, vars, compact = false }: { scene: EmptyScene; onAction?: () => void; cta?: Key; vars?: Vars; compact?: boolean }) {
+  const t = useT();
+  const def = EMPTY_SCENES[scene];
+  const k = sceneKeys(scene);
+  return (
+    <EmptyState
+      outfit={def.outfit}
+      mood={def.mood}
+      acts={def.acts}
+      compact={compact}
+      title={t(k.title, vars)}
+      action={onAction && (
+        <button className={`btn btn--primary ${compact ? 'btn--small' : ''}`} data-empty-cta={scene} onClick={onAction}>
+          <Plus size={compact ? 16 : 18} aria-hidden /> {t(cta ?? k.cta, vars)}
+        </button>
+      )}
+    >
+      {t(k.body, vars)}
+    </EmptyState>
   );
 }
 

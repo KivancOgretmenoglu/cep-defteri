@@ -11,6 +11,8 @@ import { closeSheet, openSheet } from '../ui/nav';
 import { Chip, Field, FormError, MoneyInput, Segmented, Sheet, inputFromMoney } from '../ui/kit';
 import { CATEGORY_COLORS, CATEGORY_ICONS, CatIcon } from '../ui/icons';
 import { dailyAccounts, useData, useLookups } from '../ui/hooks';
+import { usePrices } from '../store/prices';
+import { AssetModePicker, OpeningLots, lotRowsFrom, newLotRow, parseLotRows, useManualPrice, type LotRow } from './AssetFields';
 
 const parseSigned = (raw: string) => {
   const t = raw.trim();
@@ -35,25 +37,49 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
   const [priorKnown, setPriorKnown] = useState(acc?.priorContribution != null);
   const [prior, setPrior] = useState(inputFromMoney(acc?.priorContribution ?? null));
   const [err, setErr] = useState<string | null>(null);
+  // Altın/döviz modu ve "mevcut birikimimi ekle" (tür tür açılış miktarı + fiyat)
+  const [assetMode, setAssetMode] = useState(!!acc?.asset);
+  const [haveSome, setHaveSome] = useState(!!acc?.asset?.opening.length);
+  const [lotRows, setLotRows] = useState<LotRow[]>(() => (acc?.asset?.opening.length ? lotRowsFrom(acc.asset.opening) : [newLotRow()]));
+  const assetLocked = !!acc && (data.txs.some((t) => t.accountId === acc.id || t.toAccountId === acc.id) || data.valuations.some((v) => v.accountId === acc.id));
+  const isAsset = kind === 'investment' && assetMode;
 
   function save() {
-    let ob = parseSigned(opening);
+    let ob = isAsset ? 0 : parseSigned(opening);
     if (ob === null) return setErr(T('kit.amountFormat'));
+    let asset: A.AccountDraft['asset'] = null;
+    if (isAsset) {
+      const r = haveSome ? parseLotRows(lotRows) : { lots: [] };
+      if ('error' in r) return setErr(T(r.error));
+      asset = { opening: r.lots };
+    }
     if (kind === 'person') ob = owesDir === 'none' ? 0 : owesDir === 'they' ? Math.abs(ob) : -Math.abs(ob);
     let pc: number | null = null;
     if (kind === 'investment' && priorKnown) {
       pc = prior.trim() ? parseSigned(prior) : 0;
       if (pc === null || pc < 0) return setErr(T('acc.priorFormat'));
     }
-    const draft: A.AccountDraft = { name, kind, openingBalance: ob, openingDate, priorContribution: pc };
+    const draft: A.AccountDraft = { name, kind, openingBalance: ob, openingDate, priorContribution: pc, asset };
     const e = acc ? commit((d) => A.updateAccount(d, acc.id, draft), T('acc.updated')) : commit((d) => A.addAccount(d, draft).data, T('acc.added', { name: name.trim() }));
     if (e) setErr(e);
     else closeSheet();
   }
+  // İkinci adım (onay) ekranı: arşivleme (hesapta hâlâ değer varsa) ya da hareketleriyle silme.
+  const [confirm, setConfirm] = useState<null | 'archive' | 'delete'>(null);
+  const priceBook = usePrices().book;
+  const invValue = acc && isInvestment(acc) ? investmentState(data, acc.id, priceBook)!.currentValue : 0;
+  const canCascade = !!acc && used && !isDaily(acc);
   function archive() {
     if (!acc) return;
+    if (!acc.archived && invValue !== 0 && confirm !== 'archive') return setConfirm('archive');
     commit((d) => A.setAccountArchived(d, acc.id, !acc.archived), acc.archived ? T('acc.unarchived') : T('acc.archivedToast'));
     closeSheet();
+  }
+  function removeAll() {
+    if (!acc) return;
+    const e = commit((d) => A.deleteAccountCascade(d, acc.id), T('acc.deleted'));
+    if (e) { setConfirm(null); setErr(e); }
+    else closeSheet();
   }
   function remove() {
     if (!acc) return;
@@ -62,6 +88,24 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
     else closeSheet();
   }
   const balanceNow = acc && isDaily(acc) ? cashBalance(data, acc.id) : null;
+
+  if (acc && confirm === 'archive') {
+    return (
+      <Sheet
+        title={T('accdel.archiveTitle')}
+        onClose={() => setConfirm(null)}
+        footer={
+          <div className="sheet-actions">
+            <button className="btn btn--ghost" onClick={() => setConfirm(null)}>{T('common.cancel')}</button>
+            <button className="btn btn--primary btn--grow" onClick={archive}><Archive size={18} /> {T('accdel.archiveBtn')}</button>
+          </div>
+        }
+      >
+        <p>{T('accdel.archiveBody', { amount: formatMoney(invValue) })}</p>
+      </Sheet>
+    );
+  }
+  if (acc && confirm === 'delete') return <CascadeConfirm accountId={acc.id} onCancel={() => setConfirm(null)} onConfirm={removeAll} />;
 
   return (
     <Sheet
@@ -96,6 +140,7 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
           ]}
         />
       )}
+      {kind === 'investment' && <AssetModePicker value={assetMode} onChange={setAssetMode} locked={assetLocked} />}
       <Field label={kind === 'person' ? T('acc.personName') : T('acc.name')}>
         <input className="input" value={name} maxLength={40} onChange={(e) => setName(e.target.value)} placeholder={kind === 'cash' ? T('acc.ph.cash') : kind === 'bank' ? T('acc.ph.bank') : kind === 'person' ? T('acc.ph.person') : T('acc.ph.inv')} />
       </Field>
@@ -104,6 +149,13 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
           <p><b>{T('acc.debtQ')}</b> {T('acc.debtQHint')}</p>
           <Segmented size="sm" label={T('acc.debtState')} value={owesDir} onChange={setOwesDir} options={[{ value: 'none', label: T('acc.debtNone') }, { value: 'they', label: T('acc.debtThey') }, { value: 'me', label: T('acc.debtMe') }]} />
           {owesDir !== 'none' && <MoneyInput label={T('csv.amount')} value={opening} onChange={setOpening} />}
+        </div>
+      ) : isAsset ? (
+        <div className="callout">
+          <div className="chip-row">
+            <Chip on={haveSome} onClick={() => setHaveSome(!haveSome)}>{T('asset.haveSome')}</Chip>
+          </div>
+          {haveSome && <OpeningLots rows={lotRows} onChange={setLotRows} />}
         </div>
       ) : (
       <MoneyInput
@@ -117,7 +169,7 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
       <Field label={T('acc.trackStart')} hint={T('acc.trackStartHint')}>
         <input className="input" type="date" value={openingDate} max={today} onChange={(e) => e.target.value && setOpeningDate(e.target.value)} />
       </Field>
-      {kind === 'investment' && (
+      {kind === 'investment' && !(isAsset && !haveSome) && (
         <div className="callout">
           <p>
             <b>{T('acc.priorQ')}</b> {T('acc.priorQHint')}
@@ -136,14 +188,88 @@ export function AccountSheet({ accountId, kindPreset }: { accountId?: ID; kindPr
       {balanceNow !== null && (
         <p className="note-line">{T('acc.balanceNow', { amount: formatMoney(balanceNow) })}</p>
       )}
-      {acc?.archived && <p className="note-line">{T('acc.archivedNote')}</p>}
+      {acc?.archived && <p className="note-line">{isInvestment(acc) ? T('accdel.archivedNoteInv') : T('acc.archivedNote')}</p>}
       <FormError msg={err} />
+      {canCascade && (
+        <div className="danger-zone">
+          <button className="btn btn--ghost btn--danger btn--small" onClick={() => setConfirm('delete')}>
+            <Trash2 size={16} /> {T('accdel.deleteAll')}
+          </button>
+        </div>
+      )}
+    </Sheet>
+  );
+}
+
+/** Hesabı hareketleriyle silmeden önce: ne kadar kayıt gideceği ve günlük hesap bakiyelerine etkisi. */
+function CascadeConfirm({ accountId, onCancel, onConfirm }: { accountId: ID; onCancel: () => void; onConfirm: () => void }) {
+  const T = useT();
+  const { data } = useData();
+  const acc = data.accounts.find((a) => a.id === accountId);
+  if (!acc) return null;
+  const p = A.accountCascadePreview(data, accountId);
+  const otherTx = p.txIds.size - p.transfers;
+  const counts = [
+    p.transfers > 0 && T('accdel.cnt.transfers', { n: p.transfers }),
+    otherTx > 0 && T('accdel.cnt.otherTx', { n: otherTx }),
+    p.valuationIds.size > 0 && T('accdel.cnt.valuations', { n: p.valuationIds.size }),
+    p.planIds.size > 0 && T('accdel.cnt.plans', { n: p.planIds.size }),
+    p.goalIds.size > 0 && T('accdel.cnt.goals', { n: p.goalIds.size }),
+  ].filter((x): x is string => !!x);
+  const name = (id: ID) => data.accounts.find((a) => a.id === id)?.name ?? '';
+  return (
+    <Sheet
+      title={T('accdel.confirmTitle')}
+      onClose={onCancel}
+      footer={
+        <div className="sheet-actions">
+          <button className="btn btn--ghost" onClick={onCancel}>{T('common.cancel')}</button>
+          <button className="btn btn--danger btn--grow" onClick={onConfirm}><Trash2 size={18} /> {T('accdel.confirmBtn')}</button>
+        </div>
+      }
+    >
+      <p>{T('accdel.confirmLead', { name: acc.name })}</p>
+      <ul className="cascade-list">
+        {counts.map((c) => <li key={c}>{c}</li>)}
+      </ul>
+      <div className="callout">
+        <p>{T('accdel.balanceNote')}</p>
+        {p.dailyEffects.length === 0 ? (
+          <p><b>{T('accdel.noEffect')}</b></p>
+        ) : (
+          p.dailyEffects.map((e) => (
+            <p key={e.accountId}><b>{T(e.delta > 0 ? 'accdel.effectUp' : 'accdel.effectDown', { name: name(e.accountId), amount: formatMoney(Math.abs(e.delta)) })}</b></p>
+          ))
+        )}
+      </div>
+      <p className="note-line">{T('accdel.undoHint')}</p>
     </Sheet>
   );
 }
 
 // ───────────────────────── Yatırım değeri ─────────────────────────
 export function ValuationSheet({ accountId }: { accountId: ID }) {
+  const { data } = useData();
+  if (data.accounts.find((a) => a.id === accountId)?.asset) return <AssetPriceSheet accountId={accountId} />;
+  return <ValueSheet accountId={accountId} />;
+}
+
+/** Altın/döviz hesabında "değeri güncelle" yerine birim fiyat elle girilir. */
+function AssetPriceSheet({ accountId }: { accountId: ID }) {
+  const T = useT();
+  const { data } = useData();
+  const account = data.accounts.find((a) => a.id === accountId)!;
+  const [err, setErr] = useState<string | null>(null);
+  const { save, body } = useManualPrice(account, () => { closeSheet(); }, setErr);
+  return (
+    <Sheet title={T('asset.priceTitle')} onClose={closeSheet} footer={<button className="btn btn--primary btn--block" onClick={save}>{T('common.save')}</button>}>
+      {body}
+      <FormError msg={err} />
+    </Sheet>
+  );
+}
+
+function ValueSheet({ accountId }: { accountId: ID }) {
   const T = useT();
   const { data, today } = useData();
   const st = investmentState(data, accountId);

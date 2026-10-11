@@ -89,7 +89,7 @@ interface Voice {
   invest?: Pool;
   debt?: Pool;
 }
-const VOICES: Record<MascotKey, Voice> = {
+export const VOICES: Record<MascotKey, Voice> = {
   fistik: {
     expense: [L('Kaydettim. Kahveyse, bir yudum da bana.', 'Logged. If it’s coffee, save me a sip.'), L('Miyav, deftere yazıldı.', 'Meow, it’s in the book.'), L('Patimle onayladım.', 'Approved with my paw.')],
     income: [L('Para geldi! Mama kabı... yani cüzdan doldu.', 'Money! The food bowl… I mean wallet, is full.')],
@@ -121,6 +121,22 @@ const VOICES: Record<MascotKey, Voice> = {
     debt: [L('Arkadaş hesabı tamam. Kimse unutulmaz!', 'Friend tab updated. Nobody gets forgotten!')],
     jokes: [L('Top getirmek kolay, bütçe getirmek zor.', 'Fetching a ball is easy. Fetching a budget, less so.'), L('Kuyruğumu kovalamayı bıraktım, artık fişleri kovalıyorum.', 'I quit chasing my tail. Now I chase receipts.')],
     pops: [L('Hav!', 'Woof!'), L('Hav hav!', 'Woof woof!')],
+  },
+  pamuk: {
+    expense: [
+      L('Yazdım tatlım. Kendini şımartmak da bir ihtiyaç.', 'Logged, sweetie. A little treat is a need too.'),
+      L('Deftere işledim. Hak ettin, bence de.', 'In the book. You deserved it, I agree.'),
+      L('Kaydettim. Ben de az önce kendime bir havuç ısmarladım, ödeşmiş sayılırız.', 'Logged. I just treated myself to a carrot, so we’re even.'),
+    ],
+    income: [L('Para geldi! Ben şu an resmen mutluluktan eriyorum.', 'Money’s in! I am literally melting with joy.'), L('Gelir yazıldı. Sen bir yıldızsın, sadece söylüyorum.', 'Income logged. You’re a star, just saying.')],
+    invest: [L('Geleceğine küçük bir hediye. Çok zarif bir hareket.', 'A little gift to future you. Very elegant move.')],
+    debt: [L('Arkadaş hesabı tamam. Dostluklar ve hesaplar tertemiz.', 'Friend tab updated. Friendships and balances, spotless.')],
+    jokes: [
+      L('Bütçe yapmak benim öz bakım rutinim. Maske, çay, tablo.', 'Budgeting is my self-care routine. Face mask, tea, spreadsheet.'),
+      L('Kurdelemi düzelttim, defteri düzelttim. Bugün çok verimliyim.', 'Fixed my bow, fixed the books. So productive today.'),
+      L('Ben sadece bir tavşanım ama hesaplarım kusursuz.', 'I’m just a bunny, but my math is flawless.'),
+    ],
+    pops: [L('Iyy, gıdıklanıyorum!', 'Eek, hi!'), L('Pıt pıt!', 'Hop hop!')],
   },
 };
 

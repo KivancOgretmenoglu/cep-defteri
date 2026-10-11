@@ -6,6 +6,7 @@ import { addDays, diffDays, type ISODate } from '../domain/dates';
 import { catName, dueLabel, formatMoney, lower, parseMoney, shortDate } from '../i18n/format';
 import { useT } from '../i18n';
 import type { Key } from '../i18n/core';
+import { AssetQtyFields, type AssetValue } from './AssetFields';
 import { allTags, cashBalance, isInvestment, isPerson, occurrences, planIsInflow, planIsOutflow, transferKind } from '../domain/ledger';
 import { mascotEvent, type MascotEvent } from '../mascot/events';
 import { commit } from '../store/store';
@@ -13,7 +14,8 @@ import { closeSheet, openSheet, type SheetState } from '../ui/nav';
 import { discardTxDraft, stashTxDraft, takeTxDraft, type TxSnap } from './txDraft';
 import { Chip, FormError, MoneyInput, Segmented, Sheet, inputFromMoney } from '../ui/kit';
 import { CatIcon, ACCOUNT_ICONS } from '../ui/icons';
-import { dailyAccounts, frequentTemplates, recentCategories, useData, useLookups } from '../ui/hooks';
+import { categoryOrder, dailyAccounts, frequentTemplates, useData, useLookups } from '../ui/hooks';
+import { quickAmounts } from '../domain/smart';
 
 type Tab = 'expense' | 'income' | 'transfer' | 'invest' | 'debt';
 
@@ -85,6 +87,8 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
   const [planRef, setPlanRef] = useState<PlanRef | undefined>(pick('planRef', editing?.planRef));
   const [showAllCats, setShowAllCats] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  // Altın/döviz hesabına katkı/çekimde miktar + birim fiyat (yalnız Yatırım sekmesi)
+  const [assetVal, setAssetVal] = useState<AssetValue | null>(null);
 
   const catKind = tab === 'income' ? 'income' : 'expense';
 
@@ -97,12 +101,17 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
       next,
     );
   }
+  // Sıra açılışta bir kez hesaplanır: sayfa açıkken ızgara kaymasın (kayıt eklenince yer değiştirmesin).
+  const [catOrder] = useState(() => {
+    const hour = new Date().getHours();
+    return { expense: categoryOrder(data, 'expense', today, hour), income: categoryOrder(data, 'income', today, hour) };
+  });
   const catList = useMemo(() => {
-    const recent = recentCategories(data, catKind);
+    const ranked = catOrder[catKind];
     const all = data.categories.filter((c) => c.kind === catKind && (!c.archived || c.id === editing?.categoryId));
-    const ordered = [...recent.map((id) => all.find((c) => c.id === id)).filter((c): c is NonNullable<typeof c> => !!c), ...all.filter((c) => !recent.includes(c.id))];
+    const ordered = [...ranked.map((id) => all.find((c) => c.id === id)).filter((c): c is NonNullable<typeof c> => !!c), ...all.filter((c) => !ranked.includes(c.id))];
     return ordered;
-  }, [data, catKind, editing?.categoryId]);
+  }, [data, catKind, catOrder, editing?.categoryId]);
   const visibleCats = showAllCats ? catList : catList.slice(0, 8);
   if (categoryId && !visibleCats.some((c) => c.id === categoryId)) {
     const sel = catList.find((c) => c.id === categoryId);
@@ -110,6 +119,10 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
   }
 
   const templates = !editing && (tab === 'expense' || tab === 'income') ? frequentTemplates(data, tab, today) : [];
+  // Sık girilen yuvarlak tutarlar (yalnız yeni gider/gelir): dokununca tutarı doldurur, kaydetmez.
+  const [amountChips] = useState(() => ({ expense: quickAmounts(data, 'expense', today), income: quickAmounts(data, 'income', today) }));
+  // Kalıp çipinin zaten önerdiği tutar tekrar gösterilmez (aynı satır iki kez görünmesin).
+  const quick = !editing && !planRef && (tab === 'expense' || tab === 'income') ? amountChips[tab].filter((m) => !templates.some((t) => t.amount === m)) : [];
 
   // Bu türdeki yakın tarihli bekleyen planlı kalemler: seçilirse işlem plana bağlanır (iki kez düşülmez).
   const planMatches = useMemo(() => {
@@ -178,9 +191,11 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
         : { type: 'transfer', amount: amt, date, accountId: personId, toAccountId: accountId, note, tags };
     }
     if (!invId) return T('txs.addInvFirst');
+    const assetPart = accounts.get(invId)?.asset ? assetVal : undefined;
+    if (assetPart === null) return T('err.assetPrice');
     return dir === 'in'
-      ? { type: 'transfer', amount: amt, date, accountId, toAccountId: invId, note, planRef, tags }
-      : { type: 'transfer', amount: amt, date, accountId: invId, toAccountId: accountId, note, planRef, tags };
+      ? { type: 'transfer', amount: amt, date, accountId, toAccountId: invId, note, planRef, tags, ...assetPart }
+      : { type: 'transfer', amount: amt, date, accountId: invId, toAccountId: accountId, note, planRef, tags, ...assetPart };
   }
 
   function eventFor(d: A.TxDraft): MascotEvent {
@@ -337,10 +352,22 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
         />
       )}
 
-      <MoneyInput big label={T('csv.amount')} value={amount} onChange={setAmount} autoFocus={!editing} onEnter={save} />
+      <MoneyInput big tour="amount" label={T('csv.amount')} value={amount} onChange={setAmount} autoFocus={!editing} onEnter={save} />
 
-      {templates.length > 0 && (
-        <div className="chip-row chip-row--scroll" role="group" aria-label={T('txs.frequent')}>
+
+      {(quick.length > 0 || templates.length > 0) && (
+        // Hızlı tutarlar ve kalıplar tek kaydırılabilir satırda: kategori ızgarası aşağı itilmesin.
+        <div className="chip-row chip-row--scroll quick-row" data-tour="quick">
+          {quick.length > 0 && (
+            <span className="quick-row__group" role="group" aria-label={T('defaults.quickAmounts')}>
+              {quick.map((m) => (
+                <Chip key={m} className="chip--amount" on={parseMoney(amount) === m} onClick={() => setAmount(inputFromMoney(m))}>
+                  {formatMoney(m)}
+                </Chip>
+              ))}
+            </span>
+          )}
+          <span className="quick-row__group" role="group" aria-label={T('txs.frequent')}>
           {templates.map((t) => (
             <Chip
               key={t.key}
@@ -356,6 +383,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
               <Repeat size={14} aria-hidden /> {t.note ?? catName(cats.get(t.categoryId))} · {formatMoney(t.amount)}
             </Chip>
           ))}
+          </span>
         </div>
       )}
 
@@ -398,7 +426,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
                 <span className="cat-btn__name">{catName(c)}</span>
               </button>
             ))}
-            <button type="button" className="cat-btn cat-btn--more" onClick={() => openNew({ kind: 'category', catKind })}>
+            <button type="button" className="cat-btn cat-btn--more" data-tour="newCat" onClick={() => openNew({ kind: 'category', catKind })}>
               <span className="cat-btn__name">+ {T('hint.newCategory')}</span>
             </button>
             {catList.length > 8 && (
@@ -538,6 +566,17 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
                   <Chip onClick={() => openNew({ kind: 'account', kindPreset: 'investment' }, 'invId')}>+ {T('hint.newAccount')}</Chip>
                 </div>
               </fieldset>
+              {accounts.get(invId)?.asset && (
+                <AssetQtyFields
+                  key={invId + dir}
+                  account={accounts.get(invId)!}
+                  dir={dir}
+                  amount={amount}
+                  initial={editing?.qty !== undefined && editing.unit && editing.unitPrice && init.tab === 'invest' && init.dir === dir && (editing.toAccountId === invId || editing.accountId === invId) ? { unit: editing.unit, qty: editing.qty, unitPrice: editing.unitPrice } : undefined}
+                  editingTxId={editing?.id}
+                  onChange={setAssetVal}
+                />
+              )}
               <p className="note-line">
                 {dir === 'in'
                   ? T('txs.investInNote', { name: accounts.get(invId)?.name ?? T('acc.kind.investment') })
@@ -717,7 +756,9 @@ export function ConfirmSheet({ planId, due }: { planId: ID; due: ISODate }) {
   const [date, setDate] = useState(due <= today ? due : today);
   const [accountId, setAccountId] = useState(plan?.accountId ?? '');
   const [err, setErr] = useState<string | null>(null);
+  const [assetVal, setAssetVal] = useState<AssetValue | null>(null);
   if (!plan) return null;
+  const assetAcc = plan.kind === 'transfer' ? A.assetSideOf(data, { type: 'transfer', accountId: plan.accountId, toAccountId: plan.toAccountId }) : undefined;
   const occ = occurrences(data, due, due, [plan])[0];
   const skipped = occ?.status === 'skipped';
   const verb = plan.kind === 'income' ? T('due.received') : plan.kind === 'transfer' ? T('due.moved') : T('due.paid');
@@ -726,7 +767,8 @@ export function ConfirmSheet({ planId, due }: { planId: ID; due: ISODate }) {
   function save() {
     const amt = parseMoney(amount);
     if (!amt) return setErr(T('txs.typeAmount'));
-    const e = commit((d, t) => A.confirmOccurrence(d, planId, due, { amount: amt, date, accountId: plan!.kind === 'transfer' ? undefined : accountId }, t).data, T('conf.saved', { title: plan!.title, verb: verbLower }), { pulse: true });
+    if (assetAcc && !assetVal) return setErr(T('err.assetPrice'));
+    const e = commit((d, t) => A.confirmOccurrence(d, planId, due, { amount: amt, date, accountId: plan!.kind === 'transfer' ? undefined : accountId, ...(assetVal ?? {}) }, t).data, T('conf.saved', { title: plan!.title, verb: verbLower }), { pulse: true });
     if (e) setErr(e);
     else closeSheet();
   }
@@ -752,6 +794,7 @@ export function ConfirmSheet({ planId, due }: { planId: ID; due: ISODate }) {
         {plan.kind === 'transfer' && ` · ${accounts.get(plan.accountId)?.name} → ${accounts.get(plan.toAccountId!)?.name}`}
       </p>
       <MoneyInput big label={T('conf.actualAmount')} value={amount} onChange={setAmount} autoFocus onEnter={save} />
+      {assetAcc && <AssetQtyFields account={assetAcc} dir={assetAcc.id === plan.toAccountId ? 'in' : 'out'} amount={amount} onChange={setAssetVal} />}
       {plan.kind !== 'transfer' && (
         <fieldset className="block">
           <legend>{T('csv.account')}</legend>

@@ -133,6 +133,14 @@ describe('İngilizce alan metinleri', () => {
       expect(t.focus).toBe(m.focus);
     }
     expect(moods.size).toBeGreaterThanOrEqual(4);
+    // Balon kısa: tek cümle, tutarlar dahil ~90 karakteri geçmez; gerekçe her zaman var.
+    for (const c of cases) {
+      for (const lang of ['tr', 'en'] as const) {
+        const m = mascotMood(c, TODAY, lang);
+        expect(m.text.length).toBeLessThanOrEqual(90);
+        expect(m.why.length).toBeGreaterThan(0);
+      }
+    }
     const over = mascotMood(cases[4], TODAY, 'en');
     expect(over.text).toContain('Fun'); // varsayılan kategori adı çevrildi
   });
@@ -143,8 +151,9 @@ describe('İngilizce alan metinleri', () => {
     d = A.addTx(d, { type: 'expense', amount: TL(9000), date: '2026-10-10', accountId: bank, categoryId: 'e-food' }, TODAY).data;
     const en = mascotMood(d, TODAY, 'en');
     const trm = mascotMood(d, TODAY, 'tr');
-    expect(en.text).toMatch(/\d+%/);
-    expect(trm.text).toMatch(/%\d+'/);
+    // Yüzdeler "Neden böyle?" açıklamasında; balon tek kısa cümle.
+    expect(en.why).toMatch(/\d+%/);
+    expect(trm.why).toMatch(/%\d+'/);
   });
 
   it('doğrulama hataları anahtar taşır ve İngilizceye çevrilir', () => {

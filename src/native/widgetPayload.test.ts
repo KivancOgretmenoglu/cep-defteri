@@ -36,3 +36,29 @@ describe('ana ekran aracı: dil ve maskot', () => {
     expect(widgetMascot(noMascot)).toBe('fistik');
   });
 });
+
+describe('ana ekran aracı: ham tutarlar ve gizleme', () => {
+  it('ham kuruş, dil biçimi ve bugünkü harcama şablonu', () => {
+    const p = widgetPayload(withBank(), TODAY, 'real', 5);
+    expect(p).toMatchObject({ available: TL(2500), todaySpent: 0, todayTpl: 'Bugün: %s', todayISO: TODAY, hidden: false, real: true, labelShort: 'Ekim sonu', updatedAt: 5 });
+    const en = widgetPayload(A.updateSettings(withBank(), { lang: 'en' }), TODAY, 'real');
+    expect(en).toMatchObject({ amount: '₺2,500', today: 'Today: ₺0', todayTpl: 'Today: %s', labelShort: 'end of Oct' });
+    expect(widgetPayload(A.updateSettings(withBank(), { periodMode: 'days30' }), TODAY, 'real').labelShort).toBe('13 Kasım');
+  });
+
+  it('araçta tutarı gizle: maske, gizli bayrağı; toplamları gizle de aynı', () => {
+    const p = widgetPayload(withBank(), TODAY, 'real', 1, { hideAmount: true });
+    expect(p).toMatchObject({ amount: '•••• TL', today: 'Bugün: •••• TL', hidden: true, negative: false, available: TL(2500) });
+    const en = widgetPayload(A.updateSettings(withBank(), { lang: 'en', hideTotals: true }), TODAY, 'real');
+    expect(en).toMatchObject({ amount: '₺••••', hidden: true });
+  });
+
+  it('işlenmiş kuyruk qidleri yalnız gerçek veride taşınır', () => {
+    expect(widgetPayload(withBank(), TODAY, 'real', 1, { seen: ['a', 'b'] }).seen).toEqual(['a', 'b']);
+    expect(widgetPayload(withBank(), TODAY, 'demo', 1, { seen: ['a'] })).toMatchObject({ seen: [], real: false });
+  });
+
+  it('hesap yokken tutar null', () => {
+    expect(widgetPayload(emptyData(), TODAY, 'real')).toMatchObject({ amount: '—', available: null, todayTpl: '' });
+  });
+});

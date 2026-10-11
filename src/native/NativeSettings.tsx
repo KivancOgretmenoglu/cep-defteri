@@ -1,9 +1,9 @@
 /**
- * Ayarlar ekranı kartları: Güvenlik (uygulama kilidi), Bildirimler, Otomatik yedek.
+ * Ayarlar ekranı kartları: Güvenlik (uygulama kilidi), Bildirimler, Otomatik yedek, Ana ekran aracı (yalnız APK).
  * Ayarlar.tsx bunları mevcut kartların arasına yerleştirir.
  */
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Bell, Fingerprint, HardDriveDownload, Lock, RotateCcw } from 'lucide-react';
+import { Bell, EyeOff, Fingerprint, HardDriveDownload, LayoutGrid, Lock, RotateCcw } from 'lucide-react';
 import { SectionHead, Segmented } from '../ui/kit';
 import { isNative } from '../platform';
 import { getDevice, setDevice, useDevice, type DevicePrefs } from '../store/device';
@@ -17,9 +17,10 @@ import { biometricInfo, verifyBiometric, type BiometricInfo } from '../lock/biom
 import { computeSchedule } from './schedule';
 import { loadSent, notificationPermission, requestNotificationPermission, type NotifPermission } from './notifications';
 import { listAutoBackups, requestStoragePermission, runAutoBackup, type AutoBackupEntry } from './autoBackup';
-import { backupNudgeDue, NUDGE_DAYS } from './backupPlan';
+import { reminderTexts, useBackupReminder } from './BackupReminder';
 import { intlLocale } from '../i18n/format';
 import { t as tNow, useT } from '../i18n';
+import { setWidgetPrefs, useWidgetPrefs } from './widgetPrefs';
 import './native.css';
 
 type OnOff = 'on' | 'off';
@@ -268,7 +269,6 @@ export function AutoBackupSettings() {
   const t = useT();
   const ONOFF = onOff();
   const ab = useDevice((p) => p.autoBackup);
-  const data = useStore((s) => s.data);
   const mode = useStore((s) => s.mode);
   const native = isNative();
   const [list, setList] = useState<AutoBackupEntry[]>([]);
@@ -276,7 +276,9 @@ export function AutoBackupSettings() {
   useEffect(() => {
     listAutoBackups().then(setList);
   }, [ab.lastAt]);
-  const nudge = (!native || !ab.enabled) && mode === 'real' && backupNudgeDue(data, Date.now());
+  // Ana ekrandaki hatırlatmanın aynısı ("Sonra" denmiş olsa da burada görünür).
+  const reminder = useBackupReminder(true);
+  const rem = reminder && reminderTexts(reminder, t);
 
   async function backupNow() {
     setBusy(true);
@@ -312,9 +314,9 @@ export function AutoBackupSettings() {
         </p>
       )}
       {ab.lastError && <p className="form-error" role="alert">{ab.lastError}</p>}
-      {nudge && (
+      {rem && (
         <div className="callout callout--quiet">
-          {t('ns.nudge', { n: NUDGE_DAYS })}{native ? '' : t('ns.nudgeWeb')}. {t('ns.nudgeHowPre')}<b>{t('ns.downloadBackup')}</b>{t('ns.nudgeHowPost')}
+          <b>{rem.title}</b> {rem.why}{rem.last && <> {rem.last}</>} {t('ns.nudgeHowPre')}<b>{t('ns.downloadBackup')}</b>{t('ns.nudgeHowPost')}
         </div>
       )}
       {mode === 'real' && (
@@ -384,5 +386,46 @@ function AutoRestoreList({ list }: { list: AutoBackupEntry[] }) {
       )}
       {err && <p className="form-error" role="alert">{err}</p>}
     </details>
+  );
+}
+
+// ───────────────────────── Ana ekran aracı (yalnız APK) ─────────────────────────
+
+const WIDGET_TXT = {
+  tr: {
+    title: 'Ana ekran aracı',
+    anim: 'Widget animasyonu',
+    animHint: 'Büyük araçta (4×3 ve üstü) maskot kendi sahnesinde kısa bir döngü oynar. Kapalıyken sabit durur.',
+    hide: "Widget'ta tutarı gizle",
+    hideHint: 'Ana ekrandaki araçta tutarlar "•••• TL" görünür (çiplerde ve bugünkü harcamada da), maskot gizli ajan gözlüğü takar. Uygulamanın içi etkilenmez.',
+    info: 'Araç boyuna göre değişir: küçükte tutar, karede büyük maskot ve +, ortada Gider / Gelir düğmeleri, büyükte bugünkü harcama ve sık kayıtların tek dokunuşla eklendiği çipler. Çiplerle eklenenler araçtaki tutara hemen yansır, uygulamayı açınca kaydedilir.',
+  },
+  en: {
+    title: 'Home screen widget',
+    anim: 'Widget animation',
+    animHint: 'On the large widget (4×3 and up) your mascot plays a short loop in its own scene. When off, it stays still.',
+    hide: 'Hide amount on widget',
+    hideHint: 'The home screen widget shows "₺••••" instead of amounts (on chips and today’s spending too) and your mascot puts on its secret-agent glasses. The app itself is unaffected.',
+    info: 'The widget adapts to its size: the amount when small, a big mascot and + when square, Expense / Income buttons when medium, and today’s spending plus one-tap chips for frequent entries when large. Chip entries show up in the widget’s amount right away and are saved the next time you open the app.',
+  },
+} as const;
+
+export function WidgetSettings() {
+  const t = useT();
+  const ONOFF = onOff();
+  const w = useWidgetPrefs();
+  if (!isNative()) return null;
+  const s = WIDGET_TXT[t.lang === 'en' ? 'en' : 'tr'];
+  return (
+    <section className="card" aria-labelledby="s-widget">
+      <SectionHead id="s-widget" title={s.title} />
+      <Row title={<><LayoutGrid size={16} aria-hidden /> {s.anim}</>} hint={s.animHint}>
+        <Segmented<OnOff> size="sm" label={s.anim} value={w.animate ? 'on' : 'off'} onChange={(v) => setWidgetPrefs({ animate: v === 'on' })} options={ONOFF} />
+      </Row>
+      <Row title={<><EyeOff size={16} aria-hidden /> {s.hide}</>} hint={s.hideHint}>
+        <Segmented<OnOff> size="sm" label={s.hide} value={w.hideAmount ? 'on' : 'off'} onChange={(v) => setWidgetPrefs({ hideAmount: v === 'on' })} options={ONOFF} />
+      </Row>
+      <p className="muted small">{s.info}</p>
+    </section>
   );
 }

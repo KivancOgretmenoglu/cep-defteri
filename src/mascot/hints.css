@@ -30,7 +30,7 @@
   box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.35);
   font-size: 14px;
   font-weight: 600;
-  animation: sheet-up 0.2s ease-out;
+  animation: sheet-up 0.24s var(--ease-snappy);
 }
 .hint p {
   margin: 0;

@@ -18,15 +18,16 @@ import { availability, budgetStatus, goalProgress, isDaily, monthSummary, upcomi
 import { categoryName } from './defaults';
 import { translator } from '../i18n/core';
 import { spendingImprovement } from './rings';
+import { spendingGap } from './spendingPlan';
 
 export type Mood = 'curious' | 'calm' | 'happy' | 'thoughtful' | 'celebrate';
 export type MoodFocus = 'accounts' | 'add' | 'available' | 'upcoming' | 'budget' | 'goal' | 'none';
 
 export interface MoodResult {
   mood: Mood;
-  /** Kısa durum notu. */
+  /** Balonda görünen tek kısa cümle (ana çıkarım; sayılar ve ayrıntı `why`da). */
   text: string;
-  /** "Neden böyle?" açıklaması: hangi kural, hangi sayılar. */
+  /** "Neden böyle?" açıklaması: sayılar, hangi kural ve varsa öneri. Kural gerekçesi her zaman burada. */
   why: string;
   focus: MoodFocus;
 }
@@ -58,8 +59,14 @@ export function mascotMood(data: Data, today: ISODate, lang: Lang = 'tr'): MoodR
     const commitments = av.paymentsTotal + av.reserve + av.debtsOwed;
     return {
       mood: 'thoughtful',
-      text: t('mood.short.text', { date: sd(av.periodEnd), need: tl(commitments), have: tlb(av.dailyBalance), gap: tlb(commitments - av.dailyBalance) }),
-      why: t('mood.short.why', { extra: (av.reserve ? t('mood.short.whyReserve') : '') + (av.debtsOwed ? t('mood.short.whyDebts') : '') }),
+      text: t('mood.short.text'),
+      why: t('mood.short.why', {
+        date: sd(av.periodEnd),
+        need: tl(commitments),
+        have: tlb(av.dailyBalance),
+        gap: tlb(commitments - av.dailyBalance),
+        extra: (av.reserve ? t('mood.short.whyReserve') : '') + (av.debtsOwed ? t('mood.short.whyDebts') : ''),
+      }),
       focus: 'upcoming',
     };
   }
@@ -69,8 +76,8 @@ export function mascotMood(data: Data, today: ISODate, lang: Lang = 'tr'): MoodR
   if (fresh) {
     return {
       mood: 'celebrate',
-      text: t('mood.goalReached.text', { goal: fresh.goal.title, amount: tl(fresh.current) }),
-      why: t('mood.goalReached.why', { date: sd(fresh.reachedAt!) }),
+      text: t('mood.goalReached.text', { goal: fresh.goal.title }),
+      why: t('mood.goalReached.why', { amount: tl(fresh.current), date: sd(fresh.reachedAt!) }),
       focus: 'goal',
     };
   }
@@ -80,16 +87,16 @@ export function mascotMood(data: Data, today: ISODate, lang: Lang = 'tr'): MoodR
     const left = daysInMonth(month) - dayOfMonth(today);
     return {
       mood: 'thoughtful',
-      text: t('mood.over.text', { amount: tl(budget.spent - budget.budget), left: left > 0 ? t('mood.over.daysLeft', { n: left }) : '' }),
-      why: t('mood.over.why', { spent: tl(budget.spent), budget: tl(budget.budget) }),
+      text: t('mood.over.text', { amount: tl(budget.spent - budget.budget) }),
+      why: t('mood.over.why', { spent: tl(budget.spent), budget: tl(budget.budget), left: left > 0 ? t('mood.over.daysLeft', { n: left }) : '' }),
       focus: 'budget',
     };
   }
   if (budget.state === 'tight' && budget.flexUsedPct !== null) {
     return {
       mood: 'thoughtful',
-      text: t('mood.tight.text', { used: p(budget.flexUsedPct, 'acc'), elapsed: p(budget.elapsedPct, 'poss') }),
-      why: t('mood.tight.why'),
+      text: t('mood.tight.text'),
+      why: t('mood.tight.why', { used: p(budget.flexUsedPct, 'acc'), elapsed: p(budget.elapsedPct, 'poss') }),
       focus: 'budget',
     };
   }
@@ -97,10 +104,27 @@ export function mascotMood(data: Data, today: ISODate, lang: Lang = 'tr'): MoodR
   if (over) {
     return {
       mood: 'thoughtful',
-      text: t('mood.catOver.text', { cat: categoryName(over.category, lang), limit: tl(over.limit), amount: tl(over.used - over.limit) }),
-      why: t('mood.catOver.why'),
+      text: t('mood.catOver.text', { cat: categoryName(over.category, lang), amount: tl(over.used - over.limit) }),
+      why: t('mood.catOver.why', { limit: tl(over.limit) }),
       focus: 'budget',
     };
+  }
+
+  // 3b) Birikimli harcama, harcama planının belirgin biçimde üstünde (bütçe ya da ay sonu tabanı varsa).
+  //     Planlı ödemeler planda vade gününde basamak olduğundan kira günü tek başına bunu tetiklemez;
+  //     yatırım aktarımları harcama sayılmaz. Planlı ödemeler hakkı tek başına dolduruyorsa yargı yok.
+  const gap = spendingGap(data, today);
+  const gapWhy = (key: 'mood.spendOver.why' | 'mood.spendUnder.why') =>
+    t(key, {
+      target: tlb(gap!.target),
+      actual: tlb(gap!.actual),
+      gap: tlb(Math.abs(gap!.diff)),
+      threshold: tlb(gap!.threshold),
+      allowance: tlb(gap!.sp.allowance),
+      date: sd(gap!.sp.to),
+    });
+  if (gap && gap.sp.reachable && gap.state === 'over') {
+    return { mood: 'thoughtful', text: t('mood.spendOver.text'), why: gapWhy('mood.spendOver.why'), focus: data.settings.monthlyBudget ? 'budget' : 'available' };
   }
 
   // 4) Yaklaşan ödemeler ayrılınca kullanılabilir para daralıyor (bütçe tanımlıysa ölçülebilir).
@@ -111,8 +135,13 @@ export function mascotMood(data: Data, today: ISODate, lang: Lang = 'tr'): MoodR
       const up = upcomingOutflows(data, today, 7);
       return {
         mood: 'thoughtful',
-        text: t('mood.squeeze.text', { payments: tl(av.paymentsTotal), perDay: tlb(av.perDay), typical: tl(typicalDaily) }) + (up.total > 0 ? t('mood.squeeze.next7', { amount: tl(up.total) }) : ''),
-        why: t('mood.squeeze.why'),
+        text: t('mood.squeeze.text'),
+        why: t('mood.squeeze.why', {
+          payments: tl(av.paymentsTotal),
+          perDay: tlb(av.perDay),
+          typical: tl(typicalDaily),
+          next7: up.total > 0 ? t('mood.squeeze.next7', { amount: tl(up.total) }) : '',
+        }),
         focus: 'available',
       };
     }
@@ -123,8 +152,8 @@ export function mascotMood(data: Data, today: ISODate, lang: Lang = 'tr'): MoodR
   if (near) {
     return {
       mood: 'happy',
-      text: t('mood.near.text', { goal: near.goal.title, pct: p(near.pct, 'locYou'), left: tl(near.goal.target - near.current) }),
-      why: t('mood.near.why'),
+      text: t('mood.near.text', { goal: near.goal.title, pct: p(near.pct, 'locYou') }),
+      why: t('mood.near.why', { left: tl(near.goal.target - near.current) }),
       focus: 'goal',
     };
   }
@@ -141,16 +170,20 @@ export function mascotMood(data: Data, today: ISODate, lang: Lang = 'tr'): MoodR
   if (budget.state === 'on-track' && budget.flexUsedPct !== null) {
     return {
       mood: 'happy',
-      text: t('mood.onTrack.text', { used: p(budget.flexUsedPct, 'acc'), elapsed: p(budget.elapsedPct, 'poss') }),
-      why: t('mood.onTrack.why'),
+      text: t('mood.onTrack.text'),
+      why: t('mood.onTrack.why', { used: p(budget.flexUsedPct, 'acc'), elapsed: p(budget.elapsedPct, 'poss') }),
       focus: 'budget',
     };
+  }
+  // Bütçe temposu (yüzdeli) daha bilgilendirici olduğundan harcama planı mutlu satırı ondan sonra gelir.
+  if (gap && gap.sp.reachable && gap.state === 'under') {
+    return { mood: 'happy', text: t('mood.spendUnder.text'), why: gapWhy('mood.spendUnder.why'), focus: 'none' };
   }
   if (budget.state === 'watch' && budget.flexUsedPct !== null) {
     return {
       mood: 'calm',
-      text: t('mood.watch.text', { used: p(budget.flexUsedPct, 'acc'), elapsed: p(budget.elapsedPct, 'poss') }),
-      why: t('mood.watch.why'),
+      text: t('mood.watch.text'),
+      why: t('mood.watch.why', { used: p(budget.flexUsedPct, 'acc'), elapsed: p(budget.elapsedPct, 'poss') }),
       focus: 'budget',
     };
   }
@@ -161,11 +194,11 @@ export function mascotMood(data: Data, today: ISODate, lang: Lang = 'tr'): MoodR
   // 6) Bütçe yoksa: yargısız, olgusal özet.
   const s = monthSummary(data, month);
   const parts = [t('mood.summary.income', { amount: tl(s.income) }), t('mood.summary.spending', { amount: tl(s.spending) })];
-  if (s.contributions) parts.push(t('mood.summary.contrib', { amount: tl(s.contributions) }));
+  const contrib = s.contributions ? t('mood.summary.contrib', { amount: tl(s.contributions) }) : '';
   return {
     mood: 'calm',
-    text: t('mood.summary.text', { parts: parts.join(', ') }) + (budget.budget === null ? t('mood.summary.noBudget') : ''),
-    why: budget.budget === null ? t('mood.summary.whyNoBudget') : t('mood.summary.why'),
+    text: t('mood.summary.text', { parts: parts.join(', ') }),
+    why: contrib + (budget.budget === null ? t('mood.summary.whyNoBudget') + t('mood.summary.noBudget') : t('mood.summary.why')),
     focus: 'none',
   };
 }

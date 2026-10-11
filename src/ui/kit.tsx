@@ -2,15 +2,17 @@ import { useEffect, useId, useRef, useState, type ReactNode, type InputHTMLAttri
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Money } from '../domain/money';
 import { addMonths, type MonthKey } from '../domain/dates';
-import { decimalSep, formatMoney, moneyParts, moneyToInput, moneyUnit, parseMoney, monthLabel } from '../i18n/format';
+import { decimalSep, formatMoney, hiddenMoney, moneyParts, moneyToInput, moneyUnit, parseMoney, monthLabel } from '../i18n/format';
 import { useT } from '../i18n';
+import { useCountUp } from './motion';
 
 // ── Tutar gösterimi ────────────────────────────────────
 /** Gizli tutar gösterimi (bakiye gizleme açıkken). */
 export const HIDDEN = '•••••';
 
-export function Amount({ value, size = 'md', sign = false, tone, className = '', hide = false }: { value: Money; size?: 'sm' | 'md' | 'lg' | 'xl'; sign?: boolean; tone?: 'pos' | 'neg' | 'invest' | 'muted'; className?: string; hide?: boolean }) {
+export function Amount({ value: target, size = 'md', sign = false, tone, className = '', hide = false, animate = false }: { value: Money; size?: 'sm' | 'md' | 'lg' | 'xl'; sign?: boolean; tone?: 'pos' | 'neg' | 'invest' | 'muted'; className?: string; hide?: boolean; /** Değer değişince kısa sayma (ilk çizimde ve gizliyken yok) */ animate?: boolean }) {
   const t = useT();
+  const value = useCountUp(target, animate && !hide);
   const en = t.lang === 'en';
   if (hide)
     return (
@@ -38,9 +40,15 @@ export function Amount({ value, size = 'md', sign = false, tone, className = '',
   return <span className={`amount amount--${size} ${tone ? 'tone-' + tone : ''} ${className}`}>{formatMoney(value, { sign })}</span>;
 }
 
+/** Düz metin tutar (formatMoney) için sayan sürüm; gizliyken maske, sayma yok. */
+export function AnimatedMoney({ value, hide = false }: { value: Money; hide?: boolean }) {
+  const v = useCountUp(value, !hide);
+  return <>{hide ? hiddenMoney() : formatMoney(v)}</>;
+}
+
 // ── Tutar girişi ───────────────────────────────────────
 export function MoneyInput({
-  value, onChange, label, big = false, autoFocus = false, id, allowZero = false, placeholder = '0', onEnter, ...rest
+  value, onChange, label, big = false, autoFocus = false, id, allowZero = false, placeholder = '0', onEnter, tour, ...rest
 }: {
   value: string;
   onChange: (raw: string) => void;
@@ -51,12 +59,15 @@ export function MoneyInput({
   allowZero?: boolean;
   placeholder?: string;
   onEnter?: () => void;
+  /** Rehber hedefi (data-tour) — tüm alanı (etiket dahil) işaretler */
+  tour?: string;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'>) {
   const auto = useId();
   const t = useT();
   const ref = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    if (autoFocus) {
+    // Rehber (spot ışığı) açıkken klavye açılmasın.
+    if (autoFocus && document.body.dataset.tour !== '1') {
       // Sayfa açılış animasyonu bitmeden odaklanınca iOS klavyeyi açmayabilir.
       const t = setTimeout(() => ref.current?.focus({ preventScroll: true }), 60);
       return () => clearTimeout(t);
@@ -65,7 +76,7 @@ export function MoneyInput({
   const parsed = value.trim() ? parseMoney(value) : null;
   const invalid = value.trim() !== '' && parsed === null && !(allowZero && /^0+([.,]0*)?$/.test(value.trim()));
   return (
-    <label className={`money-input ${big ? 'money-input--big' : ''} ${invalid ? 'is-invalid' : ''}`} htmlFor={id ?? auto}>
+    <label className={`money-input ${big ? 'money-input--big' : ''} ${invalid ? 'is-invalid' : ''}`} htmlFor={id ?? auto} data-tour={tour}>
       <span className="money-input__label">{label}</span>
       <span className="money-input__row">
         <input

@@ -4,7 +4,7 @@ import * as A from '../domain/actions';
 import type { Data } from '../domain/types';
 import { DEFAULT_DEVICE, type NotificationPrefs } from '../store/device';
 import { computeSchedule, localAt, MAX_NOTIFICATIONS, NOTIF_ID_BASE, updateSent, LATE_DELAY_MS } from './schedule';
-import { autoBackupName, backupNudgeDue, filesToDelete, fitSnapshots, nextSnapshots, parseAutoBackupName, sortAutoBackups, type WebSnapshot } from './backupPlan';
+import { autoBackupName, backupNudgeDue, backupReminder, filesToDelete, fitSnapshots, nextSnapshots, parseAutoBackupName, sortAutoBackups, type WebSnapshot } from './backupPlan';
 import { widgetPayload } from './widgetPayload';
 
 const TODAY = '2026-10-15';
@@ -172,6 +172,23 @@ describe('otomatik yedek', () => {
     const backed: Data = A.updateSettings(d, { lastBackupAt: 10 * day });
     expect(backupNudgeDue(backed, 20 * day)).toBe(false);
     expect(backupNudgeDue(backed, 24 * day)).toBe(true);
+  });
+
+  it('yedek hatırlatması platforma göre dürüst: otomatik yedek çalışıyorsa susar', () => {
+    const day = 86_400_000;
+    const { d } = setup();
+    const now = 1000 + 20 * day;
+    const off = { enabled: false, lastAt: null, lastError: null };
+    expect(backupReminder(d, { real: true, native: false, auto: off }, now)).toEqual({ kind: 'web', count: 0, days: null });
+    expect(backupReminder(d, { real: true, native: true, auto: off }, now)?.kind).toBe('phone');
+    expect(backupReminder(d, { real: false, native: false, auto: off }, now)).toBeNull();
+    expect(backupReminder(d, { real: true, native: false, auto: off, snoozedUntil: now + 1 }, now)).toBeNull();
+    expect(backupReminder(A.updateSettings(d, { lastBackupAt: now - 3 * day }), { real: true, native: false, auto: off }, now)).toBeNull();
+    // Android + otomatik yedek açık ve hatasız: hatırlatma yok (eski elle yedek olsa bile).
+    expect(backupReminder(d, { real: true, native: true, auto: { enabled: true, lastAt: now - 5 * day, lastError: null } }, now)).toBeNull();
+    // Açık ama birkaç gündür yazılamıyor: söyler; dünkü aksaklıkta susar.
+    expect(backupReminder(d, { real: true, native: true, auto: { enabled: true, lastAt: now - 4 * day, lastError: 'x' } }, now)).toEqual({ kind: 'autoFailed', count: 0, days: 4 });
+    expect(backupReminder(d, { real: true, native: true, auto: { enabled: true, lastAt: now - day / 2, lastError: 'x' } }, now)).toBeNull();
   });
 });
 

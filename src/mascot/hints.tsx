@@ -7,6 +7,7 @@ import { X } from 'lucide-react';
 import * as A from '../domain/actions';
 import { commit, useStore } from '../store/store';
 import { useNav } from '../ui/nav';
+import { useGuide } from '../guide/state';
 import { useT } from '../i18n';
 import type { Key } from '../i18n/core';
 import { Mascot } from './Mascot';
@@ -24,7 +25,9 @@ export function useHint(key: string, condition: boolean) {
   const noAccounts = useStore((s) => s.data.accounts.length === 0);
   const { sheet } = useNav();
   const [, tick] = useState(0);
-  const blocked = seen || !condition || !!sheet || noAccounts;
+  // Rehber açıkken ipucu beklemede kalır (görülmüş sayılmaz).
+  const touring = useGuide().active;
+  const blocked = seen || !condition || !!sheet || noAccounts || touring;
 
   // Sıra bekleyen ipucu için ara sıra yeniden dene (dakika dolunca çıksın).
   useEffect(() => {
@@ -45,9 +48,9 @@ export function useHint(key: string, condition: boolean) {
   };
   // Açılan sayfa ya da kapanan koşul ipucunu gösterilmiş sayar; tekrar çıkmaz.
   useEffect(() => {
-    if (active === key && (!condition || sheet || noAccounts)) markSeen();
+    if (active === key && !touring && (!condition || sheet || noAccounts)) markSeen();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [condition, sheet, noAccounts]);
+  }, [condition, sheet, noAccounts, touring]);
 
   return { show, dismiss: markSeen };
 }

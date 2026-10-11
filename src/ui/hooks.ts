@@ -3,6 +3,7 @@ import { useStore } from '../store/store';
 import type { Data, ID, Tx } from '../domain/types';
 import { accountIndex, cashBalance, isDaily } from '../domain/ledger';
 import { addDays, type ISODate } from '../domain/dates';
+import { rankCategories } from '../domain/smart';
 
 export function useData() {
   const data = useStore((s) => s.data);
@@ -33,6 +34,15 @@ export function recentCategories(data: Data, kind: 'expense' | 'income'): ID[] {
     if (seen.length >= 6) break;
   }
   return seen;
+}
+
+/**
+ * Kategori ızgarası sırası: kendi kullanımına göre (son 90 gün, yakın tarih ve şu anki saat dilimi ağır).
+ * Son 90 günde kayıt yoksa daha eski son kullanılanlara düşer; hiç geçmiş yoksa boş (varsayılan sıra).
+ */
+export function categoryOrder(data: Data, kind: 'expense' | 'income', today: ISODate, hour: number): ID[] {
+  const ranked = rankCategories(data, kind, today, hour);
+  return ranked.length ? ranked : recentCategories(data, kind);
 }
 
 export interface Template {

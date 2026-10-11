@@ -54,13 +54,32 @@ jobs:
           CEP_KEYSTORE_PASSWORD: ${{ secrets.CEP_KEYSTORE_PASSWORD }}
         run: ./gradlew assembleRelease -PversionCode=${{ github.run_number }} -PversionName=1.0.${{ github.run_number }} --no-daemon
 
-      - name: Dosyayı adlandır
-        run: cp android/app/build/outputs/apk/release/app-release.apk "CepDefteri-1.0.${{ github.run_number }}.apk"
+      # Play Store APK değil AAB (Android App Bundle) ister; aynı anahtar "yükleme anahtarı" olur.
+      - name: AAB derle (Play Store)
+        working-directory: android
+        env:
+          CEP_KEYSTORE_PATH: ${{ steps.sign.outputs.path }}
+          CEP_KEYSTORE_PASSWORD: ${{ secrets.CEP_KEYSTORE_PASSWORD }}
+        run: ./gradlew bundleRelease -PversionCode=${{ github.run_number }} -PversionName=1.0.${{ github.run_number }} --no-daemon
+
+      - name: Dosyaları adlandır
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk "CepDefteri-1.0.${{ github.run_number }}.apk"
+          cp android/app/build/outputs/bundle/release/app-release.aab "CepDefteri-1.0.${{ github.run_number }}.aab"
+
+      # Play Console'daki izin beyanları için: birleşmiş manifestteki izinleri günlüğe yaz.
+      - name: İzinleri listele
+        run: |
+          m=$(find android/app/build/intermediates -path '*release*' -name AndroidManifest.xml | grep -i merged | head -1)
+          echo "Birleşmiş manifest: $m"
+          grep -o 'uses-permission[^>]*android:name="[^"]*"' "$m" | sed 's/.*android:name=//' | sort -u
 
       - uses: actions/upload-artifact@v4
         with:
           name: CepDefteri-1.0.${{ github.run_number }}
-          path: CepDefteri-*.apk
+          path: |
+            CepDefteri-*.apk
+            CepDefteri-*.aab
 
       - name: Releases sayfasına ekle
         if: github.ref_name == github.event.repository.default_branch
@@ -70,10 +89,13 @@ jobs:
           name: Cep Defteri 1.0.${{ github.run_number }}
           target_commitish: ${{ github.sha }}
           make_latest: true
-          files: CepDefteri-*.apk
+          files: |
+            CepDefteri-*.apk
+            CepDefteri-*.aab
           body: |
             Telefonda bu sayfadan **CepDefteri-1.0.${{ github.run_number }}.apk** dosyasını indirip aç. Android "bilinmeyen uygulamalar" izni isteyebilir.
             ${{ steps.sign.outputs.signed == 'true' && 'Kalıcı anahtarla imzalandı: önceki sürümün üzerine kurabilirsin, verilerin korunur.' || '⚠️ Geçici test anahtarıyla imzalandı: önceki bir sürüm yüklüyse önce Ayarlar → Yedek indir, sonra eski uygulamayı kaldırıp bunu kur.' }}
+            Play Console'a yüklemek için **CepDefteri-1.0.${{ github.run_number }}.aab** dosyasını kullan (telefona kurulmaz).
 
       # Ana dal dışındaki dallar: hızlı deneme için "test edilmemiş" ön sürüm olarak eklenir.
       # "Son sürüm" (releases/latest) değişmez; Releases sayfasında en üstte görünür.

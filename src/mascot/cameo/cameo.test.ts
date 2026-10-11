@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { MASCOT_KEYS } from '../characters';
+import { CHARACTERS, MASCOT_KEYS } from '../characters';
+import { chatGuest, chatLines, DIALOGUES, fitsWhen, MAX_LINE, pickDialogue } from './chat';
 import { blockedReason, CHANCE, markShown, MIN_GAP_MS, MIN_OPENS, parseCounters, PITY_OPENS, planOpen, registerOpen, sceneForScreen, showDelayMs, stayMs, FRESH } from './logic';
-import { CAMEO_SCREENS, captionFor, guestsFor, hourFits, SCENES, SCENE_IDS } from './scenes';
+import { CAMEO_SCREENS, captionFor, FORCE_ALIASES, guestsFor, hourFits, SCENES, SCENE_IDS } from './scenes';
 
 const base = { opens: 10, sinceLast: 5, lastAt: 0, pending: false };
 const NOW = 10 * 60 * 60_000;
@@ -124,5 +125,62 @@ describe('misafir seçimi ve metinler', () => {
   it('saklanma cümlesi misafire göre değişir', () => {
     expect(captionFor('hide', ['ceviz'], 'tr', 12)).toContain('Cevizi');
     expect(captionFor('hide', ['karamel'], 'en', 12)).toContain('bone');
+  });
+});
+
+describe('sohbet sahnesi', () => {
+  const ctx = { hour: 14, weekday: 3, dom: 15, dim: 31 };
+  it('misafir hiçbir zaman ana maskot değildir; her karakter misafir olabilir', () => {
+    for (const main of MASCOT_KEYS) {
+      const seen = new Set<string>();
+      for (let i = 0; i < 50; i++) {
+        const g = chatGuest(main, () => i / 50);
+        expect(g).not.toBe(main);
+        seen.add(g);
+      }
+      expect(seen.size).toBe(MASCOT_KEYS.length - 1);
+    }
+    expect(chatGuest('fistik', () => 0.9999)).not.toBe('fistik');
+  });
+  it('en az 12 diyalog; 2–4 satır, iki dil, boş değil, ≤ 60 karakter (adlar yerleşince de)', () => {
+    expect(DIALOGUES.length).toBeGreaterThanOrEqual(12);
+    expect(new Set(DIALOGUES.map((d) => d.id)).size).toBe(DIALOGUES.length);
+    for (const d of DIALOGUES) {
+      expect(d.lines.length).toBeGreaterThanOrEqual(2);
+      expect(d.lines.length).toBeLessThanOrEqual(4);
+      for (const lang of ['tr', 'en'] as const)
+        for (const guest of MASCOT_KEYS.filter((k) => !d.guest || k === d.guest))
+          for (const main of MASCOT_KEYS.filter((k) => k !== guest)) {
+            const lines = chatLines(d, lang, guest, CHARACTERS[main].name[lang]);
+            for (const l of lines) {
+              expect(l.text.trim().length, d.id).toBeGreaterThan(0);
+              expect(l.text.length, `${d.id} ${l.text}`).toBeLessThanOrEqual(MAX_LINE);
+              expect(l.text).not.toMatch(/[{}]|\d/);
+            }
+            expect(lines[0].who).toBe('guest');
+            expect(lines[1].who).toBe('main');
+          }
+      for (const l of d.lines) expect(/[ğüşıöçİĞÜŞÖÇ]/.test(l.en), l.en).toBe(false);
+    }
+  });
+  it('seçim: kişiliğe özgü diyalog yalnız o misafirle; bağlam kuralına uyar', () => {
+    for (let i = 0; i < 40; i++) {
+      for (const g of MASCOT_KEYS) {
+        const d = pickDialogue(g, ctx, () => i / 40);
+        expect(!d.guest || d.guest === g).toBe(true);
+        expect(fitsWhen(d.when, ctx)).toBe(true);
+      }
+    }
+    expect(fitsWhen('weekend', { ...ctx, weekday: 6 })).toBe(true);
+    expect(fitsWhen('weekend', ctx)).toBe(false);
+    expect(fitsWhen('monthStart', { ...ctx, dom: 2 })).toBe(true);
+    expect(fitsWhen('monthEnd', { ...ctx, dom: 28 })).toBe(true);
+    expect(fitsWhen('morning', { ...ctx, hour: 8 })).toBe(true);
+    expect(fitsWhen('morning', ctx)).toBe(false);
+  });
+  it('yalnız ana ekranda; ?cameo=chat zorlaması tanımlı; açıklama satırı var', () => {
+    expect(SCENES.chat.screens).toEqual(['home']);
+    expect(FORCE_ALIASES.chat).toBe('chat');
+    expect(captionFor('chat', ['pamuk'], 'en', 12)).toBeTruthy();
   });
 });

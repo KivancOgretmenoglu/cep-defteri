@@ -1,25 +1,32 @@
 import { useMemo } from 'react';
-import { Settings, ChevronRight, Plus, Sprout, Info, Eye, EyeOff, HandCoins, ScrollText, ChartLine } from 'lucide-react';
+import { Settings, ChevronRight, Plus, Sprout, Info, Eye, EyeOff, HandCoins, ScrollText, ChartLine, ChartColumn } from 'lucide-react';
 import { monthOf } from '../domain/dates';
 import { formatMoney, hiddenMoney, monthLabel, monthName, shortDate } from '../i18n/format';
 import { useT } from '../i18n';
 import {
-  availability, balanceSeries, budgetStatus, cashBalance, dailyBalance, debtTotals, investmentState, investmentTotal, isDaily, isInvestment, monthSummary, pendingReportCard, personBalances, upcomingOutflows, pendingUntil, trackingStart,
+  availability, balanceSeries, budgetStatus, cashBalance, dailyBalance, debtTotals, investmentTotal, isDaily, isInvestment, monthSummary, pendingReportCard, personBalances, upcomingOutflows, pendingUntil, trackingStart,
 } from '../domain/ledger';
+import { usePrices } from '../store/prices';
 import * as A from '../domain/actions';
 import { commit } from '../store/store';
 import { mascotEvent } from '../mascot/events';
 import { BalanceChart } from '../ui/BalanceChart';
 import { DueRow } from '../ui/DueRow';
 import { mascotMood } from '../domain/mood';
+import { spendingPlan } from '../domain/spendingPlan';
+import { SpendingChart } from '../ui/SpendingChart';
 import { addDays } from '../domain/dates';
-import { Amount, Progress, SectionHead } from '../ui/kit';
-import { MascotNote } from '../mascot/MascotNote';
+import { Amount, AnimatedMoney, Progress, SectionHead } from '../ui/kit';
+import { useListSettle } from '../ui/motion';
+import { MascotNote, SceneEmpty } from '../mascot/MascotNote';
 import { Rings } from '../ui/Rings';
 import { TxRow } from '../ui/TxRow';
 import { go, openSheet } from '../ui/nav';
 import { useData, useLookups } from '../ui/hooks';
 import { ACCOUNT_ICONS } from '../ui/icons';
+import { BackupReminderCard } from '../native/BackupReminder';
+import { Sky } from '../ui/Sky';
+import { GuideInvite } from '../guide/Invite';
 
 export function Home() {
   const t = useT();
@@ -37,15 +44,20 @@ export function Home() {
     const start = trackingStart(data);
     const from = start && start > addDays(today, -29) ? start : addDays(today, -29);
     const spark = start ? balanceSeries(data, from, today) : [];
+    // Küçük grafik: plan (bütçe ya da ay sonu tabanı) varsa bu dönemin harcama eğrisi ve planı; yoksa bakiye.
+    const sp = start ? spendingPlan(data, today) : null;
+    const spend = sp && sp.source !== null ? sp : null;
     const card = pendingReportCard(data, today);
-    return { av, mood, sum, budget, up, soon, spark, card };
+    return { av, mood, sum, budget, up, soon, spark, spend, card };
   }, [data, today, month, lang]);
   const { av, mood, sum, budget, soon } = d;
   const dailyAccs = data.accounts.filter((a) => isDaily(a) && (!a.archived || cashBalance(data, a.id) !== 0));
   const invAccs = data.accounts.filter((a) => isInvestment(a) && !a.archived);
   const recent = [...data.txs].sort((a, b) => (a.date === b.date ? b.seq - a.seq : a.date < b.date ? 1 : -1)).slice(0, 5);
+  const recentRef = useListSettle<HTMLUListElement>(recent.map((x) => x.id));
   const daily = dailyBalance(data);
-  const invTotal = investmentTotal(data);
+  const priceBook = usePrices().book;
+  const invTotal = investmentTotal(data, priceBook);
   const hide = data.settings.hideTotals;
   const people = personBalances(data).filter((p) => p.balance !== 0 || !p.account.archived);
   const debts = debtTotals(data);
@@ -58,16 +70,20 @@ export function Home() {
 
   return (
     <div className="screen screen--home">
-      <header className="screen-head">
+      <header className="screen-head sky-head">
+        <Sky />
         <div>
           <p className="eyebrow">{monthLabel(month)}</p>
           <h1 className="wordmark">Cep Defteri</h1>
         </div>
         <div className="head-actions">
-          <button className="icon-btn" onClick={toggleHide} aria-pressed={hide} aria-label={hide ? t('home.showBalances') : t('home.hideBalances')} title={hide ? t('home.showBalances') : t('home.hideBalances')}>
+          <button className="icon-btn only-phone" data-tour="reports" onClick={() => go('reports')} aria-label={t('nav.reports')} title={t('nav.reports')}>
+            <ChartColumn size={22} />
+          </button>
+          <button className="icon-btn" data-tour="eye" onClick={toggleHide} aria-pressed={hide} aria-label={hide ? t('home.showBalances') : t('home.hideBalances')} title={hide ? t('home.showBalances') : t('home.hideBalances')}>
             {hide ? <EyeOff size={22} /> : <Eye size={22} />}
           </button>
-          <button className="icon-btn only-phone" onClick={() => go('settings')} aria-label={t('nav.settings')}>
+          <button className="icon-btn only-phone" data-tour="settings" onClick={() => go('settings')} aria-label={t('nav.settings')}>
             <Settings size={22} />
           </button>
         </div>
@@ -96,8 +112,10 @@ export function Home() {
         }
       />
 
+      <GuideInvite />
+      <BackupReminderCard />
+
       <div className="home-grid">
-        <Rings />
         <section className="card receipt" aria-labelledby="avail-h">
           <div className="receipt__top">
             <h2 id="avail-h" className="label">{t('home.available')}</h2>
@@ -108,14 +126,14 @@ export function Home() {
           ) : (
             <>
               <div className="receipt__hero">
-                <Amount value={av.available} size="xl" hide={hide} className={av.available < 0 && !hide ? 'tone-warn' : ''} />
+                <Amount value={av.available} size="xl" hide={hide} animate className={av.available < 0 && !hide ? 'tone-warn' : ''} />
                 <button className="icon-btn icon-btn--small" onClick={toggleHide} aria-label={hide ? t('home.showBalances') : t('home.hideBalances')}>{hide ? <EyeOff size={18} /> : <Eye size={18} />}</button>
               </div>
-              {av.available > 0 && <p className="receipt__perday">{t('home.perDayPre')} <b>{H(av.perDay)}</b>{t('home.perDayPost')} · {t('common.days', { n: av.daysLeft })}</p>}
+              {av.available > 0 && <p className="receipt__perday">{t('home.perDayPre')} <b><AnimatedMoney value={av.perDay} hide={hide} /></b>{t('home.perDayPost')} · {t('common.days', { n: av.daysLeft })}</p>}
               <dl className="receipt__lines">
                 <div>
                   <dt>{t('home.inDaily')}</dt>
-                  <dd>{H(av.dailyBalance)}</dd>
+                  <dd><AnimatedMoney value={av.dailyBalance} hide={hide} /></dd>
                 </div>
                 <div>
                   <dt>
@@ -143,7 +161,7 @@ export function Home() {
                 )}
                 <div className="receipt__total">
                   <dt>= {t('home.availableShort')}</dt>
-                  <dd>{H(av.available)}</dd>
+                  <dd><AnimatedMoney value={av.available} hide={hide} /></dd>
                 </div>
               </dl>
               {av.debtsReceivable > 0 && (
@@ -166,6 +184,9 @@ export function Home() {
           )}
         </section>
 
+        {/* Önce para (asıl soru: ne kadar harcayabilirim), halkalar onun altında */}
+        <Rings />
+
         <section className="card" id="yaklasan" aria-labelledby="up-h">
           <SectionHead id="up-h" title={t('home.upcoming')} action={<button className="link" onClick={() => go('budget')}>{t('home.plans')} <ChevronRight size={16} /></button>} />
           {soon.length === 0 ? (
@@ -183,17 +204,17 @@ export function Home() {
         <section className="month-stats" aria-label={t('home.monthSummary', { month: monthName(month) })}>
           <button className="stat" onClick={() => go('tx', { filter: { month, kind: 'income' } })}>
             <span className="stat__label">{t('home.statIncome')}</span>
-            <Amount value={sum.income} size="md" tone="pos" />
+            <Amount value={sum.income} size="md" tone="pos" animate />
             <span className="stat__hint">{t('home.statIncomeHint')}</span>
           </button>
           <button className="stat" onClick={() => go('tx', { filter: { month, kind: 'expense' } })}>
             <span className="stat__label">{t('home.statSpending')}</span>
-            <Amount value={sum.spending} size="md" />
+            <Amount value={sum.spending} size="md" animate />
             <span className="stat__hint">{sum.refunds ? t('home.refundsDeducted', { amount: formatMoney(sum.refunds) }) : t('home.statSpendingHint')}</span>
           </button>
           <button className="stat" onClick={() => go('invest')}>
             <span className="stat__label">{t('home.statInvest')}</span>
-            <Amount value={sum.contributions} size="md" tone="invest" />
+            <Amount value={sum.contributions} size="md" tone="invest" animate />
             <span className="stat__hint">{sum.withdrawals ? t('home.withdrawn', { amount: formatMoney(sum.withdrawals) }) : t('home.thisMonth')}</span>
           </button>
           {budget.budget !== null && (
@@ -209,8 +230,13 @@ export function Home() {
 
         <section className="card" aria-labelledby="acc-h">
           <SectionHead id="acc-h" title={t('home.accounts')} action={<button className="link" onClick={() => openSheet({ kind: 'account' })}><Plus size={16} /> {t('common.add')}</button>} />
-          {d.spark.length > 1 && (
-            <button className="spark-btn" onClick={() => go('balance')} aria-label={t('home.openHistory')}>
+          {d.spend ? (
+            <button className="spark-btn" data-tour="chart" onClick={() => go('balance')} aria-label={t('spend.homeOpen')}>
+              <SpendingChart from={d.spend.from} to={d.spend.to} spending={d.spend.spending} plan={d.spend.plan} today={today} hide={hide} compact height={64} label={t('spend.homeLabel')} />
+              <span className="spark-btn__label"><ChartLine size={15} aria-hidden /> {t('spend.homeLabel')} <ChevronRight size={15} aria-hidden /></span>
+            </button>
+          ) : d.spark.length > 1 && (
+            <button className="spark-btn" data-tour="chart" onClick={() => go('balance')} aria-label={t('home.openHistory')}>
               <BalanceChart history={d.spark} today={today} hide={hide} compact height={64} label={t('home.sparkLabel')} />
               <span className="spark-btn__label"><ChartLine size={15} aria-hidden /> {t('balance.title')} <ChevronRight size={15} aria-hidden /></span>
             </button>
@@ -224,7 +250,7 @@ export function Home() {
                   <button className="acc-row" onClick={() => go('tx', { filter: { accountId: a.id } })}>
                     <I size={18} aria-hidden />
                     <span className="acc-row__name">{a.name}{a.archived && <small> {t('home.archivedTag')}</small>}</span>
-                    <Amount value={cashBalance(data, a.id)} hide={hide} />
+                    <Amount value={cashBalance(data, a.id)} hide={hide} animate />
                   </button>
                 </li>
               );
@@ -232,40 +258,25 @@ export function Home() {
             {dailyAccs.length > 1 && (
               <li className="acc-total">
                 <span>{t('home.dailyTotal')}</span>
-                <Amount value={daily} hide={hide} />
+                <Amount value={daily} hide={hide} animate />
               </li>
             )}
           </ul>
           {invAccs.length > 0 && (
-            <>
-              <h3 className="sub-label"><Sprout size={14} aria-hidden /> {t('home.investSeparate')}</h3>
-              <ul className="acc-list">
-                {invAccs.map((a) => {
-                  const st = investmentState(data, a.id)!;
-                  return (
-                    <li key={a.id}>
-                      <button className="acc-row acc-row--invest" onClick={() => go('invest')}>
-                        <Sprout size={18} aria-hidden />
-                        <span className="acc-row__name">
-                          {a.name}
-                          <small>{t('home.valueAsOf', { date: shortDate(st.lastValuation.date, today) })}{st.flowsSinceValuation !== 0 ? t('home.plusLater') : ''}</small>
-                        </span>
-                        <Amount value={st.currentValue} tone="invest" hide={hide} />
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-              <p className="acc-net">
-                {t('home.dailyPlusInvest')} = <b>{H(daily + invTotal)}</b>
-                <small>{t('home.investNotSpendable')}</small>
-              </p>
-            </>
-          )}
-          {invAccs.length === 0 && dailyAccs.length > 0 && (
-            <button className="link link--small" onClick={() => openSheet({ kind: 'account', kindPreset: 'investment' })}>
-              <Sprout size={14} /> {t('home.addInvestAccount')}
-            </button>
+            // Yatırımın kendi sekmesi var; burada tek satırlık özet ve kısayol yeter.
+            <ul className="acc-list acc-list--invest">
+              <li>
+                <button className="acc-row acc-row--invest" onClick={() => go('invest')}>
+                  <Sprout size={18} aria-hidden />
+                  <span className="acc-row__name">
+                    {t('home.investSeparate')}{invAccs.length > 1 ? ` · ${invAccs.length}` : ''}
+                    <small>{t('home.dailyPlusInvest')} = {H(daily + invTotal)}</small>
+                  </span>
+                  <Amount value={invTotal} tone="invest" hide={hide} animate />
+                  <ChevronRight size={16} aria-hidden />
+                </button>
+              </li>
+            </ul>
           )}
         </section>
 
@@ -294,9 +305,9 @@ export function Home() {
         <section className="card" aria-labelledby="recent-h">
           <SectionHead id="recent-h" title={t('home.recent')} action={data.txs.length > 0 && <button className="link" onClick={() => go('tx', { filter: {} })}>{t('common.all')} <ChevronRight size={16} /></button>} />
           {recent.length === 0 ? (
-            <p className="muted">{t('home.noTxPre')} <b>+</b> {t('home.noTxPost')}</p>
+            <SceneEmpty scene="home" compact onAction={() => openSheet({ kind: 'add', preset: { type: 'expense' } })} />
           ) : (
-            <ul className="tx-list">
+            <ul className="tx-list" ref={recentRef}>
               {recent.map((t) => (
                 <TxRow key={t.id} t={t} data={data} lookups={lookups} showDate={shortDate(t.date, today)} />
               ))}

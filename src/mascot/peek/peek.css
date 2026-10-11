@@ -1,0 +1,63 @@
+/* ───────── Kaydırma bakışı ─────────
+   Seçili maskot ekran kenarından yarı gizli bakar. Kapsayıcı dokunuşları geçirir; yalnız maskot dokunulabilir.
+   Adım adım (steps) kayma: piksel hissi. Hareket azaltmada hiç gösterilmez (bileşen de bağlanmaz). */
+.scroll-peek {
+  position: fixed;
+  z-index: 24; /* tab çubuğunun (20) üstünde, misafir maskotun (25) ve sayfaların altında */
+  top: min(46%, calc(100% - var(--tabbar-h) - var(--safe-b) - 120px));
+  pointer-events: none;
+  line-height: 0;
+}
+.scroll-peek--l {
+  left: 0;
+  animation: peek-in-l 0.45s steps(5) both;
+}
+.scroll-peek--r {
+  right: 0;
+  animation: peek-in-r 0.45s steps(5) both;
+}
+.scroll-peek--l.is-out {
+  animation: peek-out-l 0.45s steps(5) both;
+}
+.scroll-peek--r.is-out {
+  animation: peek-out-r 0.45s steps(5) both;
+}
+.scroll-peek__btn {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+.scroll-peek__btn .mascot {
+  filter: drop-shadow(0 1px 0 color-mix(in srgb, var(--ink, #2a1e1a) 18%, transparent));
+}
+/* Yarı gizli: gövdenin yarısı ekranın dışında kalır */
+@keyframes peek-in-l {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(-46%); }
+}
+@keyframes peek-out-l {
+  from { transform: translateX(-46%); }
+  to { transform: translateX(-100%); }
+}
+@keyframes peek-in-r {
+  from { transform: translateX(100%); }
+  to { transform: translateX(46%); }
+}
+@keyframes peek-out-r {
+  from { transform: translateX(46%); }
+  to { transform: translateX(100%); }
+}
+@media (min-width: 768px) {
+  .scroll-peek {
+    top: 50%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-peek {
+    display: none;
+  }
+}

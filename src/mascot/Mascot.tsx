@@ -58,6 +58,17 @@ export function Mascot({ who, mood = 'calm', outfit = 'plain', size = 96, idle =
           </clipPath>
         </defs>
       )}
+      {L.under && L.under.length > 0 && (
+        <>
+          {/* Arkadan geçen eşyalar tuvalin sağ kenarında kaybolur (yanındaki balonun üstüne taşmaz) */}
+          <defs>
+            <clipPath id={`${uid}-under`}>
+              <rect x={-16} y={-8} width={CW + 16} height={CH + 16} />
+            </clipPath>
+          </defs>
+          <g className="mascot__under" clipPath={`url(#${uid}-under)`}>{rects(L.under, 'u')}</g>
+        </>
+      )}
       <g className="mascot__all" clipPath={clip ? `url(#${clip})` : undefined}>
         <g transform={shift}>
           <g transform={flip}>

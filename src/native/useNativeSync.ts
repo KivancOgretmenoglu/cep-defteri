@@ -4,31 +4,43 @@
  * App içinde bir kez çağrılır.
  */
 import { useEffect, useRef } from 'react';
-import { getState, refreshToday, showToast, useStore } from '../store/store';
+import { getState, refreshToday, useStore } from '../store/store';
 import { getDevice, useDevice } from '../store/device';
 import { openSheet } from '../ui/nav';
 import { isNative } from '../platform';
 import { rescheduleNotifications, onNotificationTap } from './notifications';
 import { updateWidget } from './widget';
+import { ingestWidgetQueue } from './widgetQueue';
+import { useWidgetPrefs } from './widgetPrefs';
 import { runAutoBackup } from './autoBackup';
-import { backedUpToday, backupNudgeDue } from './backupPlan';
-import { todayISO } from '../domain/dates';
-import { t } from '../i18n';
+import { initShortcuts } from './shortcuts';
+import { backedUpToday } from './backupPlan';
 import type { NotifExtra } from './schedule';
 
 export const DEEP_LINK_SCHEME = 'io.github.kivancogretmenoglu.cepdefteri';
-const NUDGE_KEY = 'cep-defteri:backup-nudge';
 
-/** "io.github.kivancogretmenoglu.cepdefteri://add" → ekleme sayfası. */
+/**
+ * "io.github.kivancogretmenoglu.cepdefteri://add" → ekleme sayfası.
+ * "?type=expense" / "?type=income" (araçtaki Gider / Gelir düğmeleri) sayfayı o sekmeyle açar.
+ */
 export function handleDeepLink(url: string | undefined | null): boolean {
-  if (!url) return false;
-  const m = /^io\.github\.kivancogretmenoglu\.cepdefteri:\/\/([^/?#]*)/i.exec(url);
-  if (!m) return false;
-  if (m[1].toLowerCase() === 'add' || m[1].toLowerCase() === 'ekle') {
-    openSheet({ kind: 'add' });
-    return true;
-  }
-  return false;
+  const target = parseDeepLink(url);
+  if (!target) return false;
+  openSheet(target.type ? { kind: 'add', preset: { type: target.type } } : { kind: 'add' });
+  return true;
+}
+
+/** Saf ayrıştırıcı (test için): ekleme bağlantısıysa { type? }, değilse null. */
+export function parseDeepLink(url: string | undefined | null): { type?: 'expense' | 'income' } | null {
+  if (!url) return null;
+  const m = /^io\.github\.kivancogretmenoglu\.cepdefteri:\/\/([^/?#]*)[^?#]*(?:\?([^#]*))?/i.exec(url);
+  if (!m) return null;
+  const host = m[1].toLowerCase();
+  if (host !== 'add' && host !== 'ekle') return null;
+  const type = new URLSearchParams(m[2] ?? '').get('type')?.toLowerCase();
+  if (type === 'expense' || type === 'gider') return { type: 'expense' };
+  if (type === 'income' || type === 'gelir') return { type: 'income' };
+  return {};
 }
 
 function handleNotif(ex: NotifExtra) {
@@ -37,31 +49,23 @@ function handleNotif(ex: NotifExtra) {
   if (data.plans.some((p) => p.id === ex.planId)) openSheet({ kind: 'confirm', planId: ex.planId, due: ex.due });
 }
 
-/** Gün içinde bir kez, nazik bir yedek hatırlatması (tarayıcıda ya da otomatik yedek kapalıysa). */
-function maybeNudge() {
-  const { data, mode } = getState();
-  if (mode !== 'real') return;
-  if (isNative() && getDevice().autoBackup.enabled) return;
-  if (!backupNudgeDue(data, Date.now())) return;
-  const today = todayISO();
-  try {
-    if (localStorage.getItem(NUDGE_KEY) === today) return;
-    localStorage.setItem(NUDGE_KEY, today);
-  } catch {
-    return;
-  }
-  setTimeout(() => showToast(t('sync.nudge'), { ms: 7000 }), 2500);
-}
-
 let setupDone = false;
 let backupTimer: ReturnType<typeof setTimeout> | undefined;
 let backupPending = false;
+let widgetTimer: ReturnType<typeof setTimeout> | undefined;
 
 function syncNow(opts: { backupIfStale?: boolean } = {}) {
   const { data, today, mode } = getState();
   rescheduleNotifications(data, today, mode);
   updateWidget(data, today, mode, true);
   if (opts.backupIfStale && !backedUpToday(getDevice().autoBackup.lastAt, today)) runAutoBackup(data, mode);
+}
+
+/** Aracı hemen güncelle (gecikmeli güncellemeyi iptal ederek). */
+function syncWidgetNow() {
+  clearTimeout(widgetTimer);
+  const { data, today, mode } = getState();
+  void updateWidget(data, today, mode);
 }
 
 function flushBackup() {
@@ -76,17 +80,25 @@ function setupOnce() {
   if (setupDone || typeof window === 'undefined') return;
   setupDone = true;
   if (isNative()) {
+    void initShortcuts();
     import('@capacitor/app')
       .then(async ({ App }) => {
         App.addListener('appUrlOpen', ({ url }) => handleDeepLink(url));
         App.addListener('appStateChange', ({ isActive }) => {
           if (isActive) {
             refreshToday();
+            void ingestWidgetQueue();
             syncNow({ backupIfStale: true });
-          } else flushBackup();
+          } else {
+            // Arka plana geçerken: bekleyen (gecikmeli) araç güncellemesini beklemeden en son veriyi gönder.
+            syncWidgetNow();
+            flushBackup();
+          }
         });
         const launch = await App.getLaunchUrl().catch(() => undefined);
         handleDeepLink(launch?.url);
+        // Araçtaki çiplerle uygulama kapalıyken eklenen kayıtlar
+        void ingestWidgetQueue();
       })
       .catch(() => undefined);
     onNotificationTap(handleNotif).catch(() => undefined);
@@ -96,11 +108,8 @@ function setupOnce() {
       else syncNow({ backupIfStale: true });
     });
   }
-  // Açılışta: bugün yedek alınmadıysa al; hatırlatmayı değerlendir.
-  setTimeout(() => {
-    syncNow({ backupIfStale: true });
-    maybeNudge();
-  }, 1200);
+  // Açılışta: bugün yedek alınmadıysa al. (Yedek hatırlatması ana ekrandaki BackupReminder kartında.)
+  setTimeout(() => syncNow({ backupIfStale: true }), 1200);
 }
 
 export function useNativeSync(): void {
@@ -109,16 +118,27 @@ export function useNativeSync(): void {
   const mode = useStore((s) => s.mode);
   const notif = useDevice((p) => p.notifications);
   const abEnabled = useDevice((p) => p.autoBackup.enabled);
+  const widgetPrefs = useWidgetPrefs();
   const first = useRef(true);
 
   useEffect(() => setupOnce(), []);
 
-  // Bildirim + araç: veri ya da tercih değişince (kısa gecikmeyle, art arda değişiklikler birleşir).
+  // Örnek veriden gerçek veriye dönünce bekleyen araç kayıtlarını al.
   useEffect(() => {
-    const t = setTimeout(() => {
-      rescheduleNotifications(data, today, mode);
-      updateWidget(data, today, mode);
-    }, 1500);
+    if (mode === 'real' && isNative()) void ingestWidgetQueue();
+  }, [mode]);
+
+  // Araç: veri ya da araç tercihi değişince hemen sayılır (300 ms; art arda değişiklikler birleşir). Kayıt eklenince
+  // tutar ve "Not aldım ✓" pozu ana ekrana dönmeden güncellenmiş olur; arka plana geçişte ayrıca beklemeden gönderilir.
+  useEffect(() => {
+    clearTimeout(widgetTimer);
+    widgetTimer = setTimeout(() => void updateWidget(data, today, mode), 300);
+    return () => clearTimeout(widgetTimer);
+  }, [data, today, mode, widgetPrefs]);
+
+  // Bildirimler: daha pahalı, 1.5 sn gecikmeyle.
+  useEffect(() => {
+    const t = setTimeout(() => rescheduleNotifications(data, today, mode), 1500);
     return () => clearTimeout(t);
   }, [data, today, mode, notif]);
 

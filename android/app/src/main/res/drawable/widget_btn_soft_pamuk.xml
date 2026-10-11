@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- scripts/gen-android-icons.ts tarafından üretildi; elle düzenleme. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="@color/widget_ripple">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/widget_soft_pamuk" />
+            <stroke android:width="1.5dp" android:color="@color/widget_btn_pamuk" />
+            <corners android:radius="100dp" />
+        </shape>
+    </item>
+</ripple>

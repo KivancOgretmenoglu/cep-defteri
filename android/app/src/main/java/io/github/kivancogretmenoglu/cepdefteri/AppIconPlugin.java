@@ -19,7 +19,7 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 @CapacitorPlugin(name = "AppIcon")
 public class AppIconPlugin extends Plugin {
 
-    static final String[] KEYS = { "fistik", "bilge", "ceviz", "diken", "karamel" };
+    static final String[] KEYS = { "fistik", "bilge", "ceviz", "diken", "karamel", "pamuk" };
     /** Manifest'te varsayılan olarak etkin olan takma ad */
     static final String DEFAULT_KEY = "fistik";
 
