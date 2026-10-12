@@ -1527,7 +1527,22 @@ def write(mix, name):
     print('yazıldı', out)
 
 
-write(master(mus * 0.55 + mus_wet * 0.05 + sfx * 0.9 + AMB), REEL_NAME)
+VOICE_PATH = os.path.join(HERE, 'out', f'{REEL_NAME}-voice.wav')
+VO = None
+if os.path.exists(VOICE_PATH):  # voice.py make <reels> ile üretilmiş seslendirme
+    with wave.open(VOICE_PATH) as w:
+        raw = np.frombuffer(w.readframes(w.getnframes()), '<i2').reshape(-1, w.getnchannels()) / 32768.0
+    VO = np.zeros((N, 2))
+    VO[: min(N, len(raw))] = raw[:N, :2] if raw.shape[1] >= 2 else np.repeat(raw[:N], 2, 1)
+    venv = np.abs(VO).max(1)
+    venv = lp(np.convolve(venv, np.ones(int(0.05 * SR)) / int(0.05 * SR), 'same'), 6, 1).clip(0, None)
+    duck_v = 1 - np.clip(venv / 0.04, 0, 1)  # konuşurken 0, sessizken 1
+    mus = mus * (0.30 + 0.70 * duck_v)[:, None]       # müzik −10 dB civarı kısılır
+    sfx = sfx * (0.40 + 0.60 * duck_v)[:, None]       # efektler konuşmayı bastırmasın
+    mus_wet = mus_wet * (0.30 + 0.70 * duck_v)[:, None]
+    print('seslendirme karışıma eklendi:', VOICE_PATH)
+VOMIX = VO * 1.5 if VO is not None else 0
+write(master(mus * 0.55 + mus_wet * 0.05 + sfx * 0.9 + AMB + VOMIX), REEL_NAME)
 if REEL.get('noMusicVariant'):
     # Instagram'da trend ses eklemek için: yalnız efektler ve konuşma
-    write(master(sfx * 0.9 + AMB, -17.0), f'{REEL_NAME}-muziksiz')
+    write(master(sfx * 0.9 + AMB + VOMIX, -17.0), f'{REEL_NAME}-muziksiz')

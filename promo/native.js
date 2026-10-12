@@ -12,10 +12,10 @@ function setupOverlays(reel) {
     e.innerHTML = `<span class="igbox">${html}</span>`;
     return { a, b, e };
   });
-  const caps = (reel.captions || []).map(([a, b, text, y = 1430]) => {
+  const caps = (reel.captions || []).map(([a, b, text, y = 1430, times]) => {
     const e = el('div', 'abs cap', layer, { left: '70px', right: '70px', top: px(y), textAlign: 'center' });
     const words = text.split(' ').map((w) => { const s = el('span', 'w', e); s.textContent = w + ' '; return s; });
-    return { a, b, e, words, step: capStep(a, b, words.length) };
+    return { a, b, e, words, times, step: capStep(a, b, words.length) };
   });
   OVL = { boxes, caps };
 }
@@ -33,14 +33,16 @@ function updateOverlays(t) {
     e.style.opacity = a <= 0 ? 1 : clamp(prog(t, a, 0.08) * 1.5);
     e.style.transform = `scale(${0.85 + 0.15 * k})`;
   });
-  OVL.caps.forEach(({ a, b, e, words, step }) => {
+  OVL.caps.forEach(({ a, b, e, words, step, times }) => {
     const on = t >= a && t < b;
     e.style.display = on ? 'block' : 'none';
     if (!on) return;
-    const n = Math.floor((t - a) / step) + 1;
+    // seslendirme varsa her kelime gerçek söylenme anında belirir; yoksa sabit adımla
+    const n = times ? times.filter((x) => t >= x).length : Math.floor((t - a) / step) + 1;
     words.forEach((w, i) => {
       w.style.display = i < n ? 'inline' : 'none';
-      w.style.color = i === n - 1 && t < a + words.length * step + 0.25 ? '#FFD25A' : '#FFFFFF';
+      const fresh = times ? t < (times[i] ?? 0) + 0.25 : t < a + words.length * step + 0.25;
+      w.style.color = i === n - 1 && fresh ? '#FFD25A' : '#FFFFFF';
     });
   });
 }

@@ -1369,7 +1369,32 @@
         13.8,
         {}
       ]
-    ]
+    ],
+    "voice": [
+      [
+        0.2,
+        "Sepeti onaylamadan önce, dur."
+      ],
+      [
+        2.1,
+        "Bir: yirmi dört saat bekle. Ertesi gün hâlâ istiyorsan al."
+      ],
+      [
+        6.0,
+        "İki: fiyatı saate çevir. İki bin dört yüz lira, on altı saat çalışma demek."
+      ],
+      [
+        9.9,
+        "Üç: kullanım başına böl. Mont on iki lira, parti kıyafeti altı yüz."
+      ],
+      [
+        13.9,
+        "Kaydet, sepete giderken aç."
+      ]
+    ],
+    "voiceSettings": {
+      "speed": 1.08
+    }
   },
   "okul-maili-bedava": {
     "title": "Bilgi: okul mailinle ücretsiz kullanabileceklerin",
@@ -1648,6 +1673,36 @@
         "end",
         22.8,
         {}
+      ]
+    ],
+    "voice": [
+      [
+        0.1,
+        "Harçlığını neden üçe bölmelisin?"
+      ],
+      [
+        1.9,
+        "Çünkü bölmeyen, ayın on sekizinde sıfırı görür."
+      ],
+      [
+        4.6,
+        "Yüzde elli ihtiyaç: yurt, market, fatura."
+      ],
+      [
+        9.2,
+        "Yüzde otuz keyif: kafe, eğlence, abonelik."
+      ],
+      [
+        13.8,
+        "Yüzde yirmi birikim: para gelince önce bunu ayır."
+      ],
+      [
+        18.4,
+        "Yurt pahalıysa, altmış otuz on da olur."
+      ],
+      [
+        22.9,
+        "Kaydet, burs yatınca aç."
       ]
     ]
   }

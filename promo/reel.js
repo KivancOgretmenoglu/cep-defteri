@@ -656,6 +656,10 @@ window.ready = (async () => {
     OPTS = opts;
     SCENES[type](t0, opts);
   }
+  try {  // voice.py make çıktısı: kelime zamanlı altyazı, el yazısı altyazının yerine geçer
+    const vc = await fetch(`out/${name}.captions.json`);
+    if (vc.ok) reel.captions = await vc.json();
+  } catch (e) { /* seslendirme yok */ }
   window.REEL_END = reel.end;
   if (typeof setupOverlays === 'function') setupOverlays(reel);
   window.REEL_HANDHELD = !!reel.handheld;

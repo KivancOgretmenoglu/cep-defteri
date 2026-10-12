@@ -93,3 +93,22 @@ Reels düzeyinde `"music": { "gaps": [[a, b]], "lowpass": [[a, b]] }`: müzik a�
 ya da boğuklaşır (komik dönüşlerde efektlere yer açmak için).
 
 Uygulama ekranları `assets/ui/` altındadır (örnek veri modundan çekildi). Maskot pozları `assets/sprites.json` içindedir (uygulamanın kendi çiziminden üretildi).
+
+## Seslendirme (ElevenLabs)
+
+Reels'e `"voice": [[başlangıç_sn, "metin"], ...]` eklenir (isteğe bağlı `"voiceSettings"`). Sonra:
+
+```bash
+export ELEVENLABS_API_KEY=...          # ortam ayarlarından; sohbete yazma
+python3 promo/voice.py voices          # sesleri listele, birini seç
+export ELEVENLABS_VOICE_ID=...         # seçtiğin sesin id'si
+python3 promo/voice.py dry sepet-3-hesap    # API'ye gitmeden metin ve kredi tahmini
+python3 promo/voice.py make sepet-3-hesap   # seslendirmeyi üretir (önbellekli)
+promo/make.sh sepet-3-hesap            # ses karışımı + video: konuşurken müzik kısılır, altyazı kelime zamanlı
+```
+
+- Üretilen ses `out/<ad>-voice.wav`, altyazı zamanları `out/<ad>.captions.json` olarak yazılır; `audio.py` ve render bunları kendiliğinden bulur.
+- Aynı metin + ses + model bir kez üretilir (`out/voice-cache`); yeniden çalıştırmak kredi harcamaz.
+- Sayıları yazıyla yaz ("iki bin dört yüz lira"): okunuşu daha güvenilir olur.
+- Yapay ses kullanıyorsan Instagram'da "Yapay zekâ bilgisi" etiketini aç. Ücretsiz planın sesi ticari kullanıma uygun değildir; yayın için ücretli plan gerekir.
+- Bu hat API'ye karşı henüz denenmedi (anahtar ve ağ izni olmadan); karışım ve altyazı tarafı sahte ses dosyasıyla sınandı.
