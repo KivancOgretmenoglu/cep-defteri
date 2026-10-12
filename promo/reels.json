@@ -1247,5 +1247,377 @@
         }
       ]
     ]
+  },
+  "sepet-3-hesap": {
+    "title": "Bilgi: sepeti onaylamadan önce 3 hesap",
+    "end": 22.4,
+    "handheld": true,
+    "musicGain": 0.8,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        22.4,
+        "pop"
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        2.6,
+        "Sepeti onaylamadan önce<br><b>bu 3 hesabı yap</b>",
+        230
+      ],
+      [
+        19.4,
+        22.4,
+        "Kaydet, bir dahaki sepette<br><b>bu 3 hesabı yap</b>",
+        250
+      ]
+    ],
+    "scenes": [
+      [
+        "cartHook",
+        0,
+        {
+          "items": [
+            [
+              "Kablosuz kulaklık",
+              "1.450"
+            ],
+            [
+              "Telefon kılıfı",
+              "350"
+            ],
+            [
+              "Ayakkabı temizleme seti",
+              "600"
+            ]
+          ],
+          "total": "2.400"
+        }
+      ],
+      [
+        "cards",
+        2.6,
+        {
+          "items": [
+            {
+              "t": 0,
+              "num": "1",
+              "title": "24 saat kuralı",
+              "body": "İhtiyaç olmayan şeyi sepette <b>24 saat</b> beklet. Ertesi gün hâlâ istiyorsan al.",
+              "color": "#AE4716",
+              "bg": "#F8DCC8",
+              "mascot": {
+                "who": "fistik",
+                "mood": "thoughtful"
+              },
+              "ex": [
+                "Ertesi gün vazgeçersen:"
+              ],
+              "big": "{n} TL cepte",
+              "bigTo": 2400,
+              "exLabel": "SONUÇ"
+            },
+            {
+              "t": 5.6,
+              "num": "2",
+              "title": "Fiyatı saate çevir",
+              "body": "Fiyatı saatlik kazancına böl: bunun için <b>kaç saat çalışman</b> gerekiyor?",
+              "color": "#1F6F78",
+              "bg": "#DDEFE9",
+              "mascot": {
+                "who": "bilge",
+                "mood": "curious"
+              },
+              "ex": [
+                "2.400 TL ÷ 150 TL/saat ="
+              ],
+              "big": "{n} saat",
+              "bigTo": 16
+            },
+            {
+              "t": 11.2,
+              "num": "3",
+              "title": "Kullanım başına maliyet",
+              "body": "Fiyatı <b>kaç kez kullanacağına</b> böl. Ucuz olan her zaman ucuz değildir.",
+              "color": "#4351A3",
+              "bg": "#DEE2F6",
+              "mascot": {
+                "who": "ceviz",
+                "mood": "curious"
+              },
+              "ex": [
+                "Mont: 2.400 TL ÷ 200 giyim = <b style='color:#2F8F5A'>12 TL</b>",
+                "Parti kıyafeti: 1.200 TL ÷ 2 giyim = <b style='color:#C0392B'>600 TL</b>"
+              ]
+            }
+          ]
+        }
+      ],
+      [
+        "end",
+        19.4,
+        {}
+      ]
+    ]
+  },
+  "okul-maili-bedava": {
+    "title": "Bilgi: okul mailinle ücretsiz kullanabileceklerin",
+    "end": 22.6,
+    "handheld": true,
+    "musicGain": 0.8,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        22.6,
+        "chip"
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        2.6,
+        "Okul mailin varsa<br><b>bunları bedava kullanıyorsun</b>",
+        230
+      ],
+      [
+        19.6,
+        22.6,
+        "Sınıf grubuna at,<br><b>bilmeyen kalmasın</b>",
+        250
+      ]
+    ],
+    "scenes": [
+      [
+        "mailHook",
+        0,
+        {
+          "tags": [
+            "Yazılım araçları",
+            "Not uygulaması",
+            "Word & Excel",
+            "3D tasarım"
+          ]
+        }
+      ],
+      [
+        "cards",
+        2.6,
+        {
+          "items": [
+            {
+              "t": 0,
+              "num": "1",
+              "title": "GitHub Student<br>Developer Pack",
+              "body": "Yazılım öğreniyorsan: geliştirici araçları ve tekliflerle dolu ücretsiz paket.",
+              "color": "#2A1E1A",
+              "bg": "#EDE6DD",
+              "mascot": {
+                "who": "fistik",
+                "mood": "curious"
+              },
+              "ex": [
+                "education.github.com/pack"
+              ],
+              "exLabel": "NEREDEN"
+            },
+            {
+              "t": 3.4,
+              "num": "2",
+              "title": "JetBrains IDE'leri",
+              "body": "IntelliJ IDEA, PyCharm ve diğerleri. Öğrenci kaldıkça <b>her yıl ücretsiz</b> yenilenir.",
+              "color": "#1F6F78",
+              "bg": "#DDEFE9",
+              "mascot": {
+                "who": "bilge",
+                "mood": "curious"
+              },
+              "ex": [
+                "jetbrains.com/student"
+              ],
+              "exLabel": "NEREDEN"
+            },
+            {
+              "t": 6.8,
+              "num": "3",
+              "title": "Notion Plus",
+              "body": "Ders notlarına <b>sınırsız dosya yükleme</b>. Yılda bir okul mailini doğrulaman yeter.",
+              "color": "#AE4716",
+              "bg": "#F8DCC8",
+              "mascot": {
+                "who": "ceviz",
+                "mood": "curious"
+              },
+              "ex": [
+                "Ayarlar → Plan yükselt → Eğitim planı"
+              ],
+              "exLabel": "NASIL"
+            },
+            {
+              "t": 10.2,
+              "num": "4",
+              "title": "Word, Excel, PowerPoint",
+              "body": "Okulun destekliyorsa <b>web sürümleri ücretsiz</b>. Okul mailinle giriş yap.",
+              "color": "#4351A3",
+              "bg": "#DEE2F6",
+              "mascot": {
+                "who": "karamel",
+                "mood": "curious"
+              },
+              "ex": [
+                "microsoft.com/education"
+              ],
+              "exLabel": "NEREDEN"
+            },
+            {
+              "t": 13.6,
+              "num": "5",
+              "title": "AutoCAD, Fusion ve fazlası",
+              "body": "Autodesk'ten öğrencilere <b>1 yıllık ücretsiz erişim</b>, öğrenci kaldıkça yenilenir.",
+              "color": "#56661B",
+              "bg": "#E4EBCB",
+              "mascot": {
+                "who": "diken",
+                "mood": "curious"
+              },
+              "ex": [
+                "autodesk.com/education"
+              ],
+              "exLabel": "NEREDEN"
+            }
+          ]
+        }
+      ],
+      [
+        "end",
+        19.6,
+        {
+          "outfit": "cap",
+          "note": "Koşullar okula ve zamana göre değişebilir; başvurmadan önce sitesine bak."
+        }
+      ]
+    ]
+  },
+  "50-30-20": {
+    "title": "Bilgi: 50/30/20 kuralı (öğrenci versiyonu)",
+    "end": 24.0,
+    "handheld": true,
+    "musicGain": 0.8,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        24.0,
+        "lofi"
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        2.6,
+        "Bursunu ya da harçlığını<br><b>3'e böl: 50/30/20</b>",
+        230
+      ],
+      [
+        21.0,
+        24.0,
+        "Kaydet,<br><b>burs yatınca aç</b>",
+        250
+      ]
+    ],
+    "scenes": [
+      [
+        "pieHook",
+        0,
+        {}
+      ],
+      [
+        "cards",
+        2.6,
+        {
+          "items": [
+            {
+              "t": 0,
+              "num": "",
+              "title": "İhtiyaç",
+              "body": "Yurt/kira, ulaşım, market, faturalar: <b>olmazsa olmazlar</b>.",
+              "color": "#AE4716",
+              "bg": "#F8DCC8",
+              "mascot": {
+                "who": "fistik",
+                "mood": "curious"
+              },
+              "ex": [
+                "10.000 TL gelirin varsa:"
+              ],
+              "big": "{n} TL",
+              "bigTo": 5000,
+              "badge": "%50"
+            },
+            {
+              "t": 4.6,
+              "num": "",
+              "title": "İstek",
+              "body": "Kafe, eğlence, kıyafet, abonelikler: <b>keyif payın</b>.",
+              "color": "#2F8F9D",
+              "bg": "#DDEFE9",
+              "mascot": {
+                "who": "pamuk",
+                "mood": "curious"
+              },
+              "ex": [
+                "10.000 TL'nin %30'u:"
+              ],
+              "big": "{n} TL",
+              "bigTo": 3000,
+              "badge": "%30"
+            },
+            {
+              "t": 9.2,
+              "num": "",
+              "title": "Birikim",
+              "body": "Para gelir gelmez <b>önce bunu ayır</b>, kalanla yaşa. Acil durum fonun buradan büyür.",
+              "color": "#B07A12",
+              "bg": "#F1E2C6",
+              "mascot": {
+                "who": "ceviz",
+                "mood": "curious"
+              },
+              "ex": [
+                "Ayda 2.000 TL ayırırsan 1 yılda:"
+              ],
+              "big": "{n} TL",
+              "bigTo": 24000,
+              "badge": "%20"
+            },
+            {
+              "t": 13.8,
+              "num": "",
+              "title": "Yurt pahalıysa?",
+              "body": "Oranı değiştir: <b>60/30/10</b> da olur. Önemli olan her ay bir planla gitmek.",
+              "color": "#4351A3",
+              "bg": "#DEE2F6",
+              "mascot": {
+                "who": "bilge",
+                "mood": "curious"
+              },
+              "ex": [
+                "İhtiyaç %60 · İstek %30 · Birikim %10"
+              ],
+              "exLabel": "ALTERNATİF",
+              "badge": "!"
+            }
+          ]
+        }
+      ],
+      [
+        "end",
+        21.0,
+        {}
+      ]
+    ]
   }
 }

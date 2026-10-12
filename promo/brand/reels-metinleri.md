@@ -133,3 +133,66 @@ Sen hangisisin? Arkadaşını etiketle 👇
 **Test için alternatif hook'lar:**
 - "Arkadaş grubundaki herkes bunlardan biri"
 - "Ben 6 numarayım, sen?"
+
+---
+
+## 7 · sepet-3-hesap (bilgi, müzik: pop)
+
+**Açıklama:**
+```
+Sepeti onaylamadan önce bu 3 hesabı yap 🛒
+
+1. 24 saat kuralı: ihtiyaç olmayan şeyi sepette 24 saat beklet. Ertesi gün hâlâ istiyorsan al.
+2. Fiyatı saate çevir: fiyat ÷ saatlik kazancın. 2.400 TL ÷ 150 TL = 16 saat çalışma.
+3. Kullanım başına maliyet: 2.400 TL'lik mont 200 kez giyilirse 12 TL; 1.200 TL'lik parti kıyafeti 2 kez giyilirse 600 TL.
+
+Kaydet, bir dahaki sepette aç 📌
+
+#tasarruf #öğrencibütçesi #alışveriş #bütçe #paratasarrufu
+```
+
+**Test için alternatif hook'lar:**
+- "Bu 3 soruyu sormadan bir şey satın alma"
+- "Gereksiz alışverişi durduran 3 hesap"
+
+---
+
+## 8 · okul-maili-bedava (bilgi, müzik: chiptune)
+
+**Açıklama:**
+```
+Okul mailin varsa bunları bedava kullanıyorsun 🎓
+
+1. GitHub Student Developer Pack: education.github.com/pack
+2. JetBrains IDE'leri (IntelliJ, PyCharm…): jetbrains.com/student
+3. Notion Plus: okul mailinle, Ayarlar → Plan yükselt → Eğitim planı
+4. Word, Excel, PowerPoint web: okulun destekliyorsa microsoft.com/education
+5. Autodesk (AutoCAD, Fusion…): autodesk.com/education
+
+Koşullar okula ve zamana göre değişebilir; başvurmadan önce sitesine bak.
+Sınıf grubuna at, bilmeyen kalmasın 👀
+
+#öğrenci #üniversite #öğrenciindirimi #yazılım #mühendislik
+```
+
+**Not:** Figma'nın öğrenci planı 2026 baharında değişmiş olabilir, emin olamadığım için listeye koymadım.
+
+---
+
+## 9 · 50-30-20 (bilgi, müzik: lo-fi)
+
+**Açıklama:**
+```
+Bursunu ya da harçlığını 3'e böl: 50/30/20 kuralı 📊
+
+%50 ihtiyaç: yurt/kira, ulaşım, market, faturalar
+%30 istek: kafe, eğlence, kıyafet, abonelikler
+%20 birikim: para gelir gelmez önce bunu ayır
+
+10.000 TL için: 5.000 / 3.000 / 2.000 TL. Ayda 2.000 TL ayırırsan 1 yılda 24.000 TL.
+Yurt pahalıysa 60/30/10 da olur; önemli olan her ay bir planla gitmek.
+
+Kaydet, burs yatınca aç 📌
+
+#bütçe #503020 #öğrencibütçesi #burs #birikim
+```

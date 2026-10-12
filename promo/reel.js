@@ -651,6 +651,7 @@ window.ready = (async () => {
   if (typeof defineStories === 'function') defineStories();
   if (typeof defineNative === 'function') defineNative();
   if (typeof defineHooks === 'function') defineHooks();
+  if (typeof defineValue === 'function') defineValue();
   for (const [type, t0, opts = {}] of reel.scenes) {
     OPTS = opts;
     SCENES[type](t0, opts);

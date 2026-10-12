@@ -1085,6 +1085,45 @@ def cue_persona(t0, skip=0, o=None):
         put(SFX, fm_bell(1046.5 * 2 ** (i / 12 * 2), 0.6, 0.18), T(tc + 0.18))
         put(SFX, mascot_voice(k), T(tc + 0.35), 0.7)
 
+# ───────── bilgi reelsleri ─────────
+def cue_cards(t0, skip=0, o=None):
+    T = at(t0, skip)
+    for i, it in enumerate((o or {}).get('items', [])):
+        t = it['t']
+        put(SFX, stereo_move(whoosh(0.3, 400, 3500), 0.9, -0.2), T(t - 0.02), 0.45)
+        put(SFX, bloop(500, 900, 0.06, 0.2), T(t + 0.25))
+        rows = it.get('ex', [])
+        for j in range(len(rows)):
+            put(SFX, tick(True, 0.25), T(t + 0.9 + j * 0.45))
+        if it.get('big'):
+            a = t + 0.9 + len(rows) * 0.45
+            if it.get('bigTo') is not None:
+                put(SFX, slot_roll(0.6), T(a), 0.45)
+            put(SFX, fm_bell(1318.5 * 2 ** (i / 12 * 2), 0.8, 0.22), T(a + 0.7))
+        m = it.get('mascot')
+        if m:
+            put(SFX, boing(0.3, 0.18), T(t + 0.35), pan=0.5)
+            put(SFX, mascot_voice(m.get('who', 'fistik')), T(t + 0.5), 0.45, pan=0.5)
+
+
+def cue_cartHook(t0, skip=0, o=None):
+    T = at(t0, skip)
+    for k in range(4):  # tereddüt: düğmeye uzanıp geri çekilme
+        put(SFX, ui_tap(0.35), T(0.15 + k * 1.96), pan=0.2)
+    put(SFX, gulp(), T(1.1), 0.6)
+
+
+def cue_pieHook(t0, skip=0, o=None):
+    T = at(t0, skip)
+    for i in range(3):
+        put(SFX, bloop(500 + 200 * i, 1100 + 200 * i, 0.07, 0.3), T(0.1 + i * 0.18), pan=(i - 1) * 0.6)
+
+
+def cue_mailHook(t0, skip=0, o=None):
+    T = at(t0, skip)
+    put(SFX, notif_ding(), T(0.05), 0.7)
+    put(SFX, popper(), T(0.3), 0.4)
+
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
 # ═════════ ANA MÜZİK ═════════
@@ -1308,7 +1347,50 @@ def chip(a, b, last=True):
         put(MUS, crash(0.5), hit, pan=0.2)
 
 
-STYLES = {'lofi': lofi, 'horror': horror, 'quiz': quiz, 'chip': chip}
+def marimba(m, d=0.35, v=0.18):
+    t = tt(d)
+    f = freq(m)
+    x = np.sin(2 * np.pi * f * t) * np.exp(-t * 9) + 0.35 * np.sin(2 * np.pi * f * 4 * t) * np.exp(-t * 30)
+    return x * v
+
+
+def pop(a, b, last=True):
+    """hafif tropik pop: 104 BPM, dörtlük kick, el çırpma, vuruş arası akorlar, marimba"""
+    BPM = 104
+    bt = 60 / BPM
+    L = b - a
+    bus = seg_bus(a, b)
+    prog_ = [(45, [57, 60, 64]), (41, [57, 60, 65]), (36, [55, 60, 64]), (43, [55, 59, 62])]  # Am F C G
+    arp = [0, 2, 1, 2, 0, 2, 1, 3]
+    end = L - (1.0 if last else 0)
+    nbar = int(np.ceil(end / (4 * bt)))
+    for bi in range(nbar):
+        t0 = bi * 4 * bt
+        root, ch = prog_[bi % 4]
+        for beat in range(4):
+            tb = t0 + beat * bt
+            if tb >= end:
+                break
+            put(bus, kick(0.75), tb)
+            if beat % 2:
+                put(bus, clap(0.6), tb)
+            put(bus, hat(0.2, open_=True) * 0.5, tb + bt / 2, pan=0.3)
+            for m in ch:  # vuruş arası akor (pluck)
+                put(bus, pluck(m + 12, bt * 0.3, 'square', 0.3, cut=3000, v=0.035), tb + bt / 2, pan=-0.2)
+            x = np.sin(2 * np.pi * freq(root) * tt(bt * 0.9)) * adsr(int(bt * 0.9 * SR), 0.01, 0.1, 0.8, 0.05)
+            put(bus, np.tanh(x * 1.4) * 0.38, tb)
+        for k in range(8):
+            if t0 + k * bt / 2 < end:
+                n = ch[arp[k] % 3] + (12 if arp[k] == 3 else 0) + 12
+                put(bus, marimba(n), t0 + k * bt / 2, pan=0.35 if k % 2 else -0.35)
+    if last:
+        for m in (57, 60, 64, 69, 72):
+            put(bus, marimba(m + 12, 1.2, 0.2), end)
+        put(bus, crash(0.4), end)
+    put(MUS, bus[: int(L * SR)] * 1.05, a)
+
+
+STYLES = {'lofi': lofi, 'horror': horror, 'quiz': quiz, 'chip': chip, 'pop': pop}
 
 
 # ═════════ REELS'İ KUR ═════════

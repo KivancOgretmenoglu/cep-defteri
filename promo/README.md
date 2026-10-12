@@ -60,6 +60,17 @@ elektrik piyano, plak cızırtısı, bant titremesi), `horror` (uğultu, uyumsuz
 | `coffeeQuiz` | Yarışma sahnesi, geri sayım halkası, cevap sayacı, bayılan sunucu (`reveal`, `up`, `price`) |
 | `persona` | Altı siluet → maskot kartları tek tek (`c0`, `d`); özellik yazıları `boxes` ile |
 
+### Bilgi reelsleri (`value.js`)
+| Tür | İçerik |
+|---|---|
+| `cards` | Bilgi kartları: `items` (`t`, `num`/`badge`, `title`, `body`, `ex` satırları, `big` + `bigTo` sayaç, `mascot`, `color`, `bg`) |
+| `cartHook` | Sepet ve "Siparişi onayla" düğmesinde tereddüt eden Fıstık |
+| `pieHook` | Dönen 50/30/20 pasta grafiği |
+| `mailHook` | Okul maili kartı ve kepli Fıstık |
+
+Müzik türlerine `pop` (104 BPM, marimba, el çırpma) eklendi. Sıradaki konu fikirleri ve doğrulama notları:
+`brand/icerik-fikirleri.md`.
+
 ### Ekranlar
 `assets/ui2/` uygulamanın güncel hâlidir: uygulamayı çalıştırıp `node promo/tools/capture.mjs` ile yenilenir.
 `assets/ui/` eski arayüzden kalmıştır (önceki reelslerde kullanılıyor).

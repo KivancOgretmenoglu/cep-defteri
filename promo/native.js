@@ -224,10 +224,13 @@ function defineNative() {
     pattern(s.root, 'rgba(174,71,22,.08)');
     const handle = el('div', 'pill', s.root, { left: px(540 - 200), width: '400px', justifyContent: 'center', top: px(o.handleY ?? 640), fontSize: '42px', fontWeight: 800, color: 'var(--acc)' });
     handle.textContent = '@cep_defteri';
+    const note = o.note ? el('div', 'abs', s.root, { left: '80px', right: '80px', top: px((o.handleY ?? 640) + 110), textAlign: 'center', fontSize: '36px', fontWeight: 600, color: '#6e5f55' }) : null;
+    if (note) note.textContent = o.note;
     const m = new Mascot(s.root, { w: o.w || 768, outfit: o.outfit || null });
     const fr = o.friend ? new Mascot(s.root, { who: o.friend, w: 576 }) : null;
     s.update = (lt) => {
       handle.style.opacity = prog(lt, 0.5, 0.3);
+      if (note) note.style.opacity = prog(lt, 0.8, 0.3);
       const h = hop(lt, 0.7, 30);
       m.set('celebrate', Math.floor(lt / 0.2) % 2 ? 'wave' : 'wave2', blink(lt));
       m.put(fr ? 700 : 540, 1900 - h.y + (1 - E.back(prog(lt, 0, 0.4))) * 500, { sx: h.sx, sy: h.sy, flip: !!fr });
