@@ -136,7 +136,7 @@ Sen hangisisin? Arkadaşını etiketle 👇
 
 ---
 
-## 7 · sepet-3-hesap (bilgi, müzik: pop)
+## 7 · sepet-3-hesap (bilgi, müzik: pop 124 BPM, 16 sn)
 
 **Açıklama:**
 ```
@@ -179,11 +179,13 @@ Sınıf grubuna at, bilmeyen kalmasın 👀
 
 ---
 
-## 9 · 50-30-20 (bilgi, müzik: lo-fi)
+## 9 · 50-30-20 (bilgi, müzik: lo-fi; hook: "Harçlığını neden 3'e bölmelisin?")
 
 **Açıklama:**
 ```
-Bursunu ya da harçlığını 3'e böl: 50/30/20 kuralı 📊
+Harçlığını neden 3'e bölmelisin? Çünkü bölünmeyen para ay bitmeden biter 📊
+
+50/30/20 kuralı:
 
 %50 ihtiyaç: yurt/kira, ulaşım, market, faturalar
 %30 istek: kafe, eğlence, kıyafet, abonelikler

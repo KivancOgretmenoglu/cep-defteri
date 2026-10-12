@@ -1087,19 +1087,23 @@ def cue_persona(t0, skip=0, o=None):
 
 # ───────── bilgi reelsleri ─────────
 def cue_cards(t0, skip=0, o=None):
+    o = o or {}
     T = at(t0, skip)
-    for i, it in enumerate((o or {}).get('items', [])):
+    RS, RG, CD = o.get('rowStart', 0.9), o.get('rowGap', 0.45), o.get('countDur', 0.7)
+    for i, it in enumerate(o.get('items', [])):
         t = it['t']
         put(SFX, stereo_move(whoosh(0.3, 400, 3500), 0.9, -0.2), T(t - 0.02), 0.45)
         put(SFX, bloop(500, 900, 0.06, 0.2), T(t + 0.25))
         rows = it.get('ex', [])
         for j in range(len(rows)):
-            put(SFX, tick(True, 0.25), T(t + 0.9 + j * 0.45))
+            put(SFX, tick(True, 0.25), T(t + RS + j * RG))
         if it.get('big'):
-            a = t + 0.9 + len(rows) * 0.45
+            a = t + RS + len(rows) * RG
             if it.get('bigTo') is not None:
-                put(SFX, slot_roll(0.6), T(a), 0.45)
-            put(SFX, fm_bell(1318.5 * 2 ** (i / 12 * 2), 0.8, 0.22), T(a + 0.7))
+                put(SFX, slot_roll(CD * 0.85), T(a), 0.45)
+            put(SFX, fm_bell(1318.5 * 2 ** (i / 12 * 2), 0.8, 0.22), T(a + CD))
+            if o.get('fast'):
+                put(SFX, slam_hit(1.2), T(a + CD), 0.45)
         m = it.get('mascot')
         if m:
             put(SFX, boing(0.3, 0.18), T(t + 0.35), pan=0.5)
@@ -1108,9 +1112,27 @@ def cue_cards(t0, skip=0, o=None):
 
 def cue_cartHook(t0, skip=0, o=None):
     T = at(t0, skip)
+    st = (o or {}).get('stop')
+    if st is not None:  # pati yaklaşır → plak cızırtısı + "DUR!" damgası
+        put(SFX, stereo_move(whoosh(st, 300, 1500), 0.5, 0), T(0.0), 0.3)
+        d_sc = 0.25
+        put(SFX, sweep_bp(noise(d_sc), np.linspace(2500, 600, int(d_sc * SR)), q=2) * 1.6, T(st - 0.1), 0.7)
+        put(SFX, stamp(), T(st), 1.0)
+        put(SFX, slam_hit(0.7), T(st), 0.7)
+        put(SFX, meow(1.3, 0.3), T(st + 0.15), 0.6)
+        return
     for k in range(4):  # tereddüt: düğmeye uzanıp geri çekilme
         put(SFX, ui_tap(0.35), T(0.15 + k * 1.96), pan=0.2)
     put(SFX, gulp(), T(1.1), 0.6)
+
+
+def cue_drainHook(t0, skip=0, o=None):
+    T = at(t0, skip)
+    END = (o or {}).get('end', 1.5)
+    for k, tc in enumerate(np.arange(0.15, END, 0.09)):  # paralar uçuşur, perde iner
+        put(SFX, pling(2093 / (1.04 ** k), 0.12, 0.2), T(tc), pan=0.3 * np.sin(k))
+    put(SFX, sad_trombone()[: int(0.9 * SR)], T(END), 0.7)
+    put(SFX, slam_hit(0.8), T(END), 0.5)
 
 
 def cue_pieHook(t0, skip=0, o=None):
@@ -1214,7 +1236,7 @@ def ep_note(m, d, v=0.12):
     return x * v
 
 
-def lofi(a, b, last=True):
+def lofi(a, b, last=True, **kw):
     BPM = 84
     bt = 60 / BPM
     sw = 0.62  # swing: 8'liklerin ikincisi geç
@@ -1259,7 +1281,7 @@ def lofi(a, b, last=True):
     put(MUS, bus[: int(L * SR)] * 1.25, a)
 
 
-def horror(a, b, last=True):
+def horror(a, b, last=True, **kw):
     L = b - a
     t = tt(L + 0.5)
     n = len(t)
@@ -1293,7 +1315,7 @@ def brass(ms, d, v=0.1):
     return x * v / len(ms)
 
 
-def quiz(a, b, last=True):
+def quiz(a, b, last=True, **kw):
     """yarışma programı: swing, bakır nefesli vuruşlar, yürüyen bas, ride"""
     BPM = 132
     bt = 60 / BPM
@@ -1330,7 +1352,7 @@ def quiz(a, b, last=True):
     put(MUS, bus[: int(L * SR)] * 1.1, a)
 
 
-def chip(a, b, last=True):
+def chip(a, b, last=True, **kw):
     t, bi = a, 0
     hit = b - (1.0 if last else 0)
     while t < hit - 1e-6:
@@ -1354,9 +1376,9 @@ def marimba(m, d=0.35, v=0.18):
     return x * v
 
 
-def pop(a, b, last=True):
+def pop(a, b, last=True, **kw):
     """hafif tropik pop: 104 BPM, dörtlük kick, el çırpma, vuruş arası akorlar, marimba"""
-    BPM = 104
+    BPM = kw.get('bpm', 104)
     bt = 60 / BPM
     L = b - a
     bus = seg_bus(a, b)
@@ -1419,8 +1441,9 @@ if REEL.get('babble'):
 cue_boxes(REEL.get('boxes', []))
 PLAN = REEL.get('musicPlan')
 if PLAN:
-    for i, (a, b, style) in enumerate(PLAN):
-        STYLES[style](a, b, last=(i == len(PLAN) - 1))
+    for i, seg in enumerate(PLAN):
+        a, b, style = seg[:3]
+        STYLES[style](a, b, last=(i == len(PLAN) - 1), **(seg[3] if len(seg) > 3 else {}))
     for c in range(2):  # chip türünün kick pompası
         MUS[:, c] *= duck
 elif music_start is not None:

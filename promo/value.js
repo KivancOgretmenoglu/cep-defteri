@@ -32,7 +32,15 @@ function defineValue() {
       return { ...it, bigTpl: it.big, card, rows, big, m };
     });
     const counter = el('div', 'pill', s.root, { right: '56px', top: '130px', fontSize: '38px', color: '#6e5f55', zIndex: 3 });
+    const RS = o.rowStart ?? 0.9, RG = o.rowGap ?? 0.45, CD = o.countDur ?? 0.7, FAST = !!o.fast;
+    const pat = s.root.querySelector('.pattern');
     s.update = (lt) => {
+      if (FAST) {  // akan zemin + her kartta kamera vuruşu
+        pat.style.transform = `translate(${(lt * 90) % 72}px,${(lt * 60) % 72}px)`;
+        const lastT = items.reduce((a, it) => (lt >= it.t ? it.t : a), -9);
+        const pk = prog(lt, lastT, 0.25);
+        s.root.style.transform = pk < 1 ? `scale(${1.06 - 0.06 * E.out(pk)}) rotate(${(1 - E.out(pk)) * 1.2}deg)` : 'none';
+      }
       let idx = -1;
       items.forEach((it, i) => { if (lt >= it.t) idx = i; });
       counter.style.display = o.counter === false || idx < 0 ? 'none' : 'flex';
@@ -44,24 +52,25 @@ function defineValue() {
         if (it.m) it.m.root.style.display = on ? 'block' : 'none';
         if (!on) return;
         const k = lt - it.t;
-        const sl = E.out(prog(k, 0, 0.3));
+        const sl = FAST ? E.back(prog(k, 0, 0.32)) : E.out(prog(k, 0, 0.3));
         it.card.style.transform = `translateX(${(1 - sl) * 900}px) rotate(${(1 - sl) * 6}deg)`;
         it.rows.forEach((r, j) => {
-          const p = prog(k, 0.9 + j * 0.45, 0.3);
+          const p = prog(k, RS + j * RG, 0.25);
           r.style.opacity = p;
           r.style.transform = `translateY(${(1 - E.out(p)) * 20}px)`;
         });
         if (it.big) {
-          const a = 0.9 + it.rows.length * 0.45;
-          it.big.style.opacity = prog(k, a, 0.15);
-          it.big.innerHTML = it.bigTo != null ? countText(it.bigTpl, k, a, 0.7, it.bigTo) : it.bigTpl;
-          it.big.style.transform = `scale(${1 + 0.12 * Math.sin(prog(k, a + 0.7, 0.3) * Math.PI)})`;
+          const a = RS + it.rows.length * RG;
+          it.big.style.opacity = prog(k, a, 0.12);
+          it.big.innerHTML = it.bigTo != null ? countText(it.bigTpl, k, a, CD, it.bigTo) : it.bigTpl;
+          const hitK = prog(k, a + CD, 0.3);  // sayı yerine oturunca çarpar
+          it.big.style.transform = FAST ? `scale(${1 + 0.3 * Math.sin(hitK * Math.PI)}) rotate(${Math.sin(hitK * Math.PI) * -4}deg)` : `scale(${1 + 0.12 * Math.sin(prog(k, a + CD, 0.3) * Math.PI)})`;
         }
         if (it.m) {
           const M = it.mascot;
           const pop = E.back(prog(k, 0.35, 0.4));
-          const late = k > (M.cheerAt ?? 2.6);
-          const h = hop(k, 0.6, late ? 26 : 0);
+          const late = k > (M.cheerAt ?? (FAST ? RS + (it.rows.length * RG) + CD : 2.6));
+          const h = hop(k, FAST ? 0.42 : 0.6, late ? (FAST ? 50 : 26) : 0);
           it.m.set(late ? M.mood2 || 'happy' : M.mood || 'curious', late ? M.paws2 ?? 'up' : M.paws ?? null, blink(k));
           it.m.put(M.x ?? 800, (M.bottom ?? 1960) + (1 - pop) * 500 - h.y, { sx: h.sx, sy: h.sy, flip: !!M.flip });
         }
@@ -81,7 +90,28 @@ function defineValue() {
     btn.textContent = 'Siparişi onayla';
     const m = new Mascot(s.root, { w: 640 });
     const sweat = pixEl(s.root, SWEAT, SWEAT_C, 20);
+    const STOP = o.stop;
+    const stamp = STOP != null ? el('div', 'abs it', s.root, { left: '50%', top: '600px', fontSize: '300px', color: '#E8322A', textShadow: '0 12px 0 #7A1410', zIndex: 6, whiteSpace: 'nowrap' }) : null;
+    if (stamp) stamp.textContent = 'DUR!';
+    const paw = STOP != null ? pixEl(s.root, ['.oo.', 'oFFo', 'oFFo', 'oFFo', 'oFFo'], { o: '#2A1E1A', F: '#E8893C' }, 24, { zIndex: 5 }) : null;
     s.update = (lt) => {
+      if (STOP != null) {
+        const sh = shake(lt, STOP, 30, 0.35);
+        sheet.style.transform = btn.style.transform = `translate(${sh}px,0)`;
+        const sp = prog(lt, STOP, 0.18);
+        stamp.style.opacity = sp > 0 ? 1 : 0;
+        stamp.style.transform = `translateX(-50%) scale(${lerp(3, 1, E.out(sp))}) rotate(${-10 + Math.sin(lt * 12) * (lt > STOP + 0.3 ? 2 : 0)}deg)`;
+        // pati düğmeye uzanır, Fıstık öne atlayıp engeller
+        const reach = E.inOut(prog(lt, 0, STOP));
+        paw.style.display = lt < STOP + 0.1 ? 'block' : 'none';
+        paw.style.transform = `translate(${700 - reach * 80}px,${1700 - reach * 380}px) rotate(-20deg)`;
+        const j = E.back(prog(lt, STOP - 0.05, 0.3));
+        const blockH = lt > STOP ? hop(lt, 0.35, 30) : { y: 0, sx: 1, sy: 1 };
+        m.set(lt > STOP ? 'curious' : 'thoughtful', lt > STOP ? 'up' : null, lt > STOP ? 'wide' : 'mood');
+        m.put(540, 2080 - j * 360 - blockH.y + Math.sin(lt * 9) * (lt < STOP ? 6 : 0), { sx: blockH.sx, sy: blockH.sy });
+        sweat.style.display = 'none';
+        return;
+      }
       btn.style.transform = `scale(${1 + 0.035 * Math.sin(lt * 8)})`;
       const reach = Math.sin(lt * 3.2);
       m.set('thoughtful', reach > 0.3 ? 'up' : null, lt % 1.4 < 0.12 ? 'closed' : 'wide');
@@ -89,6 +119,43 @@ function defineValue() {
       const sk = (lt % 0.8) / 0.8;
       sweat.style.transform = `translate(720px,${1460 + sk * 80}px)`;
       sweat.style.opacity = 1 - sk * 0.6;
+    };
+  };
+
+  /* ── Hook: "Bölmezsen" — tek yığın para günler ilerledikçe erir ── */
+  SCENES.drainHook = (t0, o = {}) => {
+    const END = o.end ?? 1.5, TOTAL = o.total ?? 10000, DAY = o.day ?? 18;
+    const s = scene(t0, 'var(--paper)');
+    pattern(s.root);
+    const cal = el('div', 'abs', s.root, { left: '120px', top: '560px', width: '300px', height: '340px', borderRadius: '22px', background: '#FFFDF8', overflow: 'hidden', boxShadow: '0 24px 50px -16px rgba(0,0,0,.35)' });
+    cal.innerHTML = '<div style="height:84px;background:#D7372B;color:#fff;font-family:Pixel;font-size:70px;display:flex;align-items:center;justify-content:center">EKİM</div><div class="d it" style="text-align:center;font-size:230px;line-height:1;margin-top:6px"></div>';
+    const dayEl = cal.querySelector('.d');
+    const tank = el('div', 'abs', s.root, { left: '560px', top: '540px', width: '380px', height: '760px', borderRadius: '48px', background: '#E9E0D4', overflow: 'hidden', border: '10px solid #2A1E1A' });
+    const fill = el('div', 'abs', tank, { left: 0, right: 0, bottom: 0 });
+    const amt = el('div', 'abs it', s.root, { left: '480px', width: '540px', top: '1330px', textAlign: 'center', fontSize: '130px' });
+    const coins = Array.from({ length: 12 }, () => pixEl(s.root, TLCOIN, TLCOIN_C, 12));
+    const m = new Mascot(s.root, { w: 512 });
+    s.update = (lt) => {
+      const k = E.inOut(prog(lt, 0.15, END - 0.15));
+      const left = 1 - k;
+      fill.style.height = left * 100 + '%';
+      fill.style.background = left > 0.5 ? '#2F8F5A' : left > 0.2 ? '#E0A030' : '#C0392B';
+      amt.textContent = `${fmt(TOTAL * left)} TL`;
+      amt.style.color = left > 0.2 ? 'var(--ink)' : '#C0392B';
+      dayEl.textContent = String(Math.max(1, Math.round(1 + k * (DAY - 1))));
+      dayEl.style.color = k >= 1 ? '#C0392B' : 'var(--ink)';
+      cal.style.transform = `rotate(${Math.sin(lt * 20) * (k < 1 ? 3 : 0)}deg)`;
+      coins.forEach((c, i) => {
+        const p = ((lt * 1.6 + i / coins.length) % 1);
+        c.style.display = k < 1 ? 'block' : 'none';
+        c.style.transform = `translate(${750 + Math.sin(i * 2.3) * 180 * p - 36}px,${540 - p * 420 + p * p * 300}px) rotate(${p * 360}deg)`;
+        c.style.opacity = 1 - p;
+      });
+      const broke = lt >= END;
+      m.set(broke ? 'thoughtful' : 'happy', broke ? null : Math.floor(lt / 0.25) % 2 ? 'up' : 'wave', broke ? 'x' : 'mood');
+      const sink = E.out(prog(lt, END, 0.3));
+      m.put(270, 1960 + sink * 40 - (broke ? 0 : hop(lt, 0.5, 30).y), { rot: broke ? -6 * sink : 0 });
+      s.root.style.transform = broke && lt < END + 0.3 ? `translate(${shake(lt, END, 24, 0.3)}px,0) scale(1.05)` : 'none';
     };
   };
 
