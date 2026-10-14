@@ -63,7 +63,9 @@ elektrik piyano, plak cızırtısı, bant titremesi), `horror` (uğultu, uyumsuz
 ### Bilgi reelsleri (`value.js`)
 | Tür | İçerik |
 |---|---|
-| `cards` | Bilgi kartları: `items` (`t`, `num`/`badge`, `title`, `body`, `ex` satırları, `big` + `bigTo` sayaç, `mascot`, `color`, `bg`) |
+| `tagHook` | Hook: peşin/taksit etiketleri, `=` işareti `flip` anında `≠` olur |
+| `percentHook` | Hook: hesap makinesine `text` yazılır, `stop` anında "YANLIŞ!" damgası |
+| `cards` | Bilgi kartları: `items` (`t`, `num`/`badge`, `title`, `body`, `ex` satırları, `big` + `bigTo` sayaç, `mascot`, `color`, `bg`). `bigDec`: ondalık basamak. `decor: {topic, props: "money"|"percent"}` + `dur`: üstte konu başlığı ve ilerleme çubuğu, arkada soluk dev numara ve süzülen pixel paralar/yüzdeler, sayı oturunca kıvılcım; `mascot.say`: maskotun tepki balonu |
 | `cartHook` | Sepet ve "Siparişi onayla" düğmesinde tereddüt eden Fıstık |
 | `pieHook` | Dönen 50/30/20 pasta grafiği |
 | `mailHook` | Okul maili kartı ve kepli Fıstık |

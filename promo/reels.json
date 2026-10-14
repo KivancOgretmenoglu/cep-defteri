@@ -1765,7 +1765,8 @@
               "bg": "#DDEFE9",
               "mascot": {
                 "who": "ceviz",
-                "mood": "curious"
+                "mood": "curious",
+                "say": "~800 TL kâr!"
               },
               "ex": [
                 "12.000 TL, 6 × 2.000 TL taksit",
@@ -1784,7 +1785,8 @@
               "mascot": {
                 "who": "bilge",
                 "mood": "curious",
-                "outfit": "scholar"
+                "outfit": "scholar",
+                "say": "hesapla!"
               },
               "ex": [
                 "6 taksit, aylık %2 enflasyon:",
@@ -1803,7 +1805,8 @@
               "bg": "#F8DCC8",
               "mascot": {
                 "who": "karamel",
-                "mood": "thoughtful"
+                "mood": "thoughtful",
+                "say": "unutma!"
               },
               "ex": [
                 "1) Taksitli fiyat = peşin fiyat",
@@ -1816,7 +1819,12 @@
           "fast": true,
           "rowStart": 0.45,
           "rowGap": 0.35,
-          "countDur": 0.5
+          "countDur": 0.5,
+          "decor": {
+            "topic": "Peşin mi, taksit mi?",
+            "props": "money"
+          },
+          "dur": 14.0
         }
       ],
       [
@@ -1904,7 +1912,8 @@
               "mascot": {
                 "who": "bilge",
                 "mood": "curious",
-                "outfit": "spy"
+                "outfit": "spy",
+                "say": "faize faiz!"
               },
               "ex": [
                 "Aylık %3 faiz, 12 ayda:"
@@ -1923,7 +1932,8 @@
               "bg": "#DDEFE9",
               "mascot": {
                 "who": "ceviz",
-                "mood": "thoughtful"
+                "mood": "thoughtful",
+                "say": "az kalmış!"
               },
               "ex": [
                 "Faiz %40, enflasyon %30:",
@@ -1942,7 +1952,8 @@
               "bg": "#F8DCC8",
               "mascot": {
                 "who": "pamuk",
-                "mood": "thoughtful"
+                "mood": "thoughtful",
+                "say": "aynı fiyat!"
               },
               "ex": [
                 "1.000 TL → %100 zam → 2.000 TL",
@@ -1955,7 +1966,12 @@
           "fast": true,
           "rowStart": 0.45,
           "rowGap": 0.35,
-          "countDur": 0.5
+          "countDur": 0.5,
+          "decor": {
+            "topic": "Yüzde tuzakları",
+            "props": "percent"
+          },
+          "dur": 14.0
         }
       ],
       [

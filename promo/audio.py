@@ -1104,7 +1104,15 @@ def cue_cards(t0, skip=0, o=None):
             put(SFX, fm_bell(1318.5 * 2 ** (i / 12 * 2), 0.8, 0.22), T(a + CD))
             if o.get('fast'):
                 put(SFX, slam_hit(1.2), T(a + CD), 0.45)
+            if o.get('decor'):  # kıvılcımlar
+                for j in range(4):
+                    put(SFX, pling(2093 * 2 ** (j / 12 * 3), 0.1, 0.12), T(a + CD + 0.04 + j * 0.05), pan=(j - 1.5) * 0.4)
         m = it.get('mascot')
+        if m and o.get('decor') and m.get('say'):  # tepki balonu
+            sa = m.get('sayAt', (t + RS + len(rows) * RG + CD + 0.1) if it.get('big') else (t + RS + len(rows) * RG + 0.2))
+            if 'sayAt' in m:
+                sa = t + m['sayAt']
+            put(SFX, bloop(700, 1300, 0.06, 0.25), T(sa), pan=0.3)
         if m:
             put(SFX, boing(0.3, 0.18), T(t + 0.35), pan=0.5)
             put(SFX, mascot_voice(m.get('who', 'fistik')), T(t + 0.5), 0.45, pan=0.5)

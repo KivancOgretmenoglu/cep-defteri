@@ -12,6 +12,20 @@ function defineValue() {
     const s = scene(t0, o.bg || 'var(--paper)', o.wipe || [540, 1200], o.wdur ?? 0.3);
     const bg = el('div', 'abs', s.root, { inset: 0 });
     pattern(s.root, 'rgba(0,0,0,.05)');
+    const D = o.decor || null;
+    let ghost = null, props = [], segs = [];
+    if (D) {
+      // sol altta soluk dev kart numarası
+      ghost = el('div', 'abs it', s.root, { left: '24px', top: '1180px', fontSize: '760px', lineHeight: 0.8, opacity: 0.12, whiteSpace: 'nowrap' });
+      // yavaşça süzülen pixel paralar / yüzdeler (maskotla aynı pixel dili)
+      props = Array.from({ length: 8 }, (_, i) => {
+        const p = D.props === 'percent'
+          ? Object.assign(el('div', 'abs it', s.root, { fontSize: px(120 + (i % 3) * 40), color: 'rgba(42,30,26,.16)' }), { textContent: i % 3 === 2 ? '÷' : '%' })
+          : i % 2 ? pixEl(s.root, NOTE, NOTE_CS[i % 3], 12) : pixEl(s.root, TLCOIN, TLCOIN_C, 14);
+        p.style.opacity = D.props === 'percent' ? 1 : 0.5;
+        return { p, x: 40 + ((i * 397) % 900), y: (i * 271) % 1900, sp: 30 + (i % 4) * 12, ph: i * 1.7 };
+      });
+    }
     const items = (o.items || []).map((it) => {
       const card = el('div', 'abs', s.root, { left: '56px', right: '56px', top: px(o.top ?? 470), borderRadius: '56px', background: '#FFFDF8', boxShadow: '0 40px 90px -30px rgba(40,20,10,.45)', padding: '56px 56px 60px', display: 'none' });
       const head = el('div', '', card, { display: 'flex', alignItems: 'center', gap: '30px' });
@@ -26,12 +40,24 @@ function defineValue() {
         ex = el('div', '', card, { marginTop: '40px', borderRadius: '36px', background: it.exBg || '#F6EEE6', padding: '34px 40px' });
         if (it.exLabel !== false) { const l = el('div', '', ex, { fontSize: '34px', fontWeight: 800, color: '#8a7d72', letterSpacing: '.06em' }); l.textContent = it.exLabel || 'ÖRNEK'; }
         rows = (it.ex || []).map((r) => { const e = el('div', '', ex, { fontSize: '46px', fontWeight: 700, marginTop: '10px', lineHeight: 1.25 }); e.innerHTML = r; return e; });
-        if (it.big) big = el('div', 'it', ex, { fontSize: px(it.bigSize || 140), color: it.color || 'var(--acc)', marginTop: '10px', lineHeight: 1 });
+        if (it.big) big = el('div', 'it', ex, { fontSize: px(it.bigSize || 140), color: it.color || 'var(--acc)', marginTop: '10px', lineHeight: 1, display: 'inline-block', transformOrigin: '0 60%' });
+      }
+      const sparks = D && big ? Array.from({ length: 10 }, (_, j) => { ex.style.position = 'relative'; return el('div', 'abs', ex, { width: '18px', height: '18px', background: j % 3 ? it.color || 'var(--acc)' : '#F2B63C' }); }) : [];
+      let say = null;
+      if (D && it.mascot && it.mascot.say) {
+        say = el('div', 'abs it', s.root, { right: px(1080 - (it.mascot.x ?? 800) + 250), top: '1470px', background: '#fff', border: '7px solid #2A1E1A', borderRadius: '30px', padding: '6px 30px 10px', fontSize: '76px', whiteSpace: 'nowrap', transformOrigin: '100% 100%', zIndex: 4, boxShadow: '0 8px 0 rgba(42,30,26,.25)' });
+        say.textContent = it.mascot.say;
+        el('div', 'abs', say, { right: '-22px', bottom: '22px', width: '30px', height: '30px', background: '#fff', borderRight: '7px solid #2A1E1A', borderBottom: '7px solid #2A1E1A', transform: 'rotate(-45deg)' });
       }
       const m = it.mascot ? new Mascot(s.root, { who: it.mascot.who || 'fistik', w: it.mascot.w || 576, outfit: it.mascot.outfit || null }) : null;
-      return { ...it, bigTpl: it.big, card, rows, big, m };
+      return { ...it, bigTpl: it.big, card, rows, big, m, sparks, say };
     });
-    const counter = el('div', 'pill', s.root, { right: '56px', top: '130px', fontSize: '38px', color: '#6e5f55', zIndex: 3 });
+    const counter = el('div', 'pill', s.root, { right: '56px', top: D ? '236px' : '130px', fontSize: '38px', color: '#6e5f55', zIndex: 3 });
+    if (D && D.topic) { const tp = el('div', 'pill', s.root, { left: '56px', top: '236px', fontSize: '38px', color: '#2A1E1A', zIndex: 3, whiteSpace: 'nowrap' }); tp.innerHTML = D.topic; }
+    if (D) {
+      const bar = el('div', 'abs', s.root, { left: '56px', right: '56px', top: '352px', height: '16px', display: 'flex', gap: '14px', zIndex: 3 });
+      segs = items.map((it) => { const g = el('div', '', bar, { flex: 1, borderRadius: '8px', background: 'rgba(42,30,26,.12)', overflow: 'hidden' }); return el('div', '', g, { height: '100%', width: '0', background: it.color || 'var(--acc)' }); });
+    }
     const RS = o.rowStart ?? 0.9, RG = o.rowGap ?? 0.45, CD = o.countDur ?? 0.7, FAST = !!o.fast;
     const pat = s.root.querySelector('.pattern');
     s.update = (lt) => {
@@ -46,10 +72,24 @@ function defineValue() {
       counter.style.display = o.counter === false || idx < 0 ? 'none' : 'flex';
       if (idx >= 0) counter.textContent = `${idx + 1}/${items.length}`;
       if (idx >= 0) bg.style.background = items[idx].bg || 'transparent';
+      if (D) {
+        props.forEach((q) => {
+          const y = (((q.y - lt * q.sp) % 2100) + 2100) % 2100 - 180;
+          q.p.style.transform = `translate(${q.x + Math.sin(lt * 1.3 + q.ph) * 30}px,${y}px) rotate(${Math.sin(lt + q.ph) * 14}deg)`;
+        });
+        segs.forEach((f, i) => { const a = items[i].t, b = items[i + 1] ? items[i + 1].t : o.dur ?? a + 4.4; f.style.width = prog(lt, a, b - a) * 100 + '%'; });
+        if (idx >= 0) {
+          const it = items[idx], gk = E.out(prog(lt - it.t, 0, 0.45));
+          ghost.textContent = it.badge ?? it.num;
+          ghost.style.color = it.color || 'var(--acc)';
+          ghost.style.transform = `translate(${(1 - gk) * -260}px,${Math.sin(lt * 1.5) * 12}px) rotate(${-6 + (1 - gk) * -10}deg)`;
+        }
+      }
       items.forEach((it, i) => {
         const on = i === idx;
         it.card.style.display = on ? 'block' : 'none';
         if (it.m) it.m.root.style.display = on ? 'block' : 'none';
+        if (it.say && !on) it.say.style.display = 'none';
         if (!on) return;
         const k = lt - it.t;
         const sl = FAST ? E.back(prog(k, 0, 0.32)) : E.out(prog(k, 0, 0.3));
@@ -65,6 +105,21 @@ function defineValue() {
           it.big.innerHTML = it.bigTo != null ? countText(it.bigTpl, k, a, CD, it.bigTo, it.bigDec || 0) : it.bigTpl;
           const hitK = prog(k, a + CD, 0.3);  // sayı yerine oturunca çarpar
           it.big.style.transform = FAST ? `scale(${1 + 0.3 * Math.sin(hitK * Math.PI)}) rotate(${Math.sin(hitK * Math.PI) * -4}deg)` : `scale(${1 + 0.12 * Math.sin(prog(k, a + CD, 0.3) * Math.PI)})`;
+        }
+        if (it.sparks.length) {  // sayı oturunca kıvılcım patlar
+          const hitAt = RS + it.rows.length * RG + CD, sk = prog(k, hitAt, 0.45);
+          const cx = it.big.offsetLeft + Math.min(it.big.offsetWidth, 520) * 0.5, cy = it.big.offsetTop + it.big.offsetHeight * 0.5;
+          it.sparks.forEach((e, j) => {
+            const ang = (j / it.sparks.length) * Math.PI * 2 + 0.3, r = 60 + E.out(sk) * (150 + (j % 3) * 40);
+            e.style.display = sk > 0 && sk < 1 ? 'block' : 'none';
+            e.style.transform = `translate(${cx + Math.cos(ang) * r * 1.4 - 9}px,${cy + Math.sin(ang) * r * 0.7 - 9}px) scale(${1 - sk * 0.7})`;
+          });
+        }
+        if (it.say) {
+          const sayAt = it.mascot.sayAt ?? (it.big ? RS + it.rows.length * RG + CD + 0.1 : RS + it.rows.length * RG + 0.2);
+          const sp = prog(k, sayAt, 0.3);
+          it.say.style.display = sp > 0 ? 'block' : 'none';
+          it.say.style.transform = `scale(${E.back(sp)}) rotate(${-4 + Math.sin(lt * 6) * 2}deg)`;
         }
         if (it.m) {
           const M = it.mascot;
