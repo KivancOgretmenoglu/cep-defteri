@@ -274,14 +274,14 @@ function defineValue() {
     const s = scene(t0, '#FBEAD0', undefined, o.wdur ?? 0.6);
     pattern(s.root, 'rgba(174,71,22,.08)');
     const tag = (x, head, val, sub, c) => {
-      const e = el('div', 'abs', s.root, { left: px(x), top: '600px', width: '420px', borderRadius: '40px', background: '#fff', padding: '40px 30px 46px', textAlign: 'center', boxShadow: '0 30px 60px -20px rgba(40,20,10,.45)', border: `8px solid ${c}` });
+      const e = el('div', 'abs', s.root, { left: px(x), top: '760px', width: '420px', borderRadius: '40px', background: '#fff', padding: '40px 30px 46px', textAlign: 'center', boxShadow: '0 30px 60px -20px rgba(40,20,10,.45)', border: `8px solid ${c}` });
       e.innerHTML = `<div style="font-size:44px;font-weight:800;color:${c};letter-spacing:.04em">${head}</div><div class="it" style="font-size:130px;line-height:1;margin-top:14px">${val}</div><div style="font-size:40px;font-weight:700;color:#6e5f55;margin-top:6px">${sub}</div>`;
       return e;
     };
     const a = tag(60, 'PEŞİN', o.cash || '12.000', 'TL, bugün', '#AE4716');
     const b = tag(600, 'TAKSİT', o.inst || '6 × 2.000', 'TL, 6 ayda', '#2F8F5A');
-    const sign = el('div', 'abs it', s.root, { left: '540px', top: '700px', fontSize: '200px', color: '#2A1E1A', zIndex: 3 });
-    const crown = el('div', 'abs pill', s.root, { left: '810px', top: '470px', fontSize: '44px', color: '#2F8F5A', whiteSpace: 'nowrap', zIndex: 4 });
+    const sign = el('div', 'abs it', s.root, { left: '540px', top: '860px', fontSize: '200px', color: '#2A1E1A', zIndex: 3 });
+    const crown = el('div', 'abs pill', s.root, { left: '810px', top: '630px', fontSize: '48px', color: '#2F8F5A', whiteSpace: 'nowrap', zIndex: 4 });
     crown.textContent = o.win || 'daha ucuz!';
     const m = new Mascot(s.root, { w: 640, who: o.who || 'ceviz' });
     s.update = (lt) => {
@@ -309,11 +309,11 @@ function defineValue() {
     const s = scene(t0, '#DEE2F6', undefined, o.wdur ?? 0.6);
     pattern(s.root, 'rgba(67,81,163,.10)');
     const pc = Array.from({ length: 10 }, (_, i) => { const e = el('div', 'abs it', s.root, { fontSize: px(90 + (i % 3) * 50), color: 'rgba(67,81,163,.25)' }); e.textContent = '%'; return e; });
-    const calc = el('div', 'abs', s.root, { left: '130px', right: '130px', top: '520px', borderRadius: '56px', background: '#2A2F45', padding: '44px', boxShadow: '0 40px 90px -30px rgba(20,25,60,.6)' });
+    const calc = el('div', 'abs', s.root, { left: '150px', right: '150px', top: '700px', borderRadius: '56px', background: '#2A2F45', padding: '44px', boxShadow: '0 40px 90px -30px rgba(20,25,60,.6)' });
     const scr = el('div', 'it', calc, { borderRadius: '28px', background: '#C9D8B6', color: '#1E2A16', fontSize: '128px', textAlign: 'right', padding: '24px 36px', lineHeight: 1, whiteSpace: 'nowrap' });
     const keys = el('div', '', calc, { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '22px', marginTop: '34px' });
-    '789÷456×123−0%=+'.split('').forEach((k) => { const e = el('div', 'it', keys, { height: '100px', borderRadius: '24px', background: '=+−×÷%'.includes(k) ? '#4351A3' : '#454B66', color: '#fff', fontSize: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center' }); e.textContent = k; });
-    const stamp = el('div', 'abs it', s.root, { left: '50%', top: '860px', fontSize: '210px', color: '#E8322A', textShadow: '0 10px 0 #7A1410', zIndex: 6, whiteSpace: 'nowrap' });
+    '789÷456×123−0%=+'.split('').forEach((k) => { const e = el('div', 'it', keys, { height: '86px', borderRadius: '24px', background: '=+−×÷%'.includes(k) ? '#4351A3' : '#454B66', color: '#fff', fontSize: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center' }); e.textContent = k; });
+    const stamp = el('div', 'abs it', s.root, { left: '50%', top: '1000px', fontSize: '210px', color: '#E8322A', textShadow: '0 10px 0 #7A1410', zIndex: 6, whiteSpace: 'nowrap' });
     stamp.textContent = o.stamp || 'YANLIŞ!';
     const m = new Mascot(s.root, { w: 576, who: o.who || 'bilge', outfit: o.outfit || 'spy' });
     const full = o.text || '%3×12=%36';

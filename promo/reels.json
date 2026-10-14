@@ -1727,25 +1727,41 @@
         0,
         1.1,
         "Peşin ödemek seni<br><b>fakirleştirebilir</b>",
-        180
+        330,
+        {
+          "size": 100,
+          "pulse": true
+        }
       ],
       [
         1.1,
         2.0,
-        "Sonda: <b>5 saniyelik hesap</b>",
-        180
+        "Sonda:<br><b>5 saniyelik hesap</b>",
+        330,
+        {
+          "size": 100,
+          "pulse": true
+        }
       ],
       [
         13.4,
         15.0,
-        "Taksitle alan arkadaşına<br><b>gönder</b>",
-        1140
+        "Taksitle alan<br>arkadaşına <b>gönder</b>",
+        1220,
+        {
+          "size": 84,
+          "pulse": true
+        }
       ],
       [
         15.0,
         15.56,
         "Peşin ödemek seni<br><b>fakirleştirebilir</b>",
-        180
+        330,
+        {
+          "size": 100,
+          "pulse": true
+        }
       ]
     ],
     "scenes": [
@@ -1811,8 +1827,7 @@
               "bg": "#F8DCC8",
               "mascot": {
                 "who": "karamel",
-                "mood": "thoughtful",
-                "say": "bu kadar!"
+                "mood": "thoughtful"
               },
               "ex": [
                 "Peşin indirim %10 > %7 → <b style='color:#2F8F5A'>PEŞİN</b>",
@@ -1882,25 +1897,41 @@
         0,
         1.1,
         "Bu 3 yüzde<br><b>seni kandırıyor</b>",
-        180
+        330,
+        {
+          "size": 100,
+          "pulse": true
+        }
       ],
       [
         1.1,
         1.9,
-        "3.sü en <b>sinsisi</b>",
-        180
+        "3.sü en<br><b>sinsisi</b>",
+        330,
+        {
+          "size": 100,
+          "pulse": true
+        }
       ],
       [
         12.5,
         14.0,
-        "İndirim avcısı arkadaşına<br><b>gönder</b>",
-        1140
+        "İndirim avcısı<br>arkadaşına <b>gönder</b>",
+        1220,
+        {
+          "size": 84,
+          "pulse": true
+        }
       ],
       [
         14.0,
         14.55,
         "Bu 3 yüzde<br><b>seni kandırıyor</b>",
-        180
+        330,
+        {
+          "size": 100,
+          "pulse": true
+        }
       ]
     ],
     "scenes": [
@@ -1968,8 +1999,7 @@
               "bg": "#F8DCC8",
               "mascot": {
                 "who": "pamuk",
-                "mood": "thoughtful",
-                "say": "aynı fiyat!"
+                "mood": "thoughtful"
               },
               "ex": [
                 "1.000 → 2.000 → "
