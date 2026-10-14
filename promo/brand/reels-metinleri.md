@@ -201,45 +201,42 @@ Kaydet, burs yatınca aç 📌
 
 ---
 
-## 10 · pesin-mi-taksit-mi (bilgi, müzik: pop 108 BPM, 19 sn)
+## 10 · pesin-mi-taksit-mi (bilgi, döngülü, 15,6 sn, müzik: pop 108 BPM)
 
-**Açıklama:**
+**Açıklama** (ilk satır arama için anahtar kelimeli):
 ```
-Paran olsa bile peşin ödeme 💸 (önce bu hesabı yap)
+Peşin mi taksit mi? Enflasyonda hangisi daha ucuz 💸
 
-1. Vade farksız taksit, faizsiz borçtur. Enflasyon varken bugünkü 2.000 TL, 5 ay sonraki 2.000 TL'den değerlidir.
-   Örnek: 12.000 TL'lik ürün, 6 × 2.000 TL. Aylık %2 enflasyon varsayımıyla taksitlerin bugünkü değeri ≈ 11.200 TL.
-2. Peşin indirim varsa kısa hesap: (taksit sayısı + 1) ÷ 2 × aylık enflasyon.
-   6 taksit, aylık %2 → ≈ %7. Peşin indirim %7'den fazlaysa peşin, azsa taksit.
-3. İki şart: taksitli fiyat peşin fiyatla aynı olmalı (vade farkı yok) ve taksit parası kenarda durmalı, harcanmamalı. Vade farkı varsa peşin al.
+1. Vade farksız taksit, faizsiz borçtur. 12.000 TL'lik ürün, 6 × 2.000 TL taksit: aylık %2 enflasyon varsayımıyla taksitlerin bugünkü değeri ≈ 11.200 TL.
+2. Peşin indirimin sınırı = (taksit sayısı + 1) ÷ 2 × aylık enflasyon. 6 taksit, aylık %2 → ≈ %7.
+3. Peşin indirim %7'den büyükse peşin, küçükse taksit. Şartlar: taksitli fiyat peşinle aynı olmalı (vade farkı yok), taksit parası kenarda durmalı.
 
 Örnekteki enflasyon varsayımdır, yatırım tavsiyesi değildir.
-Kaydet, büyük alışverişte aç 📌
+📌 Kaydet, büyük alışverişten önce aç.
 
-#taksit #peşin #enflasyon #öğrencibütçesi #paranınzamandeğeri
+#taksit #peşin #enflasyon #öğrencibütçesi #kredikartı
 ```
 
 **Test için alternatif hook'lar:**
-- "Taksit bazen peşinden ucuz. Nasıl mı?"
-- "12.000 TL'lik taksit aslında 11.200 TL"
+- "Taksit bazen peşinden ucuz"
+- "12.000 TL'lik taksit aslında 11.200"
 
 **Hesap notu:** 2.000 × (1 − 1,02⁻⁶) ÷ 0,02 = 11.203 TL (ilk taksit 1 ay sonra). Tam avantaj %6,6; kısa formül ≈ %7 verir.
 
 ---
 
-## 11 · yuzde-tuzaklari (bilgi, müzik: quiz, 19 sn)
+## 11 · yuzde-tuzaklari (bilgi, döngülü, 14,6 sn, müzik: quiz)
 
 **Açıklama:**
 ```
-Bu 3 yüzde hesabı seni kandırıyor 🧮
+Faiz, enflasyon ve indirim hesabında 3 yüzde tuzağı 🧮
 
 1. Aylık × 12 ≠ yıllık. Faiz faize eklenir: aylık %3, bir yılda %36 değil %42,6 olur (1,03¹²). Kredi kartı ve KMH faizine bakarken bunu hatırla.
-2. Faiz − enflasyon ≠ kazanç. Gerçek kazanç = (1 + faiz) ÷ (1 + enflasyon) − 1.
-   Faiz %40, enflasyon %30 → %10 değil, %7,7.
-3. Zam + indirim tuzağı: önce %100 zam, sonra %50 indirim → fiyat aynı. 1.000 → 2.000 → 1.000 TL. Büyük indirim günlerinden önce fiyat geçmişine bak.
+2. Faiz − enflasyon ≠ kazanç. Gerçek kazanç = (1 + faiz) ÷ (1 + enflasyon) − 1. Faiz %40, enflasyon %30 → %10 değil, %7,7.
+3. Önce %100 zam, sonra %50 indirim → fiyat aynı: 1.000 → 2.000 → 1.000 TL. Büyük indirim günlerinden önce fiyat geçmişine bak.
 
 Örnek oranlar varsayımdır, yatırım tavsiyesi değildir.
-Arkadaşına at, o da kandırılmasın 👀
+📌 Kaydet, indirim gününde aç.
 
 #faiz #enflasyon #indirim #öğrencibütçesi #finansokuryazarlığı
 ```

@@ -1471,7 +1471,7 @@ PLAN = REEL.get('musicPlan')
 if PLAN:
     for i, seg in enumerate(PLAN):
         a, b, style = seg[:3]
-        STYLES[style](a, b, last=(i == len(PLAN) - 1), **(seg[3] if len(seg) > 3 else {}))
+        STYLES[style](a, b, last=(i == len(PLAN) - 1) and not REEL.get('loop'), **(seg[3] if len(seg) > 3 else {}))
     for c in range(2):  # chip türünün kick pompası
         MUS[:, c] *= duck
 elif music_start is not None:
@@ -1540,7 +1540,8 @@ def master(mix, target_db=-15.5):
     if tp > 0.89:
         mix *= 0.89 / tp
     fade = np.ones(N)
-    fade[-int(0.4 * SR):] = np.linspace(1, 0, int(0.4 * SR))
+    fl = int((0.02 if REEL.get('loop') else 0.4) * SR)  # döngülü reels başa sessizce bağlanır
+    fade[-fl:] = np.linspace(1, 0, fl)
     return mix * fade[:, None]
 
 

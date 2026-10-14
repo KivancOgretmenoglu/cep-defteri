@@ -1708,14 +1708,14 @@
   },
   "pesin-mi-taksit-mi": {
     "title": "Bilgi: peşin mi taksit mi? (enflasyonda paranın zaman değeri)",
-    "end": 18.8,
+    "end": 15.56,
     "handheld": true,
     "musicGain": 0.8,
     "noMusicVariant": true,
     "musicPlan": [
       [
         0,
-        18.8,
+        15.56,
         "pop",
         {
           "bpm": 108
@@ -1726,20 +1726,26 @@
       [
         0,
         1.1,
-        "Paran olsa bile<br><b>peşin ödeme</b>",
+        "Peşin ödemek seni<br><b>fakirleştirebilir</b>",
         180
       ],
       [
         1.1,
-        2.2,
-        "Taksit bazen<br><b>daha ucuz</b>",
+        2.0,
+        "Sonda: <b>5 saniyelik hesap</b>",
         180
       ],
       [
-        16.2,
-        18.8,
-        "Kaydet, bir dahaki<br><b>büyük alışverişte aç</b>",
-        250
+        13.4,
+        15.0,
+        "Taksitle alan arkadaşına<br><b>gönder</b>",
+        1140
+      ],
+      [
+        15.0,
+        15.56,
+        "Peşin ödemek seni<br><b>fakirleştirebilir</b>",
+        180
       ]
     ],
     "scenes": [
@@ -1753,14 +1759,14 @@
       ],
       [
         "cards",
-        2.2,
+        2.0,
         {
           "items": [
             {
               "t": 0,
               "num": "1",
-              "title": "Taksit, faizsiz borçtur",
-              "body": "Vade farksız taksitte parayı <b>sonra</b> ödersin. Enflasyon o arada borcunu eritir.",
+              "title": "Taksit = faizsiz borç",
+              "body": "Vade farksızsa, enflasyon borcunu <b>eritir</b>.",
               "color": "#2F8F5A",
               "bg": "#DDEFE9",
               "mascot": {
@@ -1769,123 +1775,132 @@
                 "say": "~800 TL kâr!"
               },
               "ex": [
-                "12.000 TL, 6 × 2.000 TL taksit",
-                "Aylık %2 enflasyonla bugünkü değeri:"
+                "12.000 TL, 6 taksit. Bugünkü değeri:"
               ],
               "big": "≈{n} TL",
-              "bigTo": 11200
+              "bigTo": 11200,
+              "exLabel": "AYLIK %2 ENFLASYONLA"
             },
             {
-              "t": 4.4,
+              "t": 4.1,
               "num": "2",
-              "title": "Peşin indirimi varsa",
-              "body": "İndirim şundan büyükse peşin, küçükse taksit:<br><b style='white-space:nowrap'>(taksit + 1) ÷ 2 × aylık enflasyon</b>",
+              "title": "Peşin indirimin sınırı",
+              "body": "Bu sınırı geçen indirim <b>peşin</b> kazandırır.",
               "color": "#4351A3",
               "bg": "#DEE2F6",
               "mascot": {
                 "who": "bilge",
                 "mood": "curious",
                 "outfit": "scholar",
-                "say": "hesapla!"
+                "say": "not al!"
               },
               "ex": [
-                "6 taksit, aylık %2 enflasyon:",
-                "(6 + 1) ÷ 2 × 2 ="
+                "(taksit + 1) ÷ 2 × aylık enflasyon",
+                "6 taksit, aylık %2 ="
               ],
               "big": "≈ %{n}",
               "bigTo": 7,
-              "exLabel": "SINIR"
+              "exLabel": "FORMÜL"
             },
             {
-              "t": 9.4,
+              "t": 8.4,
               "num": "3",
-              "title": "İki şartı var",
-              "body": "Bu hesap ancak şöyle işler:",
+              "title": "5 saniyede karar",
+              "body": "Taksit parası kenarda dursun, <b>harcama</b>.",
               "color": "#AE4716",
               "bg": "#F8DCC8",
               "mascot": {
                 "who": "karamel",
                 "mood": "thoughtful",
-                "say": "unutma!"
+                "say": "bu kadar!"
               },
               "ex": [
-                "1) Taksitli fiyat = peşin fiyat",
-                "2) Taksit parası kenarda, harcanmıyor",
-                "<span style='color:#C0392B'>Vade farkı varsa peşin al.</span>"
+                "Peşin indirim %10 > %7 → <b style='color:#2F8F5A'>PEŞİN</b>",
+                "Peşin indirim %5 < %7 → <b style='color:#2F8F5A'>TAKSİT</b>"
               ],
-              "exLabel": "ŞARTLAR"
+              "exLabel": "SINIR %7 İSE"
             }
           ],
           "fast": true,
           "rowStart": 0.45,
-          "rowGap": 0.35,
+          "rowGap": 0.5,
           "countDur": 0.5,
+          "dur": 13.0,
           "decor": {
             "topic": "Peşin mi, taksit mi?",
             "props": "money"
-          },
-          "dur": 14.0
+          }
         }
       ],
       [
-        "end",
-        16.2,
+        "tagHook",
+        15.0,
         {
-          "note": "Örnekteki enflasyon varsayımdır. Yatırım tavsiyesi değildir."
+          "flip": 9,
+          "wdur": 0.25
         }
       ]
     ],
     "voice": [
       [
         0.2,
-        "Paran olsa bile peşin ödeme."
+        "Peşin ödemek seni fakirleştirebilir."
       ],
       [
-        2.3,
-        "Vade farksız taksit, faizsiz borçtur. Aylık yüzde iki enflasyonla on iki binlik taksit, bugün on bir bin iki yüz eder."
+        2.1,
+        "Vade farksız taksit, faizsiz borçtur. On iki binlik taksit bugün on bir bin iki yüz eder."
       ],
       [
-        6.7,
-        "Peşin indirim varsa: taksit sayısı artı bir, bölü iki, çarpı aylık enflasyon. İndirim bundan büyükse peşin al."
+        6.2,
+        "Peşin indirim, taksit artı bir bölü iki çarpı aylık enflasyondan büyükse peşin al."
       ],
       [
-        11.7,
-        "Ama taksitli fiyat peşinle aynı olmalı, taksit parası da kenarda durmalı."
-      ],
-      [
-        16.3,
-        "Kaydet, büyük alışverişte aç."
+        10.5,
+        "Yüzde on indirim peşin, yüzde beş taksit. Taksitle alan arkadaşına gönder."
       ]
     ],
     "voiceSettings": {
       "speed": 1.1
-    }
+    },
+    "loop": true
   },
   "yuzde-tuzaklari": {
     "title": "Bilgi: seni kandıran 3 yüzde hesabı",
-    "end": 18.8,
+    "end": 14.55,
     "handheld": true,
     "musicGain": 0.8,
     "noMusicVariant": true,
     "musicPlan": [
       [
         0,
-        18.8,
+        14.55,
         "quiz"
       ]
     ],
     "boxes": [
       [
         0,
-        2.2,
-        "Bu 3 yüzde hesabı<br><b>seni kandırıyor</b>",
+        1.1,
+        "Bu 3 yüzde<br><b>seni kandırıyor</b>",
         180
       ],
       [
-        16.2,
-        18.8,
-        "Arkadaşına at,<br><b>o da kandırılmasın</b>",
-        250
+        1.1,
+        1.9,
+        "3.sü en <b>sinsisi</b>",
+        180
+      ],
+      [
+        12.5,
+        14.0,
+        "İndirim avcısı arkadaşına<br><b>gönder</b>",
+        1140
+      ],
+      [
+        14.0,
+        14.55,
+        "Bu 3 yüzde<br><b>seni kandırıyor</b>",
+        180
       ]
     ],
     "scenes": [
@@ -1899,14 +1914,14 @@
       ],
       [
         "cards",
-        2.2,
+        1.9,
         {
           "items": [
             {
               "t": 0,
               "num": "1",
               "title": "Aylık × 12 ≠ yıllık",
-              "body": "Faiz faize eklenir. Aylık oranı 12'yle çarparsan <b>eksik</b> hesaplarsın.",
+              "body": "Faiz, faize <b>eklenir</b>.",
               "color": "#4351A3",
               "bg": "#DEE2F6",
               "mascot": {
@@ -1916,7 +1931,7 @@
                 "say": "faize faiz!"
               },
               "ex": [
-                "Aylık %3 faiz, 12 ayda:"
+                "Aylık %3, bir yılda:"
               ],
               "big": "%{n}",
               "bigTo": 42.6,
@@ -1924,10 +1939,10 @@
               "exLabel": "%36 DEĞİL"
             },
             {
-              "t": 4.4,
+              "t": 4.0,
               "num": "2",
               "title": "Faiz − enflasyon ≠ kazanç",
-              "body": "Çıkarma değil, bölme yap. Gerçek kazanç:<br><b style='white-space:nowrap'>(1 + faiz) ÷ (1 + enflasyon) − 1</b>",
+              "body": "Çıkarma değil, <b>bölme</b> yap.",
               "color": "#2F8F5A",
               "bg": "#DDEFE9",
               "mascot": {
@@ -1937,17 +1952,18 @@
               },
               "ex": [
                 "Faiz %40, enflasyon %30:",
-                "%10 değil, gerçek kazanç"
+                "1,40 ÷ 1,30 − 1 ="
               ],
               "big": "%{n}",
               "bigTo": 7.7,
-              "bigDec": 1
+              "bigDec": 1,
+              "exLabel": "%10 DEĞİL"
             },
             {
-              "t": 9.4,
+              "t": 8.0,
               "num": "3",
               "title": "Zam + indirim tuzağı",
-              "body": "Önce <b>%100 zam</b>, sonra <b>%50 indirim</b>: fiyat hiç değişmez. İndirimden önce fiyat geçmişine bak.",
+              "body": "Önce <b>%100 zam</b>, sonra <b>%50 indirim</b>:",
               "color": "#AE4716",
               "bg": "#F8DCC8",
               "mascot": {
@@ -1956,56 +1972,55 @@
                 "say": "aynı fiyat!"
               },
               "ex": [
-                "1.000 TL → %100 zam → 2.000 TL",
-                "%50 indirimle yine:"
+                "1.000 → 2.000 → "
               ],
               "big": "{n} TL",
-              "bigTo": 1000
+              "bigTo": 1000,
+              "exLabel": "SONUÇ"
             }
           ],
           "fast": true,
           "rowStart": 0.45,
-          "rowGap": 0.35,
+          "rowGap": 0.5,
           "countDur": 0.5,
+          "dur": 12.1,
           "decor": {
             "topic": "Yüzde tuzakları",
             "props": "percent"
-          },
-          "dur": 14.0
+          }
         }
       ],
       [
-        "end",
-        16.2,
+        "percentHook",
+        14.0,
         {
-          "note": "Örnek oranlar varsayımdır. Yatırım tavsiyesi değildir."
+          "stop": 9,
+          "wdur": 0.25,
+          "text": "%3×12=%36"
         }
       ]
     ],
     "voice": [
       [
         0.2,
-        "Bu üç yüzde hesabı seni kandırıyor."
+        "Bu üç yüzde seni kandırıyor. Üçüncüsü en sinsisi."
       ],
       [
-        2.3,
-        "Bir: aylık yüzde üç, yılda yüzde otuz altı değil; faiz faize eklenir, yüzde kırk iki buçuk."
+        2.0,
+        "Aylık yüzde üç, yılda otuz altı değil, kırk iki buçuk."
       ],
       [
-        6.7,
-        "İki: faiz yüzde kırk, enflasyon yüzde otuzsa kazancın yüzde on değil, yedi buçuk."
+        6.0,
+        "Faiz kırk, enflasyon otuzsa kazancın on değil, yedi buçuk."
       ],
       [
-        11.7,
-        "Üç: önce yüzde yüz zam, sonra yüzde elli indirim. Fiyat aynı."
-      ],
-      [
-        16.3,
-        "Arkadaşına at, o da kandırılmasın."
+        10.0,
+        "Yüzde yüz zam, yüzde elli indirim: aynı fiyat. Arkadaşına gönder."
       ]
     ],
     "voiceSettings": {
       "speed": 1.1
-    }
+    },
+    "loop": true
   }
 }

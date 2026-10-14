@@ -10,6 +10,7 @@ function defineValue() {
   /* ── Bilgi kartları: her kart bir ipucu ── */
   SCENES.cards = (t0, o = {}) => {
     const s = scene(t0, o.bg || 'var(--paper)', o.wipe || [540, 1200], o.wdur ?? 0.3);
+    s.root.style.isolation = 'isolate';  // başlık ve balonlar sonraki sahnenin üstüne taşmasın
     const bg = el('div', 'abs', s.root, { inset: 0 });
     pattern(s.root, 'rgba(0,0,0,.05)');
     const D = o.decor || null;
@@ -270,7 +271,7 @@ function defineValue() {
   /* ── Hook: peşin etiketi ile taksit etiketi; "=" işareti "≠" olur ── */
   SCENES.tagHook = (t0, o = {}) => {
     const FLIP = o.flip ?? 0.6;
-    const s = scene(t0, '#FBEAD0');
+    const s = scene(t0, '#FBEAD0', undefined, o.wdur ?? 0.6);
     pattern(s.root, 'rgba(174,71,22,.08)');
     const tag = (x, head, val, sub, c) => {
       const e = el('div', 'abs', s.root, { left: px(x), top: '600px', width: '420px', borderRadius: '40px', background: '#fff', padding: '40px 30px 46px', textAlign: 'center', boxShadow: '0 30px 60px -20px rgba(40,20,10,.45)', border: `8px solid ${c}` });
@@ -305,7 +306,7 @@ function defineValue() {
   /* ── Hook: hesap makinesi "%3 × 12 = %36" → "YANLIŞ" damgası ── */
   SCENES.percentHook = (t0, o = {}) => {
     const STOP = o.stop ?? 0.7;
-    const s = scene(t0, '#DEE2F6');
+    const s = scene(t0, '#DEE2F6', undefined, o.wdur ?? 0.6);
     pattern(s.root, 'rgba(67,81,163,.10)');
     const pc = Array.from({ length: 10 }, (_, i) => { const e = el('div', 'abs it', s.root, { fontSize: px(90 + (i % 3) * 50), color: 'rgba(67,81,163,.25)' }); e.textContent = '%'; return e; });
     const calc = el('div', 'abs', s.root, { left: '130px', right: '130px', top: '520px', borderRadius: '56px', background: '#2A2F45', padding: '44px', boxShadow: '0 40px 90px -30px rgba(20,25,60,.6)' });
