@@ -1146,6 +1146,26 @@ def cue_mailHook(t0, skip=0, o=None):
     put(SFX, notif_ding(), T(0.05), 0.7)
     put(SFX, popper(), T(0.3), 0.4)
 
+def cue_tagHook(t0, skip=0, o=None):
+    T = at(t0, skip)
+    fl = (o or {}).get('flip', 0.6)
+    for k in range(3):  # gözler etiketler arasında gidip gelir
+        put(SFX, ui_tap(0.3), T(0.05 + k * 0.18), pan=(-0.5 if k % 2 else 0.5))
+    put(SFX, stamp(), T(fl), 0.9)
+    put(SFX, slam_hit(0.8), T(fl), 0.6)
+    put(SFX, fm_bell(1568, 0.8, 0.25), T(fl + 0.12))
+
+
+def cue_percentHook(t0, skip=0, o=None):
+    T = at(t0, skip)
+    o = o or {}
+    st = o.get('stop', 0.7)
+    n = len(o.get('text', '%3×12=%36'))
+    for k in range(n):  # tuşlara basılır
+        put(SFX, tick(k % 2 == 0, 0.3), T(k * (st - 0.1) / n), pan=0.2)
+    put(SFX, stamp(), T(st), 1.0)
+    put(SFX, slam_hit(0.7), T(st), 0.7)
+
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
 # ═════════ ANA MÜZİK ═════════

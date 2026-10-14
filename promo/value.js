@@ -1,9 +1,9 @@
 /* Faydalı bilgi reelsleri: hook görselleri ve bilgi kartları. */
 
 /** "12.000" gibi Türkçe biçimli sayıyı sayar; metindeki {n} yerine konur */
-function countText(tpl, lt, a, d, to) {
+function countText(tpl, lt, a, d, to, dec = 0) {
   const v = E.out(prog(lt, a, d)) * to;
-  return tpl.replace('{n}', fmt(v));
+  return tpl.replace('{n}', dec ? v.toFixed(dec).replace('.', ',') : fmt(v));
 }
 
 function defineValue() {
@@ -62,7 +62,7 @@ function defineValue() {
         if (it.big) {
           const a = RS + it.rows.length * RG;
           it.big.style.opacity = prog(k, a, 0.12);
-          it.big.innerHTML = it.bigTo != null ? countText(it.bigTpl, k, a, CD, it.bigTo) : it.bigTpl;
+          it.big.innerHTML = it.bigTo != null ? countText(it.bigTpl, k, a, CD, it.bigTo, it.bigDec || 0) : it.bigTpl;
           const hitK = prog(k, a + CD, 0.3);  // sayı yerine oturunca çarpar
           it.big.style.transform = FAST ? `scale(${1 + 0.3 * Math.sin(hitK * Math.PI)}) rotate(${Math.sin(hitK * Math.PI) * -4}deg)` : `scale(${1 + 0.12 * Math.sin(prog(k, a + CD, 0.3) * Math.PI)})`;
         }
@@ -209,6 +209,73 @@ function defineValue() {
       const h = hop(lt, 0.55, 40);
       m.set('celebrate', Math.floor(lt / 0.2) % 2 ? 'wave' : 'up', blink(lt));
       m.put(540, 1960 - h.y, { sx: h.sx, sy: h.sy });
+    };
+  };
+
+  /* ── Hook: peşin etiketi ile taksit etiketi; "=" işareti "≠" olur ── */
+  SCENES.tagHook = (t0, o = {}) => {
+    const FLIP = o.flip ?? 0.6;
+    const s = scene(t0, '#FBEAD0');
+    pattern(s.root, 'rgba(174,71,22,.08)');
+    const tag = (x, head, val, sub, c) => {
+      const e = el('div', 'abs', s.root, { left: px(x), top: '600px', width: '420px', borderRadius: '40px', background: '#fff', padding: '40px 30px 46px', textAlign: 'center', boxShadow: '0 30px 60px -20px rgba(40,20,10,.45)', border: `8px solid ${c}` });
+      e.innerHTML = `<div style="font-size:44px;font-weight:800;color:${c};letter-spacing:.04em">${head}</div><div class="it" style="font-size:130px;line-height:1;margin-top:14px">${val}</div><div style="font-size:40px;font-weight:700;color:#6e5f55;margin-top:6px">${sub}</div>`;
+      return e;
+    };
+    const a = tag(60, 'PEŞİN', o.cash || '12.000', 'TL, bugün', '#AE4716');
+    const b = tag(600, 'TAKSİT', o.inst || '6 × 2.000', 'TL, 6 ayda', '#2F8F5A');
+    const sign = el('div', 'abs it', s.root, { left: '540px', top: '700px', fontSize: '200px', color: '#2A1E1A', zIndex: 3 });
+    const crown = el('div', 'abs pill', s.root, { left: '810px', top: '470px', fontSize: '44px', color: '#2F8F5A', whiteSpace: 'nowrap', zIndex: 4 });
+    crown.textContent = o.win || 'daha ucuz!';
+    const m = new Mascot(s.root, { w: 640, who: o.who || 'ceviz' });
+    s.update = (lt) => {
+      const fl = lt >= FLIP;
+      sign.textContent = fl ? '≠' : '=';
+      const sp = prog(lt, FLIP, 0.25);
+      sign.style.color = fl ? '#D7372B' : '#2A1E1A';
+      sign.style.transform = `translateX(-50%) scale(${fl ? 1 + 0.6 * Math.sin(sp * Math.PI) : 1}) rotate(${fl ? (1 - E.out(sp)) * 180 : Math.sin(lt * 10) * 8}deg)`;
+      const sh = fl ? shake(lt, FLIP, 26, 0.3) : 0;
+      a.style.transform = `translate(${sh}px,${fl ? E.out(sp) * 40 : Math.sin(lt * 5) * 8}px) rotate(${fl ? -4 * E.out(sp) : 0}deg) scale(${fl ? 1 - 0.08 * E.out(sp) : 1})`;
+      b.style.transform = `translate(${-sh}px,${fl ? -E.out(sp) * 40 : Math.sin(lt * 5 + 1) * 8}px) rotate(${fl ? 3 * E.out(sp) : 0}deg) scale(${fl ? 1 + 0.08 * E.back(sp) : 1})`;
+      const cp = E.back(prog(lt, FLIP + 0.1, 0.3));
+      crown.style.opacity = cp > 0 ? 1 : 0;
+      crown.style.transform = `translateX(-50%) scale(${cp}) rotate(6deg)`;
+      const h = fl ? hop(lt, 0.4, 40) : { y: 0, sx: 1, sy: 1 };
+      const look = Math.sin(lt * 7) > 0;
+      m.set(fl ? 'happy' : 'thoughtful', fl ? 'up' : null, fl ? 'wide' : blink(lt));
+      m.put(540, 1960 - h.y, { sx: h.sx, sy: h.sy, flip: fl ? false : look });
+    };
+  };
+
+  /* ── Hook: hesap makinesi "%3 × 12 = %36" → "YANLIŞ" damgası ── */
+  SCENES.percentHook = (t0, o = {}) => {
+    const STOP = o.stop ?? 0.7;
+    const s = scene(t0, '#DEE2F6');
+    pattern(s.root, 'rgba(67,81,163,.10)');
+    const pc = Array.from({ length: 10 }, (_, i) => { const e = el('div', 'abs it', s.root, { fontSize: px(90 + (i % 3) * 50), color: 'rgba(67,81,163,.25)' }); e.textContent = '%'; return e; });
+    const calc = el('div', 'abs', s.root, { left: '130px', right: '130px', top: '520px', borderRadius: '56px', background: '#2A2F45', padding: '44px', boxShadow: '0 40px 90px -30px rgba(20,25,60,.6)' });
+    const scr = el('div', 'it', calc, { borderRadius: '28px', background: '#C9D8B6', color: '#1E2A16', fontSize: '128px', textAlign: 'right', padding: '24px 36px', lineHeight: 1, whiteSpace: 'nowrap' });
+    const keys = el('div', '', calc, { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '22px', marginTop: '34px' });
+    '789÷456×123−0%=+'.split('').forEach((k) => { const e = el('div', 'it', keys, { height: '100px', borderRadius: '24px', background: '=+−×÷%'.includes(k) ? '#4351A3' : '#454B66', color: '#fff', fontSize: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center' }); e.textContent = k; });
+    const stamp = el('div', 'abs it', s.root, { left: '50%', top: '860px', fontSize: '210px', color: '#E8322A', textShadow: '0 10px 0 #7A1410', zIndex: 6, whiteSpace: 'nowrap' });
+    stamp.textContent = o.stamp || 'YANLIŞ!';
+    const m = new Mascot(s.root, { w: 576, who: o.who || 'bilge', outfit: o.outfit || 'spy' });
+    const full = o.text || '%3×12=%36';
+    s.update = (lt) => {
+      pc.forEach((e, i) => {
+        const p = (lt * 0.5 + i / pc.length) % 1;
+        e.style.transform = `translate(${(i * 233) % 1000}px,${1900 - p * 1700}px) rotate(${p * 90 - 45}deg)`;
+      });
+      const n = Math.min(full.length, Math.floor(prog(lt, 0, STOP - 0.1) * full.length + 0.999));
+      scr.textContent = full.slice(0, Math.max(1, n));
+      const st = lt >= STOP, sp = prog(lt, STOP, 0.18);
+      scr.style.color = st ? '#C0392B' : '#1E2A16';
+      calc.style.transform = `translate(${st ? shake(lt, STOP, 30, 0.35) : 0}px,0) rotate(${st ? -2 : 0}deg)`;
+      stamp.style.opacity = st ? 1 : 0;
+      stamp.style.transform = `translateX(-50%) scale(${lerp(3, 1, E.out(sp))}) rotate(${-10 + (lt > STOP + 0.3 ? Math.sin(lt * 12) * 2 : 0)}deg)`;
+      const h = st ? hop(lt, 0.4, 30) : { y: 0, sx: 1, sy: 1 };
+      m.set(st ? 'curious' : 'thoughtful', st ? 'up' : null, st ? 'wide' : blink(lt));
+      m.put(820, 1980 - h.y, { sx: h.sx, sy: h.sy, flip: true });
     };
   };
 }
