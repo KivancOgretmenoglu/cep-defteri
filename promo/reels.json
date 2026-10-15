@@ -2937,5 +2937,35 @@
     ],
     "captionMaxWords": 3,
     "captionUntil": 15.05
+  },
+  "indirim-yanilgisi-kapak": {
+    "title": "Kapak: indirim yanılgısı",
+    "end": 1.0,
+    "boxes": [
+      [
+        0,
+        1,
+        "Yarı fiyata aldın.<br><b>Kaç lira kazandın?</b>",
+        250,
+        {
+          "size": 104
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "saleTag",
+        0,
+        {
+          "sale": -1,
+          "brag": -1,
+          "floor": 1930,
+          "bragX": 800,
+          "thinkX": "44px",
+          "thinkY": "1400px",
+          "thinkS": 54
+        }
+      ]
+    ]
   }
 }
