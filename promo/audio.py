@@ -1256,6 +1256,46 @@ def cue_lesson(t0, skip=0, o=None):
     put(SFX, popper(), T(b + 0.05), 0.5)
     put(SFX, ding_ding(), T(b + 0.2), 0.6)
 
+def cue_menuBoard(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    put(SFX, notif_ding(), T(0.25), 0.4)
+    if 'pick' in o:
+        put(SFX, ding_ding(), T(o['pick']), 0.6); put(SFX, popper(), T(o['pick'] + 0.05), 0.4); put(SFX, meow(1.2, 0.4), T(o['pick'] + 0.2), 0.5, pan=0.3)
+    if 'hide' in o:
+        put(SFX, buzzer(), T(o['hide']), 0.4); put(SFX, stereo_move(whoosh(0.3, 800, 3000), 0, 0.6), T(o['hide']), 0.4)
+    if 'gap' in o:
+        put(SFX, slot_roll(0.4), T(o['gap']), 0.4); put(SFX, fm_bell(1318, 0.6, 0.2), T(o['gap'] + 0.35))
+    if 'trap' in o:
+        put(SFX, stereo_move(whoosh(0.3, 400, 3500), 0.6, 0), T(o['trap']), 0.4); put(SFX, stamp(), T(o['trap'] + 0.25), 0.9); put(SFX, slam_hit(0.9), T(o['trap'] + 0.25), 0.5)
+    cd = o.get('countdown')
+    if cd:
+        for k in range(3):
+            put(SFX, woodblock(k == 2), T(cd[0] + k * cd[1]), 0.8, pan=0.3)
+    for t, st in o.get('fistik', []):
+        if st == 'shock':
+            put(SFX, pitched(meow(1.0, 0.4), 1.3), T(t + 0.05), 0.5, pan=0.3)
+
+
+def cue_saleTag(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    put(SFX, pitched(squeak(), 1.2), T(0.3), 0.4, pan=0.1)
+    if 'sale' in o:
+        put(SFX, paper_tear(), T(o['sale']), 0.5); put(SFX, stamp(), T(o['sale'] + 0.05), 0.8); put(SFX, cash_register(), T(o['sale'] + 0.3), 0.5)
+    if 'brag' in o:
+        put(SFX, popper(), T(o['brag']), 0.5); put(SFX, pitched(squeak(), 1.5), T(o['brag'] + 0.15), 0.5)
+    if 'wallet' in o:
+        put(SFX, stereo_move(whoosh(0.35, 300, 3000), -0.4, 0.4), T(o['wallet'] - 0.3), 0.5); put(SFX, boing(0.4, 0.3), T(o['wallet'] + 0.05))
+    if 'reveal' in o:
+        put(SFX, slam_hit(0.8), T(o['reveal']), 0.7); put(SFX, sad_trombone()[: int(1.1 * SR)], T(o['reveal'] + 0.1), 0.45)
+        for k in range(6):
+            put(SFX, pling(2093 / (1.05 ** k), 0.15, 0.2), T(o['reveal'] + 0.1 + k * 0.1), pan=0.3 * np.sin(k))
+    cd = o.get('countdown')
+    if cd:
+        for k in range(3):
+            put(SFX, woodblock(k == 2), T(cd[0] + k * cd[1]), 0.8, pan=0.3)
+
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
 # ═════════ ANA MÜZİK ═════════

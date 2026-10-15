@@ -7,6 +7,13 @@ function countText(tpl, lt, a, d, to, dec = 0) {
 }
 
 
+/* Kahve bardakları (aynı hücre boyunda üç boy) ve mont */
+const CUP_S = ['oooooo..', 'oKKKKoo.', 'oWWWWo.o', 'oWWWWo.o', 'oWWWWooo', '.oooo...'];
+const CUP_M = ['ooooooo..', 'oKKKKKoo.', 'oWWWWWo.o', 'oWWWWWo.o', 'oWWWWWo.o', 'oWWWWWooo', 'oWWWWWo..', '.ooooo...'];
+const CUP_L = ['oooooooo..', 'oKKKKKKoo.', 'oWWWWWWo.o', 'oWWWWWWo.o', 'oWWWWWWo.o', 'oWWWWWWo.o', 'oWWWWWWooo', 'oWWWWWWo..', 'oWWWWWWo..', '.oooooo...'];
+const CUPS_C = { o: '#2A1E1A', K: '#6B4226', W: '#F5EFE6' };
+const COAT = ['..oo..oo..', '.oCCooCCo.', 'oCCCddCCCo', 'oCCCddCCCo', 'oCoCddCoCo', 'oCoCddCoCo', 'oCoCddCoCo', 'ooCCddCCoo', '.oCCddCCo.', '.oooooooo.'];
+const COAT_C = { o: '#2A1E1A', C: '#C0392B', d: '#8E2A20' };
 /* Pixel kulaklık (maskotun kulaklığıyla aynı renkler) */
 const HEADPH = ['....oooooo....', '..ooccccccoo..', '.occoooooocco.', '.oco......oco.', 'oco........oco', 'oco........oco', 'oddo......oddo', 'oDDdo....oDDdo', 'oDDdo....oDDdo', 'oDDdo....oDDdo', '.ooo......ooo.'];
 const HEADPH_C = { o: '#2A1E1A', c: '#9B7BC6', d: '#745C94', D: '#5E4A7A' };
@@ -549,12 +556,12 @@ function defineValue() {
     const amb = ambient(s.root, { cy: 900, ray: 'rgba(255,255,255,.6)', glow: 'rgba(255,255,255,.5)' });
     const A = o.a ?? 0.2, X = o.strike ?? 1.4, B = o.b ?? 2.4;
     const l1 = el('div', 'abs', s.root, { left: '70px', right: '70px', top: '460px', textAlign: 'center' });
-    l1.innerHTML = `<span style="display:inline-block;position:relative;background:#fff;border:8px solid #2A1E1A;border-radius:36px;padding:18px 44px;font-size:96px;font-weight:800;letter-spacing:-.03em">Buna değer mi?<span class="st" style="position:absolute;left:-10px;right:-10px;top:50%;height:16px;background:#C0392B;border-radius:8px;transform-origin:0 50%"></span></span>`;
+    l1.innerHTML = `<span style="display:inline-block;position:relative;background:#fff;border:8px solid #2A1E1A;border-radius:36px;padding:18px 44px;font-size:${o.q1Size || 96}px;font-weight:800;letter-spacing:-.03em">${o.q1 || 'Buna değer mi?'}<span class="st" style="position:absolute;left:-10px;right:-10px;top:50%;height:16px;background:#C0392B;border-radius:8px;transform-origin:0 50%"></span></span>`;
     const st = l1.querySelector('.st');
     const no = el('div', 'abs it', s.root, { left: '820px', top: '380px', fontSize: '150px', color: '#C0392B', zIndex: 3 }); no.textContent = 'X';
     const l2 = el('div', 'abs', s.root, { left: '50px', right: '50px', top: '780px', textAlign: 'center' });
-    l2.innerHTML = `<span style="display:inline-block;background:#2F8F5A;color:#fff;border:8px solid #1E6B40;border-radius:40px;padding:22px 40px;font-size:92px;font-weight:800;letter-spacing:-.03em;line-height:1.08;box-shadow:0 18px 0 #1E6B40">Bunun yerine<br>ne alırdım?</span>`;
-    const p = new Mascot(s.root, { who: 'pamuk', w: 512, outfit: 'headphones' });
+    l2.innerHTML = `<span style="display:inline-block;background:#2F8F5A;color:#fff;border:8px solid #1E6B40;border-radius:40px;padding:22px 40px;font-size:92px;font-weight:800;letter-spacing:-.03em;line-height:1.08;box-shadow:0 18px 0 #1E6B40">${o.q2 || 'Bunun yerine<br>ne alırdım?'}</span>`;
+    const p = new Mascot(s.root, { who: o.who || 'pamuk', w: 512, outfit: o.outfit === undefined ? 'headphones' : o.outfit });
     const bm = new Mascot(s.root, { who: 'bilge', w: 448, outfit: 'scholar' });
     const hp = el('div', 'abs it', s.root, { fontSize: '40px' });
     s.update = (lt) => {
@@ -580,6 +587,151 @@ function defineValue() {
       bm.set(got ? 'happy' : 'curious', got ? 'wave' : null, blink(lt));
       bm.put(260, 1990 - (got ? hop(lt + 0.2, 0.5, 20).y : 0), {});
       hp.style.display = 'none';
+    };
+  };
+
+  /* ── Tuzak seçenek: kafe menü panosu, üç boy kahve ── */
+  SCENES.menuBoard = (t0, o = {}) => {
+    const s = scene(t0, '#F3E3CC', undefined, o.wdur ?? 0.5);
+    s.root.style.isolation = 'isolate';
+    pattern(s.root, 'rgba(110,70,30,.08)');
+    const amb = ambient(s.root, { cy: 930, glow: 'rgba(255,220,160,.6)' });
+    const board = el('div', 'abs', s.root, { left: '60px', right: '60px', top: '600px', height: '640px', background: '#2F4A3C', border: '22px solid #8B5A2B', borderRadius: '26px', boxShadow: '0 30px 70px -20px rgba(40,20,10,.55), inset 0 0 0 6px #6E4420' });
+    const ttl = el('div', 'abs it', board, { left: 0, right: 0, top: '22px', textAlign: 'center', color: '#F3EEE2', fontSize: '92px', letterSpacing: '.08em' }); ttl.textContent = 'KAHVE';
+    const P = o.prices || [120, 170, 175], N = o.names || ['Küçük', 'Orta', 'Büyük'];
+    const cols = [CUP_S, CUP_M, CUP_L].map((cup, i) => {
+      const c = el('div', 'abs', board, { left: px(28 + i * 300), width: '280px', bottom: '34px', height: '470px', borderRadius: '28px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end' });
+      c.innerHTML = `<div>${pix(cup, CUPS_C, 18)}</div><div style="font-size:48px;font-weight:800;color:#F3EEE2;margin-top:14px">${N[i]}</div><div class="it" style="font-size:96px;line-height:1;color:#FFD25A">${P[i]} TL</div>`;
+      return c;
+    });
+    const xMark = el('div', 'abs it', board, { left: '328px', top: '140px', width: '280px', textAlign: 'center', fontSize: '300px', color: '#E8322A', display: 'none', lineHeight: 1 }); xMark.textContent = 'X';
+    const gap = el('div', 'abs', board, { left: '200px', right: '200px', top: '190px', textAlign: 'center', display: 'none' });
+    gap.innerHTML = `<div class="it" style="font-size:110px;color:#FF8A5B;line-height:1">+${P[2] - P[0]} TL</div><div style="height:10px;margin:10px 30px 0;background:#FF8A5B;border-radius:5px"></div>`;
+    const trap = el('div', 'abs it', board, { left: '330px', top: '200px', width: '276px', textAlign: 'center', fontSize: '84px', color: '#fff', background: '#E8322A', borderRadius: '18px', padding: '4px 0', display: 'none', zIndex: 3 }); trap.textContent = 'TUZAK';
+    const timer = el('div', 'abs it', s.root, { left: '820px', top: '520px', width: '170px', height: '170px', borderRadius: '50%', background: '#4351A3', color: '#fff', fontSize: '130px', display: 'none', alignItems: 'center', justifyContent: 'center', zIndex: 4 });
+    const f = new Mascot(s.root, { who: 'fistik', w: 576 });
+    const b = o.bilge ? new Mascot(s.root, { who: 'bilge', w: 448, outfit: 'scholar' }) : null;
+    const say = el('div', 'abs it', s.root, { left: '60px', top: '1560px', background: '#fff', border: '7px solid #2A1E1A', borderRadius: '30px', padding: '6px 30px 10px', fontSize: '76px', whiteSpace: 'nowrap', zIndex: 4, display: 'none', transformOrigin: '30% 100%' });
+    say.textContent = o.say || '5 TL fark!';
+    const sweat = pixEl(s.root, SWEAT, SWEAT_C, 18);
+    const ev = (k) => o[k] ?? 99;
+    s.update = (lt) => {
+      amb(lt, [ev('pick'), ev('hide'), ev('trap')].reduce((a, t) => (lt >= t ? t : a), -9));
+      board.style.transform = `rotate(${Math.sin(lt * 1.3) * 0.6}deg)`;
+      const hid = lt >= ev('hide') && lt < ev('trap');
+      cols.forEach((c, i) => {
+        const pk = i === 2 && lt >= ev('pick');
+        const pp = prog(lt, ev('pick'), 0.3);
+        c.style.background = pk && !hid ? 'rgba(255,210,90,.18)' : 'transparent';
+        c.style.boxShadow = pk && !hid ? '0 0 0 8px #FFD25A' : 'none';
+        let tr = pk && lt < ev('hide') ? `scale(${1 + 0.1 * Math.sin(pp * Math.PI)})` : '';
+        if (i === 1) {
+          const hp = E.out(prog(lt, ev('hide'), 0.4)), rp = E.back(prog(lt, ev('trap'), 0.4));
+          c.style.opacity = lt >= ev('trap') ? 1 : 1 - 0.85 * hp;
+          tr += lt >= ev('trap') ? ` translateY(${(1 - rp) * -300}px)` : ` translateY(${hp * 40}px)`;
+        }
+        c.style.transform = tr;
+      });
+      xMark.style.display = hid && lt < ev('hide') + 0.6 ? 'block' : 'none';
+      xMark.style.transform = `scale(${lerp(2, 1, E.out(prog(lt, ev('hide'), 0.2)))})`;
+      gap.style.display = lt >= ev('gap') && lt < ev('trap') ? 'block' : 'none';
+      gap.style.transform = `scale(${E.back(prog(lt, ev('gap'), 0.35))})`;
+      const tp = prog(lt, ev('trap') + 0.25, 0.2);
+      trap.style.display = tp > 0 ? 'block' : 'none';
+      trap.style.transform = `scale(${lerp(2.4, 1, E.out(tp))}) rotate(${-8 + Math.sin(lt * 5) * 2}deg)`;
+      if (o.countdown) {
+        const [c0, st] = o.countdown, k = Math.floor((lt - c0) / st);
+        timer.style.display = k >= 0 && k < 3 ? 'flex' : 'none'; timer.textContent = String(3 - k);
+        timer.style.transform = `scale(${1 + 0.3 * Math.max(0, 1 - (((lt - c0) % st) / st) * 4)})`;
+      }
+      // Fıstık
+      const S = (o.fistik || []).reduce((a, p) => (lt >= p[0] ? p : a), [0, 'idle']);
+      const k = lt - S[0];
+      let x = 760, y = 1990, rot = 0, sx = 1, sy = 1;
+      sweat.style.display = 'none';
+      if (S[1] === 'idle') { f.set('curious', null, blink(lt)); rot = Math.sin(lt * 2) * 3; }
+      else if (S[1] === 'think') { f.set('thoughtful', 'face', 'squeeze'); x += Math.sin(lt * 40) * 4; sweat.style.display = 'block'; const q = (lt % 0.7) / 0.7; sweat.style.transform = `translate(${x + 110}px,${y - 380 + q * 70}px)`; sweat.style.opacity = 1 - q * 0.6; }
+      else if (S[1] === 'pick') { f.set('celebrate', Math.floor(lt / 0.25) % 2 ? 'up' : 'wave', 'happy'); const h = hop(lt, 0.4, 50); y -= h.y; sx = h.sx; sy = h.sy; }
+      else if (S[1] === 'shock') { f.set('curious', 'face', 'wide'); const j = Math.exp(-k * 5); y -= 60 * j; rot = 10 * Math.sin(k * 18) * j; }
+      else if (S[1] === 'dumb') { f.set('thoughtful', null, Math.floor(lt / 1.2) % 2 ? 'half' : 'mood'); rot = -10 + Math.sin(lt * 1.5) * 3; }
+      f.put(x, y, { rot, sx, sy, flip: true });
+      const sp = prog(lt, ev('pick') + 0.2, 0.3);
+      say.style.display = sp > 0 && lt < ev('hide') ? 'block' : 'none';
+      say.style.transform = `scale(${E.back(sp)}) rotate(${-4 + Math.sin(lt * 6) * 2}deg)`;
+      if (b) {
+        const bp = E.back(prog(lt, o.bilge[0], 0.4));
+        b.root.style.display = lt >= o.bilge[0] ? 'block' : 'none';
+        b.set('curious', Math.floor(lt / 0.5) % 2 ? 'wave' : null, blink(lt));
+        b.put(230 - (1 - bp) * 500, 1990 - hop(lt, 0.8, 14).y, {});
+      }
+    };
+  };
+
+  /* ── İndirim yanılgısı: indirim etiketi, kibirli Pamuk, sonra cüzdan gerçeği ── */
+  SCENES.saleTag = (t0, o = {}) => {
+    const s = scene(t0, '#FBE3E8', undefined, o.wdur ?? 0.5);
+    s.root.style.isolation = 'isolate';
+    pattern(s.root, 'rgba(192,57,43,.07)');
+    const ev = (k) => o[k] ?? 99;
+    const amb = ambient(s.root, { cy: 960, glow: 'rgba(255,200,210,.6)' });
+    const tag = el('div', 'abs', s.root, { left: '230px', width: '620px', top: '640px', height: '560px', borderRadius: '44px 44px 60px 60px', background: '#FFFDF8', border: '10px solid #2A1E1A', boxShadow: '0 30px 60px -20px rgba(40,20,10,.5)', textAlign: 'center', transformOrigin: '50% 0%' });
+    el('div', 'abs', tag, { left: '285px', top: '22px', width: '50px', height: '50px', borderRadius: '50%', background: '#FBE3E8', border: '8px solid #2A1E1A' });
+    const str = el('div', 'abs', s.root, { left: '538px', top: '520px', width: '6px', height: '130px', background: '#6e5f55', transformOrigin: '50% 0%' });
+    tag.insertAdjacentHTML('beforeend', `<div style="margin-top:96px">${pix(COAT, COAT_C, 14)}</div><div style="font-size:44px;font-weight:800;color:#8a7d72;letter-spacing:.06em">MONT</div><div class="old it" style="font-size:110px;line-height:1;position:relative;display:inline-block">2.000 TL<span class="sl" style="position:absolute;left:-10px;right:-10px;top:50%;height:12px;background:#C0392B;border-radius:6px;transform-origin:0 50%"></span></div><div class="nw it" style="font-size:150px;line-height:1;color:#2F8F5A">1.000 TL</div>`);
+    const sl = tag.querySelector('.sl'), old = tag.querySelector('.old'), nw = tag.querySelector('.nw');
+    const badge = el('div', 'abs it', s.root, { left: '700px', top: '560px', width: '220px', height: '220px', borderRadius: '50%', background: '#E8322A', color: '#fff', fontSize: '110px', display: 'none', alignItems: 'center', justifyContent: 'center', zIndex: 3, boxShadow: '0 10px 0 #7A1410' }); badge.textContent = '%50';
+    const wal = el('div', 'abs', s.root, { left: 0, right: 0, top: '600px', textAlign: 'center', display: 'none' });
+    wal.innerHTML = `<div class="w" style="margin-top:60px">${pix(WALLET_O, WALLET_COL, 26)}</div><div style="font-size:52px;font-weight:800;color:#6e5f55;margin-top:10px">CÜZDAN</div><div class="wv it" style="font-size:180px;line-height:1">?</div>`;
+    const wv = wal.querySelector('.wv'), ww = wal.querySelector('.w');
+    const coins = Array.from({ length: 8 }, () => pixEl(s.root, TLCOIN, TLCOIN_C, 16));
+    const think = el('div', 'abs', s.root, { left: '30px', top: '1390px', background: '#fff', border: '7px solid #2A1E1A', borderRadius: '40px', padding: '10px 34px 16px', zIndex: 4, display: 'none', transformOrigin: '80% 100%' });
+    think.innerHTML = `<span class="it" style="font-size:80px;color:#2F8F5A">+1.000 TL</span><br><span style="font-size:44px;font-weight:800">kazandım!</span>`;
+    const timer = el('div', 'abs it', s.root, { left: '820px', top: '540px', width: '170px', height: '170px', borderRadius: '50%', background: '#4351A3', color: '#fff', fontSize: '130px', display: 'none', alignItems: 'center', justifyContent: 'center', zIndex: 4 });
+    const m = new Mascot(s.root, { who: 'pamuk', w: 576, outfit: 'winter' });
+    s.update = (lt) => {
+      amb(lt, [ev('sale'), ev('reveal')].reduce((a, t) => (lt >= t ? t : a), -9));
+      const W = lt >= ev('wallet');
+      const out = E.inOut(prog(lt, ev('wallet') - 0.3, 0.3));
+      const swing = Math.sin(lt * 2.4) * 5;
+      tag.style.display = str.style.display = out < 1 ? 'block' : 'none';
+      tag.style.transform = `rotate(${swing}deg) translateY(${-out * 1300}px)`;
+      str.style.transform = `rotate(${swing}deg) translateY(${-out * 1300}px)`;
+      sl.style.transform = `scaleX(${E.out(prog(lt, ev('sale'), 0.25))}) rotate(-4deg)`;
+      old.style.color = lt >= ev('sale') ? '#9a8f86' : 'var(--ink)';
+      old.style.fontSize = lt >= ev('sale') ? '80px' : '110px';
+      const np = prog(lt, ev('sale') + 0.2, 0.3);
+      nw.style.display = np > 0 ? 'block' : 'none';
+      nw.style.transform = `scale(${E.back(np)})`;
+      const bp = prog(lt, ev('sale'), 0.25);
+      badge.style.display = bp > 0 && !W ? 'flex' : 'none';
+      badge.style.transform = `scale(${lerp(2.4, 1, E.out(bp))}) rotate(${12 + Math.sin(lt * 4) * 4}deg)`;
+      const tp = prog(lt, ev('brag'), 0.3);
+      think.style.display = tp > 0 && lt < ev('wallet') - 0.2 ? 'block' : 'none';
+      think.style.transform = `scale(${E.back(tp)}) rotate(${-3 + Math.sin(lt * 5) * 2}deg)`;
+      // cüzdan
+      const wp = E.back(prog(lt, ev('wallet'), 0.4));
+      wal.style.display = W ? 'block' : 'none';
+      wal.style.transform = `scale(${wp})`;
+      const R = lt >= ev('reveal');
+      if (R) { const c = E.out(prog(lt, ev('reveal'), 0.6)); wv.textContent = c > 0.02 ? `-${fmt(1000 * c)} TL` : '0 TL'; wv.style.color = '#C0392B'; }
+      else { wv.textContent = '?'; wv.style.color = 'var(--ink)'; }
+      ww.style.transform = R ? `translate(${shake(lt, ev('reveal'), 26, 0.5)}px,0)` : `rotate(${Math.sin(lt * 3) * 3}deg)`;
+      coins.forEach((c, i) => {
+        const p = (lt - ev('reveal')) / 1.2 - i * 0.06;
+        c.style.display = R && p > 0 && p < 1 ? 'block' : 'none';
+        c.style.transform = `translate(${520 + Math.sin(i * 2.1) * 380 * p}px,${780 - p * 300 + p * p * 900}px) rotate(${p * 400}deg)`;
+      });
+      if (o.countdown) {
+        const [c0, st] = o.countdown, k = Math.floor((lt - c0) / st);
+        timer.style.display = k >= 0 && k < 3 ? 'flex' : 'none'; timer.textContent = String(3 - k);
+        timer.style.transform = `scale(${1 + 0.3 * Math.max(0, 1 - (((lt - c0) % st) / st) * 4)})`;
+      }
+      // Pamuk: kibirli dans → düşünür → şok
+      let x = 540, y = 1990, rot = 0, sx = 1, sy = 1;
+      if (!W) { m.set('celebrate', Math.floor(lt / 0.3) % 2 ? 'up' : 'wave2', lt >= ev('brag') ? 'happy' : 'squeeze'); const h = hop(lt, 0.55, 36); y -= h.y; sx = h.sx; sy = h.sy; rot = Math.sin(lt * 5) * 6; }
+      else if (!R) { m.set('thoughtful', 'face', 'squeeze'); x += Math.sin(lt * 40) * 4; }
+      else { const k = lt - ev('reveal'); m.set('curious', 'face', 'x'); const j = Math.exp(-k * 4); y -= 70 * j; rot = 12 * Math.sin(k * 16) * j; }
+      m.put(x, y, { rot, sx, sy });
     };
   };
 }

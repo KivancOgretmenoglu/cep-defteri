@@ -2584,5 +2584,305 @@
         }
       ]
     ]
+  },
+  "tuzak-secenek": {
+    "title": "Kavram: tuzak seçenek (sesli)",
+    "end": 25.71,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.5,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        25.71,
+        "lofi"
+      ]
+    ],
+    "captionPixel": true,
+    "captionY": 1300,
+    "boxes": [
+      [
+        0,
+        3.0,
+        "Orta boy kahve<br><b>satılmak için yok</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        3.0,
+        6.3,
+        "Sen hangisini<br><b>alırdın?</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        22.5,
+        25.15,
+        "Kahvesiz yaşayamayan<br>arkadaşına <b>gönder</b>",
+        1090,
+        {
+          "size": 80,
+          "pulse": true
+        }
+      ],
+      [
+        25.15,
+        25.71,
+        "Orta boy kahve<br><b>satılmak için yok</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "menuBoard",
+        0,
+        {
+          "pick": 6.3,
+          "hide": 9.3,
+          "gap": 9.9,
+          "trap": 13.3,
+          "countdown": [
+            4.8,
+            0.5
+          ],
+          "bilge": [
+            13.3
+          ],
+          "fistik": [
+            [
+              3.1,
+              "think"
+            ],
+            [
+              6.3,
+              "pick"
+            ],
+            [
+              9.3,
+              "shock"
+            ],
+            [
+              13.3,
+              "dumb"
+            ]
+          ]
+        }
+      ],
+      [
+        "lesson",
+        18.3,
+        {
+          "who": "fistik",
+          "outfit": null,
+          "q1": "Büyük sadece<br>5 TL fazla!",
+          "q1Size": 80,
+          "q2": "Ortadaki olmasa<br>ne alırdım?",
+          "a": 0.2,
+          "strike": 1.3,
+          "b": 2.2
+        }
+      ],
+      [
+        "menuBoard",
+        25.15,
+        {
+          "wdur": 0.25
+        }
+      ]
+    ],
+    "voiceTempo": 1.12,
+    "voiceFiles": [
+      [
+        0.1,
+        "assets/voice/tuzak/a1.mp3",
+        "Kafedeki orta boy kahve, satılmak için orada değil."
+      ],
+      [
+        3.1,
+        "assets/voice/tuzak/a3.mp3",
+        "Sen olsan hangisini alırdın?"
+      ],
+      [
+        6.35,
+        "assets/voice/tuzak/a4.mp3",
+        "Çoğumuz büyüğü seçeriz. Sadece beş lira fark!"
+      ],
+      [
+        9.3,
+        "assets/voice/tuzak/a5.mp3",
+        "Ama orta boy olmasaydı, büyük bu kadar cazip görünmezdi."
+      ],
+      [
+        13.3,
+        "assets/voice/tuzak/a6.mp3",
+        "Buna tuzak seçenek denir. Orta boy, büyüğü ucuz göstermek için orada."
+      ],
+      [
+        18.4,
+        "assets/voice/tuzak/a7.mp3",
+        "İki seçenek arasında kalınca sor: ortadaki olmasa ne alırdım?"
+      ],
+      [
+        22.6,
+        "assets/voice/tuzak/a8.mp3"
+      ]
+    ]
+  },
+  "indirim-yanilgisi": {
+    "title": "Kavram: indirim yanılgısı (sesli)",
+    "end": 25.56,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.5,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        25.56,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ]
+    ],
+    "captionPixel": true,
+    "captionY": 1255,
+    "boxes": [
+      [
+        0,
+        3.5,
+        "%50 indirimde<br><b>kazanmadın</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        7.85,
+        12.0,
+        "Tahmin et:<br><b>cüzdanda ne değişti?</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        13.35,
+        15.85,
+        "Tasarruf =<br><b>harcamadığın para</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        22.3,
+        25.0,
+        "Sepeti hep dolu olan<br>arkadaşına <b>gönder</b>",
+        1090,
+        {
+          "size": 80,
+          "pulse": true
+        }
+      ],
+      [
+        25.0,
+        25.56,
+        "%50 indirimde<br><b>kazanmadın</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "saleTag",
+        0,
+        {
+          "sale": 0.9,
+          "brag": 5.6,
+          "wallet": 7.9,
+          "reveal": 12.0,
+          "countdown": [
+            10.5,
+            0.5
+          ]
+        }
+      ],
+      [
+        "lesson",
+        15.9,
+        {
+          "who": "pamuk",
+          "outfit": "winter",
+          "q1": "1.000 TL<br>kazandım!",
+          "q1Size": 80,
+          "q2": "İndirim olmasa da<br>alır mıydım?",
+          "a": 0.2,
+          "b": 1.3,
+          "strike": 5.0
+        }
+      ],
+      [
+        "saleTag",
+        25.0,
+        {
+          "wdur": 0.25
+        }
+      ]
+    ],
+    "voiceTempo": 1.12,
+    "voiceFiles": [
+      [
+        0.1,
+        "assets/voice/indirim/b1.mp3",
+        "Yüzde elli indirimde bin lira harcadın. Beş yüz lira kazanmadın."
+      ],
+      [
+        3.65,
+        "assets/voice/indirim/b2.mp3",
+        "Pamuk, iki binlik montu bin liraya aldı. Bin lira kazandığını sanıyor."
+      ],
+      [
+        7.85,
+        "assets/voice/indirim/b3.mp3",
+        "Tahmin et: Pamuk'un cüzdanında ne değişti?"
+      ],
+      [
+        12.05,
+        "assets/voice/indirim/b4.mp3",
+        "Eksi bin lira."
+      ],
+      [
+        13.35,
+        "assets/voice/indirim/b5.mp3",
+        "Çünkü tasarruf, harcamadığın paradır."
+      ],
+      [
+        16.0,
+        "assets/voice/indirim/b6.mp3",
+        "İndirimde kendine sor: indirim olmasa da alır mıydım? Cevap hayırsa, kazanmadın. Harcadın."
+      ],
+      [
+        22.4,
+        "assets/voice/indirim/b7.mp3"
+      ]
+    ]
   }
 }

@@ -191,6 +191,26 @@ def cmd_make(name):
     print(f'Sonraki adım: python3 promo/audio.py {name} && node promo/render.mjs video {name}')
 
 
+def estimate_caps(text, a, b, y):
+    """Satırın konuşma aralığına kelimeleri hece sayısına göre yayar; ≤4 kelimelik öbekler."""
+    words = text.split()
+    syl = [max(1, len(re.findall(r'[aeıioöuüAEIİOÖUÜ]', w))) + (0.6 if re.search(r'[.,:?!]$', w) else 0) for w in words]
+    tot, acc, times = sum(syl), 0, []
+    for s_ in syl:
+        times.append(round(a + (b - a) * acc / tot, 2)); acc += s_
+    out, cur = [], []
+    for k, w in enumerate(words):
+        cur.append(k)
+        if len(cur) >= 4 or re.search(r'[.,:?!]$', w):
+            out.append(cur); cur = []
+    if cur: out.append(cur)
+    caps = []
+    for g in out:
+        end = times[g[-1] + 1] if g[-1] + 1 < len(times) else b
+        caps.append([round(times[g[0]] - 0.03, 2), round(end + 0.3, 2), ' '.join(words[k] for k in g), y, [times[k] for k in g]])
+    return caps
+
+
 def cmd_place(name):
     """reels.json → "voiceFiles": [[sn, "mp3 yolu"], ...] ve isteğe bağlı "voiceTempo" ile hazır satırları yerleştirir."""
     reels = json.load(open(os.path.join(HERE, 'reels.json'), encoding='utf-8'))
@@ -198,12 +218,21 @@ def cmd_place(name):
     tempo = r.get('voiceTempo', 1.0)
     n = int((r['end'] + 0.5) * SR)
     track = np.zeros(n, dtype=np.float32)
-    for t0, f in r['voiceFiles']:
+    caps = []
+    for item in r['voiceFiles']:
+        t0, f = item[0], item[1]
         cmd = ['ffmpeg', '-v', 'error', '-i', os.path.join(HERE, f)] + (['-af', f'atempo={tempo}'] if tempo != 1 else []) + ['-f', 'f32le', '-ac', '1', '-ar', str(SR), '-']
         x, _ = trim(np.frombuffer(subprocess.run(cmd, capture_output=True).stdout, dtype=np.float32))
         i = int(t0 * SR)
         track[i : i + len(x)] += x[: max(0, n - i)]
         print(f'{t0:6.2f}–{t0 + len(x) / SR:5.2f} sn  {f}')
+        if len(item) > 2 and item[2]:  # metin varsa hece ağırlıklı kelime zamanlı altyazı
+            caps += estimate_caps(item[2], t0, t0 + len(x) / SR, r.get('captionY', 1330))
+    if caps:
+        for k in range(len(caps) - 1):
+            caps[k][1] = round(min(caps[k][1], caps[k + 1][0] - 0.01), 2)
+        json.dump(caps, open(os.path.join(OUT, f'{name}.captions.json'), 'w', encoding='utf-8'), ensure_ascii=False)
+        print(f'yazıldı: out/{name}.captions.json ({len(caps)} öbek)')
     stereo = (np.stack([track, track], 1) * 32767 * 0.9).astype('<i2')
     with wave.open(os.path.join(OUT, f'{name}-voice.wav'), 'wb') as w:
         w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes(stereo.tobytes())
