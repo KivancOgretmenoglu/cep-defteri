@@ -6,6 +6,44 @@ function countText(tpl, lt, a, d, to, dec = 0) {
   return tpl.replace('{n}', dec ? v.toFixed(dec).replace('.', ',') : fmt(v));
 }
 
+
+/* Pixel kulaklık (maskotun kulaklığıyla aynı renkler) */
+const HEADPH = ['....oooooo....', '..ooccccccoo..', '.occoooooocco.', '.oco......oco.', 'oco........oco', 'oco........oco', 'oddo......oddo', 'oDDdo....oDDdo', 'oDDdo....oDDdo', 'oDDdo....oDDdo', '.ooo......ooo.'];
+const HEADPH_C = { o: '#2A1E1A', c: '#9B7BC6', d: '#745C94', D: '#5E4A7A' };
+const PTAG = ['..oooooo', '.oWWWWWo', 'oW.WWWWo', 'oWWWWWWo', '.oWWWWWo', '..oooooo'];
+const PTAG_C = { o: '#C9A27E', W: '#FFF6EA' };
+
+/** Dikkat dağıtmayan arka plan canlılığı: dönen ışık hüzmeleri, süzülen soluk pikseller, patlama kıvılcımları */
+function ambient(root, o = {}) {
+  const cx = o.cx ?? 540, cy = o.cy ?? 1010;
+  const rays = el('div', 'abs', root, { left: px(cx - 900), top: px(cy - 900), width: '1800px', height: '1800px', borderRadius: '50%', background: `repeating-conic-gradient(${o.ray || 'rgba(255,255,255,.55)'} 0 9deg, transparent 9deg 22deg)`, WebkitMaskImage: 'radial-gradient(circle, #000 18%, transparent 62%)', maskImage: 'radial-gradient(circle, #000 18%, transparent 62%)' });
+  const glow = el('div', 'abs', root, { left: px(cx - 520), top: px(cy - 520), width: '1040px', height: '1040px', borderRadius: '50%', background: `radial-gradient(circle, ${o.glow || 'rgba(255,214,150,.55)'}, transparent 65%)` });
+  const fl = Array.from({ length: 9 }, (_, i) => {
+    const e = i % 3 === 0 ? pixEl(root, PTAG, PTAG_C, 10) : pixEl(root, TLCOIN, TLCOIN_C, 10);
+    e.style.opacity = 0.45;
+    return { e, x: 30 + ((i * 331) % 1000), y: (i * 419) % 1900, sp: 24 + (i % 4) * 10, ph: i * 1.3 };
+  });
+  const sparks = Array.from({ length: 14 }, (_, j) => el('div', 'abs', root, { width: '22px', height: '22px', background: ['#F2B63C', '#E86A9A', '#2F8F5A', '#4351A3'][j % 4], zIndex: 5, display: 'none' }));
+  return (lt, burst = -9) => {
+    const b = Math.exp(-Math.max(0, lt - burst) * 3) * (lt >= burst ? 1 : 0);
+    rays.style.transform = `rotate(${lt * 12}deg) scale(${1 + 0.15 * b})`;
+    rays.style.opacity = 0.35 + 0.5 * b;
+    glow.style.transform = `scale(${1 + 0.04 * Math.sin(lt * 2.2) + 0.2 * b})`;
+    fl.forEach((q) => {
+      const y = (((q.y - lt * q.sp) % 2100) + 2100) % 2100 - 120;
+      q.e.style.transform = `translate(${q.x + Math.sin(lt * 1.1 + q.ph) * 26}px,${y}px) rotate(${Math.sin(lt * 0.8 + q.ph) * 18}deg)`;
+    });
+    const sk = (lt - burst) / 0.55;
+    sparks.forEach((e, j) => {
+      const on = sk >= 0 && sk < 1;
+      e.style.display = on ? 'block' : 'none';
+      if (!on) return;
+      const a = (j / sparks.length) * Math.PI * 2 + 0.2, r = 180 + E.out(sk) * (260 + (j % 3) * 60);
+      e.style.transform = `translate(${cx + Math.cos(a) * r - 11}px,${cy + Math.sin(a) * r * 0.85 - 11}px) scale(${1 - sk * 0.8}) rotate(${sk * 180}deg)`;
+    });
+  };
+}
+
 function defineValue() {
   /* ── Bilgi kartları: her kart bir ipucu ── */
   SCENES.cards = (t0, o = {}) => {
@@ -415,13 +453,14 @@ function defineValue() {
     const s = scene(t0, '#FBEAD0', undefined, o.wdur ?? 0.5);
     s.root.style.isolation = 'isolate';
     pattern(s.root, 'rgba(174,71,22,.08)');
+    const amb = ambient(s.root, { cy: 1010 });
     const FL = o.flips || [];  // [t, html, renk]
     const notes = Array.from({ length: 5 }, (_, i) => { const e = el('div', 'abs it', s.root, { fontSize: '90px', color: '#E86A9A' }); e.textContent = i % 2 ? '♪' : '♫'; return e; });
     const string = el('div', 'abs', s.root, { left: '538px', top: '640px', width: '6px', height: '130px', background: '#6e5f55', transformOrigin: '50% 0%' });
     const tag = el('div', 'abs', s.root, { left: '250px', top: '760px', width: '580px', height: '500px', transformOrigin: '50% 0%' });
     const face = el('div', '', tag, { position: 'absolute', inset: 0, borderRadius: '44px 44px 60px 60px', background: '#FFFDF8', border: '10px solid #2A1E1A', boxShadow: '0 30px 60px -20px rgba(40,20,10,.5)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '20px' });
     el('div', 'abs', tag, { left: '265px', top: '22px', width: '50px', height: '50px', borderRadius: '50%', background: '#FBEAD0', border: '8px solid #2A1E1A' });
-    const front = o.front || "<div style='font-size:52px;font-weight:800;color:#8a7d72;letter-spacing:.06em;margin-top:40px'>KULAKLIK</div><div class='it' style='font-size:170px;line-height:1'>3.000</div><div style='font-size:56px;font-weight:800'>TL</div>";
+    const front = o.front || "<div style='margin-top:56px'>{HEADPH}</div><div style='font-size:40px;font-weight:800;color:#8a7d72;letter-spacing:.06em;margin-top:6px'>KULAKLIK</div><div class='it' style='font-size:140px;line-height:.95'>3.000 TL</div>";
     const timer = el('div', 'abs it', s.root, { left: '790px', top: '700px', width: '170px', height: '170px', borderRadius: '50%', background: '#4351A3', color: '#fff', fontSize: '130px', display: 'none', alignItems: 'center', justifyContent: 'center', zIndex: 4 });
     const qs = Array.from({ length: 3 }, (_, i) => { const e = el('div', 'abs it', s.root, { fontSize: '120px', color: '#4351A3' }); e.textContent = '?'; return e; });
     const m = new Mascot(s.root, { who: 'pamuk', w: 576, outfit: 'headphones' });
@@ -429,13 +468,14 @@ function defineValue() {
     const sweat = pixEl(s.root, SWEAT, SWEAT_C, 20);
     const CD = o.countdown;  // [başlangıç, adım]
     s.update = (lt) => {
+      amb(lt, FL.reduce((a, f) => (lt >= f[0] ? f[0] : a), -9));
       // hangi yüz görünüyor
       let fi = -1;
       FL.forEach(([t], i) => { if (lt >= t - 0.15) fi = i; });
       const ft = fi >= 0 ? FL[fi][0] : -9;
       const fk = clamp((lt - (ft - 0.15)) / 0.3);  // 0→1 dönüş
       const shown = fk < 0.5 && fi >= 0 ? fi - 1 : fi;
-      const html = (shown < 0 ? front : FL[shown][1]).replace('{TRAY}', pix(TRAY, TRAY_C, 18)).replace('{CUP}', pix(CUP, CUP_C, 24)).replace('{COIN}', pix(TLCOIN, TLCOIN_C, 18));
+      const html = (shown < 0 ? front : FL[shown][1]).replace('{TRAY}', pix(TRAY, TRAY_C, 18)).replace('{CUP}', pix(CUP, CUP_C, 24)).replace('{COIN}', pix(TLCOIN, TLCOIN_C, 18)).replace('{HEADPH}', pix(HEADPH, HEADPH_C, 13));
       if (face.dataset.k !== String(shown)) { face.innerHTML = html; face.dataset.k = String(shown); face.style.background = shown < 0 ? '#FFFDF8' : (FL[shown][2] || '#FFFDF8'); }
       const sx = fi >= 0 && fk < 1 ? Math.abs(Math.cos(fk * Math.PI)) : 1;
       const swing = Math.sin(lt * 2.4) * 5 + (fi >= 0 ? Math.sin((lt - ft) * 12) * 10 * Math.exp(-(lt - ft) * 3) * (lt > ft ? 1 : 0) : 0);
@@ -498,6 +538,7 @@ function defineValue() {
     const s = scene(t0, '#DDEFE9', [540, 1200], 0.35);
     s.root.style.isolation = 'isolate';
     pattern(s.root, 'rgba(47,143,90,.10)');
+    const amb = ambient(s.root, { cy: 900, ray: 'rgba(255,255,255,.6)', glow: 'rgba(255,255,255,.5)' });
     const A = o.a ?? 0.2, X = o.strike ?? 1.4, B = o.b ?? 2.4;
     const l1 = el('div', 'abs', s.root, { left: '70px', right: '70px', top: '460px', textAlign: 'center' });
     l1.innerHTML = `<span style="display:inline-block;position:relative;background:#fff;border:8px solid #2A1E1A;border-radius:36px;padding:18px 44px;font-size:96px;font-weight:800;letter-spacing:-.03em">Buna değer mi?<span class="st" style="position:absolute;left:-10px;right:-10px;top:50%;height:16px;background:#C0392B;border-radius:8px;transform-origin:0 50%"></span></span>`;
@@ -505,10 +546,11 @@ function defineValue() {
     const no = el('div', 'abs it', s.root, { left: '820px', top: '380px', fontSize: '150px', color: '#C0392B', zIndex: 3 }); no.textContent = 'X';
     const l2 = el('div', 'abs', s.root, { left: '50px', right: '50px', top: '780px', textAlign: 'center' });
     l2.innerHTML = `<span style="display:inline-block;background:#2F8F5A;color:#fff;border:8px solid #1E6B40;border-radius:40px;padding:22px 40px;font-size:92px;font-weight:800;letter-spacing:-.03em;line-height:1.08;box-shadow:0 18px 0 #1E6B40">Bunun yerine<br>ne alırdım?</span>`;
-    const p = new Mascot(s.root, { who: 'pamuk', w: 512 });
+    const p = new Mascot(s.root, { who: 'pamuk', w: 512, outfit: 'headphones' });
     const bm = new Mascot(s.root, { who: 'bilge', w: 448, outfit: 'scholar' });
     const hp = el('div', 'abs it', s.root, { fontSize: '40px' });
     s.update = (lt) => {
+      amb(lt, B);
       const a = E.back(prog(lt, A, 0.3));
       l1.style.opacity = clamp(a * 3); l1.style.transform = `scale(${0.7 + 0.3 * a})`;
       const sx = E.out(prog(lt, X, 0.25));
