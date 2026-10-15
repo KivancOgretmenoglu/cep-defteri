@@ -2037,5 +2037,161 @@
       "speed": 1.1
     },
     "loop": true
+  },
+  "yuzde-sesli-demo": {
+    "title": "Demo: ElevenLabs sesli açılış (yüzde tuzakları)",
+    "end": 16.36,
+    "handheld": true,
+    "musicGain": 0.8,
+    "musicPlan": [
+      [
+        0,
+        16.36,
+        "quiz"
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        1.1,
+        "Bu 3 yüzde<br><b>seni kandırıyor</b>",
+        330,
+        {
+          "size": 100,
+          "pulse": true
+        }
+      ],
+      [
+        1.1,
+        1.9,
+        "Bil bakalım:<br><b>kaçını bileceksin?</b>",
+        330,
+        {
+          "size": 92,
+          "pulse": true
+        }
+      ],
+      [
+        14.6,
+        15.9,
+        "Arkadaşına gönder,<br><b>o kaç bilecek?</b>",
+        1400,
+        {
+          "size": 80,
+          "pulse": true
+        }
+      ],
+      [
+        15.9,
+        16.36,
+        "Bu 3 yüzde<br><b>seni kandırıyor</b>",
+        330,
+        {
+          "size": 100,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "percentHook",
+        0,
+        {
+          "stop": 0.75,
+          "text": "%3×12=%36"
+        }
+      ],
+      [
+        "quiz",
+        1.9,
+        {
+          "items": [
+            {
+              "t": 0,
+              "q": "Kart borcuna aylık <b style='color:#4351A3'>%3</b> faiz. Bir yılda?",
+              "opts": [
+                "%36",
+                "%42,6"
+              ],
+              "correct": 1,
+              "why": "Faiz, faize eklenir: <b>1,03 × 1,03 × … (12 kez)</b>",
+              "color": "#4351A3",
+              "bg": "#DEE2F6",
+              "mascot": {
+                "who": "bilge",
+                "outfit": "spy"
+              }
+            },
+            {
+              "t": 4.7,
+              "q": "Birikimin <b style='color:#2F8F5A'>%40</b> faiz aldı, fiyatlar <b style='color:#C0392B'>%30</b> arttı. Gerçek kazancın?",
+              "qSize": 62,
+              "opts": [
+                "%7,7",
+                "%10"
+              ],
+              "correct": 0,
+              "why": "Çıkarma değil bölme: <b>1,40 ÷ 1,30 − 1</b>",
+              "color": "#2F8F5A",
+              "bg": "#DDEFE9",
+              "mascot": {
+                "who": "ceviz"
+              }
+            },
+            {
+              "t": 9.4,
+              "q": "1.000 TL'lik kulaklığa önce <b style='color:#C0392B'>%100 zam</b>, sonra <b style='color:#2F8F5A'>%50 indirim</b>. Fiyat?",
+              "qSize": 62,
+              "opts": [
+                "500 TL",
+                "1.000 TL"
+              ],
+              "correct": 1,
+              "why": "İndirimden önce <b>fiyat geçmişine</b> bak.",
+              "color": "#AE4716",
+              "bg": "#F8DCC8",
+              "mascot": {
+                "who": "pamuk"
+              }
+            }
+          ]
+        }
+      ],
+      [
+        "percentHook",
+        15.9,
+        {
+          "stop": 9,
+          "wdur": 0.25,
+          "text": "%3×12=%36"
+        }
+      ]
+    ],
+    "voice": [
+      [
+        0.2,
+        "Bu üç yüzde seni kandırıyor. Bil bakalım."
+      ],
+      [
+        2.0,
+        "Kart borcuna aylık yüzde üç faiz. Bir yılda kaç? Üç, iki, bir."
+      ],
+      [
+        6.7,
+        "Faiz yüzde kırk, enflasyon otuz. Gerçek kazancın? Üç, iki, bir."
+      ],
+      [
+        11.4,
+        "Önce yüzde yüz zam, sonra yüzde elli indirim. Fiyat? Üç, iki, bir."
+      ],
+      [
+        14.7,
+        "Arkadaşına gönder, o kaç bilecek?"
+      ]
+    ],
+    "voiceSettings": {
+      "speed": 1.1
+    },
+    "loop": true
   }
 }
