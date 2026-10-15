@@ -561,6 +561,8 @@ function defineValue() {
     const no = el('div', 'abs it', s.root, { left: '820px', top: '380px', fontSize: '150px', color: '#C0392B', zIndex: 3 }); no.textContent = 'X';
     const l2 = el('div', 'abs', s.root, { left: '50px', right: '50px', top: '780px', textAlign: 'center' });
     l2.innerHTML = `<span style="display:inline-block;background:#2F8F5A;color:#fff;border:8px solid #1E6B40;border-radius:40px;padding:22px 40px;font-size:92px;font-weight:800;letter-spacing:-.03em;line-height:1.08;box-shadow:0 18px 0 #1E6B40">${o.q2 || 'Bunun yerine<br>ne alırdım?'}</span>`;
+    const ex = o.extra ? el('div', 'abs', s.root, { left: 0, right: 0, top: px(o.extraY ?? 1070), textAlign: 'center' }) : null;
+    if (ex) ex.innerHTML = o.extra;
     const p = new Mascot(s.root, { who: o.who || 'pamuk', w: 512, outfit: o.outfit === undefined ? 'headphones' : o.outfit });
     const bm = new Mascot(s.root, { who: 'bilge', w: 448, outfit: 'scholar' });
     const hp = el('div', 'abs it', s.root, { fontSize: '40px' });
@@ -578,7 +580,7 @@ function defineValue() {
       no.style.transform = `scale(${lerp(2.5, 1, E.out(np))}) rotate(-8deg)`;
       const bp = prog(lt, B, 0.22);
       l2.style.opacity = bp > 0 ? 1 : 0;
-      l2.style.transform = `scale(${lerp(2.2, 1, E.out(bp))}) rotate(${(1 - E.out(bp)) * -8 + Math.sin(lt * 3) * 1.2}deg)`;
+      l2.style.transform = `scale(${lerp(o.q2From ?? 2.2, 1, E.out(bp))}) rotate(${(1 - E.out(bp)) * -8 + Math.sin(lt * 3) * 1.2}deg)`;
       // Pamuk: kafa kaşır (salak), sonra aydınlanır
       const got = lt > B + 0.3;
       p.set(got ? 'celebrate' : 'thoughtful', got ? 'up' : 'face', got ? 'happy' : (Math.floor(lt / 0.9) % 2 ? 'half' : 'mood'));
@@ -587,6 +589,7 @@ function defineValue() {
       bm.set(got ? 'happy' : 'curious', got ? 'wave' : null, blink(lt));
       bm.put(260, (o.floor ?? 1990) - (got ? hop(lt + 0.2, 0.5, 20).y : 0), {});
       hp.style.display = 'none';
+      if (ex) { const xp = E.back(prog(lt, o.extraAt ?? B + 0.2, 0.35)); ex.style.opacity = lt < (o.extraUntil ?? 99) ? clamp(xp * 3) : 0; ex.style.transform = `scale(${0.6 + 0.4 * xp})`; }
     };
   };
 
@@ -606,7 +609,7 @@ function defineValue() {
     });
     const xMark = el('div', 'abs it', board, { left: '328px', top: '140px', width: '280px', textAlign: 'center', fontSize: '300px', color: '#E8322A', display: 'none', lineHeight: 1 }); xMark.textContent = 'X';
     const gap = el('div', 'abs', board, { left: '160px', right: '160px', top: '120px', textAlign: 'center', display: 'none' });
-    gap.innerHTML = `<div style="font-size:46px;font-weight:800;color:#F3EEE2">${o.gapLabel || 'Küçük → Büyük'}</div><div class="it" style="font-size:130px;color:#FF8A5B;line-height:1">+${P[2] - P[0]} TL</div><div style="height:10px;margin:10px 30px 0;background:#FF8A5B;border-radius:5px"></div>`;
+    gap.innerHTML = `<div style="font-size:64px;font-weight:800;color:#F3EEE2">${o.gapLabel || 'Küçük → Büyük'}</div><div class="it" style="font-size:130px;color:#FF8A5B;line-height:1">+${P[2] - P[0]} TL</div><div style="height:10px;margin:10px 30px 0;background:#FF8A5B;border-radius:5px"></div>`;
     const trap = el('div', 'abs it', board, { left: '330px', top: '200px', width: '276px', textAlign: 'center', fontSize: '84px', color: '#fff', background: '#E8322A', borderRadius: '18px', padding: '4px 0', display: 'none', zIndex: 3 }); trap.textContent = 'TUZAK';
     const timer = el('div', 'abs it', s.root, { left: '820px', top: '520px', width: '170px', height: '170px', borderRadius: '50%', background: '#4351A3', color: '#fff', fontSize: '130px', display: 'none', alignItems: 'center', justifyContent: 'center', zIndex: 4 });
     const f = new Mascot(s.root, { who: 'fistik', w: 576 });
@@ -662,7 +665,7 @@ function defineValue() {
         const bp = E.back(prog(lt, o.bilge[0], 0.4));
         b.root.style.display = lt >= o.bilge[0] ? 'block' : 'none';
         b.set('curious', Math.floor(lt / 0.5) % 2 ? 'wave' : null, blink(lt));
-        b.put(230 - (1 - bp) * 500, (o.floor ?? 1990) - hop(lt, 0.8, 14).y, {});
+        b.put(270 - (1 - bp) * 500, (o.floor ?? 1990) - hop(lt, 0.8, 14).y, {});
       }
     };
   };
@@ -681,17 +684,18 @@ function defineValue() {
     const sl = tag.querySelector('.sl'), old = tag.querySelector('.old'), nw = tag.querySelector('.nw');
     const badge = el('div', 'abs it', s.root, { left: '700px', top: '560px', width: '220px', height: '220px', borderRadius: '50%', background: '#E8322A', color: '#fff', fontSize: '110px', display: 'none', alignItems: 'center', justifyContent: 'center', zIndex: 3, boxShadow: '0 10px 0 #7A1410' }); badge.textContent = '%50';
     const wal = el('div', 'abs', s.root, { left: 0, right: 0, top: '600px', textAlign: 'center', display: 'none' });
-    wal.innerHTML = `<div class="w" style="margin-top:60px">${pix(WALLET_O, WALLET_COL, 26)}</div><div style="font-size:52px;font-weight:800;color:#6e5f55;margin-top:10px">CÜZDAN</div><div class="wv it" style="font-size:180px;line-height:1">?</div>`;
-    const wv = wal.querySelector('.wv'), ww = wal.querySelector('.w');
+    wal.innerHTML = `<div class="w" style="margin-top:60px">${pix(WALLET_O, WALLET_COL, 26)}</div><div style="font-size:52px;font-weight:800;color:#6e5f55;margin-top:10px">CÜZDAN</div><div class="wv it" style="font-size:180px;line-height:1;position:relative;display:inline-block"><span class="wt">?</span></div><div class="kp" style="display:none;margin-top:18px"><span style="font-size:54px;font-weight:800;color:#6e5f55">almasaydın: </span><span class="it" style="font-size:150px;color:#2F8F5A;line-height:1">+1.000 TL</span></div>`;
+    const wv = wal.querySelector('.wv'), ww = wal.querySelector('.w'), kp = wal.querySelector('.kp'), wt = wal.querySelector('.wt');
+    const ks = el('span', 'abs', wv, { left: '-10px', right: '-10px', top: '45%', height: '16px', background: '#2A1E1A', borderRadius: '8px', transformOrigin: '0 50%', display: 'none' });
     const coins = Array.from({ length: 8 }, () => pixEl(s.root, TLCOIN, TLCOIN_C, 16));
     const think = el('div', 'abs', s.root, { left: o.thinkX ?? '20px', top: o.thinkY ?? '1330px', background: '#fff', border: '7px solid #2A1E1A', borderRadius: '40px', padding: '10px 34px 16px', zIndex: 4, display: 'none', transformOrigin: '80% 100%' });
-    think.innerHTML = `<span style="font-size:48px;font-weight:800;color:#6e5f55">Pamuk sanıyor ki:</span><br><span class="it" style="font-size:104px;color:#2F8F5A">+1.000 TL</span><br><span style="font-size:58px;font-weight:800">kazandım!</span>`;
+    think.innerHTML = `<span style="font-size:${o.thinkS ?? 48}px;font-weight:800;color:#6e5f55">Pamuk sanıyor ki:</span><br><span class="it" style="font-size:${(o.thinkS ?? 48) * 2.17}px;color:#2F8F5A">+1.000 TL</span><br><span style="font-size:${(o.thinkS ?? 48) * 1.2}px;font-weight:800">kazandım!</span>`;
     const timer = el('div', 'abs it', s.root, { left: '820px', top: '540px', width: '170px', height: '170px', borderRadius: '50%', background: '#4351A3', color: '#fff', fontSize: '130px', display: 'none', alignItems: 'center', justifyContent: 'center', zIndex: 4 });
     const m = new Mascot(s.root, { who: 'pamuk', w: 576, outfit: 'winter' });
     s.update = (lt) => {
       amb(lt, [ev('sale'), ev('reveal')].reduce((a, t) => (lt >= t ? t : a), -9));
       const W = lt >= ev('wallet');
-      const out = E.inOut(prog(lt, ev('wallet') - 0.3, 0.3));
+      const out = E.inOut(prog(lt, ev('wallet') - 0.2, 0.3));
       const swing = Math.sin(lt * 2.4) * 5;
       tag.style.display = str.style.display = out < 1 ? 'block' : 'none';
       tag.style.transform = `rotate(${swing}deg) translateY(${-out * 1300}px)`;
@@ -709,13 +713,20 @@ function defineValue() {
       think.style.display = tp > 0 && lt < ev('wallet') - 0.2 ? 'block' : 'none';
       think.style.transform = `scale(${E.back(tp)}) rotate(${-3 + Math.sin(lt * 5) * 2}deg)`;
       // cüzdan
-      const wp = E.back(prog(lt, ev('wallet'), 0.4));
-      wal.style.display = W ? 'block' : 'none';
+      const wp = E.back(prog(lt, ev('wallet') - 0.1, 0.4));
+      wal.style.display = lt >= ev('wallet') - 0.1 ? 'block' : 'none';
       wal.style.transform = `scale(${wp})`;
       const R = lt >= ev('reveal');
-      if (R) { wv.textContent = '-1.000 TL'; wv.style.color = '#C0392B'; }
-      else { wv.textContent = '?'; wv.style.color = 'var(--ink)'; }
+      if (R) { wt.textContent = '-1.000 TL'; wv.style.color = '#C0392B'; }
+      else { wt.textContent = '?'; wv.style.color = 'var(--ink)'; }
       wv.style.transform = R ? `scale(${lerp(2.2, 1, E.out(prog(lt, ev('reveal'), 0.25)))})` : 'none';
+      const K = lt >= ev('keep');
+      ks.style.display = K ? 'block' : 'none';
+      ks.style.transform = `scaleX(${E.out(prog(lt, ev('keep'), 0.25))}) rotate(-4deg)`;
+      if (K) wv.style.opacity = 0.45; else wv.style.opacity = 1;
+      const kpp = prog(lt, ev('keep') + 0.25, 0.3);
+      kp.style.display = kpp > 0 ? 'block' : 'none';
+      kp.style.transform = `scale(${E.back(kpp)})`;
       ww.style.transform = R ? `translate(${shake(lt, ev('reveal'), 26, 0.5)}px,0)` : `rotate(${Math.sin(lt * 3) * 3}deg)`;
       coins.forEach((c, i) => {
         const p = (lt - ev('reveal')) / 1.2 - i * 0.06;

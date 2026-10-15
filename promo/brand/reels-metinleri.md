@@ -274,33 +274,34 @@ Bir dahaki alışverişte "buna değer mi?" deme, "bunun yerine ne alırdım?" d
 
 ---
 
-## 13 · tuzak-secenek (kavram: decoy etkisi, seslendirme: Buğra, döngülü, 21 sn)
+## 13 · tuzak-secenek (kavram: decoy etkisi, seslendirme: Buğra, döngülü, 19 sn)
 
 **Açıklama:**
 ```
 Kafede orta boy kahve neden var? ☕
 
-Küçük 120 · Orta 170 · Büyük 175 TL
-Büyük "sadece 5 TL fazla" görünüyor, ama küçükle arası 55 TL.
-Buna tuzak seçenek (decoy etkisi) denir: ortadaki seçenek, yanındakini daha cazip gösterir. Fiyatlar örnek.
+Küçük 90 · Orta 135 · Büyük 145 TL
+Büyük, ortadan "sadece 10 TL fazla" görünüyor. Ama küçükle arası 55 TL.
+Ortadaki seçenek neredeyse büyük kadar pahalı ama daha az kahve: kimse onu almasın diye orada. Görevi büyüğü ucuz göstermek.
+Buna tuzak seçenek (decoy etkisi) denir. Fiyatlar örnek.
 
 İki seçenek arasında kalınca sor: "Ortadaki olmasa ne alırdım?"
 
-Sen hangisini alıyorsun? Yorumlara yaz 👇 Kahveci arkadaşına gönder.
+Sen hangisini alıyorsun? Yorumlara yaz 👇
 
 #decoyetkisi #kahve #öğrencibütçesi #davranışsalekonomi #tasarruf
 ```
 
 ---
 
-## 14 · indirim-yanilgisi (seslendirme: Buğra, döngülü, 20 sn)
+## 14 · indirim-yanilgisi (seslendirme: Buğra, döngülü, 18 sn)
 
 **Açıklama:**
 ```
-Yarı fiyata almak, kazanmak değil 🏷️
+Yarı fiyata mont aldın. Kaç lira kazandın? 🏷️
 
 2.000 TL'lik mont %50 indirimle 1.000 TL. Cüzdandan yine 1.000 TL çıktı.
-Tasarruf = harcamadığın para.
+Almasaydın o 1.000 TL hâlâ cüzdanında olurdu.
 
 İndirimde tek soru: "İndirim olmasa da alır mıydım?"
 Cevap evetse indirim gerçekten işine yaradı. Hayırsa, o 1.000 TL hâlâ bir harcama.
