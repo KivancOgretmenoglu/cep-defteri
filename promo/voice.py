@@ -222,7 +222,8 @@ def cmd_place(name):
     caps = []
     for item in r['voiceFiles']:
         t0, f = item[0], item[1]
-        cmd = ['ffmpeg', '-v', 'error', '-i', os.path.join(HERE, f)] + (['-af', f'atempo={tempo}'] if tempo != 1 else []) + ['-f', 'f32le', '-ac', '1', '-ar', str(SR), '-']
+        tp = item[3] if len(item) > 3 else tempo  # satıra özel hız
+        cmd = ['ffmpeg', '-v', 'error', '-i', os.path.join(HERE, f)] + (['-af', f'atempo={tp}'] if tp != 1 else []) + ['-f', 'f32le', '-ac', '1', '-ar', str(SR), '-']
         x, _ = trim(np.frombuffer(subprocess.run(cmd, capture_output=True).stdout, dtype=np.float32))
         i = int(t0 * SR)
         track[i : i + len(x)] += x[: max(0, n - i)]

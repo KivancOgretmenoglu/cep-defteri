@@ -2587,7 +2587,7 @@
   },
   "tuzak-secenek": {
     "title": "Kavram: tuzak seçenek (sesli)",
-    "end": 21.45,
+    "end": 20.4,
     "loop": true,
     "handheld": true,
     "musicGain": 0.5,
@@ -2595,7 +2595,7 @@
     "musicPlan": [
       [
         0,
-        21.45,
+        20.4,
         "lofi"
       ]
     ],
@@ -2613,8 +2613,8 @@
         }
       ],
       [
-        9.45,
-        12.3,
+        9.75,
+        12.75,
         "Orta boy<br><b>satılmak için değil</b>",
         270,
         {
@@ -2623,9 +2623,9 @@
         }
       ],
       [
-        12.35,
-        14.0,
-        "Tuzak seçenek<br><b>(decoy etkisi)</b>",
+        12.8,
+        14.45,
+        "Buna<br><b>tuzak seçenek</b> denir",
         270,
         {
           "size": 86,
@@ -2633,8 +2633,8 @@
         }
       ],
       [
-        18.5,
-        20.9,
+        17.45,
+        19.85,
         "Sen hangisini alıyorsun?<br><b>Yorumlara yaz</b>",
         1090,
         {
@@ -2643,8 +2643,8 @@
         }
       ],
       [
-        18.5,
-        20.9,
+        17.45,
+        19.85,
         "<img src='assets/icon.png' style='height:1.1em;vertical-align:-.25em;border-radius:.25em'> Cep Defteri · <b>@cep_defteri</b>",
         1560,
         {
@@ -2652,8 +2652,8 @@
         }
       ],
       [
-        21.15,
-        21.45,
+        20.1,
+        20.4,
         "Sen hangisini<br><b>alırdın?</b>",
         270,
         {
@@ -2667,16 +2667,23 @@
         "menuBoard",
         0,
         {
+          "prices": [
+            90,
+            130,
+            145
+          ],
+          "say": "Sadece +15 TL!",
+          "floor": 1930,
           "pick": 2.8,
-          "hide": 5.6,
-          "gap": 6.2,
-          "trap": 9.45,
+          "hide": 5.95,
+          "gap": 6.35,
+          "trap": 9.75,
           "countdown": [
             1.75,
             0.35
           ],
           "bilge": [
-            9.45
+            9.75
           ],
           "fistik": [
             [
@@ -2688,11 +2695,11 @@
               "pick"
             ],
             [
-              5.6,
+              5.95,
               "shock"
             ],
             [
-              9.45,
+              9.75,
               "dumb"
             ]
           ]
@@ -2700,23 +2707,30 @@
       ],
       [
         "lesson",
-        14.05,
+        14.45,
         {
           "who": "fistik",
           "outfit": null,
-          "q1": "Büyük sadece<br>5 TL fazla!",
+          "floor": 1930,
+          "q1": "Büyük sadece<br>15 TL fazla!",
           "q1Size": 80,
           "q2": "Ortadaki olmasa<br>ne alırdım?",
-          "a": 0.2,
-          "strike": 1.0,
-          "b": 2.1
+          "a": 0.15,
+          "strike": 0.6,
+          "b": 1.1
         }
       ],
       [
         "menuBoard",
-        20.9,
+        19.85,
         {
-          "wdur": 0.25
+          "wdur": 0.25,
+          "prices": [
+            90,
+            130,
+            145
+          ],
+          "floor": 1930
         }
       ]
     ],
@@ -2729,40 +2743,41 @@
       ],
       [
         2.85,
-        "assets/voice/tuzak/a4.mp3",
-        "Çoğumuz büyüğü seçeriz. Sadece beş lira fark!"
+        "assets/voice/tuzak/a4n.mp3",
+        "Büyük, ortadan sadece on beş lira fazla!"
       ],
       [
-        5.65,
-        "assets/voice/tuzak/a5.mp3",
-        "Ama orta boy olmasaydı, büyük bu kadar cazip görünmezdi."
+        6.0,
+        "assets/voice/tuzak/a5n.mp3",
+        "Ama orta olmasa? Büyük, küçükten elli beş lira pahalı.",
+        1.25
       ],
       [
-        9.5,
+        9.8,
         "assets/voice/tuzak/a1.mp3",
         "Kafedeki orta boy kahve, satılmak için orada değil."
       ],
       [
-        12.35,
+        12.8,
         "assets/voice/tuzak/a6b.mp3",
         "Buna tuzak seçenek denir!"
       ],
       [
-        14.15,
-        "assets/voice/tuzak/a7.mp3",
-        "İki seçenek arasında kalınca sor: ortadaki olmasa ne alırdım?"
+        14.5,
+        "assets/voice/tuzak/a7n.mp3",
+        "Kendine sor: ortadaki olmasa ne alırdım?"
       ],
       [
-        18.5,
+        17.45,
         "assets/voice/tuzak/a9.mp3"
       ]
     ],
     "captionMaxWords": 3,
-    "captionUntil": 18.45
+    "captionUntil": 17.4
   },
   "indirim-yanilgisi": {
     "title": "Kavram: indirim yanılgısı (sesli)",
-    "end": 19.35,
+    "end": 18.55,
     "loop": true,
     "handheld": true,
     "musicGain": 0.5,
@@ -2770,7 +2785,7 @@
     "musicPlan": [
       [
         0,
-        19.35,
+        18.55,
         "pop",
         {
           "bpm": 108
@@ -2783,7 +2798,7 @@
       [
         0,
         2.6,
-        "Yarı fiyata almak<br><b>kazanmak değil</b>",
+        "Yarı fiyata aldın.<br><b>Kaç lira kazandın?</b>",
         270,
         {
           "size": 86,
@@ -2791,8 +2806,8 @@
         }
       ],
       [
-        6.6,
-        9.1,
+        4.85,
+        7.9,
         "Tahmin et:<br><b>cüzdanda ne değişti?</b>",
         270,
         {
@@ -2801,9 +2816,9 @@
         }
       ],
       [
-        10.3,
-        12.7,
-        "Tasarruf =<br><b>harcamadığın para</b>",
+        9.25,
+        12.3,
+        "Almasaydın:<br><b>+1.000 TL cüzdanda</b>",
         270,
         {
           "size": 86,
@@ -2811,8 +2826,8 @@
         }
       ],
       [
-        16.25,
-        18.8,
+        15.5,
+        18.0,
         "Sepetinde şu an ne var?<br><b>Yorumlara yaz</b>",
         1090,
         {
@@ -2821,8 +2836,8 @@
         }
       ],
       [
-        16.25,
-        18.8,
+        15.5,
+        18.0,
         "<img src='assets/icon.png' style='height:1.1em;vertical-align:-.25em;border-radius:.25em'> Cep Defteri · <b>@cep_defteri</b>",
         1560,
         {
@@ -2830,9 +2845,9 @@
         }
       ],
       [
-        19.05,
-        19.35,
-        "Yarı fiyata almak<br><b>kazanmak değil</b>",
+        18.25,
+        18.55,
+        "Yarı fiyata aldın.<br><b>Kaç lira kazandın?</b>",
         270,
         {
           "size": 86,
@@ -2846,21 +2861,26 @@
         0,
         {
           "sale": 0.5,
-          "brag": 3.3,
-          "wallet": 6.6,
-          "reveal": 9.1,
+          "brag": 2.7,
+          "wallet": 4.85,
+          "reveal": 7.95,
           "countdown": [
-            8.0,
-            0.35
-          ]
+            7.0,
+            0.3
+          ],
+          "floor": 1930,
+          "bragX": 700,
+          "thinkX": "20px",
+          "thinkY": "1440px"
         }
       ],
       [
         "lesson",
-        12.7,
+        12.3,
         {
           "who": "pamuk",
           "outfit": "winter",
+          "floor": 1930,
           "q1": "1.000 TL<br>kazandım!",
           "q1Size": 80,
           "q2": "İndirim olmasa da<br>alır mıydım?",
@@ -2871,9 +2891,10 @@
       ],
       [
         "saleTag",
-        18.8,
+        18.0,
         {
-          "wdur": 0.25
+          "wdur": 0.25,
+          "floor": 1930
         }
       ]
     ],
@@ -2881,40 +2902,40 @@
     "voiceFiles": [
       [
         0.1,
-        "assets/voice/indirim/b1b.mp3",
-        "Yarı fiyata almak, bin lira kazanmak değil."
+        "assets/voice/indirim/b1c.mp3",
+        "Yarı fiyata mont aldın. Kaç lira kazandın?"
       ],
       [
         2.6,
-        "assets/voice/indirim/b2.mp3",
-        "Pamuk, iki binlik montu bin liraya aldı. Bin lira kazandığını sanıyor."
+        "assets/voice/indirim/b2n.mp3",
+        "Pamuk, bin lira kazandığını sanıyor."
       ],
       [
-        6.6,
+        4.9,
         "assets/voice/indirim/b3.mp3",
         "Tahmin et: Pamuk'un cüzdanında ne değişti?"
       ],
       [
-        9.15,
+        8.0,
         "assets/voice/indirim/b4.mp3",
         "Eksi bin lira."
       ],
       [
-        10.3,
-        "assets/voice/indirim/b5.mp3",
-        "Çünkü tasarruf, harcamadığın paradır."
+        9.25,
+        "assets/voice/indirim/b5n.mp3",
+        "Almasaydın, o bin lira hâlâ cüzdanında olurdu."
       ],
       [
-        12.8,
+        12.4,
         "assets/voice/indirim/b6b.mp3",
         "Tek soru sor: indirim olmasa da alır mıydım?"
       ],
       [
-        16.25,
+        15.5,
         "assets/voice/indirim/b7b.mp3"
       ]
     ],
     "captionMaxWords": 3,
-    "captionUntil": 16.2
+    "captionUntil": 15.45
   }
 }

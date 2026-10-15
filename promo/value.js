@@ -583,9 +583,9 @@ function defineValue() {
       const got = lt > B + 0.3;
       p.set(got ? 'celebrate' : 'thoughtful', got ? 'up' : 'face', got ? 'happy' : (Math.floor(lt / 0.9) % 2 ? 'half' : 'mood'));
       const h = got ? hop(lt, 0.45, 40) : { y: 0, sx: 1, sy: 1 };
-      p.put(720, 1990 - h.y, { rot: got ? 0 : -10 + Math.sin(lt * 8) * 4, sx: h.sx, sy: h.sy });
+      p.put(720, (o.floor ?? 1990) - h.y, { rot: got ? 0 : -10 + Math.sin(lt * 8) * 4, sx: h.sx, sy: h.sy });
       bm.set(got ? 'happy' : 'curious', got ? 'wave' : null, blink(lt));
-      bm.put(260, 1990 - (got ? hop(lt + 0.2, 0.5, 20).y : 0), {});
+      bm.put(260, (o.floor ?? 1990) - (got ? hop(lt + 0.2, 0.5, 20).y : 0), {});
       hp.style.display = 'none';
     };
   };
@@ -605,8 +605,8 @@ function defineValue() {
       return c;
     });
     const xMark = el('div', 'abs it', board, { left: '328px', top: '140px', width: '280px', textAlign: 'center', fontSize: '300px', color: '#E8322A', display: 'none', lineHeight: 1 }); xMark.textContent = 'X';
-    const gap = el('div', 'abs', board, { left: '200px', right: '200px', top: '190px', textAlign: 'center', display: 'none' });
-    gap.innerHTML = `<div class="it" style="font-size:110px;color:#FF8A5B;line-height:1">+${P[2] - P[0]} TL</div><div style="height:10px;margin:10px 30px 0;background:#FF8A5B;border-radius:5px"></div>`;
+    const gap = el('div', 'abs', board, { left: '160px', right: '160px', top: '120px', textAlign: 'center', display: 'none' });
+    gap.innerHTML = `<div style="font-size:46px;font-weight:800;color:#F3EEE2">${o.gapLabel || 'Küçük → Büyük'}</div><div class="it" style="font-size:130px;color:#FF8A5B;line-height:1">+${P[2] - P[0]} TL</div><div style="height:10px;margin:10px 30px 0;background:#FF8A5B;border-radius:5px"></div>`;
     const trap = el('div', 'abs it', board, { left: '330px', top: '200px', width: '276px', textAlign: 'center', fontSize: '84px', color: '#fff', background: '#E8322A', borderRadius: '18px', padding: '4px 0', display: 'none', zIndex: 3 }); trap.textContent = 'TUZAK';
     const timer = el('div', 'abs it', s.root, { left: '820px', top: '520px', width: '170px', height: '170px', borderRadius: '50%', background: '#4351A3', color: '#fff', fontSize: '130px', display: 'none', alignItems: 'center', justifyContent: 'center', zIndex: 4 });
     const f = new Mascot(s.root, { who: 'fistik', w: 576 });
@@ -647,7 +647,7 @@ function defineValue() {
       // Fıstık
       const S = (o.fistik || []).reduce((a, p) => (lt >= p[0] ? p : a), [0, 'idle']);
       const k = lt - S[0];
-      let x = 760, y = 1990, rot = 0, sx = 1, sy = 1;
+      let x = 760, y = o.floor ?? 1990, rot = 0, sx = 1, sy = 1;
       sweat.style.display = 'none';
       if (S[1] === 'idle') { f.set('curious', null, blink(lt)); rot = Math.sin(lt * 2) * 3; }
       else if (S[1] === 'think') { f.set('thoughtful', 'face', 'squeeze'); x += Math.sin(lt * 40) * 4; sweat.style.display = 'block'; const q = (lt % 0.7) / 0.7; sweat.style.transform = `translate(${x + 110}px,${y - 380 + q * 70}px)`; sweat.style.opacity = 1 - q * 0.6; }
@@ -662,7 +662,7 @@ function defineValue() {
         const bp = E.back(prog(lt, o.bilge[0], 0.4));
         b.root.style.display = lt >= o.bilge[0] ? 'block' : 'none';
         b.set('curious', Math.floor(lt / 0.5) % 2 ? 'wave' : null, blink(lt));
-        b.put(230 - (1 - bp) * 500, 1990 - hop(lt, 0.8, 14).y, {});
+        b.put(230 - (1 - bp) * 500, (o.floor ?? 1990) - hop(lt, 0.8, 14).y, {});
       }
     };
   };
@@ -684,7 +684,7 @@ function defineValue() {
     wal.innerHTML = `<div class="w" style="margin-top:60px">${pix(WALLET_O, WALLET_COL, 26)}</div><div style="font-size:52px;font-weight:800;color:#6e5f55;margin-top:10px">CÜZDAN</div><div class="wv it" style="font-size:180px;line-height:1">?</div>`;
     const wv = wal.querySelector('.wv'), ww = wal.querySelector('.w');
     const coins = Array.from({ length: 8 }, () => pixEl(s.root, TLCOIN, TLCOIN_C, 16));
-    const think = el('div', 'abs', s.root, { left: '20px', top: '1330px', background: '#fff', border: '7px solid #2A1E1A', borderRadius: '40px', padding: '10px 34px 16px', zIndex: 4, display: 'none', transformOrigin: '80% 100%' });
+    const think = el('div', 'abs', s.root, { left: o.thinkX ?? '20px', top: o.thinkY ?? '1330px', background: '#fff', border: '7px solid #2A1E1A', borderRadius: '40px', padding: '10px 34px 16px', zIndex: 4, display: 'none', transformOrigin: '80% 100%' });
     think.innerHTML = `<span style="font-size:48px;font-weight:800;color:#6e5f55">Pamuk sanıyor ki:</span><br><span class="it" style="font-size:104px;color:#2F8F5A">+1.000 TL</span><br><span style="font-size:58px;font-weight:800">kazandım!</span>`;
     const timer = el('div', 'abs it', s.root, { left: '820px', top: '540px', width: '170px', height: '170px', borderRadius: '50%', background: '#4351A3', color: '#fff', fontSize: '130px', display: 'none', alignItems: 'center', justifyContent: 'center', zIndex: 4 });
     const m = new Mascot(s.root, { who: 'pamuk', w: 576, outfit: 'winter' });
@@ -713,8 +713,9 @@ function defineValue() {
       wal.style.display = W ? 'block' : 'none';
       wal.style.transform = `scale(${wp})`;
       const R = lt >= ev('reveal');
-      if (R) { const c = E.out(prog(lt, ev('reveal'), 0.6)); wv.textContent = c > 0.02 ? `-${fmt(1000 * c)} TL` : '0 TL'; wv.style.color = '#C0392B'; }
+      if (R) { wv.textContent = '-1.000 TL'; wv.style.color = '#C0392B'; }
       else { wv.textContent = '?'; wv.style.color = 'var(--ink)'; }
+      wv.style.transform = R ? `scale(${lerp(2.2, 1, E.out(prog(lt, ev('reveal'), 0.25)))})` : 'none';
       ww.style.transform = R ? `translate(${shake(lt, ev('reveal'), 26, 0.5)}px,0)` : `rotate(${Math.sin(lt * 3) * 3}deg)`;
       coins.forEach((c, i) => {
         const p = (lt - ev('reveal')) / 1.2 - i * 0.06;
@@ -727,7 +728,8 @@ function defineValue() {
         timer.style.transform = `scale(${1 + 0.3 * Math.max(0, 1 - (((lt - c0) % st) / st) * 4)})`;
       }
       // Pamuk: kibirli dans → düşünür → şok
-      let x = 540, y = 1990, rot = 0, sx = 1, sy = 1;
+      let x = 540, y = o.floor ?? 1990, rot = 0, sx = 1, sy = 1;
+      if (!W && lt >= ev('brag') && o.bragX) x = o.bragX;
       if (!W) { m.set('celebrate', Math.floor(lt / 0.3) % 2 ? 'up' : 'wave2', lt >= ev('brag') ? 'happy' : 'squeeze'); const h = hop(lt, 0.55, 36); y -= h.y; sx = h.sx; sy = h.sy; rot = Math.sin(lt * 5) * 6; }
       else if (!R) { m.set('thoughtful', 'face', 'squeeze'); x += Math.sin(lt * 40) * 4; }
       else { const k = lt - ev('reveal'); m.set('curious', 'face', 'x'); const j = Math.exp(-k * 4); y -= 70 * j; rot = 12 * Math.sin(k * 16) * j; }
