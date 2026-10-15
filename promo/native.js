@@ -154,7 +154,7 @@ function defineNative() {
       const p = people[who] || {};
       const row = el('div', '', list, { display: 'flex', alignItems: 'flex-end', gap: '14px', justifyContent: me ? 'flex-end' : 'flex-start', flex: 'none' });
       if (!me) { const a = el('div', '', row, { width: '72px', height: '72px', borderRadius: '50%', overflow: 'hidden', background: p.bg || '#F8DCC8', flex: 'none' }); a.innerHTML = avatarSVG(p.who, 72); }
-      const b = el('div', '', row, { maxWidth: '700px', padding: '18px 28px', borderRadius: me ? '36px 36px 10px 36px' : '36px 36px 36px 10px', background: me ? '#AE4716' : '#FFFFFF', color: me ? '#fff' : '#2A1E1A', fontSize: '42px', fontWeight: 500, lineHeight: 1.2, boxShadow: '0 4px 10px rgba(0,0,0,.06)', transformOrigin: me ? '100% 100%' : '0% 100%' });
+      const b = el('div', '', row, { maxWidth: '700px', padding: '18px 28px', borderRadius: me ? '36px 36px 10px 36px' : '36px 36px 36px 10px', background: me ? '#AE4716' : '#FFFFFF', color: me ? '#fff' : '#2A1E1A', fontSize: px(o.font || 42), fontWeight: 500, lineHeight: 1.2, boxShadow: '0 4px 10px rgba(0,0,0,.06)', transformOrigin: me ? '100% 100%' : '0% 100%' });
       b.innerHTML = (me ? '' : `<div style="font-size:30px;font-weight:800;color:${p.color || '#AE4716'};margin-bottom:2px">${p.name || who}</div>`) + text;
       return { t, row, b };
     });

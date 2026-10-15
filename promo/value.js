@@ -334,4 +334,79 @@ function defineValue() {
       m.put(820, 1980 - h.y, { sx: h.sx, sy: h.sy, flip: true });
     };
   };
+
+  /* ── Quiz: soru, iki şık, 3-2-1 geri sayım, cevap ── */
+  SCENES.quiz = (t0, o = {}) => {
+    const s = scene(t0, o.bg || 'var(--paper)', o.wipe || [540, 1200], o.wdur ?? 0.3);
+    s.root.style.isolation = 'isolate';
+    const bg = el('div', 'abs', s.root, { inset: 0 });
+    const pat = pattern(s.root, 'rgba(0,0,0,.05)');
+    const OPT = o.optAt ?? 0.3, CD0 = o.countAt ?? 0.9, STEP = o.step ?? 0.6, REV = CD0 + 3 * STEP, WHY = REV + 0.45;
+    const ghost = el('div', 'abs it', s.root, { left: '24px', top: '1240px', fontSize: '700px', lineHeight: 0.8, opacity: 0.1 });
+    const top = el('div', 'pill', s.root, { left: '56px', top: '236px', fontSize: '38px', color: '#2A1E1A', zIndex: 3 });
+    const qs = (o.items || []).map((it, qi) => {
+      const card = el('div', 'abs', s.root, { left: '56px', right: '56px', top: '400px', borderRadius: '52px', background: '#FFFDF8', boxShadow: '0 40px 90px -30px rgba(40,20,10,.45)', padding: '50px 54px 54px', display: 'none' });
+      const q = el('div', '', card, { fontSize: px(it.qSize || 70), fontWeight: 800, letterSpacing: '-.025em', lineHeight: 1.12, paddingRight: '150px' });
+      q.innerHTML = it.q;
+      const timer = el('div', 'abs it', card, { right: '40px', top: '40px', width: '130px', height: '130px', borderRadius: '50%', background: it.color, color: '#fff', fontSize: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center' });
+      const opts = it.opts.map((txt, i) => {
+        const b = el('div', '', card, { marginTop: i ? '26px' : '50px', height: '170px', borderRadius: '40px', border: '6px solid #2A1E1A', background: '#fff', display: 'flex', alignItems: 'center', gap: '30px', padding: '0 34px', fontSize: '70px', fontWeight: 800, letterSpacing: '-.02em', position: 'relative' });
+        b.innerHTML = `<span class="it" style="font-size:64px;width:76px;height:76px;border-radius:20px;background:#2A1E1A;color:#fff;display:flex;align-items:center;justify-content:center">${'AB'[i]}</span><span class="tx">${txt}</span><span class="it mark" style="margin-left:auto;font-size:58px"></span>`;
+        return b;
+      });
+      const why = el('div', '', card, { marginTop: '36px', fontSize: '50px', fontWeight: 700, color: '#4A3B33', lineHeight: 1.25, textAlign: 'center' });
+      why.innerHTML = it.why || '';
+      const m = it.mascot ? new Mascot(s.root, { who: it.mascot.who, w: 512, outfit: it.mascot.outfit || null }) : null;
+      return { ...it, card, timer, opts, why, m, qi };
+    });
+    s.update = (lt) => {
+      pat.style.transform = `translate(${(lt * 90) % 72}px,${(lt * 60) % 72}px)`;
+      let idx = -1;
+      qs.forEach((it, i) => { if (lt >= it.t) idx = i; });
+      top.textContent = `SORU ${Math.max(1, idx + 1)}/${qs.length}`;
+      if (idx >= 0) { bg.style.background = qs[idx].bg; ghost.textContent = idx + 1; ghost.style.color = qs[idx].color; }
+      qs.forEach((it, i) => {
+        const on = i === idx;
+        it.card.style.display = on ? 'block' : 'none';
+        if (it.m) it.m.root.style.display = on ? 'block' : 'none';
+        if (!on) return;
+        const k = lt - it.t;
+        const sl = E.back(prog(k, 0, 0.32));
+        const rev = k >= REV;
+        it.card.style.transform = `translateX(${(1 - sl) * 900}px) rotate(${(1 - sl) * 6}deg) translateX(${rev ? shake(k, REV, 14, 0.3) : 0}px)`;
+        ghost.style.transform = `translate(${(1 - E.out(prog(k, 0, 0.45))) * -260}px,${Math.sin(lt * 1.5) * 12}px) rotate(-6deg)`;
+        // geri sayım
+        const n = 3 - Math.floor((k - CD0) / STEP);
+        it.timer.style.display = k >= CD0 && !rev ? 'flex' : 'none';
+        it.timer.textContent = String(Math.max(1, n));
+        const tp = ((k - CD0) % STEP) / STEP;
+        it.timer.style.transform = `scale(${1 + 0.25 * Math.max(0, 1 - tp * 4)})`;
+        it.opts.forEach((b, j) => {
+          const p = E.back(prog(k, OPT + j * 0.12, 0.28));
+          const good = j === it.correct;
+          const mark = b.querySelector('.mark');
+          b.style.opacity = clamp(p * 3) * (rev && !good ? 0.55 : 1);
+          let tr = `translateX(${(1 - p) * (j ? 400 : -400)}px)`;
+          if (!rev && k > CD0) tr += ` scale(${1 + 0.015 * Math.sin(lt * 14 + j * 2)})`;
+          if (rev && good) tr += ` scale(${1 + 0.08 * Math.sin(prog(k, REV, 0.35) * Math.PI)})`;
+          if (rev && !good) tr += ` translateX(${shake(k, REV, 22, 0.35)}px) rotate(${-2 * E.out(prog(k, REV, 0.2))}deg)`;
+          b.style.transform = tr;
+          b.style.background = rev ? (good ? '#2F8F5A' : '#F2D4CF') : '#fff';
+          b.style.color = rev ? (good ? '#fff' : '#C0392B') : 'var(--ink)';
+          b.style.borderColor = rev ? (good ? '#1E6B40' : '#C0392B') : '#2A1E1A';
+          b.querySelector('.tx').style.textDecoration = rev && !good ? 'line-through' : 'none';
+          mark.textContent = rev ? (good ? 'DOĞRU' : 'YANLIŞ') : '';
+        });
+        const wp = prog(k, WHY, 0.25);
+        it.why.style.opacity = wp;
+        it.why.style.transform = `translateY(${(1 - E.out(wp)) * 20}px)`;
+        if (it.m) {
+          const pop = E.back(prog(k, 0.35, 0.4));
+          const h = rev ? hop(k, 0.42, 50) : { y: 0, sx: 1, sy: 1 };
+          it.m.set(rev ? 'happy' : 'thoughtful', rev ? 'up' : null, rev ? 'wide' : blink(k));
+          it.m.put(it.mascot.x ?? 830, 1990 + (1 - pop) * 500 - h.y + (!rev && k > CD0 ? Math.sin(lt * 20) * 3 : 0), { sx: h.sx, sy: h.sy, flip: true });
+        }
+      });
+    };
+  };
 }

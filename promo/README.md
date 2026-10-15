@@ -42,6 +42,7 @@ Her sahne: `[tür, başlangıç saniyesi, seçenekler]`.
 | `debtStory` | Karamel: "Yarın veririm" → 3 ay sonra "Hangi 120?" | 5,6 sn |
 | `examStory` | Sınav haftası gecesi → hatırlatma → sınav haftası modu | 5,4 sn |
 | `pov` | Telefon ekranı adımları (`steps`: `img`, `scroll`, `seq`), `taps`, `chips`, `stopwatch`, `mascot` | serbest |
+| `chat` | (ek) `font`: mesaj yazı boyu, `hits`: büyük cevap mesajlarının vuruş sesi anları |
 | `chat` | Grup sohbeti (`people`, `messages`, `typing`) | serbest |
 | `talk` | Konuşan kafa Fıstık (`poses`, `talk`, `shake`) | serbest |
 | `lineup` | Beş maskot sıra hâlinde | 2,5 sn |
@@ -66,6 +67,7 @@ elektrik piyano, plak cızırtısı, bant titremesi), `horror` (uğultu, uyumsuz
 | `tagHook` | Hook: peşin/taksit etiketleri, `=` işareti `flip` anında `≠` olur |
 | `percentHook` | Hook: hesap makinesine `text` yazılır, `stop` anında "YANLIŞ!" damgası |
 | (reels düzeyi) `loop: true` | Müzik bitiş vuruşu ve sondaki kararma kapanır; son sahne olarak hook tekrar eklenirse video kendi içinde döner |
+| `quiz` | Quiz: `items` (`t`, `q`, `opts` [A, B], `correct` 0/1, `why`, `color`, `bg`, `mascot`); şıklar gelir, 3-2-1 geri sayım, doğru şık yeşil patlar. `optAt`, `countAt`, `step` |
 | `cards` | Bilgi kartları: `items` (`t`, `num`/`badge`, `title`, `body`, `ex` satırları, `big` + `bigTo` sayaç, `mascot`, `color`, `bg`). `bigDec`: ondalık basamak. `decor: {topic, props: "money"|"percent"}` + `dur`: üstte konu başlığı ve ilerleme çubuğu, arkada soluk dev numara ve süzülen pixel paralar/yüzdeler, sayı oturunca kıvılcım; `mascot.say`: maskotun tepki balonu |
 | `cartHook` | Sepet ve "Siparişi onayla" düğmesinde tereddüt eden Fıstık |
 | `pieHook` | Dönen 50/30/20 pasta grafiği |

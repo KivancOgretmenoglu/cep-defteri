@@ -201,39 +201,41 @@ Kaydet, burs yatınca aç 📌
 
 ---
 
-## 10 · pesin-mi-taksit-mi (bilgi, döngülü, 15,6 sn, müzik: pop 108 BPM)
+## 10 · pesin-mi-taksit-mi (format: mesajlaşma hikâyesi, döngülü, 15,6 sn, müzik: pop 108 BPM)
 
 **Açıklama** (ilk satır arama için anahtar kelimeli):
 ```
-Peşin mi taksit mi? Enflasyonda hangisi daha ucuz 💸
+Peşin mi taksit mi? Telefon alırken enflasyon hesabı 📱
 
-1. Vade farksız taksit, faizsiz borçtur. 12.000 TL'lik ürün, 6 × 2.000 TL taksit: aylık %2 enflasyon varsayımıyla taksitlerin bugünkü değeri ≈ 11.200 TL.
-2. Peşin indirimin sınırı = (taksit sayısı + 1) ÷ 2 × aylık enflasyon. 6 taksit, aylık %2 → ≈ %7.
-3. Peşin indirim %7'den büyükse peşin, küçükse taksit. Şartlar: taksitli fiyat peşinle aynı olmalı (vade farkı yok), taksit parası kenarda durmalı.
+Fıstık 18.000 TL'lik telefonu soruyor:
+• Vade farksız 6 × 3.000 TL taksit, faizsiz borç demek.
+• Aylık %2 enflasyon varsayımıyla bu 6 taksitin bugünkü değeri ≈ 16.800 TL → yaklaşık 1.200 TL avantaj.
+• Peşine %7'den fazla indirim varsa peşin al (kısa formül: (taksit sayısı + 1) ÷ 2 × aylık enflasyon).
+• Şartlar: taksitli fiyat peşinle aynı olmalı, taksit parası kenarda durmalı.
 
 Örnekteki enflasyon varsayımdır, yatırım tavsiyesi değildir.
 📌 Kaydet, büyük alışverişten önce aç.
 
-#taksit #peşin #enflasyon #öğrencibütçesi #kredikartı
+#taksit #peşin #enflasyon #öğrencibütçesi #telefon
 ```
 
 **Test için alternatif hook'lar:**
 - "Taksit bazen peşinden ucuz"
-- "12.000 TL'lik taksit aslında 11.200"
+- "18.000 TL'lik telefon aslında 16.800"
 
-**Hesap notu:** 2.000 × (1 − 1,02⁻⁶) ÷ 0,02 = 11.203 TL (ilk taksit 1 ay sonra). Tam avantaj %6,6; kısa formül ≈ %7 verir.
+**Hesap notu:** 3.000 × (1 − 1,02⁻⁶) ÷ 0,02 = 16.804 TL (ilk taksit 1 ay sonra). Tam eşik %6,6; videoda güvenli tarafta kalmak için "%7'den fazla" dendi.
 
 ---
 
-## 11 · yuzde-tuzaklari (bilgi, döngülü, 14,6 sn, müzik: quiz)
+## 11 · yuzde-tuzaklari (format: quiz, döngülü, 16,4 sn, müzik: quiz)
 
 **Açıklama:**
 ```
-Faiz, enflasyon ve indirim hesabında 3 yüzde tuzağı 🧮
+Faiz, enflasyon ve indirim: 3 soruluk yüzde testi 🧮 Kaçını bildin? 👇
 
-1. Aylık × 12 ≠ yıllık. Faiz faize eklenir: aylık %3, bir yılda %36 değil %42,6 olur (1,03¹²). Kredi kartı ve KMH faizine bakarken bunu hatırla.
-2. Faiz − enflasyon ≠ kazanç. Gerçek kazanç = (1 + faiz) ÷ (1 + enflasyon) − 1. Faiz %40, enflasyon %30 → %10 değil, %7,7.
-3. Önce %100 zam, sonra %50 indirim → fiyat aynı: 1.000 → 2.000 → 1.000 TL. Büyük indirim günlerinden önce fiyat geçmişine bak.
+1. Kart borcuna aylık %3 faiz → bir yılda %36 değil %42,6 (faiz faize eklenir: 1,03¹²).
+2. Birikimin %40 faiz aldı, fiyatlar %30 arttı → gerçek kazanç %10 değil %7,7 (1,40 ÷ 1,30 − 1).
+3. 1.000 TL'lik kulaklığa önce %100 zam, sonra %50 indirim → yine 1.000 TL. İndirimden önce fiyat geçmişine bak.
 
 Örnek oranlar varsayımdır, yatırım tavsiyesi değildir.
 📌 Kaydet, indirim gününde aç.
@@ -242,5 +244,5 @@ Faiz, enflasyon ve indirim hesabında 3 yüzde tuzağı 🧮
 ```
 
 **Test için alternatif hook'lar:**
-- "%3 × 12 = %36 mı? Değil."
-- "Bankanın sana söylemediği yüzde hesabı"
+- "%3 × 12 = %36 mı? Bil bakalım"
+- "Bu 3 soruyu bilen çok az"

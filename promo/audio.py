@@ -924,6 +924,9 @@ def cue_chat(t0, skip=0, o=None):
             put(SFX, bloop(900, 1500, 0.06, 0.38), T(t), pan=0.4)
         else:
             put(SFX, bloop(520, 820, 0.07, 0.34), T(t), pan=-0.3)
+    for h in o.get('hits', []):  # büyük cevap mesajı
+        put(SFX, slam_hit(1.0), T(h), 0.5)
+        put(SFX, ding_ding(), T(h + 0.05), 0.7)
     if o.get('typing'):
         a, b = o['typing'][0], o['typing'][1]
         for tk in np.arange(a + 0.05, b - 0.05, 0.11):
@@ -1173,6 +1176,32 @@ def cue_percentHook(t0, skip=0, o=None):
         put(SFX, tick(k % 2 == 0, 0.3), T(k * (st - 0.1) / n), pan=0.2)
     put(SFX, stamp(), T(st), 1.0)
     put(SFX, slam_hit(0.7), T(st), 0.7)
+
+def buzzer(d=0.35):
+    t = tt(d)
+    x = np.sign(np.sin(2 * np.pi * 110 * t)) * 0.5 + np.sign(np.sin(2 * np.pi * 116 * t)) * 0.5
+    return lp(x, 1800) * adsr(len(t), 0.005, 0.05, 0.8, 0.08) * 0.35
+
+
+def cue_quiz(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    OPT, CD0, STEP = o.get('optAt', 0.3), o.get('countAt', 0.9), o.get('step', 0.6)
+    REV = CD0 + 3 * STEP
+    for i, it in enumerate(o.get('items', [])):
+        t = it['t']
+        put(SFX, stereo_move(whoosh(0.3, 400, 3500), 0.9, -0.2), T(t - 0.02), 0.45)
+        for j in range(2):
+            put(SFX, bloop(500 + 250 * j, 900 + 250 * j, 0.06, 0.25), T(t + OPT + j * 0.12), pan=(j - 0.5))
+        for k in range(3):  # geri sayım
+            put(SFX, woodblock(k == 2), T(t + CD0 + k * STEP), 0.8, pan=0.3)
+        put(SFX, buzzer(), T(t + REV), 0.5, pan=-0.3)
+        put(SFX, ding_ding(), T(t + REV + 0.05), 0.7, pan=0.3)
+        put(SFX, popper(), T(t + REV), 0.35)
+        m = it.get('mascot')
+        if m:
+            put(SFX, boing(0.3, 0.18), T(t + 0.35), pan=0.5)
+            put(SFX, mascot_voice(m.get('who', 'fistik')), T(t + REV + 0.25), 0.45, pan=0.5)
 
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 

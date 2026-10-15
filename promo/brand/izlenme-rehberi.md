@@ -16,7 +16,9 @@ Kaynaklı araştırmanın özeti (Ekim 2026). [RESMİ] = Instagram/Mosseri açı
 5. **Ayrı kapanış kartı yok.** CTA son kartın üstünde; son kare ilk kareye bağlanır (döngü → tekrar izlenme).
 6. Videoda CTA **"arkadaşına gönder"**; "kaydet" açıklamada.
 7. Yazı ekranı kaplamasın, pixel sahne görünsün. Üst %14 ve alt %20–35 Instagram arayüzüne ayrılmış.
-8. Ses her zaman açık. Müziksiz sürümle sessiz bir trend ses A/B test edilebilir.
+8. **Format çeşitliliği:** aynı kart düzenini art arda kullanma; kartlar, quiz (`quiz`), mesajlaşma hikâyesi (`chat`), POV arasında dön. Örnekler öğrenci hayatından olsun (telefon, kulaklık, kart borcu, burs).
+9. **Tahmin anı:** cevabı vermeden önce 1–2 sn beklet (geri sayım, "yazıyor…"). İzleyici tahmin eder, kalır, yorumda skorunu yazar.
+10. Ses her zaman açık. Müziksiz sürümle sessiz bir trend ses A/B test edilebilir.
 
 ## Yayınlarken
 - Önce **Deneme reelsi** (Trial Reels: yalnız takip etmeyenlere gösterilir) olarak paylaş; skip rate'i sadece diğer deneme reelsleriyle karşılaştır. ([Fanpage Karma](https://www.fanpagekarma.com/insights/?p=9293))
