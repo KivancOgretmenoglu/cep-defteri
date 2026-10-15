@@ -14,7 +14,7 @@ function setupOverlays(reel) {
     return { a, b, e, pulse: !!o.pulse };
   });
   const caps = (reel.captions || []).map(([a, b, text, y = 1430, times]) => {
-    const e = el('div', 'abs cap', layer, { left: '70px', right: '70px', top: px(y), textAlign: 'center' });
+    const e = el('div', 'abs cap' + (reel.captionPixel ? ' it' : ''), layer, { left: '70px', right: '70px', top: px(y), textAlign: 'center' });
     const words = text.split(' ').map((w) => { const s = el('span', 'w', e); s.textContent = w + ' '; return s; });
     return { a, b, e, words, times, step: capStep(a, b, words.length) };
   });

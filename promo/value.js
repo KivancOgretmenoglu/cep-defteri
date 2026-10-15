@@ -477,6 +477,13 @@ function defineValue() {
       const shown = fk < 0.5 && fi >= 0 ? fi - 1 : fi;
       const html = (shown < 0 ? front : FL[shown][1]).replace('{TRAY}', pix(TRAY, TRAY_C, 18)).replace('{CUP}', pix(CUP, CUP_C, 24)).replace('{COIN}', pix(TLCOIN, TLCOIN_C, 18)).replace('{HEADPH}', pix(HEADPH, HEADPH_C, 13));
       if (face.dataset.k !== String(shown)) { face.innerHTML = html; face.dataset.k = String(shown); face.style.background = shown < 0 ? '#FFFDF8' : (FL[shown][2] || '#FFFDF8'); }
+      const cnt = face.querySelector('.cnt');
+      if (cnt && shown >= 0) {
+        const to = +cnt.dataset.to, cp = E.out(prog(lt, FL[shown][0], 0.55));
+        cnt.textContent = fmt(to * cp);
+        cnt.style.display = 'inline-block';
+        cnt.style.transform = `scale(${1 + 0.25 * Math.sin(prog(lt, FL[shown][0] + 0.55, 0.25) * Math.PI)})`;
+      }
       const sx = fi >= 0 && fk < 1 ? Math.abs(Math.cos(fk * Math.PI)) : 1;
       const swing = Math.sin(lt * 2.4) * 5 + (fi >= 0 ? Math.sin((lt - ft) * 12) * 10 * Math.exp(-(lt - ft) * 3) * (lt > ft ? 1 : 0) : 0);
       tag.style.transform = `rotate(${swing}deg) scaleX(${Math.max(0.02, sx)}) scale(${fi >= 0 && lt > ft && lt < ft + 0.3 ? 1 + 0.08 * Math.sin((lt - ft) / 0.3 * Math.PI) : 1})`;
@@ -552,6 +559,8 @@ function defineValue() {
     const hp = el('div', 'abs it', s.root, { fontSize: '40px' });
     s.update = (lt) => {
       amb(lt, B);
+      const zk = Math.exp(-Math.max(0, lt - B) * 2.5) * (lt >= B ? 1 : 0);
+      s.root.style.transform = lt >= B ? `scale(${1 + 0.07 * zk}) translate(${shake(lt, B, 18, 0.35)}px,${shake(lt + 0.05, B, 12, 0.35)}px)` : 'none';
       const a = E.back(prog(lt, A, 0.3));
       l1.style.opacity = clamp(a * 3); l1.style.transform = `scale(${0.7 + 0.3 * a})`;
       const sx = E.out(prog(lt, X, 0.25));

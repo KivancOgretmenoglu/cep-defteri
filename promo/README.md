@@ -68,6 +68,9 @@ elektrik piyano, plak cızırtısı, bant titremesi), `horror` (uğultu, uyumsuz
 | `percentHook` | Hook: hesap makinesine `text` yazılır, `stop` anında "YANLIŞ!" damgası |
 | (reels düzeyi) `loop: true` | Müzik bitiş vuruşu ve sondaki kararma kapanır; son sahne olarak hook tekrar eklenirse video kendi içinde döner |
 | `quiz` | Quiz: `items` (`t`, `q`, `opts` [A, B], `correct` 0/1, `why`, `color`, `bg`, `mascot`); şıklar gelir, 3-2-1 geri sayım, doğru şık yeşil patlar. `optAt`, `countAt`, `step` |
+| `oppTag` | Sallanan fiyat etiketi: `flips` [[t, html, zemin, sayaç]] (html içinde `{HEADPH}`, `{TRAY}`, `{CUP}`, `{COIN}` pixel çizimleri, `<span class='cnt' data-to='15'>` sayaç), `countdown` [başla, adım], `pamuk` [[t, dance/shock/dumb/think/hit/faint]], `bilge` [t] |
+| `lesson` | "Buna değer mi?" çizilir, "Bunun yerine ne alırdım?" damgalanır (yakınlaşma + sarsıntı): `a`, `strike`, `b` |
+| (reels düzeyi) `captionPixel: true` | Altyazılar pixel fontla |
 | `cards` | Bilgi kartları: `items` (`t`, `num`/`badge`, `title`, `body`, `ex` satırları, `big` + `bigTo` sayaç, `mascot`, `color`, `bg`). `bigDec`: ondalık basamak. `decor: {topic, props: "money"|"percent"}` + `dur`: üstte konu başlığı ve ilerleme çubuğu, arkada soluk dev numara ve süzülen pixel paralar/yüzdeler, sayı oturunca kıvılcım; `mascot.say`: maskotun tepki balonu |
 | `cartHook` | Sepet ve "Siparişi onayla" düğmesinde tereddüt eden Fıstık |
 | `pieHook` | Dönen 50/30/20 pasta grafiği |

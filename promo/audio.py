@@ -1203,6 +1203,10 @@ def cue_quiz(t0, skip=0, o=None):
             put(SFX, boing(0.3, 0.18), T(t + 0.35), pan=0.5)
             put(SFX, mascot_voice(m.get('who', 'fistik')), T(t + REV + 0.25), 0.45, pan=0.5)
 
+def pitched(x, s):
+    return varispeed(x, np.full(int(len(x) / s) + 2, s))
+
+
 def cue_oppTag(t0, skip=0, o=None):
     o = o or {}
     T = at(t0, skip)
@@ -1214,6 +1218,8 @@ def cue_oppTag(t0, skip=0, o=None):
         put(SFX, stereo_move(whoosh(0.3, 600, 4000), -0.4, 0.4), T(t - 0.15), 0.5)
         put(SFX, ui_tap(0.5), T(t), 0.8)
         put(SFX, ding_ding() if i else stamp(), T(t + 0.02), 0.6 if i else 0.9)
+        if len(f) > 3:
+            put(SFX, slot_roll(0.5), T(t), 0.45)
         if i:
             put(SFX, boing(0.35, 0.3), T(t + 0.05), pan=0.3)
     cd = o.get('countdown')
@@ -1221,6 +1227,15 @@ def cue_oppTag(t0, skip=0, o=None):
         for k in range(3):
             put(SFX, woodblock(k == 2), T(cd[0] + k * cd[1]), 0.8, pan=0.3)
     for t, st in o.get('pamuk', []):
+        if st == 'shock':
+            put(SFX, pitched(squeak(), 1.35), T(t + 0.05), 0.55, pan=0.15)
+        if st == 'dumb':
+            put(SFX, pitched(squeak(), 0.75), T(t + 0.3), 0.4, pan=0.15)
+        if st == 'think':
+            for k in range(3):
+                put(SFX, pitched(squeak(), 1.1 + 0.08 * k), T(t + 0.6 + k * 0.9), 0.25, pan=0.15)
+        if st == 'hit':
+            put(SFX, pitched(squeak(), 1.6), T(t + 0.08), 0.6, pan=0.15)
         if st == 'faint':
             put(SFX, sad_trombone()[: int(1.0 * SR)], T(t + 0.1), 0.45)
             put(SFX, kick(0.7), T(t + 0.5), 0.6)
@@ -1237,6 +1252,7 @@ def cue_lesson(t0, skip=0, o=None):
     put(SFX, buzzer(), T(x + 0.15), 0.4)
     b = o.get('b', 2.4)
     put(SFX, stamp(), T(b), 0.9)
+    put(SFX, boom(), T(b), 0.35)
     put(SFX, popper(), T(b + 0.05), 0.5)
     put(SFX, ding_ding(), T(b + 0.2), 0.6)
 
