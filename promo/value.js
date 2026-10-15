@@ -611,7 +611,7 @@ function defineValue() {
     const timer = el('div', 'abs it', s.root, { left: '820px', top: '520px', width: '170px', height: '170px', borderRadius: '50%', background: '#4351A3', color: '#fff', fontSize: '130px', display: 'none', alignItems: 'center', justifyContent: 'center', zIndex: 4 });
     const f = new Mascot(s.root, { who: 'fistik', w: 576 });
     const b = o.bilge ? new Mascot(s.root, { who: 'bilge', w: 448, outfit: 'scholar' }) : null;
-    const say = el('div', 'abs it', s.root, { left: '60px', top: '1560px', background: '#fff', border: '7px solid #2A1E1A', borderRadius: '30px', padding: '6px 30px 10px', fontSize: '76px', whiteSpace: 'nowrap', zIndex: 4, display: 'none', transformOrigin: '30% 100%' });
+    const say = el('div', 'abs it', s.root, { left: '60px', top: '1560px', background: '#fff', border: '7px solid #2A1E1A', borderRadius: '34px', padding: '8px 40px 14px', fontSize: '104px', whiteSpace: 'nowrap', zIndex: 4, display: 'none', transformOrigin: '30% 100%', boxShadow: '0 10px 0 rgba(42,30,26,.25)' });
     say.textContent = o.say || '5 TL fark!';
     const sweat = pixEl(s.root, SWEAT, SWEAT_C, 18);
     const ev = (k) => o[k] ?? 99;
@@ -627,7 +627,7 @@ function defineValue() {
         let tr = pk && lt < ev('hide') ? `scale(${1 + 0.1 * Math.sin(pp * Math.PI)})` : '';
         if (i === 1) {
           const hp = E.out(prog(lt, ev('hide'), 0.4)), rp = E.back(prog(lt, ev('trap'), 0.4));
-          c.style.opacity = lt >= ev('trap') ? 1 : 1 - 0.85 * hp;
+          c.style.opacity = lt >= ev('trap') ? 1 : 1 - 0.5 * hp;
           tr += lt >= ev('trap') ? ` translateY(${(1 - rp) * -300}px)` : ` translateY(${hp * 40}px)`;
         }
         c.style.transform = tr;
@@ -685,7 +685,7 @@ function defineValue() {
     const wv = wal.querySelector('.wv'), ww = wal.querySelector('.w');
     const coins = Array.from({ length: 8 }, () => pixEl(s.root, TLCOIN, TLCOIN_C, 16));
     const think = el('div', 'abs', s.root, { left: '30px', top: '1390px', background: '#fff', border: '7px solid #2A1E1A', borderRadius: '40px', padding: '10px 34px 16px', zIndex: 4, display: 'none', transformOrigin: '80% 100%' });
-    think.innerHTML = `<span class="it" style="font-size:80px;color:#2F8F5A">+1.000 TL</span><br><span style="font-size:44px;font-weight:800">kazandım!</span>`;
+    think.innerHTML = `<span style="font-size:34px;font-weight:800;color:#8a7d72">Pamuk sanıyor ki:</span><br><span class="it" style="font-size:80px;color:#2F8F5A">+1.000 TL</span><br><span style="font-size:44px;font-weight:800">kazandım!</span>`;
     const timer = el('div', 'abs it', s.root, { left: '820px', top: '540px', width: '170px', height: '170px', borderRadius: '50%', background: '#4351A3', color: '#fff', fontSize: '130px', display: 'none', alignItems: 'center', justifyContent: 'center', zIndex: 4 });
     const m = new Mascot(s.root, { who: 'pamuk', w: 576, outfit: 'winter' });
     s.update = (lt) => {

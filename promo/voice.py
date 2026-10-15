@@ -191,7 +191,7 @@ def cmd_make(name):
     print(f'Sonraki adım: python3 promo/audio.py {name} && node promo/render.mjs video {name}')
 
 
-def estimate_caps(text, a, b, y):
+def estimate_caps(text, a, b, y, mx=4):
     """Satırın konuşma aralığına kelimeleri hece sayısına göre yayar; ≤4 kelimelik öbekler."""
     words = text.split()
     syl = [max(1, len(re.findall(r'[aeıioöuüAEIİOÖUÜ]', w))) + (0.6 if re.search(r'[.,:?!]$', w) else 0) for w in words]
@@ -200,8 +200,9 @@ def estimate_caps(text, a, b, y):
         times.append(round(a + (b - a) * acc / tot, 2)); acc += s_
     out, cur = [], []
     for k, w in enumerate(words):
+        nxt = words[k + 1] if k + 1 < len(words) else ''
         cur.append(k)
-        if len(cur) >= 4 or re.search(r'[.,:?!]$', w):
+        if len(cur) >= mx or re.search(r'[.,:?!]$', w) or len(' '.join(words[i] for i in cur) + ' ' + nxt) > 17:
             out.append(cur); cur = []
     if cur: out.append(cur)
     caps = []
@@ -227,7 +228,7 @@ def cmd_place(name):
         track[i : i + len(x)] += x[: max(0, n - i)]
         print(f'{t0:6.2f}–{t0 + len(x) / SR:5.2f} sn  {f}')
         if len(item) > 2 and item[2]:  # metin varsa hece ağırlıklı kelime zamanlı altyazı
-            caps += estimate_caps(item[2], t0, t0 + len(x) / SR, r.get('captionY', 1330))
+            caps += estimate_caps(item[2], t0, t0 + len(x) / SR, r.get('captionY', 1330), r.get('captionMaxWords', 4))
     if caps:
         for k in range(len(caps) - 1):
             caps[k][1] = round(min(caps[k][1], caps[k + 1][0] - 0.01), 2)
