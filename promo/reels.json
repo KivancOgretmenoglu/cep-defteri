@@ -1739,7 +1739,7 @@
         "Bilge'ye sordum,<br><b>cevaba bak</b>",
         330,
         {
-          "size": 96,
+          "size": 86,
           "pulse": true
         }
       ],
@@ -2193,5 +2193,188 @@
       "speed": 1.1
     },
     "loop": true
+  },
+  "firsat-maliyeti": {
+    "title": "Bilgi/hikâye: fırsat maliyeti (sesli)",
+    "end": 22.22,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.55,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        22.22,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        3.3,
+        "Her etiketin arkasında<br><b>gizli bir fiyat var</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        3.35,
+        6.4,
+        "Fırsat maliyeti =<br><b>seçmediğin şey</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        6.45,
+        10.35,
+        "Tahmin et:<br><b>3.000 TL neye eşit?</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        19.4,
+        21.75,
+        "Hep \"hak ettim\" diyen<br>arkadaşına <b>gönder</b>",
+        1240,
+        {
+          "size": 80,
+          "pulse": true
+        }
+      ],
+      [
+        21.75,
+        22.22,
+        "Her etiketin arkasında<br><b>gizli bir fiyat var</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "oppTag",
+        0,
+        {
+          "flips": [
+            [
+              1.7,
+              "<div style='font-size:46px;font-weight:800;color:#8a7d72;letter-spacing:.06em;margin-top:40px'>GERÇEK FİYATI</div><div class='it' style='font-size:260px;line-height:.9;color:#C0392B'>?</div>"
+            ],
+            [
+              10.4,
+              "<div style='margin-top:30px'>{TRAY}</div><div class='it' style='font-size:130px;line-height:1;margin-top:10px'>15 öğün</div><div style='font-size:46px;font-weight:700;color:#6e5f55'>yemek · 200 TL'den</div>",
+              "#FFF3E6"
+            ],
+            [
+              11.85,
+              "<div style='margin-top:30px'>{CUP}</div><div class='it' style='font-size:130px;line-height:1;margin-top:14px'>16 kahve</div><div style='font-size:46px;font-weight:700;color:#6e5f55'>180 TL'den</div>",
+              "#F3ECE4"
+            ],
+            [
+              13.0,
+              "<div style='margin-top:30px'>{COIN}</div><div class='it' style='font-size:120px;line-height:1;margin-top:14px;color:#2F8F5A'>3.000 TL</div><div style='font-size:52px;font-weight:800;color:#2F8F5A'>birikim</div>",
+              "#E9F6EE"
+            ]
+          ],
+          "countdown": [
+            8.9,
+            0.5
+          ],
+          "bilge": [
+            6.4
+          ],
+          "pamuk": [
+            [
+              1.7,
+              "shock"
+            ],
+            [
+              3.3,
+              "dumb"
+            ],
+            [
+              6.5,
+              "think"
+            ],
+            [
+              10.4,
+              "hit"
+            ],
+            [
+              11.85,
+              "hit"
+            ],
+            [
+              13.0,
+              "faint"
+            ]
+          ]
+        }
+      ],
+      [
+        "lesson",
+        15.0,
+        {
+          "a": 0.2,
+          "strike": 1.6,
+          "b": 2.6
+        }
+      ],
+      [
+        "oppTag",
+        21.75,
+        {
+          "wdur": 0.25
+        }
+      ]
+    ],
+    "voiceTempo": 1.12,
+    "voiceFiles": [
+      [
+        0.1,
+        "assets/voice/firsat/v1.mp3"
+      ],
+      [
+        3.35,
+        "assets/voice/firsat/v2.mp3"
+      ],
+      [
+        6.45,
+        "assets/voice/firsat/v3.mp3"
+      ],
+      [
+        10.45,
+        "assets/voice/firsat/v4.mp3"
+      ],
+      [
+        11.9,
+        "assets/voice/firsat/v5.mp3"
+      ],
+      [
+        13.05,
+        "assets/voice/firsat/v6.mp3"
+      ],
+      [
+        15.1,
+        "assets/voice/firsat/v7.mp3"
+      ],
+      [
+        19.5,
+        "assets/voice/firsat/v8.mp3"
+      ]
+    ]
   }
 }

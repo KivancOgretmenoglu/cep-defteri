@@ -409,4 +409,125 @@ function defineValue() {
       });
     };
   };
+
+  /* ── Fırsat maliyeti: sallanan fiyat etiketi döner, arkasından karşılıklar çıkar; salak Pamuk ── */
+  SCENES.oppTag = (t0, o = {}) => {
+    const s = scene(t0, '#FBEAD0', undefined, o.wdur ?? 0.5);
+    s.root.style.isolation = 'isolate';
+    pattern(s.root, 'rgba(174,71,22,.08)');
+    const FL = o.flips || [];  // [t, html, renk]
+    const notes = Array.from({ length: 5 }, (_, i) => { const e = el('div', 'abs it', s.root, { fontSize: '90px', color: '#E86A9A' }); e.textContent = i % 2 ? '♪' : '♫'; return e; });
+    const string = el('div', 'abs', s.root, { left: '538px', top: '640px', width: '6px', height: '130px', background: '#6e5f55', transformOrigin: '50% 0%' });
+    const tag = el('div', 'abs', s.root, { left: '250px', top: '760px', width: '580px', height: '500px', transformOrigin: '50% 0%' });
+    const face = el('div', '', tag, { position: 'absolute', inset: 0, borderRadius: '44px 44px 60px 60px', background: '#FFFDF8', border: '10px solid #2A1E1A', boxShadow: '0 30px 60px -20px rgba(40,20,10,.5)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '20px' });
+    el('div', 'abs', tag, { left: '265px', top: '22px', width: '50px', height: '50px', borderRadius: '50%', background: '#FBEAD0', border: '8px solid #2A1E1A' });
+    const front = o.front || "<div style='font-size:52px;font-weight:800;color:#8a7d72;letter-spacing:.06em;margin-top:40px'>KULAKLIK</div><div class='it' style='font-size:170px;line-height:1'>3.000</div><div style='font-size:56px;font-weight:800'>TL</div>";
+    const timer = el('div', 'abs it', s.root, { left: '790px', top: '700px', width: '170px', height: '170px', borderRadius: '50%', background: '#4351A3', color: '#fff', fontSize: '130px', display: 'none', alignItems: 'center', justifyContent: 'center', zIndex: 4 });
+    const qs = Array.from({ length: 3 }, (_, i) => { const e = el('div', 'abs it', s.root, { fontSize: '120px', color: '#4351A3' }); e.textContent = '?'; return e; });
+    const m = new Mascot(s.root, { who: 'pamuk', w: 576, outfit: 'headphones' });
+    const b = o.bilge ? new Mascot(s.root, { who: 'bilge', w: 448, outfit: 'scholar' }) : null;
+    const sweat = pixEl(s.root, SWEAT, SWEAT_C, 20);
+    const CD = o.countdown;  // [başlangıç, adım]
+    s.update = (lt) => {
+      // hangi yüz görünüyor
+      let fi = -1;
+      FL.forEach(([t], i) => { if (lt >= t - 0.15) fi = i; });
+      const ft = fi >= 0 ? FL[fi][0] : -9;
+      const fk = clamp((lt - (ft - 0.15)) / 0.3);  // 0→1 dönüş
+      const shown = fk < 0.5 && fi >= 0 ? fi - 1 : fi;
+      const html = (shown < 0 ? front : FL[shown][1]).replace('{TRAY}', pix(TRAY, TRAY_C, 18)).replace('{CUP}', pix(CUP, CUP_C, 24)).replace('{COIN}', pix(TLCOIN, TLCOIN_C, 18));
+      if (face.dataset.k !== String(shown)) { face.innerHTML = html; face.dataset.k = String(shown); face.style.background = shown < 0 ? '#FFFDF8' : (FL[shown][2] || '#FFFDF8'); }
+      const sx = fi >= 0 && fk < 1 ? Math.abs(Math.cos(fk * Math.PI)) : 1;
+      const swing = Math.sin(lt * 2.4) * 5 + (fi >= 0 ? Math.sin((lt - ft) * 12) * 10 * Math.exp(-(lt - ft) * 3) * (lt > ft ? 1 : 0) : 0);
+      tag.style.transform = `rotate(${swing}deg) scaleX(${Math.max(0.02, sx)}) scale(${fi >= 0 && lt > ft && lt < ft + 0.3 ? 1 + 0.08 * Math.sin((lt - ft) / 0.3 * Math.PI) : 1})`;
+      string.style.transform = `rotate(${swing}deg)`;
+      // geri sayım
+      if (CD) {
+        const k = Math.floor((lt - CD[0]) / CD[1]);
+        timer.style.display = k >= 0 && k < 3 ? 'flex' : 'none';
+        timer.textContent = String(3 - k);
+        const tp = ((lt - CD[0]) % CD[1]) / CD[1];
+        timer.style.transform = `scale(${1 + 0.3 * Math.max(0, 1 - tp * 4)})`;
+      }
+      // Pamuk: önce kafasına göre dans, sonra şaşkın, sonunda bayılır
+      const P = o.pamuk || [];  // [t, durum]
+      const st = P.reduce((a, p) => (lt >= p[0] ? p[1] : a), 'dance');
+      const stT = P.reduce((a, p) => (lt >= p[0] ? p[0] : a), 0);
+      const k = lt - stT;
+      let x = 540, y = 1990, rot = 0, sxm = 1, sym = 1, flip = false;
+      notes.forEach((n) => (n.style.display = 'none'));
+      qs.forEach((q) => (q.style.display = 'none'));
+      sweat.style.display = 'none';
+      if (st === 'dance') {
+        const beat = Math.floor(lt / 0.27);
+        m.set('happy', beat % 2 ? 'up' : 'wave2', 'squeeze');
+        y -= Math.abs(Math.sin(lt * 11.6)) * 40; rot = Math.sin(lt * 5.8) * 9; flip = beat % 4 > 1;
+        notes.forEach((n, i) => { const p = (lt * 0.7 + i / 5) % 1; n.style.display = 'block'; n.style.transform = `translate(${300 + i * 110 + Math.sin(p * 6 + i) * 30}px,${1500 - p * 500}px) rotate(${Math.sin(p * 9) * 20}deg)`; n.style.opacity = 1 - p; });
+      } else if (st === 'shock') {
+        m.set('curious', 'face', 'wide');
+        const j = E.back(prog(k, 0, 0.25)); y -= j * 90 - (k > 0.25 ? 90 * E.out(prog(k, 0.25, 0.3)) : 0); sym = 1 + 0.1 * Math.sin(Math.min(1, k / 0.3) * Math.PI);
+      } else if (st === 'dumb') {  // aval aval bakar, kafası yana yatık
+        m.set('thoughtful', null, Math.floor(lt / 1.3) % 2 ? 'half' : 'mood');
+        rot = -12 + Math.sin(lt * 1.5) * 3;
+        qs.forEach((q, i) => { const p = (lt * 0.6 + i / 3) % 1; q.style.display = 'block'; q.style.transform = `translate(${560 + (i - 1) * 140}px,${1380 - p * 160}px) rotate(${(i - 1) * 15}deg)`; q.style.opacity = Math.sin(p * Math.PI); });
+      } else if (st === 'think') {  // tahmin: ter, titreme
+        m.set('thoughtful', 'face', 'squeeze');
+        x += Math.sin(lt * 40) * 4; sweat.style.display = 'block';
+        const sk = (lt % 0.7) / 0.7; sweat.style.transform = `translate(700px,${1490 + sk * 80}px)`; sweat.style.opacity = 1 - sk * 0.6;
+      } else if (st === 'hit') {  // her karşılıkta geriye savrulur
+        m.set('curious', 'up', 'x');
+        const j = Math.exp(-k * 5); rot = 14 * Math.sin(k * 18) * j; y -= 50 * j; sxm = 1 + 0.12 * j;
+      } else if (st === 'faint') {  // bayılır
+        m.set('thoughtful', null, 'x');
+        const f = E.inOut(prog(k, 0, 0.5)); rot = 84 * f; x -= 230 * f; y -= 250 * f;
+      }
+      if (b && lt >= o.bilge[0]) x += 130 * E.out(prog(lt, o.bilge[0], 0.4));
+      m.put(x, y, { rot, sx: sxm, sy: sym, flip });
+      if (b) {
+        const bp = E.back(prog(lt, o.bilge[0], 0.4));
+        b.root.style.display = lt >= o.bilge[0] ? 'block' : 'none';
+        b.set('curious', Math.floor(lt / 0.5) % 2 ? 'wave' : null, blink(lt));
+        b.put(150 - (1 - bp) * 400, 1990 - hop(lt, 0.8, 14).y, {});
+        // Pamuk sağa kayar ki Bilge'ye yer açılsın
+      }
+    };
+  };
+
+  /* ── Fırsat maliyeti dersi: "Buna değer mi?" çizilir, "Bunun yerine ne alırdım?" damgalanır ── */
+  SCENES.lesson = (t0, o = {}) => {
+    const s = scene(t0, '#DDEFE9', [540, 1200], 0.35);
+    s.root.style.isolation = 'isolate';
+    pattern(s.root, 'rgba(47,143,90,.10)');
+    const A = o.a ?? 0.2, X = o.strike ?? 1.4, B = o.b ?? 2.4;
+    const l1 = el('div', 'abs', s.root, { left: '70px', right: '70px', top: '460px', textAlign: 'center' });
+    l1.innerHTML = `<span style="display:inline-block;position:relative;background:#fff;border:8px solid #2A1E1A;border-radius:36px;padding:18px 44px;font-size:96px;font-weight:800;letter-spacing:-.03em">Buna değer mi?<span class="st" style="position:absolute;left:-10px;right:-10px;top:50%;height:16px;background:#C0392B;border-radius:8px;transform-origin:0 50%"></span></span>`;
+    const st = l1.querySelector('.st');
+    const no = el('div', 'abs it', s.root, { left: '820px', top: '380px', fontSize: '150px', color: '#C0392B', zIndex: 3 }); no.textContent = 'X';
+    const l2 = el('div', 'abs', s.root, { left: '50px', right: '50px', top: '780px', textAlign: 'center' });
+    l2.innerHTML = `<span style="display:inline-block;background:#2F8F5A;color:#fff;border:8px solid #1E6B40;border-radius:40px;padding:22px 40px;font-size:92px;font-weight:800;letter-spacing:-.03em;line-height:1.08;box-shadow:0 18px 0 #1E6B40">Bunun yerine<br>ne alırdım?</span>`;
+    const p = new Mascot(s.root, { who: 'pamuk', w: 512 });
+    const bm = new Mascot(s.root, { who: 'bilge', w: 448, outfit: 'scholar' });
+    const hp = el('div', 'abs it', s.root, { fontSize: '40px' });
+    s.update = (lt) => {
+      const a = E.back(prog(lt, A, 0.3));
+      l1.style.opacity = clamp(a * 3); l1.style.transform = `scale(${0.7 + 0.3 * a})`;
+      const sx = E.out(prog(lt, X, 0.25));
+      st.style.transform = `scaleX(${sx}) rotate(-3deg)`;
+      l1.style.filter = lt > X + 0.25 ? 'grayscale(.8) opacity(.7)' : 'none';
+      const np = prog(lt, X + 0.15, 0.2);
+      no.style.display = np > 0 ? 'block' : 'none';
+      no.style.transform = `scale(${lerp(2.5, 1, E.out(np))}) rotate(-8deg)`;
+      const bp = prog(lt, B, 0.22);
+      l2.style.opacity = bp > 0 ? 1 : 0;
+      l2.style.transform = `scale(${lerp(2.2, 1, E.out(bp))}) rotate(${(1 - E.out(bp)) * -8 + Math.sin(lt * 3) * 1.2}deg)`;
+      // Pamuk: kafa kaşır (salak), sonra aydınlanır
+      const got = lt > B + 0.3;
+      p.set(got ? 'celebrate' : 'thoughtful', got ? 'up' : 'face', got ? 'happy' : (Math.floor(lt / 0.9) % 2 ? 'half' : 'mood'));
+      const h = got ? hop(lt, 0.45, 40) : { y: 0, sx: 1, sy: 1 };
+      p.put(720, 1990 - h.y, { rot: got ? 0 : -10 + Math.sin(lt * 8) * 4, sx: h.sx, sy: h.sy });
+      bm.set(got ? 'happy' : 'curious', got ? 'wave' : null, blink(lt));
+      bm.put(260, 1990 - (got ? hop(lt + 0.2, 0.5, 20).y : 0), {});
+      hp.style.display = 'none';
+    };
+  };
 }

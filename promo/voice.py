@@ -4,6 +4,7 @@
 Kullanım:
   python3 promo/voice.py voices                 → hesabındaki sesleri listeler (ad, id, açıklama)
   python3 promo/voice.py dry <reels>            → API'ye gitmeden metinleri ve kredi tahminini yazar
+  python3 promo/voice.py place <reels>          → hazır mp3'leri ("voiceFiles") saniyelerine yerleştirir
   python3 promo/voice.py make <reels>           → seslendirmeyi üretir:
         promo/out/<reels>-voice.wav        (tam uzunlukta, satırlar doğru saniyelere yerleşmiş)
         promo/out/<reels>.captions.json    (kelime zamanlı altyazı; render otomatik kullanır)
@@ -190,12 +191,33 @@ def cmd_make(name):
     print(f'Sonraki adım: python3 promo/audio.py {name} && node promo/render.mjs video {name}')
 
 
+def cmd_place(name):
+    """reels.json → "voiceFiles": [[sn, "mp3 yolu"], ...] ve isteğe bağlı "voiceTempo" ile hazır satırları yerleştirir."""
+    reels = json.load(open(os.path.join(HERE, 'reels.json'), encoding='utf-8'))
+    r = reels[name]
+    tempo = r.get('voiceTempo', 1.0)
+    n = int((r['end'] + 0.5) * SR)
+    track = np.zeros(n, dtype=np.float32)
+    for t0, f in r['voiceFiles']:
+        cmd = ['ffmpeg', '-v', 'error', '-i', os.path.join(HERE, f)] + (['-af', f'atempo={tempo}'] if tempo != 1 else []) + ['-f', 'f32le', '-ac', '1', '-ar', str(SR), '-']
+        x, _ = trim(np.frombuffer(subprocess.run(cmd, capture_output=True).stdout, dtype=np.float32))
+        i = int(t0 * SR)
+        track[i : i + len(x)] += x[: max(0, n - i)]
+        print(f'{t0:6.2f}–{t0 + len(x) / SR:5.2f} sn  {f}')
+    stereo = (np.stack([track, track], 1) * 32767 * 0.9).astype('<i2')
+    with wave.open(os.path.join(OUT, f'{name}-voice.wav'), 'wb') as w:
+        w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes(stereo.tobytes())
+    print(f'yazıldı: out/{name}-voice.wav')
+
+
 if __name__ == '__main__':
     a = sys.argv[1:]
     if a[:1] == ['voices']:
         cmd_voices()
     elif a[:1] == ['dry'] and len(a) == 2:
         cmd_dry(a[1])
+    elif a[:1] == ['place'] and len(a) == 2:
+        cmd_place(a[1])
     elif a[:1] == ['make'] and len(a) == 2:
         cmd_make(a[1])
     else:

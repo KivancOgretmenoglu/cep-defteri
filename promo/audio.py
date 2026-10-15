@@ -1203,6 +1203,43 @@ def cue_quiz(t0, skip=0, o=None):
             put(SFX, boing(0.3, 0.18), T(t + 0.35), pan=0.5)
             put(SFX, mascot_voice(m.get('who', 'fistik')), T(t + REV + 0.25), 0.45, pan=0.5)
 
+def cue_oppTag(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    flips = o.get('flips', [])
+    if flips:
+        put(SFX, squeak(), T(0.3), 0.5, pan=0.2)  # Pamuk dans ederken cıyaklar
+    for i, f in enumerate(flips):
+        t = f[0]
+        put(SFX, stereo_move(whoosh(0.3, 600, 4000), -0.4, 0.4), T(t - 0.15), 0.5)
+        put(SFX, ui_tap(0.5), T(t), 0.8)
+        put(SFX, ding_ding() if i else stamp(), T(t + 0.02), 0.6 if i else 0.9)
+        if i:
+            put(SFX, boing(0.35, 0.3), T(t + 0.05), pan=0.3)
+    cd = o.get('countdown')
+    if cd:
+        for k in range(3):
+            put(SFX, woodblock(k == 2), T(cd[0] + k * cd[1]), 0.8, pan=0.3)
+    for t, st in o.get('pamuk', []):
+        if st == 'faint':
+            put(SFX, sad_trombone()[: int(1.0 * SR)], T(t + 0.1), 0.45)
+            put(SFX, kick(0.7), T(t + 0.5), 0.6)
+        if st == 'shock':
+            put(SFX, slam_hit(0.9), T(t), 0.5)
+
+
+def cue_lesson(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    put(SFX, bloop(500, 900, 0.06, 0.3), T(o.get('a', 0.2)))
+    x = o.get('strike', 1.4)
+    put(SFX, paper_tear(), T(x), 0.6)
+    put(SFX, buzzer(), T(x + 0.15), 0.4)
+    b = o.get('b', 2.4)
+    put(SFX, stamp(), T(b), 0.9)
+    put(SFX, popper(), T(b + 0.05), 0.5)
+    put(SFX, ding_ding(), T(b + 0.2), 0.6)
+
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
 # ═════════ ANA MÜZİK ═════════

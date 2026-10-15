@@ -246,3 +246,28 @@ Faiz, enflasyon ve indirim: 3 soruluk yüzde testi 🧮 Kaçını bildin? 👇
 **Test için alternatif hook'lar:**
 - "%3 × 12 = %36 mı? Bil bakalım"
 - "Bu 3 soruyu bilen çok az"
+
+---
+
+## 12 · firsat-maliyeti (format: hikâye + tahmin, seslendirme: Buğra, döngülü, 22 sn)
+
+**Açıklama:**
+```
+Fırsat maliyeti nedir? Her fiyat etiketinin arkasında gizli bir fiyat var 🏷️
+
+3.000 TL'lik kulaklık aslında:
+• 15 öğün yemek (200 TL'den)
+• 16 kahve (180 TL'den)
+• ya da 3.000 TL birikim
+
+Bir şeyi seçince vazgeçtiğin en iyi seçenek = fırsat maliyeti.
+Bir dahaki alışverişte "buna değer mi?" deme, "bunun yerine ne alırdım?" de.
+
+📌 Kaydet · Hep "hak ettim" diyen arkadaşına gönder 🐰
+
+#fırsatmaliyeti #öğrencibütçesi #tasarruf #ekonomi #paraYönetimi
+```
+
+**Test için alternatif hook'lar:**
+- "Bu kulaklık 3.000 TL değil"
+- "Pamuk kulaklık aldı, sonra bayıldı"
