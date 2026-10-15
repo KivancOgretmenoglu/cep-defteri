@@ -32,6 +32,8 @@ OUT = os.path.join(HERE, 'out')
 CACHE = os.path.join(OUT, 'voice-cache')
 SR = 44100
 API = 'https://api.elevenlabs.io'
+# Marka sesi: Buğra - Sosyal Medya Seslendirmecisi (genç, İstanbul aksanı). ELEVENLABS_VOICE_ID ile değiştirilebilir.
+BRAND_VOICE_ID = '78vut4AQryyKEWB72sOv'
 
 
 def die(msg, code=1):
@@ -155,9 +157,7 @@ def phrases(words, max_words=5):
 
 def cmd_make(name):
     r = load_reel(name)
-    voice_id = os.environ.get('ELEVENLABS_VOICE_ID')
-    if not voice_id:
-        die('ELEVENLABS_VOICE_ID tanımlı değil. Önce `python3 promo/voice.py voices` ile bir ses seç.')
+    voice_id = os.environ.get('ELEVENLABS_VOICE_ID') or BRAND_VOICE_ID
     model = os.environ.get('ELEVENLABS_MODEL', 'eleven_multilingual_v2')
     settings = {'stability': 0.45, 'similarity_boost': 0.8, 'style': 0.35, 'use_speaker_boost': True, **r.get('voiceSettings', {})}
     n = int((r['end'] + 0.5) * SR)
