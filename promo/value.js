@@ -455,7 +455,7 @@ function defineValue() {
     pattern(s.root, 'rgba(174,71,22,.08)');
     const amb = ambient(s.root, { cy: 1010 });
     const FL = o.flips || [];  // [t, html, renk]
-    const notes = Array.from({ length: 5 }, (_, i) => { const e = el('div', 'abs it', s.root, { fontSize: '90px', color: '#E86A9A' }); e.textContent = i % 2 ? '♪' : '♫'; return e; });
+    const notes = Array.from({ length: 5 }, (_, i) => pixEl(s.root, NOTEP, { o: ['#E86A9A', '#9B7BC6', '#4351A3'][i % 3] }, 14));
     const string = el('div', 'abs', s.root, { left: '538px', top: '640px', width: '6px', height: '130px', background: '#6e5f55', transformOrigin: '50% 0%' });
     const tag = el('div', 'abs', s.root, { left: '250px', top: '760px', width: '580px', height: '500px', transformOrigin: '50% 0%' });
     const face = el('div', '', tag, { position: 'absolute', inset: 0, borderRadius: '44px 44px 60px 60px', background: '#FFFDF8', border: '10px solid #2A1E1A', boxShadow: '0 30px 60px -20px rgba(40,20,10,.5)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '20px' });
@@ -495,6 +495,7 @@ function defineValue() {
       const stT = P.reduce((a, p) => (lt >= p[0] ? p[0] : a), 0);
       const k = lt - stT;
       let x = 540, y = 1990, rot = 0, sxm = 1, sym = 1, flip = false;
+      if (b && lt >= o.bilge[0]) x += 130 * E.out(prog(lt, o.bilge[0], 0.4));
       notes.forEach((n) => (n.style.display = 'none'));
       qs.forEach((q) => (q.style.display = 'none'));
       sweat.style.display = 'none';
@@ -513,7 +514,8 @@ function defineValue() {
       } else if (st === 'think') {  // tahmin: ter, titreme
         m.set('thoughtful', 'face', 'squeeze');
         x += Math.sin(lt * 40) * 4; sweat.style.display = 'block';
-        const sk = (lt % 0.7) / 0.7; sweat.style.transform = `translate(700px,${1490 + sk * 80}px)`; sweat.style.opacity = 1 - sk * 0.6;
+        const sk = (lt % 0.7) / 0.7;  // alnın yanından süzülür
+        sweat.style.transform = `translate(${x + 95}px,${y - 360 + sk * 70}px)`; sweat.style.opacity = 1 - sk * 0.6;
       } else if (st === 'hit') {  // her karşılıkta geriye savrulur
         m.set('curious', 'up', 'x');
         const j = Math.exp(-k * 5); rot = 14 * Math.sin(k * 18) * j; y -= 50 * j; sxm = 1 + 0.12 * j;
@@ -521,7 +523,6 @@ function defineValue() {
         m.set('thoughtful', null, 'x');
         const f = E.inOut(prog(k, 0, 0.5)); rot = 84 * f; x -= 230 * f; y -= 250 * f;
       }
-      if (b && lt >= o.bilge[0]) x += 130 * E.out(prog(lt, o.bilge[0], 0.4));
       m.put(x, y, { rot, sx: sxm, sy: sym, flip });
       if (b) {
         const bp = E.back(prog(lt, o.bilge[0], 0.4));
