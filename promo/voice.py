@@ -229,6 +229,10 @@ def cmd_place(name):
         print(f'{t0:6.2f}–{t0 + len(x) / SR:5.2f} sn  {f}')
         if len(item) > 2 and item[2]:  # metin varsa hece ağırlıklı kelime zamanlı altyazı
             caps += estimate_caps(item[2], t0, t0 + len(x) / SR, r.get('captionY', 1330), r.get('captionMaxWords', 4))
+    if caps and r.get('captionUntil'):  # CTA kutusu gelmeden altyazı biter
+        cu = r['captionUntil']
+        caps = [c for c in caps if c[0] < cu - 0.2]
+        for c in caps: c[1] = min(c[1], cu)
     if caps:
         for k in range(len(caps) - 1):
             caps[k][1] = round(min(caps[k][1], caps[k + 1][0] - 0.01), 2)

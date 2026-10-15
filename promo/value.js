@@ -624,7 +624,7 @@ function defineValue() {
         const pp = prog(lt, ev('pick'), 0.3);
         c.style.background = pk && !hid ? 'rgba(255,210,90,.18)' : 'transparent';
         c.style.boxShadow = pk && !hid ? '0 0 0 8px #FFD25A' : 'none';
-        let tr = pk && lt < ev('hide') ? `scale(${1 + 0.1 * Math.sin(pp * Math.PI)})` : '';
+        let tr = pk && lt < ev('hide') ? `scale(${1 + 0.1 * Math.sin(pp * Math.PI)})` : (lt < ev('pick') ? `translateY(${-Math.abs(Math.sin(lt * 5 + i * 1.1)) * 16}px)` : '');
         if (i === 1) {
           const hp = E.out(prog(lt, ev('hide'), 0.4)), rp = E.back(prog(lt, ev('trap'), 0.4));
           c.style.opacity = lt >= ev('trap') ? 1 : 1 - 0.5 * hp;
@@ -684,8 +684,8 @@ function defineValue() {
     wal.innerHTML = `<div class="w" style="margin-top:60px">${pix(WALLET_O, WALLET_COL, 26)}</div><div style="font-size:52px;font-weight:800;color:#6e5f55;margin-top:10px">CÜZDAN</div><div class="wv it" style="font-size:180px;line-height:1">?</div>`;
     const wv = wal.querySelector('.wv'), ww = wal.querySelector('.w');
     const coins = Array.from({ length: 8 }, () => pixEl(s.root, TLCOIN, TLCOIN_C, 16));
-    const think = el('div', 'abs', s.root, { left: '30px', top: '1390px', background: '#fff', border: '7px solid #2A1E1A', borderRadius: '40px', padding: '10px 34px 16px', zIndex: 4, display: 'none', transformOrigin: '80% 100%' });
-    think.innerHTML = `<span style="font-size:34px;font-weight:800;color:#8a7d72">Pamuk sanıyor ki:</span><br><span class="it" style="font-size:80px;color:#2F8F5A">+1.000 TL</span><br><span style="font-size:44px;font-weight:800">kazandım!</span>`;
+    const think = el('div', 'abs', s.root, { left: '20px', top: '1330px', background: '#fff', border: '7px solid #2A1E1A', borderRadius: '40px', padding: '10px 34px 16px', zIndex: 4, display: 'none', transformOrigin: '80% 100%' });
+    think.innerHTML = `<span style="font-size:48px;font-weight:800;color:#6e5f55">Pamuk sanıyor ki:</span><br><span class="it" style="font-size:104px;color:#2F8F5A">+1.000 TL</span><br><span style="font-size:58px;font-weight:800">kazandım!</span>`;
     const timer = el('div', 'abs it', s.root, { left: '820px', top: '540px', width: '170px', height: '170px', borderRadius: '50%', background: '#4351A3', color: '#fff', fontSize: '130px', display: 'none', alignItems: 'center', justifyContent: 'center', zIndex: 4 });
     const m = new Mascot(s.root, { who: 'pamuk', w: 576, outfit: 'winter' });
     s.update = (lt) => {

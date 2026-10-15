@@ -2587,7 +2587,7 @@
   },
   "tuzak-secenek": {
     "title": "Kavram: tuzak seçenek (sesli)",
-    "end": 21.35,
+    "end": 21.45,
     "loop": true,
     "handheld": true,
     "musicGain": 0.5,
@@ -2595,7 +2595,7 @@
     "musicPlan": [
       [
         0,
-        21.35,
+        21.45,
         "lofi"
       ]
     ],
@@ -2604,17 +2604,7 @@
     "boxes": [
       [
         0,
-        2.95,
-        "Orta boy kahve<br><b>satılmak için yok</b>",
-        270,
-        {
-          "size": 86,
-          "pulse": true
-        }
-      ],
-      [
-        2.95,
-        5.75,
+        2.8,
         "Sen hangisini<br><b>alırdın?</b>",
         270,
         {
@@ -2623,18 +2613,38 @@
         }
       ],
       [
-        18.3,
-        20.8,
-        "Yorumlara yaz,<br>kahveci arkadaşına <b>gönder</b>",
-        1090,
+        9.45,
+        12.3,
+        "Orta boy<br><b>satılmak için değil</b>",
+        270,
         {
-          "size": 76,
+          "size": 86,
           "pulse": true
         }
       ],
       [
-        18.3,
-        20.8,
+        12.35,
+        14.0,
+        "Tuzak seçenek<br><b>(decoy etkisi)</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        18.5,
+        20.9,
+        "Sen hangisini alıyorsun?<br><b>Yorumlara yaz</b>",
+        1090,
+        {
+          "size": 80,
+          "pulse": true
+        }
+      ],
+      [
+        18.5,
+        20.9,
         "<img src='assets/icon.png' style='height:1.1em;vertical-align:-.25em;border-radius:.25em'> Cep Defteri · <b>@cep_defteri</b>",
         1560,
         {
@@ -2642,9 +2652,9 @@
         }
       ],
       [
-        21.05,
-        21.35,
-        "Orta boy kahve<br><b>satılmak için yok</b>",
+        21.15,
+        21.45,
+        "Sen hangisini<br><b>alırdın?</b>",
         270,
         {
           "size": 86,
@@ -2657,32 +2667,32 @@
         "menuBoard",
         0,
         {
-          "pick": 5.75,
-          "hide": 8.55,
-          "gap": 9.2,
-          "trap": 12.4,
+          "pick": 2.8,
+          "hide": 5.6,
+          "gap": 6.2,
+          "trap": 9.45,
           "countdown": [
-            4.55,
-            0.4
+            1.75,
+            0.35
           ],
           "bilge": [
-            12.4
+            9.45
           ],
           "fistik": [
             [
-              2.95,
+              1.7,
               "think"
             ],
             [
-              5.75,
+              2.8,
               "pick"
             ],
             [
-              8.55,
+              5.6,
               "shock"
             ],
             [
-              12.4,
+              9.45,
               "dumb"
             ]
           ]
@@ -2690,7 +2700,7 @@
       ],
       [
         "lesson",
-        14.2,
+        14.05,
         {
           "who": "fistik",
           "outfit": null,
@@ -2698,13 +2708,13 @@
           "q1Size": 80,
           "q2": "Ortadaki olmasa<br>ne alırdım?",
           "a": 0.2,
-          "strike": 1.1,
-          "b": 2.2
+          "strike": 1.0,
+          "b": 2.1
         }
       ],
       [
         "menuBoard",
-        20.8,
+        20.9,
         {
           "wdur": 0.25
         }
@@ -2714,44 +2724,45 @@
     "voiceFiles": [
       [
         0.1,
-        "assets/voice/tuzak/a1.mp3",
-        "Kafedeki orta boy kahve, satılmak için orada değil."
-      ],
-      [
-        2.95,
         "assets/voice/tuzak/a3.mp3",
         "Sen olsan hangisini alırdın?"
       ],
       [
-        5.8,
+        2.85,
         "assets/voice/tuzak/a4.mp3",
         "Çoğumuz büyüğü seçeriz. Sadece beş lira fark!"
       ],
       [
-        8.6,
+        5.65,
         "assets/voice/tuzak/a5.mp3",
         "Ama orta boy olmasaydı, büyük bu kadar cazip görünmezdi."
       ],
       [
-        12.45,
+        9.5,
+        "assets/voice/tuzak/a1.mp3",
+        "Kafedeki orta boy kahve, satılmak için orada değil."
+      ],
+      [
+        12.35,
         "assets/voice/tuzak/a6b.mp3",
         "Buna tuzak seçenek denir!"
       ],
       [
-        14.3,
+        14.15,
         "assets/voice/tuzak/a7.mp3",
         "İki seçenek arasında kalınca sor: ortadaki olmasa ne alırdım?"
       ],
       [
-        18.4,
+        18.5,
         "assets/voice/tuzak/a9.mp3"
       ]
     ],
-    "captionMaxWords": 3
+    "captionMaxWords": 3,
+    "captionUntil": 18.45
   },
   "indirim-yanilgisi": {
     "title": "Kavram: indirim yanılgısı (sesli)",
-    "end": 20.25,
+    "end": 19.35,
     "loop": true,
     "handheld": true,
     "musicGain": 0.5,
@@ -2759,7 +2770,7 @@
     "musicPlan": [
       [
         0,
-        20.25,
+        19.35,
         "pop",
         {
           "bpm": 108
@@ -2781,7 +2792,7 @@
       ],
       [
         6.6,
-        10.3,
+        9.1,
         "Tahmin et:<br><b>cüzdanda ne değişti?</b>",
         270,
         {
@@ -2790,8 +2801,8 @@
         }
       ],
       [
-        11.5,
-        13.9,
+        10.3,
+        12.7,
         "Tasarruf =<br><b>harcamadığın para</b>",
         270,
         {
@@ -2800,18 +2811,18 @@
         }
       ],
       [
-        17.1,
-        19.7,
-        "Sepetini yorumlara yaz,<br>alışverişçi arkadaşına <b>gönder</b>",
+        16.25,
+        18.8,
+        "Sepetinde şu an ne var?<br><b>Yorumlara yaz</b>",
         1090,
         {
-          "size": 76,
+          "size": 80,
           "pulse": true
         }
       ],
       [
-        17.1,
-        19.7,
+        16.25,
+        18.8,
         "<img src='assets/icon.png' style='height:1.1em;vertical-align:-.25em;border-radius:.25em'> Cep Defteri · <b>@cep_defteri</b>",
         1560,
         {
@@ -2819,8 +2830,8 @@
         }
       ],
       [
-        19.95,
-        20.25,
+        19.05,
+        19.35,
         "Yarı fiyata almak<br><b>kazanmak değil</b>",
         270,
         {
@@ -2837,16 +2848,16 @@
           "sale": 0.5,
           "brag": 3.3,
           "wallet": 6.6,
-          "reveal": 10.3,
+          "reveal": 9.1,
           "countdown": [
-            9.1,
-            0.4
+            8.0,
+            0.35
           ]
         }
       ],
       [
         "lesson",
-        13.9,
+        12.7,
         {
           "who": "pamuk",
           "outfit": "winter",
@@ -2860,7 +2871,7 @@
       ],
       [
         "saleTag",
-        19.7,
+        18.8,
         {
           "wdur": 0.25
         }
@@ -2884,25 +2895,26 @@
         "Tahmin et: Pamuk'un cüzdanında ne değişti?"
       ],
       [
-        10.35,
+        9.15,
         "assets/voice/indirim/b4.mp3",
         "Eksi bin lira."
       ],
       [
-        11.5,
+        10.3,
         "assets/voice/indirim/b5.mp3",
         "Çünkü tasarruf, harcamadığın paradır."
       ],
       [
-        14.0,
+        12.8,
         "assets/voice/indirim/b6b.mp3",
         "Tek soru sor: indirim olmasa da alır mıydım?"
       ],
       [
-        17.2,
+        16.25,
         "assets/voice/indirim/b7b.mp3"
       ]
     ],
-    "captionMaxWords": 3
+    "captionMaxWords": 3,
+    "captionUntil": 16.2
   }
 }
