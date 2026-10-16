@@ -3139,7 +3139,7 @@
       ]
     ],
     "voiceTempo": 1.2,
-    "voiceFilter": "equalizer=f=170:t=q:w=0.9:g=-4,equalizer=f=560:t=q:w=1.0:g=-3,highshelf=f=3800:g=3.5",
+    "voiceFilter": "brand",
     "voiceFiles": [
       [
         0.1,

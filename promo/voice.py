@@ -35,6 +35,14 @@ SR = 44100
 API = 'https://api.elevenlabs.io'
 # Marka sesi: Buğra - Sosyal Medya Seslendirmecisi (genç, İstanbul aksanı). ELEVENLABS_VOICE_ID ile değiştirilebilir.
 BRAND_VOICE_ID = '78vut4AQryyKEWB72sOv'
+# Marka sesi tarifi (brand/marka-sesi.md): ses rengini önceki reelslerdeki satırlara eşitleyen EQ.
+# reels.json'da "voiceFilter": "brand" bunu seçer; yeni reelslerde "voiceTempo": 1.2 ile birlikte kullanılır.
+BRAND_VOICE_FILTER = 'equalizer=f=170:t=q:w=0.9:g=-4,equalizer=f=560:t=q:w=1.0:g=-3,highshelf=f=3800:g=3.5'
+
+
+def voice_filter(r):
+    vf = r.get('voiceFilter') or ''
+    return BRAND_VOICE_FILTER if vf == 'brand' else vf
 
 
 def die(msg, code=1):
@@ -107,8 +115,8 @@ def synth(text, voice_id, model, settings):
     return mp3, al
 
 
-def decode(mp3):
-    r = subprocess.run(['ffmpeg', '-v', 'error', '-i', mp3, '-f', 'f32le', '-ac', '1', '-ar', str(SR), '-'], capture_output=True)
+def decode(mp3, af=''):
+    r = subprocess.run(['ffmpeg', '-v', 'error', '-i', mp3] + (['-af', af] if af else []) + ['-f', 'f32le', '-ac', '1', '-ar', str(SR), '-'], capture_output=True)
     if r.returncode:
         die('ffmpeg çözemedi: ' + r.stderr.decode()[:200])
     return np.frombuffer(r.stdout, dtype=np.float32)
@@ -166,7 +174,7 @@ def cmd_make(name):
     caps, spoken = [], 0
     for t0, text in r['voice']:
         mp3, al = synth(text, voice_id, model, settings)
-        x, lead = trim(decode(mp3))
+        x, lead = trim(decode(mp3, voice_filter(r)))
         i = int(t0 * SR)
         track[i : i + len(x)] += x[: max(0, n - i)]
         ws = [(w, t0 + a, t0 + b) for w, a, b in words_from_alignment(al, lead)]
@@ -223,7 +231,7 @@ def cmd_place(name):
     for item in r['voiceFiles']:
         t0, f = item[0], item[1]
         tp = item[3] if len(item) > 3 else tempo  # satıra özel hız
-        af = [r['voiceFilter']] if r.get('voiceFilter') else []  # ses rengini diğer reelslere eşitleyen EQ
+        af = [voice_filter(r)] if voice_filter(r) else []  # ses rengini diğer reelslere eşitleyen EQ
         if tp != 1: af.append(f'atempo={tp}')
         cmd = ['ffmpeg', '-v', 'error', '-i', os.path.join(HERE, f)] + (['-af', ','.join(af)] if af else []) + ['-f', 'f32le', '-ac', '1', '-ar', str(SR), '-']
         x, _ = trim(np.frombuffer(subprocess.run(cmd, capture_output=True).stdout, dtype=np.float32))
