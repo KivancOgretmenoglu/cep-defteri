@@ -1349,6 +1349,74 @@ def cue_cinema(t0, skip=0, o=None):
             put(SFX, boing(0.18, 0.18), T(lv + k * 0.3), pan=0.2 + 0.2 * k)
         put(SFX, fanfare_short() if 'fanfare_short' in globals() else pling(1318, 0.3, 0.5), T(lv + 0.7), 0.5)
 
+def cue_payPain(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    if 'pay' in o:
+        put(SFX, woodblock(False), T(o['pay'] - 0.45), 0.6); put(SFX, woodblock(True), T(o['pay'] - 0.2), 0.6)
+        for i in range(3):
+            tb = o['pay'] + i * 0.4
+            put(SFX, flutter(0.35), T(tb), 0.5, pan=-0.5)
+            put(SFX, pitched(chitter(), 0.8 + 0.1 * i), T(tb + 0.15), 0.55, pan=-0.4)
+            put(SFX, boing(0.3, 0.25), T(tb + 0.15), pan=-0.4)
+    if 'bip' in o:
+        put(SFX, stereo_move(whoosh(0.25, 800, 2600), 0.2, 0.6), T(o['bip'] - 0.35), 0.3)
+        put(SFX, pling(2637, 0.3, 0.09), T(o['bip']), pan=0.6); put(SFX, pling(2637, 0.3, 0.09), T(o['bip'] + 0.13), pan=0.6)
+        put(SFX, pitched(chitter(), 1.3), T(o['bip'] + 0.3), 0.45, pan=0.4)
+    if 'extras' in o:
+        for i in range(3):
+            put(SFX, bloop(420 + 120 * i, 1100 + 200 * i, 0.08, 0.4), T(o['extras'] + i * 0.35), pan=0.5)
+        put(SFX, cash_register(), T(o['extras'] + 1.05), 0.45, pan=0.4)
+    if 'ekS' in o:
+        put(SFX, stereo_move(whoosh(0.35, 3000, 500), 0.4, 0.4), T(o['ekS']), 0.45); put(SFX, paper_tear(), T(o['ekS'] + 0.3), 0.4)
+    if 'ekR' in o:
+        put(SFX, slam_hit(0.8), T(o['ekR']), 0.7); put(SFX, sad_trombone()[: int(1.0 * SR)], T(o['ekR'] + 0.08), 0.4)
+    if 'name' in o:
+        put(SFX, ding_ding(), T(o['name']), 0.5)
+    if 'write' in o:
+        put(SFX, bloop(500, 900, 0.06, 0.3), T(o['write'] + 0.3))
+        for i in range(7):
+            put(SFX, key_click(0.45), T(o['write'] + 0.6 + i * 0.12), pan=0.4)
+    if 'feel' in o:
+        put(SFX, pitched(chitter(), 1.0), T(o['feel']), 0.4, pan=0.4); put(SFX, pling(1318, 0.25, 0.4), T(o['feel'] + 0.1), pan=0.3)
+    if 'cta' in o:
+        put(SFX, popper(), T(o['cta']), 0.45)
+
+
+def cue_harclik(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    if 'day1' in o:
+        put(SFX, flutter(0.6), T(0.1), 0.45)
+        for k in range(4):
+            put(SFX, pling(1568 + 200 * k, 0.18, 0.35), T(0.25 + k * 0.35), pan=0.4 * np.sin(k))
+        put(SFX, cash_register(), T(1.6), 0.45)
+        for i, k in enumerate(['day1', 'day2', 'day3']):
+            put(SFX, paper_tear(0.2), T(o[k] - 0.05), 0.35)
+            put(SFX, stereo_move(whoosh(0.3, 600, 2800), 0, 0.7), T(o[k]), 0.4)
+            put(SFX, pling(1046 / (1.12 ** i), 0.3, 0.3), T(o[k] + 0.15), pan=0.5)
+    if 'zero' in o:
+        put(SFX, slam_hit(0.85), T(o['zero']), 0.7); put(SFX, sad_trombone()[: int(1.0 * SR)], T(o['zero'] + 0.05), 0.4)
+        put(SFX, pitched(woof(), 0.85), T(o['zero'] + 0.3), 0.45)
+    if 'work' in o:
+        w = o['work']
+        put(SFX, bloop(400, 1000, 0.08, 0.35), T(w))
+        for k in range(5):
+            put(SFX, clink(), T(w + 0.4 + k * 0.5), 0.35, pan=0.3 * np.sin(k * 1.3))
+        put(SFX, cash_register(), T(w + 1.0), 0.4)
+    if 'labels' in o:
+        put(SFX, bloop(500, 1200, 0.08, 0.35), T(o['labels'])); put(SFX, bloop(500, 1200, 0.08, 0.35), T(o['labels'] + 0.15))
+    if 'peel' in o:
+        put(SFX, paper_tear(), T(o['peel']), 0.5, pan=-0.4); put(SFX, paper_tear(), T(o['peel'] + 0.12), 0.5, pan=0.4)
+    if 'stamp' in o:
+        put(SFX, stamp(), T(o['stamp']), 0.9); put(SFX, boom(0.6), T(o['stamp']), 0.35)
+    if 'name' in o:
+        put(SFX, ding_ding(), T(o['name']), 0.5)
+    if 'think' in o:
+        put(SFX, bloop(700, 500, 0.08, 0.3), T(o['think']))
+    if 'cta' in o:
+        put(SFX, popper(), T(o['cta']), 0.45); put(SFX, woof(), T(o['cta'] + 0.3), 0.45)
+
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
 # ═════════ ANA MÜZİK ═════════

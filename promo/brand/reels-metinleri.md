@@ -329,3 +329,37 @@ En son neye "paraya yazık" diye katlandın? Yorumlara yaz 👇
 
 #batıkmaliyet #sinema #öğrencibütçesi #davranışsalekonomi #paraipuçları
 ```
+
+## 16 · odeme-acisi (kavram: ödeme acısı, seslendirme: Buğra, döngülü, 18,5 sn)
+
+**Açıklama:**
+```
+Aynı 450 TL. Nakitte mi acır, kartta mı? 💳
+
+Nakitte her banknot elinden çıkarken hissedersin. Kartta sadece "bip".
+Acı olmayınca fren de olmaz: sepete +45, +55, +60 derken ay sonu ekstre gelir.
+Buna ödeme acısı denir. Tutarlar örnek.
+
+Çözüm basit: kartla ödediysen hemen yaz. Yazınca acı geri gelir.
+
+Kartla ödeyince sepetine en son ne ekledin? Yorumlara yaz 👇
+
+#ödemeacısı #kredikartı #öğrencibütçesi #davranışsalekonomi #paraipuçları
+```
+
+## 17 · bulunmus-para (kavram: bulunmuş para etkisi, seslendirme: Buğra, döngülü, 17,4 sn)
+
+**Açıklama:**
+```
+Bayram harçlığı neden 3 günde biter? 💸
+
+Pizza, oyun, kulaklık: 1.500 TL üç günde sıfır.
+Aynı 1.500 TL'yi bir hafta akşam mesaisiyle kazansaydın, üç günde harcar mıydın?
+Para aynı para. "Hediye" ya da "maaş" diye etiketi yok. Buna bulunmuş para etkisi denir. Tutarlar örnek.
+
+Harcamadan önce sor: "Çalışarak kazansaydım böyle harcar mıydım?"
+
+Harçlığın en hızlı neye gitti? Yorumlara yaz 👇
+
+#bulunmuşpara #bayramharçlığı #öğrencibütçesi #davranışsalekonomi #paraipuçları
+```

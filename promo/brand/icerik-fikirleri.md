@@ -24,13 +24,13 @@ Rakam içeren her örnek "örnek" diye etiketlensin.
 1. **Batık maliyet** – "Kötü filmi sonuna kadar izlemek seni iki kez kaybettirir" · Diken 250 TL'lik bilette uyuyakalır · Ders: geri gelmeyecek parayı karara katma. ✅ üretildi (300 TL bilet, KAL/ÇIK anketi)
 2. **Çapa etkisi** – "Bu üstü çizili fiyat sana yalan söylüyor" · Pamuk ~~4.000~~ 2.500 TL montu ucuz sanır · Ders: kendi bütçeni referans al.
 3. **Tuzak seçenek** – "Orta boy kahve satılmak için orada değil" · S 120 / M 170 / L 175 · Ders: ortadaki olmasa ne alırdım? ✅ üretildi
-4. **Bulunmuş para** – "Bayram harçlığı neden 3 günde biter?" · Karamel · Ders: paranın etiketi yok.
+4. **Bulunmuş para** – "Bayram harçlığı neden 3 günde biter?" · Karamel · Ders: paranın etiketi yok. ✅ üretildi (1.500 TL harçlık, HEDİYE/MAAŞ etiketleri)
 5. **Sahiplik etkisi** – "Eski telefonunu neden kimse senin fiyatına almıyor?" · Ceviz · Ders: alıcının gözüyle fiyatla.
 6. **Hedonik adaptasyon** – "Yeni telefonun mutluluğu kaç gün sürer?" · Fıstık'ın mutluluk barı erir · Ders: deneyime harca / 1 hafta bekle.
 7. **Kayıptan kaçınma** – "100 TL kaybetmek, bulmaktan daha çok acıtır" · Ders: kötü aboneliği bu yüzden iptal etmiyoruz.
 8. **Şimdiki zaman yanlılığı** – "Bugün 1.000 mü, 1 ay sonra 1.100 mü?" quiz · Ders: gelecekteki sen de sensin.
 9. **Planlama yanılgısı** – "Bütçen neden her ay taşıyor?" · Ders: %10 beklenmedik payı.
-10. **Ödeme acısı** – "Kartla ödeyince neden daha çok harcarsın?" · Ders: anında yaz.
+10. **Ödeme acısı** – "Kartla ödeyince neden daha çok harcarsın?" · Ders: anında yaz. ✅ üretildi (Ceviz vs Ceviz, nakit/kart acı göstergesi)
 
 ### Satıcıların numaraları
 11. **Bedava kargo** – "50 TL kargo için 300 TL harcadın".
