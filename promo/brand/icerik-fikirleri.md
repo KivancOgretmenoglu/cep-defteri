@@ -21,7 +21,7 @@ Rakam içeren her örnek "örnek" diye etiketlensin.
 ## 25 kavram reelsi (fırsat maliyeti kalıbında: kavram + maskot hikâyesi + tahmin anı + tek ders)
 
 ### Kafamızın oyunları
-1. **Batık maliyet** – "Kötü filmi sonuna kadar izlemek seni iki kez kaybettirir" · Diken 250 TL'lik bilette uyuyakalır · Ders: geri gelmeyecek parayı karara katma.
+1. **Batık maliyet** – "Kötü filmi sonuna kadar izlemek seni iki kez kaybettirir" · Diken 250 TL'lik bilette uyuyakalır · Ders: geri gelmeyecek parayı karara katma. ✅ üretildi (300 TL bilet, KAL/ÇIK anketi)
 2. **Çapa etkisi** – "Bu üstü çizili fiyat sana yalan söylüyor" · Pamuk ~~4.000~~ 2.500 TL montu ucuz sanır · Ders: kendi bütçeni referans al.
 3. **Tuzak seçenek** – "Orta boy kahve satılmak için orada değil" · S 120 / M 170 / L 175 · Ders: ortadaki olmasa ne alırdım? ✅ üretildi
 4. **Bulunmuş para** – "Bayram harçlığı neden 3 günde biter?" · Karamel · Ders: paranın etiketi yok.
