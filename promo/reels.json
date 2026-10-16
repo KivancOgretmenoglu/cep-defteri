@@ -3171,5 +3171,31 @@
         "assets/voice/batik/e7.mp3"
       ]
     ]
+  },
+  "batik-maliyet-kapak": {
+    "title": "Kapak: batık maliyet",
+    "end": 1.0,
+    "boxes": [
+      [
+        0,
+        1,
+        "Film berbat.<br><b>Kalır mısın?</b>",
+        272,
+        {
+          "size": 108
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "cinema",
+        0,
+        {
+          "price": 300,
+          "floor": 1700,
+          "tkY": 566
+        }
+      ]
+    ]
   }
 }

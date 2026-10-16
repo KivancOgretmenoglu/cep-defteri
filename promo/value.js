@@ -872,7 +872,7 @@ function defineValue() {
       water.style.top = px(921 - wh); water.style.height = px(Math.max(0, wh));
       crest.style.backgroundPosition = `${lt * 70}px 0`;
       // bilet: başta köşede, KAL'da Diken'in eline geçer, batışta suya düşer
-      let tx = 24, ty = 486, tsc = 1 + 0.22 * Math.sin(prog(lt, ev('ticket'), 0.3) * Math.PI), trot = -10 + Math.sin(lt * 2.2) * 3;
+      let tx = o.tkX ?? 24, ty = o.tkY ?? 486, tsc = 1 + 0.22 * Math.sin(prog(lt, ev('ticket'), 0.3) * Math.PI), trot = -10 + Math.sin(lt * 2.2) * 3;
       const hold = E.inOut(prog(lt, ev('pick') + 0.15, 0.35));
       if (hold > 0) { tx = lerp(24, 180, hold); ty = lerp(486, 1400, hold); tsc = lerp(tsc, 0.6, hold); trot = lerp(trot, 8 + Math.sin(lt * 7) * 2, hold); }
       const S2 = lt >= SK;
