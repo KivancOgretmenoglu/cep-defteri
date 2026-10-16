@@ -1296,6 +1296,45 @@ def cue_saleTag(t0, skip=0, o=None):
         for k in range(3):
             put(SFX, woodblock(k == 2), T(cd[0] + k * cd[1]), 0.8, pan=0.3)
 
+def cue_cinema(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    if 'ticket' in o:
+        put(SFX, crickets(2.4), T(0.1), 0.9, pan=0.4)
+        put(SFX, stamp(), T(o['ticket']), 0.8); put(SFX, slam_hit(1.1), T(o['ticket']), 0.35)
+    if 'poll' in o:
+        put(SFX, bloop(420, 1300, 0.09, 0.45), T(o['poll']))
+    if 'leave1' in o:
+        put(SFX, stereo_move(whoosh(0.35, 600, 2200), 0, -0.7), T(o['leave1'] + 0.1), 0.35)
+    if 'qmark' in o:
+        put(SFX, bloop(700, 500, 0.08, 0.3), T(o['qmark']))
+    if 'pick' in o:
+        put(SFX, ui_tap(0.8), T(o['pick'])); put(SFX, ding_ding(), T(o['pick'] + 0.08), 0.5)
+        put(SFX, sniff(), T(o['pick'] + 0.25), 0.6, pan=0.1)
+    if 'sleep' in o:
+        sl, en = o['sleep'], o.get('end', o['sleep'] + 1.2)
+        put(SFX, stereo_move(whoosh(0.5, 300, 2600), -0.5, 0.5), T(sl), 0.45)
+        n = int((en - sl) / 0.11)
+        for k in range(n):
+            put(SFX, tick(k % 2 == 0, 0.28), T(sl + 0.05 + k * 0.11), pan=0.3)
+        put(SFX, snore(0.7), T(sl + 0.2), 0.9); put(SFX, snore(0.7), T(sl + 0.95), 0.9)
+        put(SFX, crunch(), T(sl + 0.55), 0.5, pan=0.5)
+        put(SFX, fm_bell(392, 0.8, 0.25), T(en)); put(SFX, boom(0.6), T(en), 0.4)
+    if 'cmp' in o:
+        put(SFX, pitched(sniff(), 1.35), T(o['cmp']), 0.6); put(SFX, notif_ding(), T(o['cmp'] + 0.05), 0.4)
+    if 'cmp1' in o:
+        put(SFX, pling(1046, 0.25, 0.4), T(o['cmp1']), pan=-0.4); put(SFX, pling(1318, 0.25, 0.4), T(o['cmp1'] + 0.18), pan=0.4)
+    if 'same' in o:
+        put(SFX, paper_tear(), T(o['same']), 0.5); put(SFX, stamp(), T(o['same'] + 0.2), 0.9)
+    if 'cmp2' in o:
+        put(SFX, slam_hit(0.8), T(o['cmp2']), 0.7); put(SFX, sad_trombone()[: int(1.1 * SR)], T(o['cmp2'] + 0.1), 0.4)
+    if 'sink' in o:
+        sk = o['sink']
+        put(SFX, stereo_move(whoosh(0.4, 2400, 300), 0.5, 0), T(sk), 0.45)
+        put(SFX, gulp(), T(sk + 0.45), 0.8)
+        for k in range(6):
+            put(SFX, bloop(260 + 40 * k, 700 + 90 * k, 0.07, 0.25), T(sk + 0.7 + k * 0.17), pan=0.3 * np.sin(k * 1.7))
+
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
 # ═════════ ANA MÜZİK ═════════

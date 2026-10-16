@@ -20,13 +20,31 @@ const HEADPH_C = { o: '#2A1E1A', c: '#9B7BC6', d: '#745C94', D: '#5E4A7A' };
 const PTAG = ['..oooooo', '.oWWWWWo', 'oW.WWWWo', 'oWWWWWWo', '.oWWWWWo', '..oooooo'];
 const PTAG_C = { o: '#C9A27E', W: '#FFF6EA' };
 
+/* Sinema: salyangozlu sıkıcı film, yıldız, patlamış mısır, koltuk, seyirci başı, tik */
+const SNAIL = ['..o.o.........', '..o.o..oooo...', '..oBo.oSSSSo..', '..oBBoSsssSSo.', '..oBBoSsSSsSo.', '..oBBoSsssSSo.', '.oBBBBoSSSSoo.', 'oBBBBBBooooBBo', '.oooooooooooo.'];
+const SNAIL_C = { o: '#2A1E1A', B: '#D8C08A', S: '#C0703F', s: '#7A3A1E' };
+const STAR = ['...o...', '..oYo..', 'ooYYYoo', 'oYYYYYo', '.oYYYo.', '.oYoYo.', '.oo.oo.'];
+const STAR_ON = { o: '#2A1E1A', Y: '#F2B63C' }, STAR_OFF = { o: '#2A1E1A', Y: '#6E6680' };
+const POPCORN = ['..w.yw.w..', '.wywwywyw.', 'wwywwwywww', 'oooooooooo', 'oRRWWRRWWo', 'oRRWWRRWWo', '.oRWWRRWo.', '.oRWWRRWo.', '.oRWWRRWo.', '..oWRRWo..', '..oooooo..'];
+const POPCORN_C = { o: '#2A1E1A', R: '#E8322A', W: '#FFF6EA', w: '#FFF1C9', y: '#F2C14E' };
+const KERNEL = ['.ww.', 'wyww', 'wwyw', '.ww.'];
+const KERNEL_C = { w: '#FFF1C9', y: '#F2C14E' };
+const SEAT = ['...oooooooooo...', '..oRRRRRRRRRRo..', '.oRRrRRRRRRrRRo.', '.oRRrRRRRRRrRRo.', '.oRRrRRRRRRrRRo.', '.oRRrRRRRRRrRRo.', '.oRRrRRRRRRrRRo.', '.oRRRRRRRRRRRRo.', 'ooooRRRRRRRRoooo', 'oDDoRRRRRRRRoDDo', 'oDDoRRRRRRRRoDDo', 'oDDooooooooooDDo', 'oDDo........oDDo', 'oooo........oooo'];
+const SEAT_C = { o: '#120D1C', R: '#B3263A', r: '#8E1B2C', D: '#6B4A3A' };
+const HEAD = ['...rrrr...', '..roooor..', '.roooooor.', '.oooooooo.', '.oooooooo.', '..oooooo..', '...oooo...', '.oooooooo.', 'oooooooooo', 'oooooooooo'];
+const HEAD_C = { o: '#0B0814', r: '#3B3355' };
+const CHECK = ['......o', '.....oo', 'o...oo.', 'oo.oo..', '.ooo...', '..o....'];
+const CHECK_C = { o: '#2F8F5A' };
+const FFWD = ['o...o...', 'oo..oo..', 'ooo.ooo.', 'oooooooo', 'ooo.ooo.', 'oo..oo..', 'o...o...'];
+const BUBL = ['.o.', 'o.o', '.o.'];
+
 /** Dikkat dağıtmayan arka plan canlılığı: dönen ışık hüzmeleri, süzülen soluk pikseller, patlama kıvılcımları */
 function ambient(root, o = {}) {
   const cx = o.cx ?? 540, cy = o.cy ?? 1010;
   const rays = el('div', 'abs', root, { left: px(cx - 900), top: px(cy - 900), width: '1800px', height: '1800px', borderRadius: '50%', background: `repeating-conic-gradient(${o.ray || 'rgba(255,255,255,.55)'} 0 9deg, transparent 9deg 22deg)`, WebkitMaskImage: 'radial-gradient(circle, #000 18%, transparent 62%)', maskImage: 'radial-gradient(circle, #000 18%, transparent 62%)' });
   const glow = el('div', 'abs', root, { left: px(cx - 520), top: px(cy - 520), width: '1040px', height: '1040px', borderRadius: '50%', background: `radial-gradient(circle, ${o.glow || 'rgba(255,214,150,.55)'}, transparent 65%)` });
   const fl = Array.from({ length: 9 }, (_, i) => {
-    const e = i % 3 === 0 ? pixEl(root, PTAG, PTAG_C, 10) : pixEl(root, TLCOIN, TLCOIN_C, 10);
+    const e = o.float ? pixEl(root, o.float[0], o.float[1], 10) : i % 3 === 0 ? pixEl(root, PTAG, PTAG_C, 10) : pixEl(root, TLCOIN, TLCOIN_C, 10);
     e.style.opacity = 0.45;
     return { e, x: 30 + ((i * 331) % 1000), y: (i * 419) % 1900, sp: 24 + (i % 4) * 10, ph: i * 1.3 };
   });
@@ -747,4 +765,175 @@ function defineValue() {
       m.put(x, y, { rot, sx, sy });
     };
   };
+
+  /* ── Batık maliyet: sinema salonu, berbat film, anket, zaman atlama, karşılaştırma, batan bilet ── */
+  SCENES.cinema = (t0, o = {}) => {
+    const s = scene(t0, '#1F1A2E', undefined, o.wdur ?? 0.5);
+    s.root.style.isolation = 'isolate';
+    pattern(s.root, 'rgba(255,255,255,.035)');
+    const ev = (k) => o[k] ?? 99;
+    const PRICE = o.price || 300;
+    const amb = ambient(s.root, { cy: 820, ray: 'rgba(170,180,255,.10)', glow: 'rgba(110,120,255,.30)', float: [KERNEL, KERNEL_C] });
+    // perde (iç alan 912×532, sahnede 84..996 × 554..1086)
+    const scr = el('div', 'abs', s.root, { left: '70px', width: '940px', top: '540px', height: '560px', boxSizing: 'border-box', background: '#0B0814', border: '14px solid #0B0814', borderRadius: '14px', boxShadow: '0 0 90px 14px rgba(140,150,255,.32)', overflow: 'hidden' });
+    const film = el('div', 'abs', scr, { inset: 0, background: 'linear-gradient(#AEB9C6, #919DAB 70%, #6F7D62 70%)' });
+    const clouds = [0, 1, 2].map(() => pixEl(film, CLOUD, CLOUD_C, 10));
+    const snail = pixEl(film, SNAIL, SNAIL_C, 11, { top: px(532 * 0.7 - 9 * 11 + 8) });
+    const stars = el('div', 'abs', film, { left: '24px', top: '20px', display: 'flex', gap: '8px' });
+    stars.innerHTML = [0, 1, 2, 3, 4].map((i) => pix(STAR, i ? STAR_OFF : STAR_ON, 8)).join('');
+    const bar = el('div', 'abs', film, { left: '30px', right: '30px', bottom: '30px', height: '14px', background: 'rgba(255,255,255,.4)', borderRadius: '7px' });
+    const fill = el('div', 'abs', bar, { left: 0, top: 0, bottom: 0, background: '#E8322A', borderRadius: '7px' });
+    const knob = el('div', 'abs', bar, { top: '-8px', width: '30px', height: '30px', borderRadius: '50%', background: '#fff', marginLeft: '-15px' });
+    const clock = el('div', 'abs it', film, { right: '32px', bottom: '58px', fontSize: '48px', color: '#fff', textShadow: '4px 4px 0 #2A1E1A' });
+    const ff = pixEl(film, FFWD, { o: '#fff' }, 12, { right: '36px', top: '24px', display: 'none' });
+    const fin = el('div', 'abs it', scr, { inset: 0, background: '#0B0814', color: '#F3EEE2', fontSize: '230px', display: 'none', alignItems: 'center', justifyContent: 'center', letterSpacing: '.1em' }); fin.textContent = 'SON';
+    // karşılaştırma: "Kalsa" / "Çıksa"
+    const cmp = el('div', 'abs', scr, { inset: 0, background: '#141021', display: 'none' });
+    const strike = (txt) => `<span style="position:relative;display:inline-block">${txt}<span class="sl" style="position:absolute;left:-10px;right:-10px;top:46%;height:12px;background:#F3EEE2;border-radius:6px;transform-origin:0 50%;transform:scaleX(0)"></span></span>`;
+    cmp.innerHTML = `<div class="abs" style="left:453px;top:24px;bottom:24px;width:6px;background:#3B3355"></div>`
+      + ['KALSA', 'ÇIKSA'].map((h, i) => `<div class="abs it hd" style="left:${i * 456}px;width:456px;top:24px;text-align:center;font-size:88px;color:${i ? '#FF8A5B' : '#8E9BEA'}">${h}</div>`).join('')
+      + [0, 1].map((i) => `<div class="abs it r1" style="left:${i * 456}px;width:456px;top:165px;text-align:center;font-size:104px;color:#FF6B6B">${strike(`-${fmt(PRICE)} TL`)}</div>`).join('')
+      + `<div class="abs it r2" style="left:0;width:456px;top:320px;text-align:center;font-size:124px;color:#FF6B6B;display:none">-2 saat</div>`
+      + `<div class="abs it qm" style="left:0;width:456px;top:300px;text-align:center;font-size:150px;color:#F2B63C;display:none">?</div>`
+      + `<div class="abs it same" style="left:456px;top:150px;background:#F2B63C;color:#2A1E1A;font-size:64px;padding:4px 24px;border-radius:14px;border:6px solid #2A1E1A;display:none;z-index:2">AYNI</div>`;
+    const hds = [...cmp.querySelectorAll('.hd')], r1 = [...cmp.querySelectorAll('.r1')], sls = [...cmp.querySelectorAll('.sl')];
+    const r2 = cmp.querySelector('.r2'), same = cmp.querySelector('.same'), qm = cmp.querySelector('.qm');
+    // su (perdenin içi, sahne katmanında: bilet altında kalır)
+    const water = el('div', 'abs', s.root, { left: '84px', width: '912px', top: '1086px', height: '0px', background: 'rgba(46,111,163,.78)', zIndex: 7, display: 'none' });
+    const crest = el('div', 'abs', water, { left: 0, right: 0, top: '-14px', height: '14px', backgroundImage: 'linear-gradient(90deg,#7FC6EE 50%,rgba(127,198,238,0) 50%)', backgroundSize: '56px 14px' });
+    const bubs = Array.from({ length: 7 }, () => pixEl(s.root, BUBL, { o: '#CDEBFB' }, 12, { zIndex: 8, display: 'none' }));
+    // seyirci başları
+    const heads = [90, 250, 740, 900].map((x) => ({ x, e: pixEl(s.root, HEAD, HEAD_C, 10, { left: px(x), top: '1104px' }) }));
+    // koltuk, Diken, mısır
+    pixEl(s.root, SEAT, SEAT_C, 36, { left: '252px', top: px(1925 - 14 * 36) });
+    const d = new Mascot(s.root, { who: 'diken', w: 576 });
+    const corn = pixEl(s.root, POPCORN, POPCORN_C, 16, { left: '806px', top: '1602px', transformOrigin: '20% 100%' });
+    const kern = Array.from({ length: 7 }, () => pixEl(s.root, KERNEL, KERNEL_C, 9, { display: 'none' }));
+    const zs = [64, 80, 96].map((f) => { const z = el('div', 'abs it', s.root, { fontSize: px(f), color: '#DEE2F6', display: 'none', textShadow: '4px 4px 0 #0B0814' }); z.textContent = 'Z'; return z; });
+    const say = el('div', 'abs it', s.root, { left: '24px', top: '1388px', background: '#fff', border: '7px solid #2A1E1A', borderRadius: '34px', padding: '8px 34px 14px', fontSize: '84px', lineHeight: '.95', zIndex: 6, display: 'none', transformOrigin: '80% 100%', boxShadow: '0 10px 0 rgba(0,0,0,.35)' });
+    say.innerHTML = o.say || 'Paraya<br>yazık!';
+    // bilet
+    const tk = el('div', 'abs', s.root, { left: '712px', top: '548px', width: '330px', height: '172px', boxSizing: 'border-box', background: '#F2B63C', border: '8px solid #2A1E1A', borderRadius: '18px', textAlign: 'center', zIndex: 5, boxShadow: '0 14px 0 rgba(0,0,0,.35)',
+      WebkitMaskImage: 'radial-gradient(circle at 0 50%, transparent 24px, #000 25px), radial-gradient(circle at 100% 50%, transparent 24px, #000 25px)', WebkitMaskSize: '51% 100%', WebkitMaskPosition: 'left, right', WebkitMaskRepeat: 'no-repeat' });
+    tk.innerHTML = `<div style="font-size:38px;font-weight:800;color:#6B4A1A;margin-top:12px;letter-spacing:.1em">SİNEMA</div><div class="it" style="font-size:100px;line-height:1;color:#2A1E1A">${fmt(PRICE)} TL</div>`;
+    // anket çıkartması
+    const poll = el('div', 'abs', s.root, { left: '160px', width: '760px', top: '680px', height: '150px', background: '#fff', borderRadius: '34px', boxShadow: '0 16px 40px rgba(0,0,0,.4)', display: 'flex', overflow: 'hidden', zIndex: 4, transformOrigin: '50% 50%' });
+    poll.innerHTML = `<div class="pk" style="position:absolute;left:0;top:0;bottom:0;width:50%;background:#DEE2F6;transform-origin:0 50%;transform:scaleX(0)"></div>`
+      + `<div class="it" style="position:relative;flex:1;display:flex;align-items:center;justify-content:center;font-size:96px;color:#4351A3">KAL<span class="ck" style="display:none;margin-left:18px">${pix(CHECK, CHECK_C, 10)}</span></div>`
+      + `<div style="position:relative;width:6px;background:#E6E1EA"></div><div class="it pb" style="position:relative;flex:1;display:flex;align-items:center;justify-content:center;font-size:96px;color:#E8322A">ÇIK</div>`;
+    const pk = poll.querySelector('.pk'), ck = poll.querySelector('.ck'), pb = poll.querySelector('.pb');
+    const tap = el('div', 'tap', s.root, { left: '350px', top: '755px', zIndex: 6 });
+
+    s.update = (lt) => {
+      amb(lt, [ev('pick'), ev('cmp2'), ev('sink')].reduce((a, t) => (lt >= t ? t : a), -9));
+      const SL = ev('sleep'), END = ev('end'), CMP = ev('cmp'), SK = ev('sink');
+      // film ve zaman atlama
+      const tl = lt >= SL ? E.inOut(prog(lt, SL, Math.max(0.1, END - SL - 0.15))) : 0;
+      const mins = 20 + 120 * tl, frac = mins / 140;
+      fill.style.width = `${frac * 100}%`; knob.style.left = `${frac * 100}%`;
+      clock.textContent = `${Math.floor(mins / 60)}:${String(Math.floor(mins % 60)).padStart(2, '0')} / 2:20`;
+      const sb = 760 - Math.min(lt, SL) * 8;
+      snail.style.left = px(lerp(sb, 30, tl));
+      snail.style.transform = `scaleY(${1 + 0.04 * Math.sin(lt * 3)})`;
+      clouds.forEach((c, i) => { c.style.left = px(((i * 330 + 60 + lt * 8 + tl * 900) % 1060) - 140); c.style.top = px(70 + i * 60); });
+      const FFon = lt >= SL && lt < END;
+      ff.style.display = FFon && Math.floor(lt / 0.25) % 2 === 0 ? 'block' : 'none';
+      film.style.filter = FFon ? 'contrast(1.15) brightness(1.08)' : 'none';
+      film.style.display = lt < END ? 'block' : 'none';
+      fin.style.display = lt >= END && lt < CMP ? 'flex' : 'none';
+      fin.style.transform = `scale(${lerp(1.6, 1, E.out(prog(lt, END, 0.25)))})`;
+      // karşılaştırma
+      const C = lt >= CMP && lt < SK + 0.5;
+      cmp.style.display = C ? 'block' : 'none';
+      if (C) {
+        hds.forEach((h, i) => (h.style.transform = `scale(${E.back(prog(lt, CMP + i * 0.12, 0.3))})`));
+        r1.forEach((r, i) => { const p = prog(lt, ev('cmp1') + i * 0.18, 0.3); r.style.opacity = p > 0 ? (lt > ev('same') + 0.25 ? 0.45 : 1) : 0; r.style.transform = `scale(${E.back(p)})`; });
+        sls.forEach((l) => (l.style.transform = `scaleX(${E.out(prog(lt, ev('same'), 0.25))}) rotate(-4deg)`));
+        const ap = prog(lt, ev('same') + 0.2, 0.25);
+        same.style.display = ap > 0 ? 'block' : 'none';
+        same.style.transform = `translateX(-50%) scale(${lerp(2.2, 1, E.out(ap))}) rotate(-8deg)`;
+        const p2 = prog(lt, ev('cmp2'), 0.3);
+        r2.style.display = p2 > 0 ? 'block' : 'none';
+        const qp = prog(lt, ev('qmark'), 0.25);
+        qm.style.display = qp > 0 && p2 <= 0 ? 'block' : 'none';
+        qm.style.transform = `scale(${E.back(qp) * (1 + 0.12 * Math.sin(lt * 9))}) rotate(${Math.sin(lt * 5) * 8}deg)`;
+        r2.style.transform = `scale(${lerp(2.4, 1, E.out(p2))}) rotate(${Math.sin(lt * 6) * 2}deg)`;
+        cmp.style.opacity = lt >= SK ? 1 - prog(lt, SK, 0.35) : 1;
+      }
+      scr.style.transform = `translate(${shake(lt, ev('cmp2'), 16, 0.35)}px,${shake(lt + 0.05, ev('same') + 0.2, 8, 0.25)}px)`;
+      // su
+      const W = lt >= SK;
+      water.style.display = W ? 'block' : 'none';
+      const wh = E.out(prog(lt, SK, 0.45)) * 320;
+      water.style.top = px(1086 - wh); water.style.height = px(wh);
+      crest.style.backgroundPosition = `${lt * 70}px 0`;
+      // bilet: damga gibi iner, sallanır; batışta perdeye uçar, suya düşer, dibe çöker
+      let tx = 712, ty = 548, trot = 10 + Math.sin(lt * 2.2) * 3, tsc = lerp(2.2, 1, E.out(prog(lt, ev('ticket'), 0.25)));
+      tk.style.display = lt >= ev('ticket') ? 'block' : 'none';
+      const park = E.inOut(prog(lt, CMP - 0.3, 0.3));  // karşılaştırmada perdenin köşesine çekilir
+      if (park > 0) { tx = lerp(712, 790, park); ty = lerp(548, 452, park); tsc = lerp(tsc, 0.62, park); trot = lerp(trot, 14, park); }
+      if (W) {
+        const f1 = E.inOut(prog(lt, SK, 0.4)), f2 = prog(lt, SK + 0.4, 1.4);
+        tx = lerp(790, 375, f1); ty = lerp(452, 600, f1) + (1 - Math.pow(1 - f2, 2)) * 300;
+        tsc = lerp(0.62, 1, f1);
+        trot = lerp(14, -6, f1) + Math.sin(f2 * 9) * 10 * (1 - f2);
+      }
+      tk.style.left = px(tx); tk.style.top = px(ty);
+      tk.style.transform = `rotate(${trot}deg) scale(${tsc})`;
+      tk.style.filter = W && ty + 86 > 1086 - wh ? 'brightness(.8) saturate(.75)' : 'none';
+      bubs.forEach((b, i) => {
+        const p = (lt - SK - 0.6 - i * 0.16) / 1.1;
+        b.style.display = W && p > 0 && p < 1 ? 'block' : 'none';
+        b.style.transform = `translate(${tx + 70 + (i % 3) * 80 + Math.sin(p * 9 + i) * 14}px,${ty + 40 - p * 240}px)`;
+      });
+      // anket
+      const pp = prog(lt, ev('poll'), 0.3);
+      const pout = ((x) => x * x * x)(prog(lt, SL - 0.3, 0.3));
+      poll.style.display = pp > 0 && pout < 1 ? 'flex' : 'none';
+      poll.style.transform = `scale(${E.back(pp) * (1 - pout)}) rotate(${Math.sin(lt * 2) * 1.2}deg)`;
+      const PK = lt >= ev('pick');
+      pk.style.transform = `scaleX(${E.out(prog(lt, ev('pick') + 0.1, 0.3))})`;
+      ck.style.display = PK ? 'inline-block' : 'none';
+      pb.style.opacity = PK ? 0.35 : 1;
+      const tp = prog(lt, ev('pick') - 0.05, 0.4);
+      tap.style.opacity = tp > 0 && tp < 1 ? 1 - tp : 0;
+      tap.style.transform = `translate(-50%,-50%) scale(${0.4 + tp * 1.2})`;
+      // seyirciler zaman atlamada birer birer çıkar
+      heads.forEach((h, i) => {
+        const L1 = o.leave1 != null, ta = L1 && i === 0 ? o.leave1 : SL + 0.15 + (i - (L1 ? 1 : 0)) * 0.22;
+        const p = ((x) => x * x * x)(prog(lt, ta, 0.45));
+        const dir = h.x < 540 ? -1 : 1;
+        h.e.style.transform = `translate(${dir * p * 420}px,${-Math.sin(p * Math.PI) * 50}px)`;
+        h.e.style.opacity = 1 - p;
+      });
+      // Diken
+      const D = (o.diken || []).reduce((a, p) => (lt >= p[0] ? p : a), [0, 'bored']);
+      const k = lt - D[0];
+      let x = 540, y = o.floor ?? 1930, rot = 0, sx = 1, sy = 1;
+      zs.forEach((z) => (z.style.display = 'none'));
+      if (D[1] === 'bored') { d.set('calm', null, Math.floor(lt / 1.5) % 3 === 2 ? 'closed' : 'half'); rot = Math.sin(lt * 1.3) * 4; sy = 1 + 0.02 * Math.sin(lt * 2); }
+      else if (D[1] === 'stay') { d.set('curious', 'face', 'squeeze'); x = 590; y -= 46 * Math.exp(-k * 4) * Math.abs(Math.sin(k * 11)); rot = -4 + Math.sin(lt * 9) * 2; }
+      else if (D[1] === 'sleep') {
+        d.set('calm', null, 'closed'); rot = -14 + Math.sin(lt * 2) * 2; sy = 1 + 0.03 * Math.sin(lt * 3.2);
+        zs.forEach((z, i) => { const p = (lt * 0.7 + i / 3) % 1; z.style.display = 'block'; z.style.transform = `translate(${700 + i * 46 + p * 70}px,${1500 - p * 140 - i * 20}px) rotate(${-12 + p * 20}deg)`; z.style.opacity = Math.sin(p * Math.PI); });
+      }
+      else if (D[1] === 'shock') { d.set('curious', 'face', 'wide'); const j = E.back(prog(k, 0, 0.25)); y -= j * 80 - (k > 0.25 ? 80 * E.out(prog(k, 0.25, 0.3)) : 0); sy = 1 + 0.08 * Math.sin(Math.min(1, k / 0.3) * Math.PI); }
+      else if (D[1] === 'hit') { d.set('curious', 'up', 'x'); const j = Math.exp(-k * 5); rot = 14 * Math.sin(k * 18) * j; y -= 40 * j; sx = 1 + 0.1 * j; }
+      else if (D[1] === 'dumb') { d.set('thoughtful', null, Math.floor(lt / 1.2) % 2 ? 'half' : 'mood'); rot = -10 + Math.sin(lt * 1.5) * 3; }
+      d.put(x, y, { rot, sx, sy });
+      // mısır: uyuyunca devrilir, taneler dökülür
+      const cp = E.out(prog(lt, SL + 0.5, 0.3));
+      corn.style.transform = `rotate(${cp * 72}deg)`;
+      kern.forEach((e, i) => {
+        const q = lt - (SL + 0.6 + i * 0.07);
+        e.style.display = q > 0 ? 'block' : 'none';
+        const kx = 900 + i * 22 + q * (60 + i * 14), ky = Math.min(1885, 1640 + q * 120 + 0.5 * 2600 * q * q);
+        e.style.transform = `translate(${kx}px,${ky}px) rotate(${q * 500 + i * 40}deg)`;
+      });
+      const sp = prog(lt, o.sayAt ?? ev('pick') + 0.15, 0.3);
+      say.style.display = sp > 0 && lt < SL - 0.05 ? 'block' : 'none';
+      say.style.transform = `scale(${E.back(sp)}) rotate(${-4 + Math.sin(lt * 6) * 2}deg)`;
+    };
+  };
+
 }
