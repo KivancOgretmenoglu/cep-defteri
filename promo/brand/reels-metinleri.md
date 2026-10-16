@@ -313,20 +313,19 @@ Sepetinde şu an ne var? Yorumlara yaz 👇
 
 ---
 
-## 15 · batik-maliyet (kavram: batık maliyet, seslendirme: Buğra, döngülü, 20 sn)
+## 15 · batik-maliyet (kavram: batık maliyet, seslendirme: Buğra, döngülü, 18 sn)
 
 **Açıklama:**
 ```
 Film berbat. Bilete 300 TL verdin. Kalır mısın? 🍿
 
 Kalsan da çıksan da o 300 TL geri gelmez.
-Kalmanın tek bedeli: 2 saatin.
+Kalırsan 2 saatin de gider: o 2 saatte kahve, ödev ya da uyku olabilirdi.
 Geri gelmeyecek bu paraya batık maliyet denir. Fiyatlar örnek.
 
 Karar verirken tek soru: "Bundan sonrası buna değer mi?"
 
-Sen kalır mısın, çıkar mısın? Yorumlara yaz 👇
+En son neye "paraya yazık" diye katlandın? Yorumlara yaz 👇
 
 #batıkmaliyet #sinema #öğrencibütçesi #davranışsalekonomi #paraipuçları
 ```
-

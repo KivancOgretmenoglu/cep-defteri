@@ -223,7 +223,9 @@ def cmd_place(name):
     for item in r['voiceFiles']:
         t0, f = item[0], item[1]
         tp = item[3] if len(item) > 3 else tempo  # satıra özel hız
-        cmd = ['ffmpeg', '-v', 'error', '-i', os.path.join(HERE, f)] + (['-af', f'atempo={tp}'] if tp != 1 else []) + ['-f', 'f32le', '-ac', '1', '-ar', str(SR), '-']
+        af = [r['voiceFilter']] if r.get('voiceFilter') else []  # ses rengini diğer reelslere eşitleyen EQ
+        if tp != 1: af.append(f'atempo={tp}')
+        cmd = ['ffmpeg', '-v', 'error', '-i', os.path.join(HERE, f)] + (['-af', ','.join(af)] if af else []) + ['-f', 'f32le', '-ac', '1', '-ar', str(SR), '-']
         x, _ = trim(np.frombuffer(subprocess.run(cmd, capture_output=True).stdout, dtype=np.float32))
         i = int(t0 * SR)
         track[i : i + len(x)] += x[: max(0, n - i)]

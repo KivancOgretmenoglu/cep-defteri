@@ -1300,40 +1300,54 @@ def cue_cinema(t0, skip=0, o=None):
     o = o or {}
     T = at(t0, skip)
     if 'ticket' in o:
-        put(SFX, crickets(2.4), T(0.1), 0.9, pan=0.4)
-        put(SFX, stamp(), T(o['ticket']), 0.8); put(SFX, slam_hit(1.1), T(o['ticket']), 0.35)
-    if 'poll' in o:
-        put(SFX, bloop(420, 1300, 0.09, 0.45), T(o['poll']))
+        put(SFX, crickets(2.6), T(0.05), 0.9, pan=0.4)
+        put(SFX, stamp(), T(o['ticket']), 0.7); put(SFX, slam_hit(1.1), T(o['ticket']), 0.3)
+    if 'yawn' in o:
+        put(SFX, voice([380, 300, 200], [(780, 1250), (620, 1000)], 0.75, kind='tri', breath=0.45, v=0.28), T(o['yawn']), pan=0.05)
     if 'leave1' in o:
-        put(SFX, stereo_move(whoosh(0.35, 600, 2200), 0, -0.7), T(o['leave1'] + 0.1), 0.35)
-    if 'qmark' in o:
-        put(SFX, bloop(700, 500, 0.08, 0.3), T(o['qmark']))
+        for k in range(4):
+            put(SFX, tick(k % 2 == 0, 0.2), T(o['leave1'] + 0.1 + k * 0.22), pan=0.2 + 0.15 * k)
     if 'pick' in o:
         put(SFX, ui_tap(0.8), T(o['pick'])); put(SFX, ding_ding(), T(o['pick'] + 0.08), 0.5)
-        put(SFX, sniff(), T(o['pick'] + 0.25), 0.6, pan=0.1)
+        put(SFX, sniff(), T(o['pick'] + 0.3), 0.6, pan=0.1)
     if 'sleep' in o:
         sl, en = o['sleep'], o.get('end', o['sleep'] + 1.2)
         put(SFX, stereo_move(whoosh(0.5, 300, 2600), -0.5, 0.5), T(sl), 0.45)
         n = int((en - sl) / 0.11)
         for k in range(n):
-            put(SFX, tick(k % 2 == 0, 0.28), T(sl + 0.05 + k * 0.11), pan=0.3)
-        put(SFX, snore(0.7), T(sl + 0.2), 0.9); put(SFX, snore(0.7), T(sl + 0.95), 0.9)
-        put(SFX, crunch(), T(sl + 0.55), 0.5, pan=0.5)
+            put(SFX, tick(k % 2 == 0, 0.26), T(sl + 0.05 + k * 0.11), pan=0.3)
+        put(SFX, snore(0.7), T(sl + 0.15), 0.9); put(SFX, snore(0.7), T(sl + 1.2), 0.9)
+        put(SFX, boing(0.4, 0.35), T(sl + 0.6)); put(SFX, crunch(), T(sl + 0.95), 0.6, pan=0.2); put(SFX, slam_hit(1.4), T(sl + 0.95), 0.35)
+        for k in range(3):
+            put(SFX, tick(True, 0.15), T(sl + 0.5 + k * 0.35), pan=0.8)
         put(SFX, fm_bell(392, 0.8, 0.25), T(en)); put(SFX, boom(0.6), T(en), 0.4)
     if 'cmp' in o:
         put(SFX, pitched(sniff(), 1.35), T(o['cmp']), 0.6); put(SFX, notif_ding(), T(o['cmp'] + 0.05), 0.4)
     if 'cmp1' in o:
-        put(SFX, pling(1046, 0.25, 0.4), T(o['cmp1']), pan=-0.4); put(SFX, pling(1318, 0.25, 0.4), T(o['cmp1'] + 0.18), pan=0.4)
+        put(SFX, pling(1046, 0.25, 0.4), T(o['cmp1']), pan=-0.4); put(SFX, pling(1318, 0.25, 0.4), T(o['cmp1'] + 0.12), pan=0.4)
     if 'same' in o:
-        put(SFX, paper_tear(), T(o['same']), 0.5); put(SFX, stamp(), T(o['same'] + 0.2), 0.9)
+        put(SFX, paper_tear(), T(o['same']), 0.5); put(SFX, stamp(), T(o['same'] + 0.15), 0.9)
     if 'cmp2' in o:
-        put(SFX, slam_hit(0.8), T(o['cmp2']), 0.7); put(SFX, sad_trombone()[: int(1.1 * SR)], T(o['cmp2'] + 0.1), 0.4)
+        put(SFX, slam_hit(0.8), T(o['cmp2']), 0.7); put(SFX, sad_trombone()[: int(0.9 * SR)], T(o['cmp2'] + 0.08), 0.35)
+    if 'cmp3' in o:
+        put(SFX, ding_ding(), T(o['cmp3']), 0.5); put(SFX, pling(1568, 0.25, 0.5), T(o['cmp3'] + 0.1), pan=0.4)
     if 'sink' in o:
         sk = o['sink']
-        put(SFX, stereo_move(whoosh(0.4, 2400, 300), 0.5, 0), T(sk), 0.45)
-        put(SFX, gulp(), T(sk + 0.45), 0.8)
+        put(SFX, stereo_move(whoosh(0.45, 600, 3000), -0.3, 0.2), T(sk + 0.1), 0.45)
+        put(SFX, gulp(), T(sk + 0.6), 0.8)
         for k in range(6):
-            put(SFX, bloop(260 + 40 * k, 700 + 90 * k, 0.07, 0.25), T(sk + 0.7 + k * 0.17), pan=0.3 * np.sin(k * 1.7))
+            put(SFX, bloop(260 + 40 * k, 700 + 90 * k, 0.07, 0.25), T(sk + 0.8 + k * 0.17), pan=0.3 * np.sin(k * 1.7))
+    if 'rule' in o:
+        put(SFX, stereo_move(whoosh(0.4, 2400, 400), 0.2, -0.2), T(o['rule']), 0.35)
+        put(SFX, bloop(500, 1100, 0.08, 0.35), T(o['rule'] + 0.9))
+    if 'choose2' in o:
+        put(SFX, ui_tap(0.8), T(o['choose2'])); put(SFX, ding_ding(), T(o['choose2'] + 0.06), 0.55)
+    if 'leave' in o:
+        lv = o['leave']
+        put(SFX, popper(), T(lv - 0.3), 0.45); put(SFX, boing(0.4, 0.35), T(lv - 0.3))
+        for k in range(4):
+            put(SFX, boing(0.18, 0.18), T(lv + k * 0.3), pan=0.2 + 0.2 * k)
+        put(SFX, fanfare_short() if 'fanfare_short' in globals() else pling(1318, 0.3, 0.5), T(lv + 0.7), 0.5)
 
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 

@@ -2970,7 +2970,7 @@
   },
   "batik-maliyet": {
     "title": "Kavram: batık maliyet (sesli)",
-    "end": 19.65,
+    "end": 17.85,
     "loop": true,
     "handheld": true,
     "musicGain": 0.5,
@@ -2978,79 +2978,99 @@
     "musicPlan": [
       [
         0,
-        19.65,
+        17.85,
         "lofi"
       ]
     ],
     "captionPixel": true,
-    "captionY": 1232,
+    "captionY": 1052,
     "captionMaxWords": 3,
-    "captionUntil": 17.0,
+    "captionUntil": 15.15,
     "boxes": [
       [
         0,
-        3.35,
+        4.55,
         "Film berbat.<br><b>Kalır mısın?</b>",
-        240,
+        200,
         {
           "size": 100,
           "pulse": true
         }
       ],
       [
-        5.25,
-        6.75,
+        4.6,
+        6.5,
         "<b>2 saat sonra...</b>",
-        270,
+        200,
         {
           "size": 86,
           "pulse": true
         }
       ],
       [
-        6.8,
-        11.55,
+        6.5,
+        10.45,
         "Kalmak<br><b>neye mal oldu?</b>",
-        270,
+        200,
         {
           "size": 86,
           "pulse": true
         }
       ],
       [
-        11.6,
-        14.15,
+        10.5,
+        12.7,
         "Geri gelmeyen para:<br><b>batık maliyet</b>",
-        270,
+        200,
         {
           "size": 86,
           "pulse": true
         }
       ],
       [
-        17.05,
-        19.1,
-        "Sen kalır mısın?<br><b>Yorumlara yaz</b>",
-        1060,
+        12.75,
+        15.15,
+        "Bundan sonrası<br><b>değer mi?</b>",
+        200,
         {
-          "size": 80,
+          "size": 96,
           "pulse": true
         }
       ],
       [
-        17.05,
-        19.1,
-        "<img src='assets/icon.png' style='height:1.1em;vertical-align:-.25em;border-radius:.25em'> Cep Defteri · <b>@cep_defteri</b>",
-        1290,
+        15.2,
+        17.3,
+        "En son neye<br><b>“paraya yazık”</b><br>diye katlandın?",
+        470,
         {
-          "size": 50
+          "size": 78,
+          "pulse": true
         }
       ],
       [
-        19.22,
-        19.65,
+        15.2,
+        17.3,
+        "<b>Yorumlara yaz</b>",
+        880,
+        {
+          "size": 60,
+          "pulse": true
+        }
+      ],
+      [
+        15.2,
+        17.3,
+        "<img src='assets/icon.png' style='height:1.1em;vertical-align:-.25em;border-radius:.25em'> Cep Defteri · <b>@cep_defteri</b>",
+        968,
+        {
+          "size": 44
+        }
+      ],
+      [
+        17.5,
+        17.85,
         "Film berbat.<br><b>Kalır mısın?</b>",
-        240,
+        200,
         {
           "size": 100,
           "pulse": true
@@ -3063,111 +3083,92 @@
         0,
         {
           "price": 300,
-          "floor": 1930,
-          "ticket": 0.25,
-          "poll": 0.55,
-          "pick": 3.35,
-          "sayAt": 4.35,
-          "sleep": 5.25,
-          "end": 6.45,
-          "cmp": 6.8,
-          "cmp1": 7.2,
-          "same": 8.85,
-          "cmp2": 10.95,
-          "sink": 11.6,
+          "floor": 1700,
+          "ticket": 0.1,
+          "yawn": 0.5,
+          "leave1": 1.55,
+          "pick": 3.15,
+          "sayAt": 3.6,
+          "sleep": 4.6,
+          "end": 6.3,
+          "cmp": 6.5,
+          "cmp1": 6.6,
+          "same": 8.0,
+          "cmp2": 9.36,
+          "cmp3": 9.9,
+          "sink": 10.5,
+          "rule": 12.75,
+          "choose2": 15.0,
+          "leave": 15.25,
           "diken": [
             [
-              3.35,
-              "stay"
+              3.15,
+              "clutch"
             ],
             [
-              5.25,
+              4.6,
               "sleep"
             ],
             [
-              6.8,
+              6.5,
               "shock"
             ],
             [
-              10.95,
+              9.36,
               "hit"
             ],
             [
-              11.6,
-              "dumb"
+              10.5,
+              "watch"
+            ],
+            [
+              12.75,
+              "think"
             ]
-          ],
-          "leave1": 1.6,
-          "qmark": 9.45
-        }
-      ],
-      [
-        "lesson",
-        14.2,
-        {
-          "who": "diken",
-          "outfit": null,
-          "floor": 1930,
-          "q1": "Paraya<br>yazık!",
-          "q1Size": 84,
-          "q2": "Bundan sonrası<br>değer mi?",
-          "q2From": 1.4,
-          "a": 0.12,
-          "strike": 0.5,
-          "b": 1.2,
-          "extra": "<div style='display:inline-flex;background:#fff;border-radius:26px;overflow:hidden;border:6px solid #2A1E1A;box-shadow:0 10px 0 rgba(42,30,26,.2)'><div class='it' style='padding:12px 48px;font-size:72px;color:#4351A3;opacity:.35'>KAL</div><div style='width:6px;background:#E6E1EA'></div><div class='it' style='padding:12px 48px;font-size:72px;color:#fff;background:#2F8F5A'>ÇIK</div></div>",
-          "extraY": 1075,
-          "extraAt": 1.8,
-          "extraUntil": 2.85
+          ]
         }
       ],
       [
         "cinema",
-        19.1,
+        17.3,
         {
           "wdur": 0.25,
           "price": 300,
-          "floor": 1930,
-          "ticket": -1,
-          "poll": -1
+          "floor": 1700
         }
       ]
     ],
-    "voiceTempo": 1.15,
+    "voiceTempo": 1.2,
+    "voiceFilter": "equalizer=f=170:t=q:w=0.9:g=-4,equalizer=f=560:t=q:w=1.0:g=-3,highshelf=f=3800:g=3.5",
     "voiceFiles": [
       [
         0.1,
-        "assets/voice/batik/c1.mp3",
+        "assets/voice/batik/e1.mp3",
         "Bilete üç yüz lira verdin. Film berbat. Kalır mısın?"
       ],
       [
-        3.4,
-        "assets/voice/batik/c2.mp3",
-        "Diken kalıyor. Paraya yazık!"
+        6.55,
+        "assets/voice/batik/e3.mp3",
+        "Kalsa da çıksa da, üç yüz lira gitti!"
       ],
       [
-        6.95,
-        "assets/voice/batik/c3.mp3",
-        "Kalsa da çıksa da, o üç yüz lira gitti."
+        8.45,
+        "assets/voice/batik/e4.mp3",
+        "Kalırsan, iki saatin de gider."
       ],
       [
-        9.4,
-        "assets/voice/batik/c4.mp3",
-        "Kalmanın tek bedeli: iki saat."
+        10.55,
+        "assets/voice/batik/e5.mp3",
+        "Geri gelmeyen paraya, batık maliyet denir!"
       ],
       [
-        11.65,
-        "assets/voice/batik/c5.mp3",
-        "Geri gelmeyen bu paraya, batık maliyet denir."
+        12.8,
+        "assets/voice/batik/e6.mp3",
+        "Kendine sor: Bundan sonrası buna değer mi?"
       ],
       [
-        14.3,
-        "assets/voice/batik/c6.mp3",
-        "Kendine sor: bundan sonrası buna değer mi?"
-      ],
-      [
-        17.05,
-        "assets/voice/batik/c7.mp3"
+        15.25,
+        "assets/voice/batik/e7.mp3"
       ]
     ]
   }
