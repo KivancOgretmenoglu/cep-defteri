@@ -1,0 +1,3621 @@
+{
+  "tanitim": {
+    "title": "Uzun tanıtım (sabitlenmiş gönderi)",
+    "end": 29.5,
+    "scenes": [
+      [
+        "hook",
+        0
+      ],
+      [
+        "brand",
+        4.5,
+        {
+          "flash": true
+        }
+      ],
+      [
+        "quickAdd",
+        7.5
+      ],
+      [
+        "daily",
+        12.5
+      ],
+      [
+        "bills",
+        15.5
+      ],
+      [
+        "savings",
+        19.5
+      ],
+      [
+        "mascots",
+        22.5
+      ],
+      [
+        "outro",
+        25.5,
+        {
+          "flash": true
+        }
+      ]
+    ]
+  },
+  "ay-sonu": {
+    "title": "Ayın 1'i / 15'i / 30'u",
+    "end": 9.5,
+    "scenes": [
+      [
+        "hook",
+        0
+      ],
+      [
+        "outro",
+        4.5,
+        {
+          "flash": true,
+          "sub": "Ay sonu sürprizlerine son.",
+          "accent": "Bütçeni cebine koy.",
+          "cta": "Takipte kal"
+        }
+      ]
+    ]
+  },
+  "burs-gunu": {
+    "title": "Burs yattı bildirimi gelince",
+    "end": 11.5,
+    "scenes": [
+      [
+        "bursStory",
+        0
+      ],
+      [
+        "app",
+        5.0,
+        {
+          "bg": "var(--soft)",
+          "lines": [
+            {
+              "html": "Bu sefer",
+              "y": 240,
+              "size": 124
+            },
+            {
+              "html": "*önce planla.*",
+              "y": 370,
+              "size": 120,
+              "itColor": "var(--acc)"
+            }
+          ],
+          "phone": {
+            "w": 560,
+            "top": 760,
+            "scroll": {
+              "src": "assets/ui/full-butce.png",
+              "nav": "assets/ui/nav-butce.png",
+              "from": 820,
+              "to": 1000
+            }
+          },
+          "chips": [
+            {
+              "html": "<span>Telefon faturası</span><b style='color:#1F6F78'>350 TL ayrıldı ✓</b>",
+              "x": 30,
+              "y": 900,
+              "w": 620,
+              "t": 0.9
+            },
+            {
+              "html": "<span>Kulaklık taksiti</span><b style='color:#1F6F78'>415 TL ayrıldı ✓</b>",
+              "x": 30,
+              "y": 1030,
+              "w": 620,
+              "t": 1.2
+            },
+            {
+              "html": "<span>Gerisi rahat:</span><b style='color:#AE4716'>günde ~243 TL</b>",
+              "x": 400,
+              "y": 1160,
+              "w": 640,
+              "t": 1.5,
+              "from": 300,
+              "rot": 5
+            }
+          ],
+          "mascot": {
+            "outfit": "ledger",
+            "x": 860,
+            "t": 1.6
+          }
+        }
+      ],
+      [
+        "outro",
+        8.0,
+        {
+          "flash": true,
+          "sub": "Burs yattığı gün değil,",
+          "accent": "ay sonunda da gül.",
+          "cta": "Takipte kal"
+        }
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          3.3,
+          5.0
+        ]
+      ]
+    }
+  },
+  "tost-mu-yemekhane-mi": {
+    "title": "Tost mu, yemekhane mi?",
+    "end": 11.7,
+    "scenes": [
+      [
+        "tostStory",
+        0
+      ],
+      [
+        "app",
+        5.2,
+        {
+          "bg": "#F8DCC8",
+          "lines": [
+            {
+              "html": "Kategoriye limit koy,",
+              "y": 240,
+              "size": 110
+            },
+            {
+              "html": "*kalanı gör.*",
+              "y": 370,
+              "size": 130,
+              "itColor": "var(--acc)"
+            }
+          ],
+          "phone": {
+            "w": 560,
+            "top": 760,
+            "scroll": {
+              "src": "assets/ui/full-butce.png",
+              "nav": "assets/ui/nav-butce.png",
+              "from": 300,
+              "to": 560
+            }
+          },
+          "chips": [
+            {
+              "html": "<span>Yemek &amp; kafe</span><b style='color:#AE4716'>835 / 2.500 TL</b>",
+              "x": 30,
+              "y": 960,
+              "w": 600,
+              "t": 1.3
+            }
+          ],
+          "mascot": {
+            "outfit": "cap",
+            "x": 860,
+            "t": 1.5
+          }
+        }
+      ],
+      [
+        "outro",
+        8.2,
+        {
+          "flash": true,
+          "sub": "Küçük harcamalar",
+          "accent": "büyük fark yapar.",
+          "cta": "Takipte kal"
+        }
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          4.0,
+          5.2
+        ]
+      ]
+    }
+  },
+  "abonelik-avcisi": {
+    "title": "Abonelik avcısı",
+    "end": 11.5,
+    "scenes": [
+      [
+        "subsStory",
+        0
+      ],
+      [
+        "app",
+        5.0,
+        {
+          "bg": "#DEE2F6",
+          "dot": "rgba(67,81,163,.10)",
+          "lines": [
+            {
+              "html": "Her ay ne ödediğini gör,",
+              "y": 240,
+              "size": 96
+            },
+            {
+              "html": "*unuttuğunu yakala.*",
+              "y": 360,
+              "size": 110,
+              "itColor": "#4351A3"
+            }
+          ],
+          "phone": {
+            "w": 560,
+            "top": 760,
+            "scroll": {
+              "src": "assets/ui/full-butce.png",
+              "nav": "assets/ui/nav-butce.png",
+              "from": 820,
+              "to": 980
+            }
+          },
+          "chips": [
+            {
+              "html": "<span>Müzik aboneliği</span><b style='color:#4351A3'>4 gün sonra · 60 TL</b>",
+              "x": 30,
+              "y": 960,
+              "w": 640,
+              "t": 1.2
+            }
+          ],
+          "mascot": {
+            "outfit": "spy",
+            "x": 860,
+            "t": 1.5
+          }
+        }
+      ],
+      [
+        "outro",
+        8.0,
+        {
+          "flash": true,
+          "sub": "Abonelikler sessizce",
+          "accent": "cebini yemesin.",
+          "cta": "Takipte kal"
+        }
+      ]
+    ],
+    "music": {
+      "lowpass": [
+        [
+          1.85,
+          3.75
+        ]
+      ]
+    }
+  },
+  "yarin-veririm": {
+    "title": "Yarın veririm",
+    "end": 12.1,
+    "scenes": [
+      [
+        "debtStory",
+        0
+      ],
+      [
+        "app",
+        5.6,
+        {
+          "bg": "var(--soft)",
+          "lines": [
+            {
+              "html": "Kim kime borçlu,",
+              "y": 240,
+              "size": 120
+            },
+            {
+              "html": "*Cep Defteri unutmaz.*",
+              "y": 370,
+              "size": 100,
+              "itColor": "var(--acc)"
+            }
+          ],
+          "phone": {
+            "w": 560,
+            "top": 760,
+            "scroll": {
+              "src": "assets/ui/full-borclar.png",
+              "nav": "assets/ui/nav-borclar.png",
+              "from": 0,
+              "to": 120
+            }
+          },
+          "chips": [
+            {
+              "html": "<span>Ali</span><b style='color:#2F8F5A'>sana borçlu · 120 TL</b>",
+              "x": 30,
+              "y": 1000,
+              "w": 560,
+              "t": 1.2
+            }
+          ],
+          "mascot": {
+            "who": "karamel",
+            "x": 860,
+            "t": 1.5
+          }
+        }
+      ],
+      [
+        "outro",
+        8.6,
+        {
+          "flash": true,
+          "sub": "Borç verdin mi?",
+          "accent": "Hemen deftere yaz.",
+          "cta": "Takipte kal"
+        }
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          2.1,
+          5.6
+        ]
+      ]
+    }
+  },
+  "sinav-haftasi": {
+    "title": "Sınav haftası",
+    "end": 11.9,
+    "scenes": [
+      [
+        "examStory",
+        0
+      ],
+      [
+        "app",
+        5.4,
+        {
+          "bg": "#DEE2F6",
+          "dot": "rgba(67,81,163,.10)",
+          "lines": [
+            {
+              "html": "Fıstık da",
+              "y": 240,
+              "size": 124
+            },
+            {
+              "html": "*seninle çalışır.*",
+              "y": 370,
+              "size": 120,
+              "itColor": "#4351A3"
+            }
+          ],
+          "phone": {
+            "w": 560,
+            "top": 760,
+            "img": "assets/ui/home-exam.png"
+          },
+          "chips": [
+            {
+              "html": "<span>Sınav haftası açık ·</span><b style='color:#4351A3'>ödeme hatırlatmaları sürer</b>",
+              "x": 40,
+              "y": 1520,
+              "t": 1.3
+            }
+          ]
+        }
+      ],
+      [
+        "outro",
+        8.4,
+        {
+          "flash": true,
+          "sub": "Sınavlarında",
+          "accent": "bol şans!",
+          "cta": "Takipte kal"
+        }
+      ]
+    ],
+    "music": {
+      "lowpass": [
+        [
+          0,
+          4.1
+        ]
+      ]
+    }
+  },
+  "ay-sonu-hala-param-var": {
+    "title": "Sonucu önce göster: ayın 30'u ve hâlâ param var",
+    "end": 14.0,
+    "handheld": true,
+    "boxes": [
+      [
+        0,
+        2.6,
+        "Ayın 30'u ve hâlâ<br><b>3.985 liram</b> var",
+        250
+      ],
+      [
+        2.6,
+        5.4,
+        "<b>1.</b> Para gelince önce<br>sabit ödemeleri ayır",
+        250
+      ],
+      [
+        5.4,
+        8.2,
+        "<b>2.</b> Her sabah bak: bugün<br>ne kadar harcayabilirim?",
+        250
+      ],
+      [
+        8.2,
+        11.0,
+        "<b>3.</b> Harcamayı anında yaz,<br>5 saniye sürüyor",
+        250
+      ],
+      [
+        11.0,
+        14.0,
+        "Kaydet, ay başında<br>lazım olur",
+        250
+      ]
+    ],
+    "scenes": [
+      [
+        "pov",
+        0,
+        {
+          "steps": [
+            {
+              "t": -1,
+              "img": "assets/ui/home-30-para.png"
+            },
+            {
+              "t": 2.6,
+              "scroll": {
+                "src": "assets/ui/full-butce.png",
+                "nav": "assets/ui/nav-butce.png",
+                "from": 830,
+                "to": 1010,
+                "dur": 2.0
+              }
+            },
+            {
+              "t": 5.4,
+              "scroll": {
+                "src": "assets/ui/full-ozet.png",
+                "nav": "assets/ui/nav-ozet.png",
+                "from": 470,
+                "to": 470
+              }
+            },
+            {
+              "t": 8.2,
+              "seq": [
+                [
+                  8.2,
+                  "assets/ui/add0.png"
+                ],
+                [
+                  8.799999999999999,
+                  "assets/ui/add2.png"
+                ],
+                [
+                  9.299999999999999,
+                  "assets/ui/add3.png"
+                ],
+                [
+                  9.799999999999999,
+                  "assets/ui/saved.png"
+                ]
+              ]
+            }
+          ],
+          "taps": [
+            {
+              "t": 8.45,
+              "fx": 0.2,
+              "fy": 0.29
+            },
+            {
+              "t": 9.149999999999999,
+              "fx": 0.845,
+              "fy": 0.67
+            },
+            {
+              "t": 9.649999999999999,
+              "fx": 0.5,
+              "fy": 0.958
+            }
+          ],
+          "stopwatch": [
+            8.45,
+            9.8,
+            4.8,
+            8.2
+          ],
+          "chips": [
+            {
+              "t": 5.9,
+              "html": "<span>Bugün harcayabileceğin</span><b style='color:#1F6F78'>~243 TL</b>",
+              "x": 40,
+              "y": 1160,
+              "until": 8.2
+            }
+          ],
+          "mascot": {
+            "outfit": "summer",
+            "dance": [
+              0,
+              2.6
+            ],
+            "x": 190,
+            "w": 448,
+            "cheer": 9.8
+          },
+          "confetti": {
+            "t": -0.5,
+            "x": 540,
+            "y": 700
+          }
+        }
+      ],
+      [
+        "end",
+        11.0,
+        {}
+      ]
+    ],
+    "musicGain": 0.75,
+    "noMusicVariant": true
+  },
+  "yemek-hesabi": {
+    "title": "Uyarı: arkadaşlarla yemeğe çıkmadan önce",
+    "end": 14.0,
+    "handheld": true,
+    "boxes": [
+      [
+        0,
+        2.5,
+        "Arkadaşlarla yemeğe çıkmadan<br>önce <b>bunu izle</b>",
+        230
+      ],
+      [
+        2.5,
+        5.2,
+        "Her seferinde<br>aynı sohbet:",
+        230
+      ],
+      [
+        5.2,
+        7.2,
+        "Ödeyen sensen:<br><b>Hesabı bölüş</b>",
+        250
+      ],
+      [
+        7.2,
+        11.0,
+        "Kim kime ne borçlu,<br><b>defterde yazılı</b>",
+        250
+      ],
+      [
+        11.0,
+        14.0,
+        "Yemek grubuna at,<br>bu sefer kimse unutmasın",
+        250
+      ]
+    ],
+    "scenes": [
+      [
+        "chat",
+        0,
+        {
+          "title": "Cuma yemeği",
+          "subtitle": "Ali, Zeynep, Karamel, sen",
+          "people": {
+            "ali": {
+              "who": "bilge",
+              "name": "Ali",
+              "color": "#4351A3",
+              "bg": "#DEE2F6"
+            },
+            "zeynep": {
+              "who": "ceviz",
+              "name": "Zeynep",
+              "color": "#7A5418",
+              "bg": "#F1E2C6"
+            },
+            "karamel": {
+              "who": "karamel",
+              "name": "Karamel",
+              "color": "#1F5F96",
+              "bg": "#D7E6F3"
+            }
+          },
+          "messages": [
+            [
+              -1,
+              "zeynep",
+              "Akşam burgerci mi?"
+            ],
+            [
+              -1,
+              "karamel",
+              "Ben varım"
+            ],
+            [
+              -1,
+              "me",
+              "20.00'de oradayım"
+            ],
+            [
+              -1,
+              "ali",
+              "Hesap 640 TL geldi"
+            ],
+            [
+              -1,
+              "zeynep",
+              "Kim ödedi?"
+            ],
+            [
+              0.4,
+              "karamel",
+              "Ben ödedim galiba"
+            ],
+            [
+              0.9,
+              "ali",
+              "Galiba ne ya"
+            ],
+            [
+              1.45,
+              "zeynep",
+              "Ben bozuk para verdim, sayılır mı?"
+            ],
+            [
+              3.2,
+              "me",
+              "Ben ödedim. Kartımdan. 640 TL."
+            ],
+            [
+              3.7,
+              "karamel",
+              "Tamam yarın veririm"
+            ],
+            [
+              4.15,
+              "ali",
+              "Ben 100 attım ama kime?"
+            ],
+            [
+              4.6,
+              "zeynep",
+              "Hangi gün yemiştik?"
+            ]
+          ],
+          "typing": [
+            2.5,
+            3.2,
+            "me"
+          ]
+        }
+      ],
+      [
+        "pov",
+        5.2,
+        {
+          "rise": true,
+          "steps": [
+            {
+              "t": 0,
+              "img": "assets/ui/split.png"
+            },
+            {
+              "t": 2.0,
+              "img": "assets/ui/split-saved.png"
+            }
+          ],
+          "taps": [
+            {
+              "t": 0.55,
+              "fx": 0.22,
+              "fy": 0.506
+            },
+            {
+              "t": 0.95,
+              "fx": 0.27,
+              "fy": 0.577
+            },
+            {
+              "t": 1.75,
+              "fx": 0.5,
+              "fy": 0.958
+            }
+          ],
+          "chips": [
+            {
+              "t": 2.4,
+              "html": "<b style='color:#2F8F5A'>Ali sana 320 TL borçlu</b>",
+              "x": 330,
+              "y": 1250,
+              "from": 300,
+              "rot": 4
+            }
+          ],
+          "mascot": {
+            "outfit": "ledger",
+            "x": 880,
+            "w": 384,
+            "enter": 2.6,
+            "cheer": 2.9
+          }
+        }
+      ],
+      [
+        "end",
+        11.0,
+        {
+          "friend": "karamel"
+        }
+      ]
+    ],
+    "musicGain": 0.75,
+    "noMusicVariant": true
+  },
+  "butce-sikici-mi": {
+    "title": "Tepki: herkes bütçe tutmak sıkıcı diyor",
+    "end": 14.6,
+    "handheld": true,
+    "babble": true,
+    "boxes": [
+      [
+        0,
+        3.2,
+        "Herkes “bütçe tutmak<br>sıkıcı” diyor",
+        250
+      ],
+      [
+        12.0,
+        14.6,
+        "Katılıyor musun?<br><b>Yoruma yaz</b>",
+        250
+      ]
+    ],
+    "captions": [
+      [
+        0.25,
+        1.4,
+        "Bence yanlış."
+      ],
+      [
+        1.5,
+        3.1,
+        "Çünkü üç sebebi var:"
+      ],
+      [
+        3.3,
+        6.4,
+        "Bir: harcamayı yazmak 5 saniye sürüyor."
+      ],
+      [
+        6.7,
+        9.4,
+        "İki: bugün ne kadar harcayabileceğini söylüyor."
+      ],
+      [
+        9.7,
+        11.9,
+        "Üç: maskotu var. Hem de altı tane."
+      ],
+      [
+        12.1,
+        14.4,
+        "Asıl sıkıcı olan, ayın 30'unda bakiyeye bakmak."
+      ]
+    ],
+    "scenes": [
+      [
+        "talk",
+        0,
+        {
+          "poses": [
+            [
+              0,
+              "curious",
+              null,
+              "wide"
+            ],
+            [
+              0.25,
+              "thoughtful",
+              null,
+              "squeeze"
+            ],
+            [
+              1.5,
+              "happy",
+              "up",
+              "mood"
+            ]
+          ],
+          "shake": [
+            [
+              0.3,
+              1.2
+            ]
+          ],
+          "talk": [
+            [
+              0.25,
+              1.4
+            ],
+            [
+              1.5,
+              3.1
+            ]
+          ]
+        }
+      ],
+      [
+        "pov",
+        3.2,
+        {
+          "rise": true,
+          "steps": [
+            {
+              "t": 0,
+              "seq": [
+                [
+                  0.3,
+                  "assets/ui/add0.png"
+                ],
+                [
+                  0.8999999999999999,
+                  "assets/ui/add2.png"
+                ],
+                [
+                  1.4000000000000001,
+                  "assets/ui/add3.png"
+                ],
+                [
+                  1.9000000000000001,
+                  "assets/ui/saved.png"
+                ]
+              ]
+            }
+          ],
+          "taps": [
+            {
+              "t": 0.55,
+              "fx": 0.2,
+              "fy": 0.29
+            },
+            {
+              "t": 1.25,
+              "fx": 0.845,
+              "fy": 0.67
+            },
+            {
+              "t": 1.75,
+              "fx": 0.5,
+              "fy": 0.958
+            }
+          ],
+          "stopwatch": [
+            0.55,
+            1.9,
+            4.8
+          ],
+          "mascot": {
+            "outfit": "headphones",
+            "x": 190,
+            "w": 448,
+            "cheer": 1.9
+          }
+        }
+      ],
+      [
+        "pov",
+        6.6,
+        {
+          "steps": [
+            {
+              "t": 0,
+              "scroll": {
+                "src": "assets/ui/full-ozet.png",
+                "nav": "assets/ui/nav-ozet.png",
+                "from": 380,
+                "to": 470,
+                "dur": 1.4
+              }
+            }
+          ],
+          "chips": [
+            {
+              "t": 1.0,
+              "html": "<span>Bugün harcayabileceğin</span><b style='color:#1F6F78'>~243 TL</b>",
+              "x": 40,
+              "y": 1160
+            }
+          ],
+          "mascot": {
+            "outfit": "scholar",
+            "x": 880,
+            "w": 448,
+            "enter": 0.5,
+            "cheer": 1.3
+          }
+        }
+      ],
+      [
+        "lineup",
+        9.6
+      ],
+      [
+        "talk",
+        12.0,
+        {
+          "poses": [
+            [
+              0,
+              "happy",
+              null,
+              "mood"
+            ],
+            [
+              1.6,
+              "celebrate",
+              "wave",
+              "mood"
+            ]
+          ],
+          "talk": [
+            [
+              0.1,
+              2.4
+            ]
+          ]
+        }
+      ]
+    ],
+    "musicGain": 0.75,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        14.6,
+        "quiz"
+      ]
+    ]
+  },
+  "korku-filmi": {
+    "title": "Hook: banka uygulamasını açmadan önceki 3 saniye (korku)",
+    "end": 11.6,
+    "handheld": true,
+    "musicGain": 0.8,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        3.3,
+        "horror"
+      ],
+      [
+        4.8,
+        11.6,
+        "lofi"
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        3.3,
+        "Banka uygulamasını açmadan<br>önceki <b>3 saniye</b>",
+        230
+      ],
+      [
+        3.3,
+        4.8,
+        "Ayın daha <b>20'si</b>.",
+        250
+      ],
+      [
+        4.8,
+        8.6,
+        "Sürpriz olmasın:<br><b>kaç paran kaldığını her an bil</b>",
+        250
+      ],
+      [
+        8.6,
+        11.6,
+        "Her ay bu filmi çeken<br><b>arkadaşına at</b>",
+        250
+      ]
+    ],
+    "scenes": [
+      [
+        "dread",
+        0,
+        {
+          "scare": 3.3
+        }
+      ],
+      [
+        "pov",
+        4.8,
+        {
+          "rise": true,
+          "steps": [
+            {
+              "t": 0,
+              "img": "assets/ui2/home.png"
+            }
+          ],
+          "chips": [
+            {
+              "t": 1.0,
+              "html": "<span>Ekim sonuna kadar</span><b style='color:#1F6F78'>günde ~231 TL</b>",
+              "x": 40,
+              "y": 1250
+            }
+          ],
+          "mascot": {
+            "x": 880,
+            "w": 448,
+            "enter": 0.6,
+            "cheer": 1.3
+          }
+        }
+      ],
+      [
+        "end",
+        8.6,
+        {}
+      ]
+    ]
+  },
+  "kahve-tahmin": {
+    "title": "Hook: günde 1 kahve, yılda kaç lira? (yarışma)",
+    "end": 13.0,
+    "handheld": true,
+    "musicGain": 0.8,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        13.0,
+        "quiz"
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        3.0,
+        "Günde 1 kahve.<br>Yılda kaç lira? <b>Tahmin et</b>",
+        230
+      ],
+      [
+        5.2,
+        7.0,
+        "Kahveyi bırakma.<br><b>Sadece say.</b>",
+        250
+      ],
+      [
+        7.0,
+        10.2,
+        "Kategoriye limit koy,<br><b>yaklaşınca haber versin</b>",
+        250
+      ],
+      [
+        10.2,
+        13.0,
+        "Tahminini yorumlara yaz,<br><b>en yakın kim?</b>",
+        250
+      ]
+    ],
+    "scenes": [
+      [
+        "coffeeQuiz",
+        0,
+        {
+          "reveal": 3.0,
+          "up": 5.2,
+          "price": 175
+        }
+      ],
+      [
+        "pov",
+        7.0,
+        {
+          "rise": true,
+          "steps": [
+            {
+              "t": 0,
+              "scroll": {
+                "src": "assets/ui2/full-butce.png",
+                "nav": "assets/ui2/nav-butce.png",
+                "from": 420,
+                "to": 560,
+                "dur": 1.4
+              }
+            }
+          ],
+          "mascot": {
+            "outfit": "suit",
+            "x": 880,
+            "w": 448,
+            "enter": 0.8,
+            "cheer": 1.4
+          }
+        }
+      ],
+      [
+        "end",
+        10.2,
+        {
+          "outfit": "suit"
+        }
+      ]
+    ]
+  },
+  "hangi-hayvansin": {
+    "title": "Hook: harcama tarzına göre hangi hayvansın? (test)",
+    "end": 13.8,
+    "handheld": true,
+    "musicGain": 0.85,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        13.8,
+        "lofi"
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        1.8,
+        "Harcama tarzına göre<br><b>hangi hayvansın?</b>",
+        230
+      ],
+      [
+        1.8,
+        3.35,
+        "“Son kez” deyip<br>her gün kantine giden",
+        250
+      ],
+      [
+        3.35,
+        4.9,
+        "Her kuruşu<br>tabloya yazan",
+        250
+      ],
+      [
+        4.9,
+        6.45,
+        "Bozuk parayı bile<br>biriktiren",
+        250
+      ],
+      [
+        6.45,
+        8.0,
+        "“İhtiyacım yok” deyip<br>hiçbir şey almayan",
+        250
+      ],
+      [
+        8.0,
+        9.55,
+        "Hesabı hep ödeyip<br>geri istemeyi unutan",
+        250
+      ],
+      [
+        9.55,
+        11.1,
+        "“Hak ettim” deyip<br>kendine ödül alan",
+        250
+      ],
+      [
+        11.1,
+        13.8,
+        "Sen hangisisin?<br><b>Arkadaşını etiketle</b>",
+        230
+      ]
+    ],
+    "scenes": [
+      [
+        "persona",
+        0,
+        {
+          "c0": 1.8,
+          "d": 1.55
+        }
+      ],
+      [
+        "lineup",
+        11.1,
+        {
+          "note": "Cep Defteri'nde maskotunu sen seçiyorsun",
+          "noteY": 520,
+          "rows": 2
+        }
+      ]
+    ]
+  },
+  "sepet-3-hesap": {
+    "title": "Bilgi: sepeti onaylamadan önce 3 hesap",
+    "end": 16.2,
+    "handheld": true,
+    "musicGain": 0.8,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        16.2,
+        "pop",
+        {
+          "bpm": 124
+        }
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        2.0,
+        "Sepeti onaylamadan önce<br><b>bu 3 hesabı yap</b>",
+        180
+      ],
+      [
+        13.8,
+        16.2,
+        "Kaydet, bir dahaki sepette<br><b>bu 3 hesabı yap</b>",
+        250
+      ]
+    ],
+    "scenes": [
+      [
+        "cartHook",
+        0,
+        {
+          "items": [
+            [
+              "Kablosuz kulaklık",
+              "1.450"
+            ],
+            [
+              "Telefon kılıfı",
+              "350"
+            ],
+            [
+              "Ayakkabı temizleme seti",
+              "600"
+            ]
+          ],
+          "total": "2.400",
+          "stop": 0.55
+        }
+      ],
+      [
+        "cards",
+        2.0,
+        {
+          "items": [
+            {
+              "t": 0.0,
+              "num": "1",
+              "title": "24 saat kuralı",
+              "body": "İhtiyaç olmayan şeyi sepette <b>24 saat</b> beklet. Ertesi gün hâlâ istiyorsan al.",
+              "color": "#AE4716",
+              "bg": "#F8DCC8",
+              "mascot": {
+                "who": "fistik",
+                "mood": "thoughtful"
+              },
+              "ex": [
+                "Ertesi gün vazgeçersen:"
+              ],
+              "big": "{n} TL cepte",
+              "bigTo": 2400,
+              "exLabel": "SONUÇ"
+            },
+            {
+              "t": 3.9,
+              "num": "2",
+              "title": "Fiyatı saate çevir",
+              "body": "Fiyatı saatlik kazancına böl: bunun için <b>kaç saat çalışman</b> gerekiyor?",
+              "color": "#1F6F78",
+              "bg": "#DDEFE9",
+              "mascot": {
+                "who": "bilge",
+                "mood": "curious"
+              },
+              "ex": [
+                "2.400 TL ÷ 150 TL/saat ="
+              ],
+              "big": "{n} saat",
+              "bigTo": 16
+            },
+            {
+              "t": 7.8,
+              "num": "3",
+              "title": "Kullanım başına maliyet",
+              "body": "Fiyatı <b>kaç kez kullanacağına</b> böl. Ucuz olan her zaman ucuz değildir.",
+              "color": "#4351A3",
+              "bg": "#DEE2F6",
+              "mascot": {
+                "who": "ceviz",
+                "mood": "curious"
+              },
+              "ex": [
+                "Mont: 2.400 TL ÷ 200 giyim = <b style='color:#2F8F5A'>12 TL</b>",
+                "Parti kıyafeti: 1.200 TL ÷ 2 giyim = <b style='color:#C0392B'>600 TL</b>"
+              ]
+            }
+          ],
+          "fast": true,
+          "rowStart": 0.45,
+          "rowGap": 0.3,
+          "countDur": 0.45
+        }
+      ],
+      [
+        "end",
+        13.8,
+        {}
+      ]
+    ],
+    "voice": [
+      [
+        0.2,
+        "Sepeti onaylamadan önce, dur."
+      ],
+      [
+        2.1,
+        "Bir: yirmi dört saat bekle. Ertesi gün hâlâ istiyorsan al."
+      ],
+      [
+        6.0,
+        "İki: fiyatı saate çevir. İki bin dört yüz lira, on altı saat çalışma demek."
+      ],
+      [
+        9.9,
+        "Üç: kullanım başına böl. Mont on iki lira, parti kıyafeti altı yüz."
+      ],
+      [
+        13.9,
+        "Kaydet, sepete giderken aç."
+      ]
+    ],
+    "voiceSettings": {
+      "speed": 1.08
+    }
+  },
+  "okul-maili-bedava": {
+    "title": "Bilgi: okul mailinle ücretsiz kullanabileceklerin",
+    "end": 22.6,
+    "handheld": true,
+    "musicGain": 0.8,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        22.6,
+        "chip"
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        2.6,
+        "Okul mailin varsa<br><b>bunları bedava kullanıyorsun</b>",
+        230
+      ],
+      [
+        19.6,
+        22.6,
+        "Sınıf grubuna at,<br><b>bilmeyen kalmasın</b>",
+        250
+      ]
+    ],
+    "scenes": [
+      [
+        "mailHook",
+        0,
+        {
+          "tags": [
+            "Yazılım araçları",
+            "Not uygulaması",
+            "Word & Excel",
+            "3D tasarım"
+          ]
+        }
+      ],
+      [
+        "cards",
+        2.6,
+        {
+          "items": [
+            {
+              "t": 0,
+              "num": "1",
+              "title": "GitHub Student<br>Developer Pack",
+              "body": "Yazılım öğreniyorsan: geliştirici araçları ve tekliflerle dolu ücretsiz paket.",
+              "color": "#2A1E1A",
+              "bg": "#EDE6DD",
+              "mascot": {
+                "who": "fistik",
+                "mood": "curious"
+              },
+              "ex": [
+                "education.github.com/pack"
+              ],
+              "exLabel": "NEREDEN"
+            },
+            {
+              "t": 3.4,
+              "num": "2",
+              "title": "JetBrains IDE'leri",
+              "body": "IntelliJ IDEA, PyCharm ve diğerleri. Öğrenci kaldıkça <b>her yıl ücretsiz</b> yenilenir.",
+              "color": "#1F6F78",
+              "bg": "#DDEFE9",
+              "mascot": {
+                "who": "bilge",
+                "mood": "curious"
+              },
+              "ex": [
+                "jetbrains.com/student"
+              ],
+              "exLabel": "NEREDEN"
+            },
+            {
+              "t": 6.8,
+              "num": "3",
+              "title": "Notion Plus",
+              "body": "Ders notlarına <b>sınırsız dosya yükleme</b>. Yılda bir okul mailini doğrulaman yeter.",
+              "color": "#AE4716",
+              "bg": "#F8DCC8",
+              "mascot": {
+                "who": "ceviz",
+                "mood": "curious"
+              },
+              "ex": [
+                "Ayarlar → Plan yükselt → Eğitim planı"
+              ],
+              "exLabel": "NASIL"
+            },
+            {
+              "t": 10.2,
+              "num": "4",
+              "title": "Word, Excel, PowerPoint",
+              "body": "Okulun destekliyorsa <b>web sürümleri ücretsiz</b>. Okul mailinle giriş yap.",
+              "color": "#4351A3",
+              "bg": "#DEE2F6",
+              "mascot": {
+                "who": "karamel",
+                "mood": "curious"
+              },
+              "ex": [
+                "microsoft.com/education"
+              ],
+              "exLabel": "NEREDEN"
+            },
+            {
+              "t": 13.6,
+              "num": "5",
+              "title": "AutoCAD, Fusion ve fazlası",
+              "body": "Autodesk'ten öğrencilere <b>1 yıllık ücretsiz erişim</b>, öğrenci kaldıkça yenilenir.",
+              "color": "#56661B",
+              "bg": "#E4EBCB",
+              "mascot": {
+                "who": "diken",
+                "mood": "curious"
+              },
+              "ex": [
+                "autodesk.com/education"
+              ],
+              "exLabel": "NEREDEN"
+            }
+          ]
+        }
+      ],
+      [
+        "end",
+        19.6,
+        {
+          "outfit": "cap",
+          "note": "Koşullar okula ve zamana göre değişebilir; başvurmadan önce sitesine bak."
+        }
+      ]
+    ]
+  },
+  "50-30-20": {
+    "title": "Bilgi: 50/30/20 kuralı (öğrenci versiyonu)",
+    "end": 25.8,
+    "handheld": true,
+    "musicGain": 0.8,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        25.8,
+        "lofi"
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        0.9,
+        "Harçlığını neden<br><b>3'e bölmelisin?</b>",
+        230
+      ],
+      [
+        0.9,
+        1.8,
+        "Bölmezsen: ayın 18'i,<br><b>0 TL</b>",
+        230
+      ],
+      [
+        1.8,
+        4.4,
+        "Bölersen: <b>50/30/20</b>",
+        230
+      ],
+      [
+        22.8,
+        25.8,
+        "Kaydet,<br><b>burs yatınca aç</b>",
+        250
+      ]
+    ],
+    "scenes": [
+      [
+        "drainHook",
+        0,
+        {
+          "end": 1.5,
+          "total": 10000,
+          "day": 18
+        }
+      ],
+      [
+        "pieHook",
+        1.8,
+        {
+          "flash": false
+        }
+      ],
+      [
+        "cards",
+        4.4,
+        {
+          "items": [
+            {
+              "t": 0,
+              "num": "",
+              "title": "İhtiyaç",
+              "body": "Yurt/kira, ulaşım, market, faturalar: <b>olmazsa olmazlar</b>.",
+              "color": "#AE4716",
+              "bg": "#F8DCC8",
+              "mascot": {
+                "who": "fistik",
+                "mood": "curious"
+              },
+              "ex": [
+                "10.000 TL gelirin varsa:"
+              ],
+              "big": "{n} TL",
+              "bigTo": 5000,
+              "badge": "%50"
+            },
+            {
+              "t": 4.6,
+              "num": "",
+              "title": "İstek",
+              "body": "Kafe, eğlence, kıyafet, abonelikler: <b>keyif payın</b>.",
+              "color": "#2F8F9D",
+              "bg": "#DDEFE9",
+              "mascot": {
+                "who": "pamuk",
+                "mood": "curious"
+              },
+              "ex": [
+                "10.000 TL'nin %30'u:"
+              ],
+              "big": "{n} TL",
+              "bigTo": 3000,
+              "badge": "%30"
+            },
+            {
+              "t": 9.2,
+              "num": "",
+              "title": "Birikim",
+              "body": "Para gelir gelmez <b>önce bunu ayır</b>, kalanla yaşa. Acil durum fonun buradan büyür.",
+              "color": "#B07A12",
+              "bg": "#F1E2C6",
+              "mascot": {
+                "who": "ceviz",
+                "mood": "curious"
+              },
+              "ex": [
+                "Ayda 2.000 TL ayırırsan 1 yılda:"
+              ],
+              "big": "{n} TL",
+              "bigTo": 24000,
+              "badge": "%20"
+            },
+            {
+              "t": 13.8,
+              "num": "",
+              "title": "Yurt pahalıysa?",
+              "body": "Oranı değiştir: <b>60/30/10</b> da olur. Önemli olan her ay bir planla gitmek.",
+              "color": "#4351A3",
+              "bg": "#DEE2F6",
+              "mascot": {
+                "who": "bilge",
+                "mood": "curious"
+              },
+              "ex": [
+                "İhtiyaç %60 · İstek %30 · Birikim %10"
+              ],
+              "exLabel": "ALTERNATİF",
+              "badge": "!"
+            }
+          ]
+        }
+      ],
+      [
+        "end",
+        22.8,
+        {}
+      ]
+    ],
+    "voice": [
+      [
+        0.1,
+        "Harçlığını neden üçe bölmelisin?"
+      ],
+      [
+        1.9,
+        "Çünkü bölmeyen, ayın on sekizinde sıfırı görür."
+      ],
+      [
+        4.6,
+        "Yüzde elli ihtiyaç: yurt, market, fatura."
+      ],
+      [
+        9.2,
+        "Yüzde otuz keyif: kafe, eğlence, abonelik."
+      ],
+      [
+        13.8,
+        "Yüzde yirmi birikim: para gelince önce bunu ayır."
+      ],
+      [
+        18.4,
+        "Yurt pahalıysa, altmış otuz on da olur."
+      ],
+      [
+        22.9,
+        "Kaydet, burs yatınca aç."
+      ]
+    ]
+  },
+  "pesin-mi-taksit-mi": {
+    "title": "Bilgi/hikâye: telefon peşin mi taksit mi?",
+    "end": 15.56,
+    "handheld": true,
+    "musicGain": 0.8,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        15.56,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        1.1,
+        "Peşin ödemek seni<br><b>fakirleştirebilir</b>",
+        330,
+        {
+          "size": 100,
+          "pulse": true
+        }
+      ],
+      [
+        1.1,
+        2.0,
+        "Bilge'ye sordum,<br><b>cevaba bak</b>",
+        330,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        15.0,
+        15.56,
+        "Peşin ödemek seni<br><b>fakirleştirebilir</b>",
+        330,
+        {
+          "size": 100,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "tagHook",
+        0,
+        {
+          "flip": 0.6,
+          "win": "daha ucuz!",
+          "cash": "18.000",
+          "inst": "6 × 3.000"
+        }
+      ],
+      [
+        "chat",
+        2.0,
+        {
+          "title": "Bilge",
+          "subtitle": "çevrimiçi",
+          "top": 300,
+          "people": {
+            "bilge": {
+              "who": "bilge",
+              "name": "Bilge",
+              "color": "#4351A3",
+              "bg": "#DEE2F6"
+            }
+          },
+          "messages": [
+            [
+              0.0,
+              "me",
+              "Telefon alıcam, 18.000 TL"
+            ],
+            [
+              0.8,
+              "me",
+              "Peşin mi, 6 × 3.000 taksit mi?"
+            ],
+            [
+              1.9,
+              "bilge",
+              "Vade farkı yoksa <b>taksit</b>."
+            ],
+            [
+              2.9,
+              "bilge",
+              "Tahmin et: o 6 taksit <b>bugün</b> kaç TL eder?"
+            ],
+            [
+              5.4,
+              "bilge",
+              "<span class='it' style='font-size:96px;line-height:1;color:#2F8F5A'>≈16.800 TL</span><div style='font-size:32px;color:#8a7d72;margin-top:6px'>aylık %2 enflasyonla</div>"
+            ],
+            [
+              6.6,
+              "me",
+              "1.200 TL kâr mı yani?!"
+            ],
+            [
+              7.6,
+              "bilge",
+              "Evet. Ama taksit parası <b>kenarda</b> dursun."
+            ],
+            [
+              9.0,
+              "bilge",
+              "Peşine <b>%7'den fazla</b> indirim varsa peşin al."
+            ],
+            [
+              10.4,
+              "me",
+              "Not aldım"
+            ],
+            [
+              11.3,
+              "bilge",
+              "Taksitle alan arkadaşına da <b>gönder</b> bunu"
+            ]
+          ],
+          "typing": [
+            3.9,
+            5.4,
+            "bilge"
+          ],
+          "font": 50,
+          "hits": [
+            5.4
+          ]
+        }
+      ],
+      [
+        "tagHook",
+        15.0,
+        {
+          "flip": 9,
+          "wdur": 0.25,
+          "cash": "18.000",
+          "inst": "6 × 3.000"
+        }
+      ]
+    ],
+    "voice": [
+      [
+        0.2,
+        "Peşin ödemek seni fakirleştirebilir."
+      ],
+      [
+        2.1,
+        "Telefon alıcam, on sekiz bin. Peşin mi, taksit mi?"
+      ],
+      [
+        4.9,
+        "Tahmin et: o altı taksit bugün kaç eder?"
+      ],
+      [
+        7.4,
+        "On altı bin sekiz yüz. Bin iki yüz lira kâr."
+      ],
+      [
+        11.0,
+        "Peşine yüzde yediden fazla indirim varsa peşin al."
+      ]
+    ],
+    "voiceSettings": {
+      "speed": 1.1
+    },
+    "loop": true
+  },
+  "yuzde-tuzaklari": {
+    "title": "Bilgi/quiz: seni kandıran 3 yüzde hesabı",
+    "end": 16.36,
+    "handheld": true,
+    "musicGain": 0.8,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        16.36,
+        "quiz"
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        1.1,
+        "Bu 3 yüzde<br><b>seni kandırıyor</b>",
+        330,
+        {
+          "size": 100,
+          "pulse": true
+        }
+      ],
+      [
+        1.1,
+        1.9,
+        "Bil bakalım:<br><b>kaçını bileceksin?</b>",
+        330,
+        {
+          "size": 92,
+          "pulse": true
+        }
+      ],
+      [
+        14.6,
+        15.9,
+        "Arkadaşına gönder,<br><b>o kaç bilecek?</b>",
+        1400,
+        {
+          "size": 80,
+          "pulse": true
+        }
+      ],
+      [
+        15.9,
+        16.36,
+        "Bu 3 yüzde<br><b>seni kandırıyor</b>",
+        330,
+        {
+          "size": 100,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "percentHook",
+        0,
+        {
+          "stop": 0.75,
+          "text": "%3×12=%36"
+        }
+      ],
+      [
+        "quiz",
+        1.9,
+        {
+          "items": [
+            {
+              "t": 0,
+              "q": "Kart borcuna aylık <b style='color:#4351A3'>%3</b> faiz. Bir yılda?",
+              "opts": [
+                "%36",
+                "%42,6"
+              ],
+              "correct": 1,
+              "why": "Faiz, faize eklenir: <b>1,03 × 1,03 × … (12 kez)</b>",
+              "color": "#4351A3",
+              "bg": "#DEE2F6",
+              "mascot": {
+                "who": "bilge",
+                "outfit": "spy"
+              }
+            },
+            {
+              "t": 4.7,
+              "q": "Birikimin <b style='color:#2F8F5A'>%40</b> faiz aldı, fiyatlar <b style='color:#C0392B'>%30</b> arttı. Gerçek kazancın?",
+              "qSize": 62,
+              "opts": [
+                "%7,7",
+                "%10"
+              ],
+              "correct": 0,
+              "why": "Çıkarma değil bölme: <b>1,40 ÷ 1,30 − 1</b>",
+              "color": "#2F8F5A",
+              "bg": "#DDEFE9",
+              "mascot": {
+                "who": "ceviz"
+              }
+            },
+            {
+              "t": 9.4,
+              "q": "1.000 TL'lik kulaklığa önce <b style='color:#C0392B'>%100 zam</b>, sonra <b style='color:#2F8F5A'>%50 indirim</b>. Fiyat?",
+              "qSize": 62,
+              "opts": [
+                "500 TL",
+                "1.000 TL"
+              ],
+              "correct": 1,
+              "why": "İndirimden önce <b>fiyat geçmişine</b> bak.",
+              "color": "#AE4716",
+              "bg": "#F8DCC8",
+              "mascot": {
+                "who": "pamuk"
+              }
+            }
+          ]
+        }
+      ],
+      [
+        "percentHook",
+        15.9,
+        {
+          "stop": 9,
+          "wdur": 0.25,
+          "text": "%3×12=%36"
+        }
+      ]
+    ],
+    "voice": [
+      [
+        0.2,
+        "Bu üç yüzde seni kandırıyor. Bil bakalım."
+      ],
+      [
+        2.0,
+        "Kart borcuna aylık yüzde üç faiz. Bir yılda kaç? Üç, iki, bir."
+      ],
+      [
+        6.7,
+        "Faiz yüzde kırk, enflasyon otuz. Gerçek kazancın? Üç, iki, bir."
+      ],
+      [
+        11.4,
+        "Önce yüzde yüz zam, sonra yüzde elli indirim. Fiyat? Üç, iki, bir."
+      ],
+      [
+        14.7,
+        "Arkadaşına gönder, o kaç bilecek?"
+      ]
+    ],
+    "voiceSettings": {
+      "speed": 1.1
+    },
+    "loop": true
+  },
+  "yuzde-sesli-demo": {
+    "title": "Demo: ElevenLabs sesli açılış (yüzde tuzakları)",
+    "end": 16.36,
+    "handheld": true,
+    "musicGain": 0.8,
+    "musicPlan": [
+      [
+        0,
+        16.36,
+        "quiz"
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        1.1,
+        "Bu 3 yüzde<br><b>seni kandırıyor</b>",
+        330,
+        {
+          "size": 100,
+          "pulse": true
+        }
+      ],
+      [
+        1.1,
+        1.9,
+        "Bil bakalım:<br><b>kaçını bileceksin?</b>",
+        330,
+        {
+          "size": 92,
+          "pulse": true
+        }
+      ],
+      [
+        14.6,
+        15.9,
+        "Arkadaşına gönder,<br><b>o kaç bilecek?</b>",
+        1400,
+        {
+          "size": 80,
+          "pulse": true
+        }
+      ],
+      [
+        15.9,
+        16.36,
+        "Bu 3 yüzde<br><b>seni kandırıyor</b>",
+        330,
+        {
+          "size": 100,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "percentHook",
+        0,
+        {
+          "stop": 0.75,
+          "text": "%3×12=%36"
+        }
+      ],
+      [
+        "quiz",
+        1.9,
+        {
+          "items": [
+            {
+              "t": 0,
+              "q": "Kart borcuna aylık <b style='color:#4351A3'>%3</b> faiz. Bir yılda?",
+              "opts": [
+                "%36",
+                "%42,6"
+              ],
+              "correct": 1,
+              "why": "Faiz, faize eklenir: <b>1,03 × 1,03 × … (12 kez)</b>",
+              "color": "#4351A3",
+              "bg": "#DEE2F6",
+              "mascot": {
+                "who": "bilge",
+                "outfit": "spy"
+              }
+            },
+            {
+              "t": 4.7,
+              "q": "Birikimin <b style='color:#2F8F5A'>%40</b> faiz aldı, fiyatlar <b style='color:#C0392B'>%30</b> arttı. Gerçek kazancın?",
+              "qSize": 62,
+              "opts": [
+                "%7,7",
+                "%10"
+              ],
+              "correct": 0,
+              "why": "Çıkarma değil bölme: <b>1,40 ÷ 1,30 − 1</b>",
+              "color": "#2F8F5A",
+              "bg": "#DDEFE9",
+              "mascot": {
+                "who": "ceviz"
+              }
+            },
+            {
+              "t": 9.4,
+              "q": "1.000 TL'lik kulaklığa önce <b style='color:#C0392B'>%100 zam</b>, sonra <b style='color:#2F8F5A'>%50 indirim</b>. Fiyat?",
+              "qSize": 62,
+              "opts": [
+                "500 TL",
+                "1.000 TL"
+              ],
+              "correct": 1,
+              "why": "İndirimden önce <b>fiyat geçmişine</b> bak.",
+              "color": "#AE4716",
+              "bg": "#F8DCC8",
+              "mascot": {
+                "who": "pamuk"
+              }
+            }
+          ]
+        }
+      ],
+      [
+        "percentHook",
+        15.9,
+        {
+          "stop": 9,
+          "wdur": 0.25,
+          "text": "%3×12=%36"
+        }
+      ]
+    ],
+    "voice": [
+      [
+        0.2,
+        "Bu üç yüzde seni kandırıyor. Bil bakalım."
+      ],
+      [
+        2.0,
+        "Kart borcuna aylık yüzde üç faiz. Bir yılda kaç? Üç, iki, bir."
+      ],
+      [
+        6.7,
+        "Faiz yüzde kırk, enflasyon otuz. Gerçek kazancın? Üç, iki, bir."
+      ],
+      [
+        11.4,
+        "Önce yüzde yüz zam, sonra yüzde elli indirim. Fiyat? Üç, iki, bir."
+      ],
+      [
+        14.7,
+        "Arkadaşına gönder, o kaç bilecek?"
+      ]
+    ],
+    "voiceSettings": {
+      "speed": 1.1
+    },
+    "loop": true
+  },
+  "firsat-maliyeti": {
+    "title": "Bilgi/hikâye: fırsat maliyeti (sesli)",
+    "end": 22.22,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.55,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        22.22,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        3.3,
+        "Her etiketin arkasında<br><b>gizli bir fiyat var</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        3.35,
+        6.4,
+        "Fırsat maliyeti =<br><b>seçmediğin şey</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        6.45,
+        10.35,
+        "Tahmin et:<br><b>3.000 TL neye eşit?</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        19.4,
+        21.75,
+        "Hep \"hak ettim\" diyen<br>arkadaşına <b>gönder</b>",
+        1090,
+        {
+          "size": 80,
+          "pulse": true
+        }
+      ],
+      [
+        21.75,
+        22.22,
+        "Her etiketin arkasında<br><b>gizli bir fiyat var</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "oppTag",
+        0,
+        {
+          "flips": [
+            [
+              1.7,
+              "<div style='font-size:46px;font-weight:800;color:#8a7d72;letter-spacing:.06em;margin-top:40px'>GERÇEK FİYATI</div><div class='it' style='font-size:260px;line-height:.9;color:#C0392B'>?</div>"
+            ],
+            [
+              10.4,
+              "<div style='margin-top:30px'>{TRAY}</div><div class='it' style='font-size:130px;line-height:1;margin-top:10px'><span class='cnt' data-to='15'>15</span> öğün</div><div style='font-size:46px;font-weight:700;color:#6e5f55'>yemek · 200 TL'den</div>",
+              "#FFF3E6",
+              15
+            ],
+            [
+              11.85,
+              "<div style='margin-top:30px'>{CUP}</div><div class='it' style='font-size:130px;line-height:1;margin-top:14px'><span class='cnt' data-to='16'>16</span> kahve</div><div style='font-size:46px;font-weight:700;color:#6e5f55'>180 TL'den</div>",
+              "#F3ECE4",
+              16
+            ],
+            [
+              13.0,
+              "<div style='margin-top:30px'>{COIN}</div><div class='it' style='font-size:120px;line-height:1;margin-top:14px;color:#2F8F5A'><span class='cnt' data-to='3000'>3.000</span> TL</div><div style='font-size:52px;font-weight:800;color:#2F8F5A'>birikim</div>",
+              "#E9F6EE",
+              3000
+            ]
+          ],
+          "countdown": [
+            8.9,
+            0.5
+          ],
+          "bilge": [
+            6.4
+          ],
+          "pamuk": [
+            [
+              1.7,
+              "shock"
+            ],
+            [
+              3.3,
+              "dumb"
+            ],
+            [
+              6.5,
+              "think"
+            ],
+            [
+              10.4,
+              "hit"
+            ],
+            [
+              11.85,
+              "hit"
+            ],
+            [
+              13.0,
+              "faint"
+            ]
+          ]
+        }
+      ],
+      [
+        "lesson",
+        15.0,
+        {
+          "a": 0.2,
+          "strike": 1.6,
+          "b": 2.6
+        }
+      ],
+      [
+        "oppTag",
+        21.75,
+        {
+          "wdur": 0.25
+        }
+      ]
+    ],
+    "voiceTempo": 1.12,
+    "voiceFiles": [
+      [
+        0.1,
+        "assets/voice/firsat/v1.mp3"
+      ],
+      [
+        3.35,
+        "assets/voice/firsat/v2.mp3"
+      ],
+      [
+        6.45,
+        "assets/voice/firsat/v3.mp3"
+      ],
+      [
+        10.45,
+        "assets/voice/firsat/v4.mp3"
+      ],
+      [
+        11.9,
+        "assets/voice/firsat/v5.mp3"
+      ],
+      [
+        13.05,
+        "assets/voice/firsat/v6.mp3"
+      ],
+      [
+        15.1,
+        "assets/voice/firsat/v7.mp3"
+      ],
+      [
+        19.5,
+        "assets/voice/firsat/v8.mp3"
+      ]
+    ],
+    "captions": [
+      [
+        0.13,
+        1.98,
+        "Her fiyat etiketinin arkasında",
+        1330,
+        [
+          0.16,
+          0.4,
+          0.64,
+          1.14
+        ]
+      ],
+      [
+        1.99,
+        3.4,
+        "gizli bir etiket var.",
+        1330,
+        [
+          2.02,
+          2.36,
+          2.52,
+          2.92
+        ]
+      ],
+      [
+        3.41,
+        5.06,
+        "Adı fırsat maliyeti:",
+        1330,
+        [
+          3.44,
+          3.82,
+          4.26
+        ]
+      ],
+      [
+        5.07,
+        6.46,
+        "yani seçmediğin şey.",
+        1330,
+        [
+          5.1,
+          5.62,
+          6.22
+        ]
+      ],
+      [
+        6.47,
+        7.36,
+        "Tahmin et:",
+        1330,
+        [
+          6.5,
+          6.88
+        ]
+      ],
+      [
+        7.37,
+        8.28,
+        "bu kulaklık sana",
+        1330,
+        [
+          7.4,
+          7.52,
+          7.96
+        ]
+      ],
+      [
+        8.29,
+        10.04,
+        "aslında neye mal oluyor?",
+        1330,
+        [
+          8.32,
+          8.82,
+          9.08,
+          9.32
+        ]
+      ],
+      [
+        10.51,
+        11.94,
+        "On beş öğün yemek,",
+        1330,
+        [
+          10.54,
+          10.76,
+          11.02,
+          11.26
+        ]
+      ],
+      [
+        11.95,
+        13.1,
+        "on altı kahve",
+        1330,
+        [
+          11.98,
+          12.16,
+          12.44
+        ]
+      ],
+      [
+        13.11,
+        13.6,
+        "ya da",
+        1330,
+        [
+          13.14,
+          13.28
+        ]
+      ],
+      [
+        13.61,
+        15.0,
+        "üç bin lira birikim.",
+        1330,
+        [
+          13.64,
+          13.84,
+          13.98,
+          14.22
+        ]
+      ],
+      [
+        15.13,
+        16.12,
+        "Bir dahakine",
+        1330,
+        [
+          15.16,
+          15.34
+        ]
+      ],
+      [
+        16.13,
+        17.58,
+        "\"buna değer mi\" deme.",
+        1330,
+        [
+          16.16,
+          16.44,
+          16.76,
+          16.92
+        ]
+      ],
+      [
+        17.59,
+        18.3,
+        "\"Bunun yerine",
+        1330,
+        [
+          17.62,
+          17.92
+        ]
+      ],
+      [
+        18.31,
+        19.49,
+        "ne alırdım\" de.",
+        1330,
+        [
+          18.34,
+          18.52,
+          19.24
+        ]
+      ]
+    ],
+    "captionPixel": true
+  },
+  "firsat-maliyeti-kapak": {
+    "title": "Kapak: fırsat maliyeti",
+    "end": 1.0,
+    "boxes": [
+      [
+        0,
+        1,
+        "Bu kulaklık<br><b>3.000 TL değil</b>",
+        300,
+        {
+          "size": 110
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "oppTag",
+        0,
+        {
+          "flips": [
+            [
+              -1,
+              "<div style='font-size:46px;font-weight:800;color:#8a7d72;letter-spacing:.06em;margin-top:40px'>GERÇEK FİYATI</div><div class='it' style='font-size:260px;line-height:.9;color:#C0392B'>?</div>"
+            ]
+          ],
+          "pamuk": [
+            [
+              -1,
+              "shock"
+            ]
+          ]
+        }
+      ]
+    ]
+  },
+  "tuzak-secenek": {
+    "title": "Kavram: tuzak seçenek (sesli)",
+    "end": 19.25,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.5,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        19.25,
+        "lofi"
+      ]
+    ],
+    "captionPixel": true,
+    "captionY": 1300,
+    "boxes": [
+      [
+        0,
+        1.85,
+        "Sen hangisini<br><b>alırdın?</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        8.6,
+        11.55,
+        "Orta boy<br><b>satılmak için değil</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        11.6,
+        13.3,
+        "Buna<br><b>tuzak seçenek</b> denir",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        16.3,
+        18.7,
+        "Sen hangisini alıyorsun?<br><b>Yorumlara yaz</b>",
+        1060,
+        {
+          "size": 80,
+          "pulse": true
+        }
+      ],
+      [
+        16.3,
+        18.7,
+        "<img src='assets/icon.png' style='height:1.1em;vertical-align:-.25em;border-radius:.25em'> Cep Defteri · <b>@cep_defteri</b>",
+        1290,
+        {
+          "size": 50
+        }
+      ],
+      [
+        18.95,
+        19.25,
+        "Sen hangisini<br><b>alırdın?</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "menuBoard",
+        0,
+        {
+          "prices": [
+            90,
+            135,
+            145
+          ],
+          "say": "Sadece +10 TL!",
+          "floor": 1930,
+          "pick": 1.85,
+          "hide": 5.0,
+          "gap": 5.35,
+          "trap": 8.6,
+          "bilge": [
+            8.6
+          ],
+          "fistik": [
+            [
+              0.9,
+              "think"
+            ],
+            [
+              1.85,
+              "pick"
+            ],
+            [
+              5.0,
+              "shock"
+            ],
+            [
+              8.6,
+              "dumb"
+            ]
+          ]
+        }
+      ],
+      [
+        "lesson",
+        13.3,
+        {
+          "who": "fistik",
+          "outfit": null,
+          "floor": 1930,
+          "q1": "Büyük sadece<br>10 TL fazla!",
+          "q1Size": 80,
+          "q2": "Ortadaki olmasa<br>ne alırdım?",
+          "q2From": 1.4,
+          "a": 0.15,
+          "strike": 0.6,
+          "b": 1.1,
+          "extra": "<div style='display:inline-block;background:#2F4A3C;border:14px solid #8B5A2B;border-radius:22px;padding:40px 16px 14px'><span style='display:inline-block;position:relative;margin:0 18px;text-align:center'><span style='display:block;font-size:36px;font-weight:800;color:#F3EEE2'>Küçük</span><span class='it' style='font-size:72px;color:#FFD25A'>90</span></span><span style='display:inline-block;position:relative;margin:0 18px;text-align:center'><span class='it' style='position:absolute;left:-10px;right:-10px;top:-44px;background:#E8322A;color:#fff;font-size:44px;border-radius:10px;transform:rotate(-8deg)'>TUZAK</span><span style='display:block;font-size:36px;font-weight:800;color:#F3EEE2'>Orta</span><span class='it' style='font-size:72px;color:#8fa79a'>135</span></span><span style='display:inline-block;position:relative;margin:0 18px;text-align:center'><span style='display:block;font-size:36px;font-weight:800;color:#F3EEE2'>Büyük</span><span class='it' style='font-size:72px;color:#FFD25A'>145</span></span></div>",
+          "extraY": 1070,
+          "extraAt": 1.5,
+          "extraUntil": 2.95
+        }
+      ],
+      [
+        "menuBoard",
+        18.7,
+        {
+          "wdur": 0.25,
+          "prices": [
+            90,
+            135,
+            145
+          ],
+          "floor": 1930
+        }
+      ]
+    ],
+    "voiceTempo": 1.15,
+    "voiceFiles": [
+      [
+        0.1,
+        "assets/voice/tuzak/a3.mp3",
+        "Sen olsan hangisini alırdın?"
+      ],
+      [
+        1.9,
+        "assets/voice/tuzak/a4o.mp3",
+        "Büyük, ortadan sadece on lira fazla!"
+      ],
+      [
+        5.05,
+        "assets/voice/tuzak/a5n.mp3",
+        "Ama orta olmasa? Büyük, küçükten elli beş lira pahalı.",
+        1.3
+      ],
+      [
+        8.65,
+        "assets/voice/tuzak/a1.mp3",
+        "Kafedeki orta boy kahve, satılmak için orada değil."
+      ],
+      [
+        11.6,
+        "assets/voice/tuzak/a6b.mp3",
+        "Buna tuzak seçenek denir!"
+      ],
+      [
+        13.35,
+        "assets/voice/tuzak/a7n.mp3",
+        "Kendine sor: ortadaki olmasa ne alırdım?"
+      ],
+      [
+        16.3,
+        "assets/voice/tuzak/a9.mp3"
+      ]
+    ],
+    "captionMaxWords": 3,
+    "captionUntil": 16.25
+  },
+  "indirim-yanilgisi": {
+    "title": "Kavram: indirim yanılgısı (sesli)",
+    "end": 18.15,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.5,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        18.15,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ]
+    ],
+    "captionPixel": true,
+    "captionY": 1255,
+    "boxes": [
+      [
+        0,
+        2.6,
+        "Yarı fiyata aldın.<br><b>Kaç lira kazandın?</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        4.7,
+        7.5,
+        "Tahmin et:<br><b>cüzdanda ne değişti?</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        8.85,
+        11.9,
+        "Almasaydın<br><b>cüzdanda kalırdı</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        15.1,
+        17.6,
+        "Sepetinde şu an ne var?<br><b>Yorumlara yaz</b>",
+        1060,
+        {
+          "size": 80,
+          "pulse": true
+        }
+      ],
+      [
+        15.1,
+        17.6,
+        "<img src='assets/icon.png' style='height:1.1em;vertical-align:-.25em;border-radius:.25em'> Cep Defteri · <b>@cep_defteri</b>",
+        1290,
+        {
+          "size": 50
+        }
+      ],
+      [
+        17.85,
+        18.15,
+        "Yarı fiyata aldın.<br><b>Kaç lira kazandın?</b>",
+        270,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "saleTag",
+        0,
+        {
+          "sale": 0.5,
+          "brag": 2.7,
+          "wallet": 4.8,
+          "reveal": 7.5,
+          "keep": 8.85,
+          "floor": 1930,
+          "bragX": 800,
+          "thinkX": "44px",
+          "thinkY": "1400px",
+          "thinkS": 54
+        }
+      ],
+      [
+        "lesson",
+        11.9,
+        {
+          "who": "pamuk",
+          "outfit": "winter",
+          "floor": 1930,
+          "q1": "1.000 TL<br>kazandım!",
+          "q1Size": 80,
+          "q2": "İndirim olmasa da<br>alır mıydım?",
+          "q2From": 1.4,
+          "a": 0.2,
+          "b": 0.9,
+          "strike": 2.6
+        }
+      ],
+      [
+        "saleTag",
+        17.6,
+        {
+          "wdur": 0.25,
+          "floor": 1930
+        }
+      ]
+    ],
+    "voiceTempo": 1.15,
+    "voiceFiles": [
+      [
+        0.1,
+        "assets/voice/indirim/b1c.mp3",
+        "Yarı fiyata mont aldın. Kaç lira kazandın?"
+      ],
+      [
+        2.6,
+        "assets/voice/indirim/b2n.mp3",
+        "Pamuk, bin lira kazandığını sanıyor."
+      ],
+      [
+        4.85,
+        "assets/voice/indirim/b3.mp3",
+        "Tahmin et: Pamuk'un cüzdanında ne değişti?"
+      ],
+      [
+        7.55,
+        "assets/voice/indirim/b4.mp3",
+        "Eksi bin lira."
+      ],
+      [
+        8.85,
+        "assets/voice/indirim/b5n.mp3",
+        "Almasaydın, o bin lira hâlâ cüzdanında olurdu."
+      ],
+      [
+        12.0,
+        "assets/voice/indirim/b6b.mp3",
+        "Tek soru sor: indirim olmasa da alır mıydım?"
+      ],
+      [
+        15.1,
+        "assets/voice/indirim/b7b.mp3"
+      ]
+    ],
+    "captionMaxWords": 3,
+    "captionUntil": 15.05
+  },
+  "indirim-yanilgisi-kapak": {
+    "title": "Kapak: indirim yanılgısı",
+    "end": 1.0,
+    "boxes": [
+      [
+        0,
+        1,
+        "Yarı fiyata aldın.<br><b>Kaç lira kazandın?</b>",
+        250,
+        {
+          "size": 104
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "saleTag",
+        0,
+        {
+          "sale": -1,
+          "brag": -1,
+          "floor": 1930,
+          "bragX": 800,
+          "thinkX": "44px",
+          "thinkY": "1400px",
+          "thinkS": 54
+        }
+      ]
+    ]
+  },
+  "batik-maliyet": {
+    "title": "Kavram: batık maliyet (sesli)",
+    "end": 17.85,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.5,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        17.85,
+        "lofi"
+      ]
+    ],
+    "captionPixel": true,
+    "captionY": 1052,
+    "captionMaxWords": 3,
+    "captionUntil": 15.15,
+    "boxes": [
+      [
+        0,
+        4.55,
+        "Film berbat.<br><b>Kalır mısın?</b>",
+        200,
+        {
+          "size": 100,
+          "pulse": true
+        }
+      ],
+      [
+        4.6,
+        6.5,
+        "<b>2 saat sonra...</b>",
+        200,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        6.5,
+        10.45,
+        "Kalmak<br><b>neye mal oldu?</b>",
+        200,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        10.5,
+        12.7,
+        "Geri gelmeyen para:<br><b>batık maliyet</b>",
+        200,
+        {
+          "size": 86,
+          "pulse": true
+        }
+      ],
+      [
+        12.75,
+        15.15,
+        "Bundan sonrası<br><b>değer mi?</b>",
+        200,
+        {
+          "size": 96,
+          "pulse": true
+        }
+      ],
+      [
+        15.2,
+        17.3,
+        "En son neye<br><b>“paraya yazık”</b><br>diye katlandın?",
+        470,
+        {
+          "size": 78,
+          "pulse": true
+        }
+      ],
+      [
+        15.2,
+        17.3,
+        "<b>Yorumlara yaz</b>",
+        880,
+        {
+          "size": 60,
+          "pulse": true
+        }
+      ],
+      [
+        15.2,
+        17.3,
+        "<img src='assets/icon.png' style='height:1.1em;vertical-align:-.25em;border-radius:.25em'> Cep Defteri · <b>@cep_defteri</b>",
+        968,
+        {
+          "size": 44
+        }
+      ],
+      [
+        17.5,
+        17.85,
+        "Film berbat.<br><b>Kalır mısın?</b>",
+        200,
+        {
+          "size": 100,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "cinema",
+        0,
+        {
+          "price": 300,
+          "floor": 1700,
+          "ticket": 0.1,
+          "yawn": 0.5,
+          "leave1": 1.55,
+          "pick": 3.15,
+          "sayAt": 3.6,
+          "sleep": 4.6,
+          "end": 6.3,
+          "cmp": 6.5,
+          "cmp1": 6.6,
+          "same": 8.0,
+          "cmp2": 9.36,
+          "cmp3": 9.9,
+          "sink": 10.5,
+          "rule": 12.75,
+          "choose2": 15.0,
+          "leave": 15.25,
+          "diken": [
+            [
+              3.15,
+              "clutch"
+            ],
+            [
+              4.6,
+              "sleep"
+            ],
+            [
+              6.5,
+              "shock"
+            ],
+            [
+              9.36,
+              "hit"
+            ],
+            [
+              10.5,
+              "watch"
+            ],
+            [
+              12.75,
+              "think"
+            ]
+          ]
+        }
+      ],
+      [
+        "cinema",
+        17.3,
+        {
+          "wdur": 0.25,
+          "price": 300,
+          "floor": 1700
+        }
+      ]
+    ],
+    "voiceTempo": 1.2,
+    "voiceFilter": "brand",
+    "voiceFiles": [
+      [
+        0.1,
+        "assets/voice/batik/e1.mp3",
+        "Bilete üç yüz lira verdin. Film berbat. Kalır mısın?"
+      ],
+      [
+        6.55,
+        "assets/voice/batik/e3.mp3",
+        "Kalsa da çıksa da, üç yüz lira gitti!"
+      ],
+      [
+        8.45,
+        "assets/voice/batik/e4.mp3",
+        "Kalırsan, iki saatin de gider."
+      ],
+      [
+        10.55,
+        "assets/voice/batik/e5.mp3",
+        "Geri gelmeyen paraya, batık maliyet denir!"
+      ],
+      [
+        12.8,
+        "assets/voice/batik/e6.mp3",
+        "Kendine sor: Bundan sonrası buna değer mi?"
+      ],
+      [
+        15.25,
+        "assets/voice/batik/e7.mp3"
+      ]
+    ]
+  },
+  "batik-maliyet-kapak": {
+    "title": "Kapak: batık maliyet",
+    "end": 1.0,
+    "boxes": [
+      [
+        0,
+        1,
+        "Film berbat.<br><b>Kalır mısın?</b>",
+        272,
+        {
+          "size": 108
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "cinema",
+        0,
+        {
+          "price": 300,
+          "floor": 1700,
+          "tkY": 566
+        }
+      ]
+    ]
+  },
+  "odeme-acisi": {
+    "title": "Kavram: ödeme acısı (sesli)",
+    "end": 19.15,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.45,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        19.15,
+        "quiz"
+      ]
+    ],
+    "captionPixel": true,
+    "captionY": 1062,
+    "captionMaxWords": 3,
+    "captionUntil": 16.35,
+    "boxes": [
+      [
+        0,
+        3.7,
+        "Aynı 450 TL.<br><b>Hangisi acıtır?</b>",
+        296,
+        {
+          "size": 92,
+          "pulse": true
+        }
+      ],
+      [
+        3.7,
+        7.0,
+        "Nakit acıtır,<br><b>kart acıtmaz</b>",
+        296,
+        {
+          "size": 82,
+          "pulse": true
+        }
+      ],
+      [
+        7.05,
+        9.2,
+        "Acı yok,<br><b>fren yok</b>",
+        296,
+        {
+          "size": 82,
+          "pulse": true
+        }
+      ],
+      [
+        9.25,
+        11.65,
+        "Ay boyu bip, bip, bip…<br><b>Ay sonu: ekstre şoku</b>",
+        296,
+        {
+          "size": 74,
+          "pulse": true
+        }
+      ],
+      [
+        11.7,
+        13.5,
+        "Adı:<br><b>ödeme acısı</b>",
+        296,
+        {
+          "size": 88,
+          "pulse": true
+        }
+      ],
+      [
+        13.55,
+        14.6,
+        "Kartla ödedin mi?<br><b>Hemen yaz.</b>",
+        296,
+        {
+          "size": 82,
+          "pulse": true
+        }
+      ],
+      [
+        14.65,
+        16.35,
+        "Yazınca<br><b>acı geri gelir</b>",
+        296,
+        {
+          "size": 82,
+          "pulse": true
+        }
+      ],
+      [
+        16.4,
+        18.6,
+        "Kartı elinden düşmeyen<br><b>arkadaşına gönder</b>",
+        296,
+        {
+          "size": 76,
+          "pulse": true
+        }
+      ],
+      [
+        18.85,
+        19.15,
+        "Aynı 450 TL.<br><b>Hangisi acıtır?</b>",
+        296,
+        {
+          "size": 92,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "payPain",
+        0,
+        {
+          "pay": 3.8,
+          "bip": 6.8,
+          "extras": 7.6,
+          "ekS": 9.6,
+          "ekR": 10.5,
+          "name": 11.7,
+          "write": 13.1,
+          "feel": 15.65,
+          "cta": 16.4,
+          "left": [
+            [
+              3.75,
+              "pay"
+            ],
+            [
+              5.5,
+              "sad"
+            ],
+            [
+              16.4,
+              "happy"
+            ]
+          ],
+          "right": [
+            [
+              6.45,
+              "tap"
+            ],
+            [
+              7.6,
+              "greedy"
+            ],
+            [
+              10.5,
+              "shock"
+            ],
+            [
+              11.7,
+              "sad"
+            ],
+            [
+              13.1,
+              "think"
+            ],
+            [
+              15.65,
+              "nod"
+            ],
+            [
+              16.4,
+              "happy"
+            ]
+          ],
+          "check": 14.68
+        }
+      ],
+      [
+        "payPain",
+        18.6,
+        {
+          "wdur": 0.25
+        }
+      ]
+    ],
+    "voiceTempo": 1.2,
+    "voiceFilter": "brand",
+    "voiceFiles": [
+      [
+        0.1,
+        "assets/voice/odeme/o1.mp3",
+        "Aynı dört yüz elli lira. Hangisi daha çok acıtır?"
+      ],
+      [
+        3.7,
+        "assets/voice/odeme/o2.mp3",
+        "Nakitte her banknot acıtır. Kartta sadece bip!"
+      ],
+      [
+        7.05,
+        "assets/voice/odeme/o3.mp3",
+        "Acı yoksa fren de yok: sepet büyür!"
+      ],
+      [
+        9.25,
+        "assets/voice/odeme/o4.mp3",
+        "Ay sonu: ekstre dört bin üç yüz lira?!"
+      ],
+      [
+        11.7,
+        "assets/voice/odeme/o5.mp3",
+        "Buna ödeme acısı denir."
+      ],
+      [
+        13.1,
+        "assets/voice/odeme/o6.mp3",
+        "Kartla ödediysen hemen yaz. Yazınca, acı geri gelir."
+      ],
+      [
+        16.4,
+        "assets/voice/odeme/o7m.mp3"
+      ]
+    ]
+  },
+  "bulunmus-para": {
+    "title": "Kavram: bulunmuş para (sesli)",
+    "end": 18.2,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.45,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        18.2,
+        "chip"
+      ]
+    ],
+    "captionPixel": true,
+    "captionY": 960,
+    "captionMaxWords": 3,
+    "captionUntil": 15.35,
+    "boxes": [
+      [
+        0,
+        2.0,
+        "Bayram harçlığı<br><b>3 günde biter</b>",
+        296,
+        {
+          "size": 92,
+          "pulse": true
+        }
+      ],
+      [
+        2.0,
+        4.6,
+        "Pizza, oyun, kulaklık:<br><b>3 günde sıfır</b>",
+        296,
+        {
+          "size": 82,
+          "pulse": true
+        }
+      ],
+      [
+        4.65,
+        8.4,
+        "Çalışarak kazansaydın<br><b>3 günde harcar mıydın?</b>",
+        296,
+        {
+          "size": 76,
+          "pulse": true
+        }
+      ],
+      [
+        8.45,
+        10.35,
+        "Para aynı para.<br><b>Etiketi yok.</b>",
+        296,
+        {
+          "size": 82,
+          "pulse": true
+        }
+      ],
+      [
+        10.4,
+        12.1,
+        "Bulunmuş para etkisi:<br><b>kolay gelen, kolay gider</b>",
+        296,
+        {
+          "size": 74,
+          "pulse": true
+        }
+      ],
+      [
+        12.15,
+        15.35,
+        "Çalışarak kazansaydım<br><b>böyle harcar mıydım?</b>",
+        296,
+        {
+          "size": 78,
+          "pulse": true
+        }
+      ],
+      [
+        15.4,
+        17.65,
+        "Harçlığı 3 günde biten<br><b>arkadaşına gönder</b>",
+        296,
+        {
+          "size": 76,
+          "pulse": true
+        }
+      ],
+      [
+        17.9,
+        18.2,
+        "Bayram harçlığı<br><b>3 günde biter</b>",
+        296,
+        {
+          "size": 92,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "harclik",
+        0,
+        {
+          "day1": 2.0,
+          "day2": 2.45,
+          "day3": 2.9,
+          "zero": 4.15,
+          "work": 4.65,
+          "labels": 7.65,
+          "peel": 9.55,
+          "stamp": 9.95,
+          "name": 10.4,
+          "think": 12.15,
+          "cta": 15.4,
+          "karamel": [
+            [
+              1.9,
+              "spend"
+            ],
+            [
+              4.15,
+              "broke"
+            ],
+            [
+              4.65,
+              "work"
+            ],
+            [
+              7.65,
+              "think"
+            ],
+            [
+              8.45,
+              "shrug"
+            ],
+            [
+              10.4,
+              "aha"
+            ],
+            [
+              12.15,
+              "think"
+            ],
+            [
+              15.4,
+              "ok"
+            ]
+          ],
+          "clock": 12.86,
+          "ask": 14.25,
+          "same": 8.45
+        }
+      ],
+      [
+        "harclik",
+        17.65,
+        {
+          "wdur": 0.25
+        }
+      ]
+    ],
+    "voiceTempo": 1.2,
+    "voiceFilter": "brand",
+    "voiceFiles": [
+      [
+        0.1,
+        "assets/voice/bulunmus/p1.mp3",
+        "Bayram harçlığı neden üç günde biter?"
+      ],
+      [
+        2.0,
+        "assets/voice/bulunmus/p2.mp3",
+        "Pizza, oyun, kulaklık... Üç günde sıfır!"
+      ],
+      [
+        4.65,
+        "assets/voice/bulunmus/p3m.mp3",
+        "Bu parayı kafede çalışarak kazansaydın, üç günde harcar mıydın?"
+      ],
+      [
+        8.45,
+        "assets/voice/bulunmus/p4.mp3",
+        "Ama para aynı para. Etiketi yok!"
+      ],
+      [
+        10.4,
+        "assets/voice/bulunmus/p5b.mp3",
+        "Buna bulunmuş para etkisi denir."
+      ],
+      [
+        12.15,
+        "assets/voice/bulunmus/p6b.mp3",
+        "Kendine sor: çalışarak kazansaydım, böyle harcar mıydım?"
+      ],
+      [
+        15.4,
+        "assets/voice/bulunmus/p7.mp3"
+      ]
+    ]
+  }
+}

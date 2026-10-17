@@ -1,0 +1,6 @@
+out/*.wav
+out/still-*.png
+out/voice-el/
+out/review/
+__pycache__/
+reels_work/
