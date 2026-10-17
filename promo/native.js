@@ -135,10 +135,10 @@ function defineNative() {
 
   /* ── Grup sohbeti ── */
   SCENES.chat = (t0, o = {}) => {
-    const s = scene(t0, '#E6DDD1');
+    const s = scene(t0, '#E6DDD1', undefined, o.wdur ?? 0.5);
     pattern(s.root, 'rgba(0,0,0,.05)');
     const P = { left: 36, right: 36, top: o.top ?? 430, bottom: 1880 };
-    const panel = el('div', 'abs', s.root, { left: px(P.left), right: px(P.right), top: px(P.top), bottom: '300px', borderRadius: '52px', background: '#F4EEE6', overflow: 'hidden', boxShadow: '0 30px 80px -20px rgba(0,0,0,.35)' });
+    const panel = el('div', 'abs', s.root, { left: px(P.left), right: px(P.right), top: px(P.top), bottom: px(o.bottom ?? 300), borderRadius: '52px', background: '#F4EEE6', overflow: 'hidden', boxShadow: '0 30px 80px -20px rgba(0,0,0,.35)' });
     const head = el('div', 'abs', panel, { left: 0, right: 0, top: 0, height: '150px', background: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '22px', padding: '0 36px', borderBottom: '2px solid #E8DFD3', zIndex: 2 });
     const people = o.people || {};
     const av = el('div', '', head, { display: 'flex' });
@@ -161,7 +161,7 @@ function defineNative() {
     const typing = o.typing ? (() => {
       const row = el('div', '', list, { display: 'flex', justifyContent: o.typing[2] === 'me' ? 'flex-end' : 'flex-start', flex: 'none' });
       const b = el('div', '', row, { padding: '22px 30px', borderRadius: '36px', background: o.typing[2] === 'me' ? '#C9774F' : '#FFFFFF', display: 'flex', gap: '12px' });
-      const dots = [0, 1, 2].map(() => el('div', '', b, { width: '18px', height: '18px', borderRadius: '50%', background: '#fff' }));
+      const dots = [0, 1, 2].map(() => el('div', '', b, { width: '18px', height: '18px', borderRadius: '50%', background: o.typing[2] === 'me' ? '#fff' : '#B9AEA3' }));  // karşı tarafın balonu beyaz: noktalar gri
       return { row, dots, a: o.typing[0], b: o.typing[1] };
     })() : null;
     s.update = (lt) => {

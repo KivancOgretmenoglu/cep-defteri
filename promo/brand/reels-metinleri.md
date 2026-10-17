@@ -367,3 +367,22 @@ Harçlığın en hızlı neye gitti? Yorumlara yaz 👇
 
 #bulunmuşpara #bayramharçlığı #öğrencibütçesi #davranışsalekonomi #paraipuçları
 ```
+
+## 18 · odeme-acisi-sohbet (kavram: ödeme acısı, mesajlaşma formatı, seslendirme: Buğra, döngülü, 18,6 sn)
+16 numaranın yerine geçen yeni kurgu; ikisi birlikte yayınlanmaz.
+
+**Açıklama:**
+```
+Kartla ödedin, hiç acımadı. Sonra ekstre geldi: 4.300 TL 😭
+
+Ödeme acısı: parayı öderken hissettiğin o küçük "ah". Nakitte her banknotta hissedersin; kredi kartında o an acımaz, hesap ay sonuna kalır. Banka kartında para anında düşer, bu yüzden etki daha zayıftır.
+Bu bir eğilim, herkeste aynı güçte değil. Araştırma: MIT'deki bir deneyde kredi kartıyla ödeyecek olanlar aynı maç biletine nakitle ödeyeceklerden çok daha yüksek fiyat teklif etti (Prelec & Simester, 2001).
+Tutarlar örnek.
+
+Çözüm: kartla ödeyince hemen yaz, toplamı ay sonundan önce gör.
+
+Senin bu ayki ekstren kaç geldi? Yorumlara yaz 👇
+📌 Kaydet, ekstre gelmeden önce aç.
+
+#ödemeacısı #kredikartı #öğrencibütçesi #davranışsalekonomi #paraipuçları
+```

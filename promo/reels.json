@@ -3660,5 +3660,241 @@
         "assets/voice/bulunmus/p7.mp3"
       ]
     ]
+  },
+  "odeme-acisi-sohbet": {
+    "title": "Kavram: ödeme acısı (mesajlaşma, sesli)",
+    "end": 18.6,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.7,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        18.6,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        2.2,
+        "Kartla ödedim,<br><b>hiç acımamıştı</b>",
+        330,
+        {
+          "size": 92,
+          "pulse": true
+        }
+      ],
+      [
+        2.25,
+        10.65,
+        "4.300 TL<br><b>nereye gitti?</b>",
+        330,
+        {
+          "size": 88,
+          "pulse": true
+        }
+      ],
+      [
+        10.7,
+        15.85,
+        "Adı:<br><b>ödeme acısı</b>",
+        330,
+        {
+          "size": 88,
+          "pulse": true
+        }
+      ],
+      [
+        15.9,
+        18.3,
+        "Ekstresine bakmaya korkan<br><b>arkadaşına gönder</b>",
+        330,
+        {
+          "size": 66,
+          "pulse": true
+        }
+      ],
+      [
+        15.9,
+        18.3,
+        "<img src='assets/icon.png' style='height:1.1em;vertical-align:-.25em;border-radius:.25em'> Cep Defteri · <b>@cep_defteri</b>",
+        1465,
+        {
+          "size": 52
+        }
+      ],
+      [
+        18.35,
+        18.6,
+        "Kartla ödedim,<br><b>hiç acımamıştı</b>",
+        330,
+        {
+          "size": 92,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "chat",
+        0,
+        {
+          "title": "Bilge",
+          "subtitle": "çevrimiçi",
+          "top": 600,
+          "people": {
+            "bilge": {
+              "who": "bilge",
+              "name": "Bilge",
+              "color": "#4351A3",
+              "bg": "#DEE2F6"
+            }
+          },
+          "messages": [
+            [
+              -0.3,
+              "me",
+              "<span style='font-size:66px'>Ekstre geldi 😭</span>"
+            ],
+            [
+              -0.25,
+              "me",
+              "<span class='it' style='font-size:170px;line-height:1;color:#fff'>4.300 TL</span>"
+            ],
+            [
+              2.2,
+              "bilge",
+              "Ne aldın ki? 👀"
+            ],
+            [
+              2.85,
+              "me",
+              "Hatırlamıyorum bile 🤷"
+            ],
+            [
+              4.0,
+              "bilge",
+              "<div style='font-size:36px;font-weight:800;letter-spacing:.06em;color:#8a7d72'>EKSTRE · EKİM <span style='font-weight:600'>(örnek)</span></div><div style='display:flex;justify-content:space-between;gap:30px;white-space:nowrap'><span>Market</span><b style='color:#2A1E1A'>610 TL</b></div><div style='display:flex;justify-content:space-between;gap:30px;white-space:nowrap'><span>Yemek siparişi</span><b style='color:#2A1E1A'>1.150 TL</b></div><div style='display:flex;justify-content:space-between;gap:30px;white-space:nowrap'><span>Kahve, abonelik…</span><b style='color:#2A1E1A'>2.540 TL</b></div><div style='border-top:3px dashed #cbbfb2;margin:8px 0 2px'></div><div style='display:flex;justify-content:space-between;gap:30px;white-space:nowrap'><span>Toplam</span><b style='color:#C0392B'>4.300 TL</b></div>"
+            ],
+            [
+              5.6,
+              "bilge",
+              "Hepsi <b>“bip”</b> diye gitti 💳"
+            ],
+            [
+              6.7,
+              "bilge",
+              "Nakitte parayı verirken <b>hissedersin</b> 💸"
+            ],
+            [
+              8.6,
+              "bilge",
+              "<b>Kredi kartında</b> o acı ay sonuna kalır 📄"
+            ],
+            [
+              10.7,
+              "bilge",
+              "<span class='it' style='font-size:80px;line-height:1.05;color:#C0392B'>ÖDEME ACISI</span><div style='font-size:40px;color:#6e5f55;margin-top:6px'>parayı öderken hissettiğin “ah”</div>"
+            ],
+            [
+              11.9,
+              "me",
+              "Peki ne yapayım? 😩"
+            ],
+            [
+              12.2,
+              "bilge",
+              "Kartla ödeyince <b>hemen yaz</b>. Toplamı ay sonundan <b>önce</b> gör."
+            ],
+            [
+              14.2,
+              "me",
+              "<div style='font-size:34px;font-weight:800;opacity:.9;white-space:nowrap'>📒 CEP DEFTERİ · bu ay şimdiye kadar</div><span class='it' style='font-size:76px;line-height:1.1'>1.240 TL</span>"
+            ],
+            [
+              15.9,
+              "bilge",
+              "Ekstresine bakmaya korkan arkadaşına <b>gönder</b> 👇"
+            ]
+          ],
+          "typing": [
+            3.3,
+            4.0,
+            "bilge"
+          ],
+          "font": 52,
+          "hits": [
+            0.05,
+            10.7
+          ],
+          "bottom": 480
+        }
+      ],
+      [
+        "chat",
+        18.3,
+        {
+          "title": "Bilge",
+          "subtitle": "çevrimiçi",
+          "top": 600,
+          "people": {
+            "bilge": {
+              "who": "bilge",
+              "name": "Bilge",
+              "color": "#4351A3",
+              "bg": "#DEE2F6"
+            }
+          },
+          "messages": [
+            [
+              -0.3,
+              "me",
+              "<span style='font-size:66px'>Ekstre geldi 😭</span>"
+            ],
+            [
+              -0.25,
+              "me",
+              "<span class='it' style='font-size:170px;line-height:1;color:#fff'>4.300 TL</span>"
+            ]
+          ],
+          "font": 52,
+          "wdur": 0.25,
+          "bottom": 480
+        }
+      ]
+    ],
+    "voiceTempo": 1.2,
+    "voiceFilter": "brand",
+    "voiceFiles": [
+      [
+        0.1,
+        "assets/voice/sohbet/s1.mp3"
+      ],
+      [
+        4.1,
+        "assets/voice/sohbet/s3k2.mp3"
+      ],
+      [
+        6.7,
+        "assets/voice/sohbet/s4.mp3"
+      ],
+      [
+        10.7,
+        "assets/voice/sohbet/s5m.mp3"
+      ],
+      [
+        12.15,
+        "assets/voice/sohbet/s6n.mp3"
+      ],
+      [
+        15.9,
+        "assets/voice/sohbet/s7b.mp3"
+      ]
+    ]
   }
 }

@@ -25,3 +25,37 @@ Kaynaklı araştırmanın özeti (Ekim 2026). [RESMİ] = Instagram/Mosseri açı
 - Skip rate %30–40 altı iyi, %50 üstü hook zayıf demek. ([Metricool](https://metricool.com/instagram-reel-analytics/))
 - İzlenme grafiğinde düşüşün olduğu saniyeye bak; o kartı kısalt ya da hareket ekle.
 - Açıklamanın ilk satırı arama için anahtar kelimeli olsun ("Peşin mi taksit mi? Enflasyonda…").
+
+## Ödeme acısı sürecinden dersler (Ekim 2026, v1–v5)
+Beş sürüm ve dört ajan paneli sonunda öğrenilenler. Yeni her reelste uygula.
+
+**Hook**
+- İlk kare **kişisel ve okunur** olsun: bir kişinin anı + somut sonuç ("Kartla ödedim, hiç acımamıştı" + "4.300 TL"). Bulanık/bağlamsız rakam ("kimin ekstresi?") tutmadı (v5, 7/10 ajan).
+- Cevabı belli soru ("Hangisi acıtır?") ve hook'tan önceki tahmin boşluğu ilk 3 sn'yi harcar. Tahmin anı hook'tan **sonra** gelsin.
+
+**Doğruluk** (davranışsal ekonomi içeriklerinde)
+- Kavramı doğru adlandır: ödeme acısı = **ödeme anındaki** acı; ay sonu ekstre şoku ayrı şey.
+- "Kart" değil **"kredi kartı"**: banka kartında para anında düşer.
+- Nedensellik gibi okunan örnek rakamlara (450 → 610) ekranda **"örnek"** yaz. Kanıtsız iddia kurma ("yazınca acı geri gelir" yerine "toplamı önceden gör").
+- Etki bir **eğilim**; herkes için kesin sonuç gibi söyleme.
+
+**Ekran**
+- Rakam listeleri ≤ 3 satır, ≥ 46 px, aynı anda ve tam okunur; toplam tutsun.
+- Mikro yazı (etiket, "AH!", "+45") 40 px altına inmesin; okunmuyorsa hiç koyma.
+- Künye maskotların/animasyonun üstüne binmesin; tam boy karede kontrol et.
+
+**Marka ve çağrı**
+- Uygulama **kapalı testte**: link, "profilde", "indir" yazma.
+- Videoda uygulamanın faydası tek cümle olsun ("ekstre gelmeden toplamı gör"); "Cep Defteri'ne yaz" tek başına bir şey anlatmıyor.
+- "Arkadaşına gönder" çağrısı **kime ve neden** göndereceğini söylesin.
+
+**Süre**: hedef ≤ 16 sn. Aynı kare 2 sn'den uzun durmasın.
+
+**Üretim hattı**
+- `out/<ad>-voice.wav` git'te yok: `make.sh` artık önce `voice.py place` çalıştırır. Render sonrası müziksiz sürümde konuşma bölümlerinin sesini `volumedetect` ile doğrula.
+- Seslendirme satırları ElevenLabs bağlayıcısıyla (marka sesi tarifi) üretilir, `voice_check.py` UYGUN olmalı; gereksiz kısım ffmpeg ile kesilebilir.
+
+**Ajan panelleri**
+- Ajanlar videoyu izlemez: 1 sn aralıklı kareler + metin brif görür; ses, tempo ve hareket iyileşmeleri onlara pek ulaşmaz.
+- Kurallarsız paneller nazik ve şişkin puan verir (v1: 6,6, "5/10 kaydederim"). Gerçekçilik kuralları (taban oranlar: ilk 3 sn kaydırma %30–50, kaydetme %1–3; varsayılan eylem "hiçbiri") ile puanlar ~5'e iner ve küçük düzeltmeleri ayırt etmez (v4 ve v5: 5,1).
+- Panel; okunabilirlik, doğruluk ve kafa karışıklığı bulmak için iyi, viral tahmin için değil. Asıl ölçüm: **Deneme reelsi** skip rate ve izlenme grafiği.
