@@ -12,7 +12,9 @@ v2'nin hedefi: CTA/marka 5,5 → 8, mesaj netliği 6,3 → 8, süre ~17,5 sn.
 - Defterdeki "CEP DEFTERİ" etiketi 26 → 36 px; CTA boyunca "Cep Defteri · @cep_defteri" künyesi.
 - Instagram açıklaması (`promo/brand/reels-metinleri.md` #16): erteleme, eğilim notu, ekstre dökümü.
 
-Yeni seslendirme gerektirdiği için bekleyenler (ElevenLabs bu ortamdan erişilemiyor): S1 hook metni, S4'teki "Kart acıyı silmez, ay sonuna erteler" satırı, S5 tam ekran uygulama akışı, ~17,5 sn'ye kısaltma. Aşağıdaki senaryo bu tam sürümü anlatıyor.
+- Yeni seslendirme (Buğra, eleven_v4, voice_check UYGUN): hook "Aynı dört yüz elli lira. Hangisi acıtır?" (2,6 → 2,1 sn) ve "Buna ödeme acısı denir. Kart acıyı silmez, erteler!" (yeni başlık kartıyla). Süre 19,15 → 20,5 sn.
+
+Bekleyenler: S5 tam ekran uygulama akışı ve ~17,5 sn'ye kısaltma. Aşağıdaki senaryo bu tam sürümü anlatıyor.
 
 ## v1 panel özeti
 

@@ -330,7 +330,7 @@ En son neye "paraya yazık" diye katlandın? Yorumlara yaz 👇
 #batıkmaliyet #sinema #öğrencibütçesi #davranışsalekonomi #paraipuçları
 ```
 
-## 16 · odeme-acisi (kavram: ödeme acısı, seslendirme: Buğra, döngülü, 18,5 sn)
+## 16 · odeme-acisi (kavram: ödeme acısı, seslendirme: Buğra, döngülü, 20,5 sn)
 
 **Açıklama:**
 ```

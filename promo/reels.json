@@ -3200,7 +3200,7 @@
   },
   "odeme-acisi": {
     "title": "Kavram: ödeme acısı (sesli)",
-    "end": 19.15,
+    "end": 20.5,
     "loop": true,
     "handheld": true,
     "musicGain": 0.45,
@@ -3208,18 +3208,18 @@
     "musicPlan": [
       [
         0,
-        19.15,
+        20.5,
         "quiz"
       ]
     ],
     "captionPixel": true,
     "captionY": 1062,
     "captionMaxWords": 3,
-    "captionUntil": 16.35,
+    "captionUntil": 17.7,
     "boxes": [
       [
         0,
-        3.7,
+        3.16,
         "Aynı 450 TL.<br><b>Hangisi acıtır?</b>",
         296,
         {
@@ -3228,8 +3228,8 @@
         }
       ],
       [
-        3.7,
-        7.0,
+        3.16,
+        6.46,
         "Nakit hemen acıtır,<br><b>kart sonra…</b>",
         296,
         {
@@ -3238,8 +3238,8 @@
         }
       ],
       [
-        7.05,
-        9.2,
+        6.51,
+        8.66,
         "Acı yok,<br><b>fren yok</b>",
         296,
         {
@@ -3248,8 +3248,8 @@
         }
       ],
       [
-        9.25,
-        11.65,
+        8.71,
+        11.11,
         "Ay boyu bip, bip, bip…<br><b>Ay sonu: ekstre şoku</b>",
         296,
         {
@@ -3258,8 +3258,8 @@
         }
       ],
       [
-        11.7,
-        13.5,
+        11.16,
+        12.6,
         "Adı:<br><b>ödeme acısı</b>",
         296,
         {
@@ -3268,8 +3268,18 @@
         }
       ],
       [
-        13.55,
-        14.6,
+        12.65,
+        14.85,
+        "Kart acıyı silmez,<br><b>erteler!</b>",
+        296,
+        {
+          "size": 82,
+          "pulse": true
+        }
+      ],
+      [
+        14.9,
+        15.95,
         "Kartla ödedin mi?<br><b>Hemen yaz.</b>",
         296,
         {
@@ -3278,8 +3288,8 @@
         }
       ],
       [
-        14.65,
-        16.35,
+        16.0,
+        17.7,
         "Yazınca acı geri gelir,<br><b>fren de gelir</b>",
         296,
         {
@@ -3288,8 +3298,8 @@
         }
       ],
       [
-        16.4,
-        18.6,
+        17.75,
+        19.95,
         "Kartı elinden düşmeyen<br><b>arkadaşına gönder</b>",
         296,
         {
@@ -3298,8 +3308,8 @@
         }
       ],
       [
-        16.4,
-        18.6,
+        17.75,
+        19.95,
         "<img src='assets/icon.png' style='height:1.1em;vertical-align:-.25em;border-radius:.25em'> Cep Defteri · <b>@cep_defteri</b>",
         1075,
         {
@@ -3307,8 +3317,8 @@
         }
       ],
       [
-        18.85,
-        19.15,
+        20.2,
+        20.5,
         "Aynı 450 TL.<br><b>Hangisi acıtır?</b>",
         296,
         {
@@ -3322,65 +3332,65 @@
         "payPain",
         0,
         {
-          "pay": 3.8,
-          "bip": 6.8,
-          "extras": 7.6,
-          "ekS": 9.6,
-          "ekR": 10.5,
-          "name": 11.7,
-          "write": 13.1,
-          "feel": 15.65,
-          "cta": 16.4,
+          "pay": 3.26,
+          "bip": 6.26,
+          "extras": 7.06,
+          "ekS": 9.06,
+          "ekR": 9.96,
+          "name": 11.16,
+          "write": 14.45,
+          "feel": 17.0,
+          "cta": 17.75,
           "left": [
             [
-              3.75,
+              3.21,
               "pay"
             ],
             [
-              5.5,
+              4.96,
               "sad"
             ],
             [
-              16.4,
+              17.75,
               "happy"
             ]
           ],
           "right": [
             [
-              6.45,
+              5.91,
               "tap"
             ],
             [
-              7.6,
+              7.06,
               "greedy"
             ],
             [
-              10.5,
+              9.96,
               "shock"
             ],
             [
-              11.7,
+              11.16,
               "sad"
             ],
             [
-              13.1,
+              14.45,
               "think"
             ],
             [
-              15.65,
+              17.0,
               "nod"
             ],
             [
-              16.4,
+              17.75,
               "happy"
             ]
           ],
-          "check": 14.68
+          "check": 16.03
         }
       ],
       [
         "payPain",
-        18.6,
+        19.95,
         {
           "wdur": 0.25
         }
@@ -3391,36 +3401,36 @@
     "voiceFiles": [
       [
         0.1,
-        "assets/voice/odeme/o1.mp3",
-        "Aynı dört yüz elli lira. Hangisi daha çok acıtır?"
+        "assets/voice/odeme/o1v3.mp3",
+        "Aynı dört yüz elli lira. Hangisi acıtır?"
       ],
       [
-        3.7,
+        3.16,
         "assets/voice/odeme/o2.mp3",
         "Nakitte her banknot acıtır. Kartta sadece bip!"
       ],
       [
-        7.05,
+        6.51,
         "assets/voice/odeme/o3.mp3",
         "Acı yoksa fren de yok: sepet büyür!"
       ],
       [
-        9.25,
+        8.71,
         "assets/voice/odeme/o4.mp3",
         "Ay sonu: ekstre dört bin üç yüz lira?!"
       ],
       [
-        11.7,
-        "assets/voice/odeme/o5.mp3",
-        "Buna ödeme acısı denir."
+        11.16,
+        "assets/voice/odeme/o5v3.mp3",
+        "Buna ödeme acısı denir. Kart acıyı silmez, erteler!"
       ],
       [
-        13.1,
+        14.45,
         "assets/voice/odeme/o6.mp3",
         "Kartla ödediysen hemen yaz. Yazınca, acı geri gelir."
       ],
       [
-        16.4,
+        17.75,
         "assets/voice/odeme/o7m.mp3"
       ]
     ]
