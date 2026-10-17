@@ -27,7 +27,7 @@ Hedef kitle üniversite öğrencisi. Bu yüzden Zeynep, Emre ve Kaan'ın puanlar
 
 | v1 sorunu | Kim söyledi | v2'deki çözüm |
 |---|---|---|
-| Marka yalnızca 16. sn'de küçük etikette, CTA ~1 sn | 10/10 | Sabit rozet (0–17,5 sn), tam ekran ürün anı (S5), 2,5 sn'lik çift CTA (S6) |
+| Marka yalnızca 16. sn'de küçük etikette, CTA ~1 sn | 10/10 | Sabit rozet (0–17,5 sn), tam ekran ürün anı (S5), 2,5 sn'lik CTA + @cep_defteri künyesi (S6) |
 | 4.300 TL'nin nereden geldiği belli değil | 9/10 | S3'te ekstre 5 kaleme bölünüyor, toplam 4.300 TL; "dönem borcu" etiketi |
 | "Kart acıtmaz" mutlak ve sondaki "acı geri gelir" ile çelişiyor | Selin, Kaan, Ayşe, Ece | Ana fikir değişiyor: "Kart acıyı silmez, ay sonuna erteler." |
 | 17. sn'de "acı geri gelir" denirken kart kadranı kırmızıya dönmüyor | Selin (karede doğrulandı) | Kadran S4'te kırmızıya sıçrıyor; S5'te "görünür" bölgesine (sarı) iniyor, söz ve görüntü aynı şeyi anlatıyor |
@@ -88,7 +88,7 @@ Düzen v1 ile aynı: krem zemin, sol NAKİT (turuncu) / sağ KART (mint), ortada
 
 ### S6 · 15,0–17,5 sn — CTA ve döngü
 - **Başlık:** "Kartı elinden düşmeyen arkadaşına gönder"
-- **Alt bant (y ≈ 1200–1500):** Cep Defteri logosu + "[Ücretsiz · Linki profilde]" (köşeli parantezli kısım yayın bilgisine göre doldurulacak).
+- **Künye (y ≈ 1075):** Cep Defteri logosu + "@cep_defteri". Uygulama kapalı testte; indirme/link çağrısı yok.
 - **Görüntü:** İki Ceviz el sallar. Son 0,5 sn: kart rakamı 610 → 450'ye geri sayar, kadranlar S1 başlangıç konumuna döner, kesintisiz döngü.
 - **VO:** "Kartı elinden düşmeyen arkadaşına gönder."
 
