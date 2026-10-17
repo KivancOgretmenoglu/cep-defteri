@@ -3,6 +3,17 @@
 v1: `odeme-acisi.mp4` (19,15 sn, 1080×1920). 10 kişilik panelin (5 uzman, 5 izleyici) ortalaması **6,6/10**.
 v2'nin hedefi: CTA/marka 5,5 → 8, mesaj netliği 6,3 → 8, süre ~17,5 sn.
 
+## Durum (17 Ekim 2026)
+
+`promo/out/odeme-acisi.mp4` mevcut seslendirmeyle yeniden render edildi. Uygulananlar:
+- Ekstre kalem kalem, ekranın ortasında büyük: market 610 + yemek 1.150 + kahve 765 + abonelik 425 + kıyafet 1.350 = 4.300 TL. "Adı: ödeme acısı" anında kart paneline küçülüyor.
+- Başlık "Nakit acıtır, kart acıtmaz" → "Nakit hemen acıtır, kart sonra…" (mutlak iddia gitti, ekstreye açık döngü).
+- "Yazınca acı geri gelir" anında kart ibresi sarıdan kırmızı sınırına çıkıyor; başlık "Yazınca acı geri gelir, fren de gelir".
+- Defterdeki "CEP DEFTERİ" etiketi 26 → 36 px; CTA boyunca "Cep Defteri · @cep_defteri" künyesi.
+- Instagram açıklaması (`promo/brand/reels-metinleri.md` #16): erteleme, eğilim notu, ekstre dökümü.
+
+Yeni seslendirme gerektirdiği için bekleyenler (ElevenLabs bu ortamdan erişilemiyor): S1 hook metni, S4'teki "Kart acıyı silmez, ay sonuna erteler" satırı, S5 tam ekran uygulama akışı, ~17,5 sn'ye kısaltma. Aşağıdaki senaryo bu tam sürümü anlatıyor.
+
 ## v1 panel özeti
 
 | | Hook | Akış | Görsel | Mesaj | CTA | Genel |

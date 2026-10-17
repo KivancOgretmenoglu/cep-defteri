@@ -336,12 +336,12 @@ En son neye "paraya yazık" diye katlandın? Yorumlara yaz 👇
 ```
 Ödeme acısı: aynı 450 TL nakitte mi acır, kartta mı? 💳
 
-Nakitte her banknot elinden çıkarken hissedersin. Kartta sadece "bip".
+Nakitte her banknot elinden çıkarken hissedersin. Kartta sadece "bip"; acı kaybolmaz, ay sonuna ertelenir.
 Acı olmayınca fren de olmaz: sepete +45, +55, +60 derken ay sonu ekstre gelir.
-Buna ödeme acısı denir: parayı elinden çıkarken hissetmek harcamayı frenler, kartta bu fren zayıflar. Tutarlar örnek.
+Buna ödeme acısı denir: parayı elinden çıkarken hissetmek harcamayı frenler, kartta bu fren zayıflar. Bu bir eğilim, herkeste aynı güçte değil. Tutarlar örnek (ekstre: market 610 + yemek 1.150 + kahve 765 + abonelik 425 + kıyafet 1.350).
 Araştırma: MIT'deki bir deneyde kartla ödeyecek olanlar aynı maç biletine nakitle ödeyeceklerden çok daha yüksek fiyat teklif etti (Prelec & Simester, 2001).
 
-Çözüm basit: kartla ödediysen hemen yaz. Yazınca acı geri gelir.
+Çözüm basit: kartla ödediysen hemen yaz. Yazınca harcama görünür olur, fren geri gelir.
 
 Kartla ödeyince sepetine en son ne ekledin? Yorumlara yaz 👇
 📌 Kaydet, bir dahaki kartlı alışverişte aç.

@@ -1043,13 +1043,17 @@ function defineValue() {
       const g = el('div', 'abs it', s.root, { left: '912px', top: '892px', fontSize: '60px', color: '#C0392B', display: 'none', zIndex: 6, textShadow: '3px 3px 0 #fff' }); g.textContent = t;
       return { e, g };
     });
-    // ekstre
-    const ek = el('div', 'abs', s.root, { left: '585px', top: '880px', width: '440px', height: '205px', boxSizing: 'border-box', background: '#FFFDF8', border: '6px solid #2A1E1A', borderRadius: '10px', textAlign: 'center', zIndex: 6, display: 'none', boxShadow: '0 18px 0 rgba(0,0,0,.18)' });
-    ek.innerHTML = `<div style="font-size:36px;font-weight:800;letter-spacing:.08em;color:#6e5f55;margin-top:18px">EKSTRE · EKİM</div><div style="height:6px;margin:12px 40px 14px;background:repeating-linear-gradient(90deg,#2A1E1A 0 14px,transparent 14px 24px)"></div><div class="ekv" style="white-space:nowrap"><span class="it" style="font-size:100px;line-height:1;color:#C0392B">4.300 TL</span><span class="it" style="font-size:64px;color:#C0392B;margin-left:10px">?!</span></div>`;
+    // ekstre: önce ortada büyük ve kalem kalem (610 → 4.300 bağı), ad anında kart paneline küçülür
+    const EK_ITEMS = o.ekItems ?? [['Market (bu sepet)', 610], ['Yemek siparişi', 1150], ['Kahve ×9', 765], ['Abonelikler', 425], ['Kıyafet', 1350]];
+    const ek = el('div', 'abs', s.root, { left: '150px', top: '590px', width: '780px', height: '450px', boxSizing: 'border-box', background: '#FFFDF8', border: '6px solid #2A1E1A', borderRadius: '14px', textAlign: 'center', zIndex: 6, display: 'none', boxShadow: '0 18px 0 rgba(0,0,0,.18)' });
+    ek.innerHTML = `<div style="font-size:38px;font-weight:800;letter-spacing:.08em;color:#6e5f55;margin-top:20px">EKSTRE · EKİM</div><div style="height:6px;margin:12px 48px 14px;background:repeating-linear-gradient(90deg,#2A1E1A 0 14px,transparent 14px 24px)"></div>`
+      + EK_ITEMS.map(([n, v], i) => `<div class="ekl" style="display:flex;justify-content:space-between;margin:0 60px;font-size:38px;line-height:46px;font-weight:700;color:${i ? '#4a3b33' : '#C0392B'}"><span>${n}</span><span style="font-weight:800">${fmt(v)} TL</span></div>`).join('')
+      + `<div class="ekv" style="white-space:nowrap;margin-top:8px"><span class="it" style="font-size:96px;line-height:1;color:#C0392B">${fmt(EK_ITEMS.reduce((a, x) => a + x[1], 0))} TL</span><span class="it" style="font-size:60px;color:#C0392B;margin-left:10px">?!</span></div>`;
+    const ekl = [...ek.querySelectorAll('.ekl')];
     const ekv = ek.querySelector('.ekv');
     // defter
-    const nb = el('div', 'abs', s.root, { left: '600px', top: '882px', width: '400px', height: '196px', boxSizing: 'border-box', background: 'repeating-linear-gradient(#FFFDF4 0 46px, #BFD3EA 46px 49px)', border: '6px solid #2A1E1A', borderRadius: '14px', zIndex: 6, display: 'none', padding: '44px 34px' });
-    el('div', 'abs', nb, { left: '18px', top: '6px', fontSize: '26px', fontWeight: 800, letterSpacing: '.12em', color: '#AE4716' }).textContent = 'CEP DEFTERİ';
+    const nb = el('div', 'abs', s.root, { left: '600px', top: '882px', width: '400px', height: '206px', boxSizing: 'border-box', background: 'repeating-linear-gradient(#FFFDF4 0 46px, #BFD3EA 46px 49px)', border: '6px solid #2A1E1A', borderRadius: '14px', zIndex: 6, display: 'none', padding: '54px 34px' });
+    el('div', 'abs', nb, { left: '18px', top: '6px', fontSize: '36px', fontWeight: 800, letterSpacing: '.12em', color: '#AE4716' }).textContent = 'CEP DEFTERİ';
     const nbt = el('div', 'it', nb, { fontSize: '88px', color: '#C0392B', lineHeight: '1', whiteSpace: 'nowrap' });
     const tick = pixEl(s.root, CHECK, CHECK_C, 11, { left: '912px', top: '930px', display: 'none', zIndex: 7 });
     const ah2 = el('div', 'abs it', s.root, { left: '915px', top: '1090px', fontSize: '84px', color: '#D9622B', display: 'none', zIndex: 6, textShadow: '4px 4px 0 #fff, -2px -2px 0 #fff' }); ah2.textContent = 'ah';
@@ -1076,13 +1080,13 @@ function defineValue() {
       [0, 1, 2].forEach((i) => { vl += 0.32 * E.back(prog(lt, PAY + i * 0.4 + 0.15, 0.3)); });
       vl = Math.min(1, vl) + (vl > 0.6 ? Math.sin(lt * 37) * 0.015 : 0) + hunt(0);
       gl.nd.style.transform = `rotate(${-90 + 180 * vl}deg)`;
-      // sağ ibre: bip'te kıpırdar, ekstrede tavan, yazınca orta
+      // sağ ibre: bip'te kıpırdar, ekstrede tavan, yazınca kırmızı sınırı (acı geri gelir)
       let vr = 0.03 + 0.07 * Math.exp(-Math.max(0, lt - BIP) * 6) * (lt >= BIP ? 1 : 0);
       if (lt >= EKR) vr = 0.03 + 0.97 * E.back(prog(lt, EKR, 0.35)) + Math.sin(lt * 31) * 0.015;
       if (lt >= W) vr = lerp(vr, 0.04, E.out(prog(lt, W, 0.3)));
       const CK = o.check ?? W + 1.58;
       if (lt >= CK && lt < FEEL) vr = 0.04 + 0.14 * prog(lt, CK, FEEL - CK) + Math.sin(lt * 23) * 0.012;
-      if (lt >= FEEL) vr = 0.04 + 0.5 * E.back(prog(lt, FEEL, 0.45)) + Math.sin(lt * 9) * 0.01;
+      if (lt >= FEEL) vr = 0.04 + 0.62 * E.back(prog(lt, FEEL, 0.45)) + Math.sin(lt * 9) * 0.01;
       gr.nd.style.transform = `rotate(${-90 + 180 * Math.min(1.05, vr + hunt(Math.PI))}deg)`;
       // fiyat: sepet büyüdükçe artar
       const INC = [45, 55, 60], land = (i) => EX + i * 0.35 + 0.3;
@@ -1135,9 +1139,10 @@ function defineValue() {
         x.g.style.opacity = 1 - Math.max(0, q - 0.7) * 3.3;
       });
       // ekstre iner
-      const ekIn = E.out(prog(lt, EKS, 0.35)), ekOut = E.inOut(prog(lt, W - 0.25, 0.3));
+      const ekIn = E.out(prog(lt, EKS, 0.35)), ekSm = E.inOut(prog(lt, ev('name') - 0.4, 0.4)), ekOut = E.inOut(prog(lt, W - 0.25, 0.3));
       ek.style.display = ekIn > 0 && ekOut < 1 ? 'block' : 'none';
-      ek.style.transform = `translateX(${(1 - ekIn) * 560 + ekOut * 640}px) rotate(${(1 - ekIn) * 8}deg)`;
+      ek.style.transform = `translate(${265 * ekSm + (1 - ekIn) * 700 + ekOut * 640}px,${190 * ekSm}px) rotate(${(1 - ekIn) * 8}deg) scale(${(0.7 + 0.3 * ekIn) * lerp(1, 0.52, ekSm)})`;
+      ekl.forEach((r, i) => { const p = prog(lt, EKS + 0.25 + i * 0.13, 0.18); r.style.opacity = p; r.style.transform = `translateX(${(1 - E.out(p)) * 40}px)`; });
       ekv.style.transform = `scale(${1 + 0.16 * Math.sin(prog(lt, EKR, 0.35) * Math.PI)})`;
       s.root.style.transform = lt >= EKR && lt < EKR + 0.5 ? `translate(${shake(lt, EKR, 16, 0.4)}px,0)` : 'none';
       // defter: -450 TL yazılır
