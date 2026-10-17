@@ -1016,7 +1016,7 @@ function defineValue() {
       g.innerHTML = pix(GR, { o: '#2A1E1A', G: '#5FD38D', Y: '#F2C14E', R: '#E8322A' }, 16);
       const nd = el('div', 'abs', g, { left: '147px', top: '28px', width: '10px', height: '124px', background: '#2A1E1A', transformOrigin: '50% 100%' });
       el('div', 'abs', g, { left: '138px', top: '138px', width: '28px', height: '28px', background: '#2A1E1A' });
-      const lb = el('div', 'abs it', g, { left: 0, right: 0, top: '168px', textAlign: 'center', fontSize: '38px', color: '#6e5f55' }); lb.textContent = 'ACI';
+      const lb = el('div', 'abs it', g, { left: 0, right: 0, top: '164px', textAlign: 'center', fontSize: '46px', color: '#4a3b33' }); lb.textContent = 'ACI';
       const q = el('div', 'abs it', g, { left: '128px', top: '26px', fontSize: '80px', color: '#4351A3' }); q.textContent = '?';
       return { g, nd, q, lb };
     };
@@ -1051,6 +1051,7 @@ function defineValue() {
     const nb = el('div', 'abs', s.root, { left: '600px', top: '882px', width: '400px', height: '196px', boxSizing: 'border-box', background: 'repeating-linear-gradient(#FFFDF4 0 46px, #BFD3EA 46px 49px)', border: '6px solid #2A1E1A', borderRadius: '14px', zIndex: 6, display: 'none', padding: '44px 34px' });
     el('div', 'abs', nb, { left: '18px', top: '6px', fontSize: '26px', fontWeight: 800, letterSpacing: '.12em', color: '#AE4716' }).textContent = 'CEP DEFTERİ';
     const nbt = el('div', 'it', nb, { fontSize: '88px', color: '#C0392B', lineHeight: '1', whiteSpace: 'nowrap' });
+    const tick = pixEl(s.root, CHECK, CHECK_C, 11, { left: '912px', top: '930px', display: 'none', zIndex: 7 });
     const ah2 = el('div', 'abs it', s.root, { left: '915px', top: '1090px', fontSize: '84px', color: '#D9622B', display: 'none', zIndex: 6, textShadow: '4px 4px 0 #fff, -2px -2px 0 #fff' }); ah2.textContent = 'ah';
     const ST = (arr, lt, d) => (arr || []).reduce((a, p) => (lt >= p[0] ? p : a), [0, d]);
     s.update = (lt) => {
@@ -1065,7 +1066,11 @@ function defineValue() {
       price[0].style.transform = `scale(${1 + say450})`;
       // ad anında "ACI" etiketleri kırmızı nabız
       const nm = prog(lt, ev('name'), 0.6);
-      [gl, gr].forEach((g) => { g.lb.style.transform = `scale(${1 + 0.7 * Math.sin(nm * Math.PI)})`; g.lb.style.color = nm > 0 && nm < 1 ? '#E8322A' : '#6e5f55'; });
+      [gl, gr].forEach((g) => {
+        g.lb.textContent = lt >= ev('name') ? 'ÖDEME ACISI' : 'ACI';
+        g.lb.style.transform = `scale(${1 + 0.45 * Math.sin(nm * Math.PI)})`;
+        g.lb.style.color = nm > 0 && nm < 1 ? '#E8322A' : lt >= ev('name') ? '#B5501E' : '#4a3b33';
+      });
       // sol ibre: her banknotta yükselir
       let vl = 0;
       [0, 1, 2].forEach((i) => { vl += 0.32 * E.back(prog(lt, PAY + i * 0.4 + 0.15, 0.3)); });
@@ -1075,14 +1080,16 @@ function defineValue() {
       let vr = 0.03 + 0.07 * Math.exp(-Math.max(0, lt - BIP) * 6) * (lt >= BIP ? 1 : 0);
       if (lt >= EKR) vr = 0.03 + 0.97 * E.back(prog(lt, EKR, 0.35)) + Math.sin(lt * 31) * 0.015;
       if (lt >= W) vr = lerp(vr, 0.04, E.out(prog(lt, W, 0.3)));
+      const CK = o.check ?? W + 1.58;
+      if (lt >= CK && lt < FEEL) vr = 0.04 + 0.14 * prog(lt, CK, FEEL - CK) + Math.sin(lt * 23) * 0.012;
       if (lt >= FEEL) vr = 0.04 + 0.5 * E.back(prog(lt, FEEL, 0.45)) + Math.sin(lt * 9) * 0.01;
       gr.nd.style.transform = `rotate(${-90 + 180 * Math.min(1.05, vr + hunt(Math.PI))}deg)`;
       // fiyat: sepet büyüdükçe artar
       const INC = [45, 55, 60], land = (i) => EX + i * 0.35 + 0.3;
-      const pc = INC.reduce((a, v, i) => a + v * E.out(prog(lt, land(i), 0.25)), 0);
-      price[1].textContent = lt >= W ? '450 TL' : `${fmt(450 + pc)} TL`;
+      const pc = INC.reduce((a, v, i) => a + (lt >= land(i) ? v : 0), 0);
+      price[1].textContent = `${fmt(450 + pc)} TL`;
       price[1].style.transform = `scale(${1 + say450 + INC.reduce((a, v, i) => a + 0.14 * Math.sin(prog(lt, land(i), 0.25) * Math.PI), 0)})`;
-      price[1].style.color = pc > 1 && lt < W ? '#C0392B' : '#2A1E1A';
+      price[1].style.color = pc > 1 && lt < ev('cta') ? '#C0392B' : '#2A1E1A';
       price[1].style.display = lt >= EKS + 0.3 && lt < ev('cta') ? 'none' : 'block';  // ekstre ve defter boyunca gizli: 610 TL arada geri görünmesin
       // banknotlar kasaya uçar
       bills.forEach((b, i) => {
@@ -1100,11 +1107,17 @@ function defineValue() {
       });
       // kart POS'a gider, bip
       const go = E.inOut(prog(lt, BIP - 0.35, 0.3)), back = E.inOut(prog(lt, BIP + 0.45, 0.3));
-      const cpx = lerp(R + 30, 850, go - back), cpy = lerp(1260, 1035, go - back) - hopR;
+      const SRc = ST(o.right, lt, 'idle'), kc = lt - SRc[0];  // kart pençede: Ceviz zıplarken onunla birlikte
+      const pawY = SRc[1] === 'greedy' ? hop(lt, 0.32, 40).y : SRc[1] === 'tap' ? hop(lt, 0.5, 24).y : SRc[1] === 'happy' ? hop(lt + 0.2, 0.45, 30).y : SRc[1] === 'shock' ? 60 * Math.exp(-kc * 4) : 0;
+      let cpx = lerp(R + 30, 850, go - back), cpy = lerp(1260 - pawY, 1035, go - back) - hopR;
+      const tri = (lt - (EKS - 0.42)) / 0.14;  // ay boyu bip, bip, bip: üç hızlı dokunuş
+      if (tri >= 0 && tri < 3) { const g = Math.sin((tri % 1) * Math.PI) * 0.9; cpx = lerp(cpx, 850, g); cpy = lerp(cpy, 1035, g); }
+      [0, 1, 2].forEach((i) => { const g = Math.sin(prog(lt, land(i) - 0.16, 0.16) * Math.PI) * 0.9; cpx = lerp(cpx, 850, g); cpy = lerp(cpy, 1035, g); });  // her ürün: bir bip daha
       card.style.transform = `translate(${cpx - 72}px,${cpy - 42}px) rotate(${lerp(-14, 8, go - back)}deg)`;
       card.style.display = lt >= W + 0.2 && lt < ev('cta') ? 'none' : 'block';
       const bp = prog(lt, BIP, 0.8);
       waves.style.display = bip.style.display = bp > 0 && bp < 1 ? 'block' : 'none';
+      if ((tri >= 0 && tri < 3) || [0, 1, 2].some((i) => lt >= land(i) - 0.16 && lt < land(i) + 0.1)) waves.style.display = 'block';
       waves.style.transform = `scale(${1 + 0.25 * Math.sin(bp * Math.PI * 4)})`;
       pos.style.display = lt >= EKS - 0.1 && lt < ev('cta') ? 'none' : 'block';
       bip.style.transform = `scale(${E.back(Math.min(1, bp * 4))}) rotate(-8deg)`;
@@ -1131,8 +1144,11 @@ function defineValue() {
       const np = prog(lt, W + 0.3, 0.3);
       nb.style.display = np > 0 && lt < ev('cta') ? 'block' : 'none';
       nb.style.transform = `scale(${E.back(np)}) rotate(-3deg)`;
-      const txt = '-450 TL', nch = Math.floor(Math.max(0, Math.min(txt.length, (lt - (W + 0.6)) / 0.12)));
+      const txt = '-610 TL', nch = Math.floor(Math.max(0, Math.min(txt.length, (lt - (W + 0.6)) / 0.12)));
       nbt.textContent = txt.slice(0, nch);
+      const tk = prog(lt, o.check ?? W + 1.58, 0.3);
+      tick.style.display = tk > 0 && lt < ev('cta') ? 'block' : 'none';
+      tick.style.transform = `scale(${E.back(tk)}) rotate(-8deg)`;
       const ap = prog(lt, FEEL, 0.8);
       ah2.style.display = ap > 0 && ap < 1 ? 'block' : 'none';
       ah2.style.transform = `translateY(${-ap * 40}px) scale(${E.back(Math.min(1, ap * 3))})`;
@@ -1175,7 +1191,7 @@ function defineValue() {
     el('div', 'abs', s.root, { left: '20px', right: '20px', top: '554px', height: '6px', background: '#8B5A2B', borderRadius: '3px' });
     const flags = Array.from({ length: 11 }, (_, i) => pixEl(s.root, FLAGP, { o: '#2A1E1A', C: ['#E8322A', '#2F8F5A', '#F2B63C', '#4351A3'][i % 4] }, 14, { left: px(30 + i * 94), top: '558px', transformOrigin: '50% 0%' }));
     // cüzdan + bakiye
-    const wal = el('div', 'abs', s.root, { left: 0, right: 0, top: '640px', textAlign: 'center' });
+    const wal = el('div', 'abs', s.root, { left: 0, right: 0, top: '640px', textAlign: 'center', zIndex: 2 });
     wal.innerHTML = `<div>${pix(WALLET_O, WALLET_COL, 18)}</div><div style="font-size:40px;font-weight:800;letter-spacing:.1em;color:#8a7d72">CÜZDAN</div><div class="it bal" style="font-size:118px;line-height:1">1.500 TL</div>`;
     const bal = wal.querySelector('.bal');
     // takvim
@@ -1183,7 +1199,7 @@ function defineValue() {
     cal.innerHTML = `<div style="background:#E8322A;color:#fff;font-weight:800;font-size:40px;letter-spacing:.1em;padding:8px 0">GÜN</div><div class="it cd" style="font-size:130px;line-height:1.1;color:#2A1E1A">1</div>`;
     const cd = cal.querySelector('.cd');
     // zarflar
-    const envs = Array.from({ length: 7 }, (_, i) => pixEl(s.root, ZARF, ZARF_C, 11, { zIndex: 3 }));
+    const envs = Array.from({ length: 7 }, (_, i) => pixEl(s.root, ZARF, ZARF_C, 11, { zIndex: 1 }));
     // harcamalar
     const led = el('div', 'abs', s.root, { left: '776px', top: '626px', width: '284px', height: '344px', boxSizing: 'border-box', background: 'repeating-linear-gradient(#FFFDF4 0 86px, #BFD3EA 86px 89px)', backgroundPosition: '0 52px', border: '6px solid #2A1E1A', borderRadius: '14px', display: 'none', zIndex: 3, transformOrigin: '50% 0%' });
     el('div', 'abs', led, { left: '16px', top: '8px', fontSize: '26px', fontWeight: 800, letterSpacing: '.12em', color: '#AE4716' }).textContent = 'CEP DEFTERİ';
@@ -1194,7 +1210,7 @@ function defineValue() {
     });
     // kafe
     const cafe = el('div', 'abs', s.root, { left: '250px', width: '580px', top: '650px', textAlign: 'center', display: 'none' });
-    cafe.innerHTML = `<div class="it" style="display:inline-block;background:#2F4A3C;color:#F3EEE2;font-size:76px;padding:16px 40px;border:10px solid #8B5A2B;border-radius:16px">KAFE</div><div style="font-size:46px;font-weight:800;color:#6e5f55;margin-top:18px">1 hafta, akşam mesaisi</div><div class="it earn" style="font-size:104px;color:#2F8F5A;line-height:1.1">+1.500 TL</div>`;
+    cafe.innerHTML = `<div class="it" style="display:inline-block;background:#2F4A3C;color:#F3EEE2;font-size:76px;padding:16px 40px;border:10px solid #8B5A2B;border-radius:16px">KAFE</div><div style="font-size:46px;font-weight:800;color:#6e5f55;margin-top:18px">3 akşam · 12 saat mesai</div><div class="it earn" style="font-size:104px;color:#2F8F5A;line-height:1.1">+1.500 TL</div>`;
     const earn = cafe.querySelector('.earn');
     const tray = el('div', 'abs', s.root, { width: '156px', zIndex: 4, display: 'none', textAlign: 'center' });
     tray.innerHTML = `<div style="display:flex;justify-content:center;gap:6px">${pix(CUP, CUP_C, 10)}${pix(CUP, CUP_C, 10)}</div>${pix(PLATEP, PLATEP_C, 13)}`;
@@ -1204,7 +1220,7 @@ function defineValue() {
       const d = el('div', 'abs', s.root, { left: px(x), top: '660px', width: '232px', height: '240px', display: 'none' });
       d.innerHTML = [0, 1, 2].map((i) => `<div style="position:absolute;left:${i * 6}px;top:${70 - i * 22}px">${pix(NOTE, NOTE_CS[0], 20)}</div>`).join('')
         + `<div class="it" style="position:absolute;left:24px;top:84px;font-size:46px;color:#2A1E1A">1.500</div>`;
-      const tg = el('div', 'abs it', s.root, { left: px(x + 40), top: '870px', fontSize: '50px', color: '#fff', background: col, padding: '6px 22px', borderRadius: '12px', border: '5px solid #2A1E1A', display: 'none', transformOrigin: '50% 0%', zIndex: 3 });
+      const tg = el('div', 'abs it', s.root, { left: px(x + 16), top: '862px', fontSize: '64px', color: '#fff', background: col, padding: '6px 22px', borderRadius: '12px', border: '5px solid #2A1E1A', display: 'none', transformOrigin: '50% 0%', zIndex: 3 });
       tg.textContent = lbl;
       return { d, tg };
     };
@@ -1212,7 +1228,8 @@ function defineValue() {
     const same = el('div', 'abs it', s.root, { left: '540px', top: '872px', fontSize: '72px', color: '#2A1E1A', background: '#F2B63C', padding: '8px 26px', borderRadius: '14px', border: '6px solid #2A1E1A', display: 'none', zIndex: 4, whiteSpace: 'nowrap' }); same.textContent = 'AYNI PARA';
     const eq = el('div', 'abs', s.root, { left: '486px', top: '738px', width: '108px', height: '74px', display: 'none' });
     eq.innerHTML = '<div style="height:22px;background:#2A1E1A;border-radius:4px"></div><div style="height:22px;margin-top:30px;background:#2A1E1A;border-radius:4px"></div>';
-    const clock = el('div', 'abs it', s.root, { left: '96px', top: '812px', fontSize: '44px', color: '#fff', background: '#2F8F5A', padding: '6px 18px', borderRadius: '12px', border: '5px solid #2A1E1A', display: 'none', zIndex: 3, whiteSpace: 'nowrap', transformOrigin: '50% 0%' }); clock.textContent = '= 1 HAFTA MESAİ';
+    const qm = el('div', 'abs it', s.root, { left: '440px', top: '626px', width: '200px', textAlign: 'center', fontSize: '250px', color: '#C0392B', display: 'none', textShadow: '6px 6px 0 #fff' }); qm.textContent = '?';
+    const clock = el('div', 'abs it', s.root, { left: '96px', top: '812px', fontSize: '44px', color: '#fff', background: '#2F8F5A', padding: '6px 18px', borderRadius: '12px', border: '5px solid #2A1E1A', display: 'none', zIndex: 3, whiteSpace: 'nowrap', transformOrigin: '50% 0%' }); clock.textContent = '= 12 SAAT MESAİ';
     const bub = el('div', 'abs', s.root, { left: '742px', top: '1078px', width: '300px', height: '150px', boxSizing: 'border-box', background: '#fff', border: '6px solid #2A1E1A', borderRadius: '40px', display: 'none', zIndex: 5, transformOrigin: '15% 100%' });
     bub.innerHTML = `<div style="position:absolute;left:22px;top:30px">${pix(PIZZAP, PIZZAP_C, 8)}</div><div style="position:absolute;left:104px;top:44px">${pix(PADP, PADP_C, 6)}</div><div style="position:absolute;left:186px;top:28px">${pix(HEADPH, HEADPH_C, 6)}</div>`
       + '<div style="position:absolute;left:-26px;top:118px;width:28px;height:28px;border-radius:50%;background:#fff;border:5px solid #2A1E1A"></div><div style="position:absolute;left:-50px;top:150px;width:16px;height:16px;border-radius:50%;background:#fff;border:4px solid #2A1E1A"></div>';
@@ -1241,7 +1258,7 @@ function defineValue() {
         const p = ((lt * 0.55 + i / 7) % 1);
         const on = lt < D1 || lt >= ev('rain2');
         e.style.display = on ? 'block' : 'none';
-        e.style.transform = `translate(${80 + ((i * 337) % 900)}px,${300 + p * 1150}px) rotate(${Math.sin(lt * 3 + i) * 25}deg)`;
+        e.style.transform = `translate(${80 + ((i * 337) % 900)}px,${600 + p * 1000}px) rotate(${Math.sin(lt * 3 + i) * 25}deg)`;
         e.style.opacity = 0.95;
       });
       // harcamalar cüzdandan uçar
@@ -1272,7 +1289,11 @@ function defineValue() {
       const sp = prog(lt, ev('stamp'), 0.25);
       same.style.display = sp > 0 ? 'block' : 'none';
       same.style.transform = `translateX(-50%) scale(${lerp(2.2, 1, E.out(sp))}) rotate(-6deg)`;
-      eq.style.display = lt >= LB + 0.3 ? 'block' : 'none';
+      const SAME = o.same ?? LB + 0.3;  // tahmin anı: önce "?", cevapla "="
+      qm.style.display = lt >= LB + 0.3 && lt < SAME ? 'block' : 'none';
+      qm.style.transform = `scale(${E.back(prog(lt, LB + 0.3, 0.3)) * (1 + 0.12 * Math.sin(lt * 9))}) rotate(${Math.sin(lt * 5) * 8}deg)`;
+      eq.style.display = lt >= SAME ? 'block' : 'none';
+      eq.style.transform = `scale(${E.back(prog(lt, SAME, 0.3))})`;
       const ck = prog(lt, ev('clock'), 0.35);
       clock.style.display = ck > 0 ? 'block' : 'none';
       clock.style.transform = `translateY(${(1 - E.out(ck)) * -70}px) rotate(${-4 + (1 - ck) * -10}deg) scale(${E.back(ck)})`;

@@ -3200,7 +3200,7 @@
   },
   "odeme-acisi": {
     "title": "Kavram: ödeme acısı (sesli)",
-    "end": 18.55,
+    "end": 19.15,
     "loop": true,
     "handheld": true,
     "musicGain": 0.45,
@@ -3208,92 +3208,102 @@
     "musicPlan": [
       [
         0,
-        18.55,
+        19.15,
         "quiz"
       ]
     ],
     "captionPixel": true,
     "captionY": 1062,
     "captionMaxWords": 3,
-    "captionUntil": 15.75,
+    "captionUntil": 16.35,
     "boxes": [
       [
         0,
-        3.1,
+        3.7,
         "Aynı 450 TL.<br><b>Hangisi acıtır?</b>",
-        280,
-        {
-          "size": 96,
-          "pulse": true
-        }
-      ],
-      [
-        3.1,
-        6.4,
-        "Nakit acıtır,<br><b>kart acıtmaz</b>",
-        280,
-        {
-          "size": 86,
-          "pulse": true
-        }
-      ],
-      [
-        6.45,
-        8.6,
-        "Acı yok,<br><b>fren yok</b>",
-        280,
-        {
-          "size": 86,
-          "pulse": true
-        }
-      ],
-      [
-        8.65,
-        11.05,
-        "Ay sonu:<br><b>ekstre şoku</b>",
-        280,
-        {
-          "size": 86,
-          "pulse": true
-        }
-      ],
-      [
-        11.1,
-        12.45,
-        "Adı:<br><b>ödeme acısı</b>",
-        280,
+        296,
         {
           "size": 92,
           "pulse": true
         }
       ],
       [
-        12.5,
-        15.75,
+        3.7,
+        7.0,
+        "Nakit acıtır,<br><b>kart acıtmaz</b>",
+        296,
+        {
+          "size": 82,
+          "pulse": true
+        }
+      ],
+      [
+        7.05,
+        9.2,
+        "Acı yok,<br><b>fren yok</b>",
+        296,
+        {
+          "size": 82,
+          "pulse": true
+        }
+      ],
+      [
+        9.25,
+        11.65,
+        "Ay boyu bip, bip, bip…<br><b>Ay sonu: ekstre şoku</b>",
+        296,
+        {
+          "size": 74,
+          "pulse": true
+        }
+      ],
+      [
+        11.7,
+        13.5,
+        "Adı:<br><b>ödeme acısı</b>",
+        296,
+        {
+          "size": 88,
+          "pulse": true
+        }
+      ],
+      [
+        13.55,
+        14.6,
         "Kartla ödedin mi?<br><b>Hemen yaz.</b>",
-        280,
+        296,
         {
-          "size": 86,
+          "size": 82,
           "pulse": true
         }
       ],
       [
-        15.8,
-        18.0,
+        14.65,
+        16.35,
+        "Yazınca<br><b>acı geri gelir</b>",
+        296,
+        {
+          "size": 82,
+          "pulse": true
+        }
+      ],
+      [
+        16.4,
+        18.6,
         "Kartı elinden düşmeyen<br><b>arkadaşına gönder</b>",
-        280,
+        296,
         {
-          "size": 80,
+          "size": 76,
           "pulse": true
         }
       ],
       [
-        18.25,
-        18.55,
+        18.85,
+        19.15,
         "Aynı 450 TL.<br><b>Hangisi acıtır?</b>",
-        280,
+        296,
         {
-          "size": 96,
+          "size": 92,
           "pulse": true
         }
       ]
@@ -3303,64 +3313,65 @@
         "payPain",
         0,
         {
-          "pay": 3.2,
-          "bip": 6.2,
-          "extras": 7.0,
-          "ekS": 8.7,
-          "ekR": 9.9,
-          "name": 11.1,
-          "write": 12.5,
-          "feel": 15.05,
-          "cta": 15.8,
+          "pay": 3.8,
+          "bip": 6.8,
+          "extras": 7.6,
+          "ekS": 9.6,
+          "ekR": 10.5,
+          "name": 11.7,
+          "write": 13.1,
+          "feel": 15.65,
+          "cta": 16.4,
           "left": [
             [
-              3.15,
+              3.75,
               "pay"
             ],
             [
-              4.9,
+              5.5,
               "sad"
             ],
             [
-              15.8,
+              16.4,
               "happy"
             ]
           ],
           "right": [
             [
-              5.85,
+              6.45,
               "tap"
             ],
             [
-              7.0,
+              7.6,
               "greedy"
             ],
             [
-              9.9,
+              10.5,
               "shock"
             ],
             [
-              11.1,
+              11.7,
               "sad"
             ],
             [
-              12.5,
+              13.1,
               "think"
             ],
             [
-              15.05,
+              15.65,
               "nod"
             ],
             [
-              15.8,
+              16.4,
               "happy"
             ]
-          ]
+          ],
+          "check": 14.68
         }
       ],
       [
         "payPain",
-        18.0,
+        18.6,
         {
           "wdur": 0.25
         }
@@ -3375,39 +3386,39 @@
         "Aynı dört yüz elli lira. Hangisi daha çok acıtır?"
       ],
       [
-        3.1,
+        3.7,
         "assets/voice/odeme/o2.mp3",
         "Nakitte her banknot acıtır. Kartta sadece bip!"
       ],
       [
-        6.45,
+        7.05,
         "assets/voice/odeme/o3.mp3",
         "Acı yoksa fren de yok: sepet büyür!"
       ],
       [
-        8.65,
+        9.25,
         "assets/voice/odeme/o4.mp3",
         "Ay sonu: ekstre dört bin üç yüz lira?!"
       ],
       [
-        11.1,
+        11.7,
         "assets/voice/odeme/o5.mp3",
         "Buna ödeme acısı denir."
       ],
       [
-        12.5,
+        13.1,
         "assets/voice/odeme/o6.mp3",
         "Kartla ödediysen hemen yaz. Yazınca, acı geri gelir."
       ],
       [
-        15.8,
+        16.4,
         "assets/voice/odeme/o7m.mp3"
       ]
     ]
   },
   "bulunmus-para": {
     "title": "Kavram: bulunmuş para (sesli)",
-    "end": 17.4,
+    "end": 18.2,
     "loop": true,
     "handheld": true,
     "musicGain": 0.45,
@@ -3415,22 +3426,22 @@
     "musicPlan": [
       [
         0,
-        17.4,
+        18.2,
         "chip"
       ]
     ],
     "captionPixel": true,
     "captionY": 960,
     "captionMaxWords": 3,
-    "captionUntil": 14.55,
+    "captionUntil": 15.35,
     "boxes": [
       [
         0,
         2.0,
         "Bayram harçlığı<br><b>3 günde biter</b>",
-        280,
+        296,
         {
-          "size": 96,
+          "size": 92,
           "pulse": true
         }
       ],
@@ -3438,69 +3449,69 @@
         2.0,
         4.6,
         "Pizza, oyun, kulaklık:<br><b>3 günde sıfır</b>",
-        280,
+        296,
         {
-          "size": 86,
+          "size": 82,
           "pulse": true
         }
       ],
       [
         4.65,
-        7.6,
+        8.4,
         "Çalışarak kazansaydın<br><b>3 günde harcar mıydın?</b>",
-        280,
+        296,
         {
-          "size": 80,
+          "size": 76,
           "pulse": true
         }
       ],
       [
-        7.65,
-        9.55,
+        8.45,
+        10.35,
         "Para aynı para.<br><b>Etiketi yok.</b>",
-        280,
+        296,
         {
-          "size": 86,
+          "size": 82,
           "pulse": true
         }
       ],
       [
-        9.6,
-        11.3,
-        "Adı:<br><b>bulunmuş para etkisi</b>",
-        280,
+        10.4,
+        12.1,
+        "Bulunmuş para etkisi:<br><b>kolay gelen, kolay gider</b>",
+        296,
         {
-          "size": 84,
+          "size": 74,
           "pulse": true
         }
       ],
       [
-        11.35,
-        14.55,
-        "Kendine sor:<br><b>böyle harcar mıydım?</b>",
-        280,
+        12.15,
+        15.35,
+        "Çalışarak kazansaydım<br><b>böyle harcar mıydım?</b>",
+        296,
         {
-          "size": 84,
+          "size": 78,
           "pulse": true
         }
       ],
       [
-        14.6,
-        16.85,
+        15.4,
+        17.65,
         "Harçlığı 3 günde biten<br><b>arkadaşına gönder</b>",
-        280,
+        296,
         {
-          "size": 80,
+          "size": 76,
           "pulse": true
         }
       ],
       [
-        17.1,
-        17.4,
+        17.9,
+        18.2,
         "Bayram harçlığı<br><b>3 günde biter</b>",
-        280,
+        296,
         {
-          "size": 96,
+          "size": 92,
           "pulse": true
         }
       ]
@@ -3516,11 +3527,11 @@
           "zero": 4.15,
           "work": 4.65,
           "labels": 7.65,
-          "peel": 8.75,
-          "stamp": 9.15,
-          "name": 9.6,
-          "think": 11.35,
-          "cta": 14.6,
+          "peel": 9.55,
+          "stamp": 9.95,
+          "name": 10.4,
+          "think": 12.15,
+          "cta": 15.4,
           "karamel": [
             [
               1.9,
@@ -3536,28 +3547,33 @@
             ],
             [
               7.65,
-              "shrug"
-            ],
-            [
-              9.6,
-              "aha"
-            ],
-            [
-              11.35,
               "think"
             ],
             [
-              14.6,
+              8.45,
+              "shrug"
+            ],
+            [
+              10.4,
+              "aha"
+            ],
+            [
+              12.15,
+              "think"
+            ],
+            [
+              15.4,
               "ok"
             ]
           ],
-          "clock": 12.06,
-          "ask": 13.45
+          "clock": 12.86,
+          "ask": 14.25,
+          "same": 8.45
         }
       ],
       [
         "harclik",
-        16.85,
+        17.65,
         {
           "wdur": 0.25
         }
@@ -3582,22 +3598,22 @@
         "Bu parayı kafede çalışarak kazansaydın, üç günde harcar mıydın?"
       ],
       [
-        7.65,
+        8.45,
         "assets/voice/bulunmus/p4.mp3",
         "Ama para aynı para. Etiketi yok!"
       ],
       [
-        9.6,
+        10.4,
         "assets/voice/bulunmus/p5b.mp3",
         "Buna bulunmuş para etkisi denir."
       ],
       [
-        11.35,
+        12.15,
         "assets/voice/bulunmus/p6b.mp3",
         "Kendine sor: çalışarak kazansaydım, böyle harcar mıydım?"
       ],
       [
-        14.6,
+        15.4,
         "assets/voice/bulunmus/p7.mp3"
       ]
     ]

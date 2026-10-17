@@ -338,7 +338,8 @@ En son neye "paraya yazık" diye katlandın? Yorumlara yaz 👇
 
 Nakitte her banknot elinden çıkarken hissedersin. Kartta sadece "bip".
 Acı olmayınca fren de olmaz: sepete +45, +55, +60 derken ay sonu ekstre gelir.
-Buna ödeme acısı denir. Tutarlar örnek.
+Buna ödeme acısı denir: parayı elinden çıkarken hissetmek harcamayı frenler, kartta bu fren zayıflar. Tutarlar örnek.
+Araştırma: MIT'deki bir deneyde kartla ödeyecek olanlar aynı maç biletine nakitle ödeyeceklerden çok daha yüksek fiyat teklif etti (Prelec & Simester, 2001).
 
 Çözüm basit: kartla ödediysen hemen yaz. Yazınca acı geri gelir.
 
@@ -355,8 +356,9 @@ Kartla ödeyince sepetine en son ne ekledin? Yorumlara yaz 👇
 Bayram harçlığı neden 3 günde biter? 💸
 
 Pizza, oyun, kulaklık: 1.500 TL üç günde sıfır.
-Aynı 1.500 TL'yi bir hafta akşam mesaisiyle kazansaydın, üç günde harcar mıydın?
-Para aynı para. "Hediye" ya da "maaş" diye etiketi yok. Buna bulunmuş para etkisi denir. Tutarlar örnek.
+Aynı 1.500 TL'yi kafede 12 saat akşam mesaisiyle kazansaydın, üç günde harcar mıydın?
+Para aynı para. "Hediye" ya da "maaş" diye etiketi yok. Buna bulunmuş para etkisi denir: kolay gelen parayı (harçlık, hediye, ikramiye) daha kolay harcamak. Tutarlar örnek.
+Araştırma: beklenmedik gelen parayı insanlar, kazandıkları paradan daha hızlı harcıyor (Arkes ve ark., 1994).
 
 Harcamadan önce sor: "Çalışarak kazansaydım böyle harcar mıydım?"
 

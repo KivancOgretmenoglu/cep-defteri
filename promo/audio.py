@@ -1353,6 +1353,7 @@ def cue_payPain(t0, skip=0, o=None):
     o = o or {}
     T = at(t0, skip)
     if 'pay' in o:
+        put(SFX, woodblock(True), T(o['pay'] - 0.7), 0.55)  # tahmin anı: tik-tak-tik
         put(SFX, woodblock(False), T(o['pay'] - 0.45), 0.6); put(SFX, woodblock(True), T(o['pay'] - 0.2), 0.6)
         for i in range(3):
             tb = o['pay'] + i * 0.4
@@ -1366,8 +1367,11 @@ def cue_payPain(t0, skip=0, o=None):
     if 'extras' in o:
         for i in range(3):
             put(SFX, bloop(420 + 120 * i, 1100 + 200 * i, 0.08, 0.4), T(o['extras'] + i * 0.35), pan=0.5)
+            put(SFX, pling(2637, 0.2, 0.07), T(o['extras'] + i * 0.35 + 0.22), pan=0.6)  # her ürün: bir bip daha
         put(SFX, cash_register(), T(o['extras'] + 1.05), 0.45, pan=0.4)
     if 'ekS' in o:
+        for i in range(3):  # ay boyu bip, bip, bip…
+            put(SFX, pling(2637, 0.22, 0.07), T(o['ekS'] - 0.35 + i * 0.14), pan=0.6)
         put(SFX, stereo_move(whoosh(0.35, 3000, 500), 0.4, 0.4), T(o['ekS']), 0.45); put(SFX, paper_tear(), T(o['ekS'] + 0.3), 0.4)
     if 'ekR' in o:
         put(SFX, slam_hit(0.8), T(o['ekR']), 0.7); put(SFX, sad_trombone()[: int(1.0 * SR)], T(o['ekR'] + 0.08), 0.4)
@@ -1377,6 +1381,8 @@ def cue_payPain(t0, skip=0, o=None):
         put(SFX, bloop(500, 900, 0.06, 0.3), T(o['write'] + 0.3))
         for i in range(7):
             put(SFX, key_click(0.45), T(o['write'] + 0.6 + i * 0.12), pan=0.4)
+    if 'check' in o:
+        put(SFX, pling(1760, 0.2, 0.35), T(o['check']), pan=0.4); put(SFX, pling(2349, 0.25, 0.3), T(o['check'] + 0.08), pan=0.4)
     if 'feel' in o:
         put(SFX, pitched(chitter(), 1.0), T(o['feel']), 0.4, pan=0.4); put(SFX, pling(1318, 0.25, 0.4), T(o['feel'] + 0.1), pan=0.3)
     if 'cta' in o:
@@ -1406,6 +1412,10 @@ def cue_harclik(t0, skip=0, o=None):
         put(SFX, cash_register(), T(w + 1.0), 0.4)
     if 'labels' in o:
         put(SFX, bloop(500, 1200, 0.08, 0.35), T(o['labels'])); put(SFX, bloop(500, 1200, 0.08, 0.35), T(o['labels'] + 0.15))
+    if 'same' in o:  # tahmin anı: tik-tak, sonra cevap
+        for i in range(3):
+            put(SFX, woodblock(i % 2 == 1), T(o['same'] - 0.62 + i * 0.22), 0.5)
+        put(SFX, pling(1568, 0.3, 0.35), T(o['same']))
     if 'peel' in o:
         put(SFX, paper_tear(), T(o['peel']), 0.5, pan=-0.4); put(SFX, paper_tear(), T(o['peel'] + 0.12), 0.5, pan=0.4)
     if 'stamp' in o:
