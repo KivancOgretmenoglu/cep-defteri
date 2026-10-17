@@ -1258,7 +1258,7 @@ function defineValue() {
         const p = ((lt * 0.55 + i / 7) % 1);
         const on = lt < D1 || lt >= ev('rain2');
         e.style.display = on ? 'block' : 'none';
-        e.style.transform = `translate(${80 + ((i * 337) % 900)}px,${600 + p * 1000}px) rotate(${Math.sin(lt * 3 + i) * 25}deg)`;
+        e.style.transform = `translate(${[30, 770, 140, 880, 240, 950, 85][i]}px,${600 + p * 1000}px) rotate(${Math.sin(lt * 3 + i) * 25}deg)`;  // yan şeritler: cüzdan ve bakiye sütunu boş kalsın
         e.style.opacity = 0.95;
       });
       // harcamalar cüzdandan uçar
