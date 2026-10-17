@@ -1047,7 +1047,7 @@ function defineValue() {
     const EK_ITEMS = o.ekItems ?? [['Market (bu sepet)', 610], ['Yemek siparişi', 1150], ['Kahve ×9', 765], ['Abonelikler', 425], ['Kıyafet', 1350]];
     const ek = el('div', 'abs', s.root, { left: '150px', top: '590px', width: '780px', height: '450px', boxSizing: 'border-box', background: '#FFFDF8', border: '6px solid #2A1E1A', borderRadius: '14px', textAlign: 'center', zIndex: 6, display: 'none', boxShadow: '0 18px 0 rgba(0,0,0,.18)' });
     ek.innerHTML = `<div style="font-size:38px;font-weight:800;letter-spacing:.08em;color:#6e5f55;margin-top:20px">EKSTRE · EKİM</div><div style="height:6px;margin:12px 48px 14px;background:repeating-linear-gradient(90deg,#2A1E1A 0 14px,transparent 14px 24px)"></div>`
-      + EK_ITEMS.map(([n, v], i) => `<div class="ekl" style="display:flex;justify-content:space-between;margin:0 60px;font-size:38px;line-height:46px;font-weight:700;color:${i ? '#4a3b33' : '#C0392B'}"><span>${n}</span><span style="font-weight:800">${fmt(v)} TL</span></div>`).join('')
+      + EK_ITEMS.map(([n, v], i) => `<div class="ekl" style="display:flex;justify-content:space-between;margin:0 60px;font-size:${o.ekFont ?? 38}px;line-height:${Math.round((o.ekFont ?? 38) * 1.22)}px;font-weight:700;color:${i ? '#4a3b33' : '#C0392B'};white-space:nowrap"><span>${n}</span><span style="font-weight:800">${fmt(v)} TL</span></div>`).join('')
       + `<div class="ekv" style="white-space:nowrap;margin-top:8px"><span class="it" style="font-size:96px;line-height:1;color:#C0392B">${fmt(EK_ITEMS.reduce((a, x) => a + x[1], 0))} TL</span><span class="it" style="font-size:60px;color:#C0392B;margin-left:10px">?!</span></div>`;
     const ekl = [...ek.querySelectorAll('.ekl')];
     const ekv = ek.querySelector('.ekv');
@@ -1060,7 +1060,7 @@ function defineValue() {
     const ST = (arr, lt, d) => (arr || []).reduce((a, p) => (lt >= p[0] ? p : a), [0, d]);
     s.update = (lt) => {
       amb(lt, [ev('pay'), ev('bip'), ev('ekR'), ev('name'), ev('feel')].reduce((a, t) => (lt >= t ? t : a), -9));
-      const PAY = ev('pay'), BIP = ev('bip'), EX = ev('extras'), EKS = ev('ekS'), EKR = ev('ekR'), W = ev('write'), FEEL = ev('feel');
+      const HK = o.hookEnd ?? o.hookPose ?? 0, PAY = ev('pay'), BIP = ev('bip'), EX = ev('extras'), EKS = ev('ekS'), EKR = ev('ekR'), W = ev('write'), FEEL = ev('feel');
       // tahmin: soru işaretleri
       [gl, gr].forEach((g) => { g.q.style.display = lt < PAY ? 'block' : 'none'; g.q.style.transform = `scale(${1 + 0.15 * Math.sin(lt * 7)})`; });
       const amp = lt < PAY ? 1 - E.out(prog(lt, PAY - 0.35, 0.35)) : 0, hunt = (ph) => amp * (0.17 + 0.15 * Math.sin(lt * 4.4 + ph));
@@ -1086,7 +1086,8 @@ function defineValue() {
       if (lt >= W) vr = lerp(vr, 0.04, E.out(prog(lt, W, 0.3)));
       const CK = o.check ?? W + 1.58;
       if (lt >= CK && lt < FEEL) vr = 0.04 + 0.14 * prog(lt, CK, FEEL - CK) + Math.sin(lt * 23) * 0.012;
-      if (lt >= FEEL) vr = 0.04 + 0.62 * E.back(prog(lt, FEEL, 0.45)) + Math.sin(lt * 9) * 0.01;
+      if (lt < HK) vr = 1 + Math.sin(lt * 31) * 0.015;
+      if (lt >= FEEL) vr = 0.04 + (o.feelLevel ?? 0.62) * E.back(prog(lt, FEEL, 0.45)) + Math.sin(lt * 9) * 0.01;
       gr.nd.style.transform = `rotate(${-90 + 180 * Math.min(1.05, vr + hunt(Math.PI))}deg)`;
       // fiyat: sepet büyüdükçe artar
       const INC = [45, 55, 60], land = (i) => EX + i * 0.35 + 0.3;
@@ -1139,12 +1140,19 @@ function defineValue() {
         x.g.style.opacity = 1 - Math.max(0, q - 0.7) * 3.3;
       });
       // ekstre iner
-      const ekIn = E.out(prog(lt, EKS, 0.35)), ekSm = E.inOut(prog(lt, ev('name') - 0.4, 0.4)), ekOut = E.inOut(prog(lt, W - 0.25, 0.3));
-      ek.style.display = ekIn > 0 && ekOut < 1 ? 'block' : 'none';
-      ek.style.transform = `translate(${265 * ekSm + (1 - ekIn) * 700 + ekOut * 640}px,${190 * ekSm}px) rotate(${(1 - ekIn) * 8}deg) scale(${(0.7 + 0.3 * ekIn) * lerp(1, 0.52, ekSm)})`;
-      ekl.forEach((r, i) => { const p = prog(lt, EKS + 0.25 + i * 0.13, 0.18); r.style.opacity = p; r.style.transform = `translateX(${(1 - E.out(p)) * 40}px)`; });
-      ekv.style.transform = `scale(${1 + 0.16 * Math.sin(prog(lt, EKR, 0.35) * Math.PI)})`;
-      s.root.style.transform = lt >= EKR && lt < EKR + 0.5 ? `translate(${shake(lt, EKR, 16, 0.4)}px,0)` : 'none';
+      if (lt < HK) {  // hook: sonuç önce, kalemler bulanık (nereye gitti?), sonra ekstre yukarı fırlar
+        const hx = E.inOut(prog(lt, HK - 0.3, 0.3));
+        ek.style.display = 'block';
+        ek.style.transform = `translateY(${-hx * 1100}px) rotate(${-hx * 6}deg) scale(${1 + 0.06 * Math.sin(prog(lt, 0, 0.35) * Math.PI)})`;
+        ekl.forEach((r) => { r.style.opacity = 0.55; r.style.filter = 'blur(9px)'; r.style.transform = 'none'; });
+      } else {
+        const ekIn = E.out(prog(lt, EKS, 0.35)), ekSm = E.inOut(prog(lt, ev('name') - 0.4, 0.4)), ekOut = E.inOut(prog(lt, W - 0.25, 0.3));
+        ek.style.display = ekIn > 0 && ekOut < 1 ? 'block' : 'none';
+        ek.style.transform = `translate(${265 * ekSm + (1 - ekIn) * 700 + ekOut * 640}px,${190 * ekSm}px) rotate(${(1 - ekIn) * 8}deg) scale(${(0.7 + 0.3 * ekIn) * lerp(1, 0.52, ekSm)})`;
+        ekl.forEach((r, i) => { const p = prog(lt, EKS + 0.2 + i * (HK ? 0.08 : 0.13), 0.18); r.style.opacity = p; r.style.filter = 'none'; r.style.transform = `translateX(${(1 - E.out(p)) * 40}px)`; });
+      }
+      ekv.style.transform = `scale(${1 + 0.16 * Math.sin(prog(lt, EKR, 0.35) * Math.PI) + (HK ? 0.16 * Math.sin(prog(lt, 0.05, 0.35) * Math.PI) : 0)})`;
+      s.root.style.transform = lt >= EKR && lt < EKR + 0.5 ? `translate(${shake(lt, EKR, 16, 0.4)}px,0)` : HK && lt < 0.5 ? `translate(${shake(lt, 0.05, 16, 0.4)}px,0)` : 'none';
       // defter: -450 TL yazılır
       const np = prog(lt, W + 0.3, 0.3);
       nb.style.display = np > 0 && lt < ev('cta') ? 'block' : 'none';
@@ -1155,7 +1163,7 @@ function defineValue() {
       tick.style.display = tk > 0 && lt < ev('cta') ? 'block' : 'none';
       tick.style.transform = `scale(${E.back(tk)}) rotate(-8deg)`;
       const ap = prog(lt, FEEL, 0.8);
-      ah2.style.display = ap > 0 && ap < 1 ? 'block' : 'none';
+      ah2.style.display = ap > 0 && ap < 1 && o.feelAh !== false ? 'block' : 'none';
       ah2.style.transform = `translateY(${-ap * 40}px) scale(${E.back(Math.min(1, ap * 3))})`;
       // Ceviz'ler
       const SL = ST(o.left, lt, 'idle'), SR = ST(o.right, lt, 'idle');

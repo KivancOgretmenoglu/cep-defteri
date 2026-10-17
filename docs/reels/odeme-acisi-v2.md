@@ -3,18 +3,16 @@
 v1: `odeme-acisi.mp4` (19,15 sn, 1080×1920). 10 kişilik panelin (5 uzman, 5 izleyici) ortalaması **6,6/10**.
 v2'nin hedefi: CTA/marka 5,5 → 8, mesaj netliği 6,3 → 8, süre ~17,5 sn.
 
-## Durum (17 Ekim 2026)
+## Durum (17 Ekim 2026): v5 yayında
 
-`promo/out/odeme-acisi.mp4` mevcut seslendirmeyle yeniden render edildi. Uygulananlar:
-- Ekstre kalem kalem, ekranın ortasında büyük: market 610 + yemek 1.150 + kahve 765 + abonelik 425 + kıyafet 1.350 = 4.300 TL. "Adı: ödeme acısı" anında kart paneline küçülüyor.
-- Başlık "Nakit acıtır, kart acıtmaz" → "Nakit hemen acıtır, kart sonra…" (mutlak iddia gitti, ekstreye açık döngü).
-- "Yazınca acı geri gelir" anında kart ibresi sarıdan kırmızı sınırına çıkıyor; başlık "Yazınca acı geri gelir, fren de gelir".
-- Defterdeki "CEP DEFTERİ" etiketi 26 → 36 px; CTA boyunca "Cep Defteri · @cep_defteri" künyesi.
-- Instagram açıklaması (`promo/brand/reels-metinleri.md` #16): erteleme, eğilim notu, ekstre dökümü.
+v4, gerçekçilik kurallarıyla (taban oranlar, varsayılan "hiçbir şey yapmam") 10 ajana yeniden puanlatıldı: ortalama 5,1/10, gerçek eylem 10/10 "hiçbiri". Ortak bulgulara göre v5 (`promo/out/odeme-acisi.mp4`, 20,9 sn):
+- Hook sonuçla açılıyor: "Ekstre: 4.300 TL?!", kalemler bulanık; tahmin boşluğu kalktı.
+- Ekstre 3 büyük kalem: market 610 + yemek 1.150 + kahve, abonelik… 2.540 = 4.300 TL.
+- Kavram düzeltildi: "Kartla öderken acımaz, hesap ay sonuna kalır." "Acı geri gelir" iddiası çıktı; yerine "harcaman gözünün önünde olsun".
+- "Kartla ödedin mi? Cep Defteri'ne yaz"; CTA "Kartla 'bir şey olmaz' diyen arkadaşına gönder"; künye sincaplardan uzakta (y 985).
+- Yeni seslendirme: 5 satır (Buğra, eleven_v4, hepsi voice_check UYGUN; CTA ikinci denemede).
 
-- Yeni seslendirme (Buğra, eleven_v4, voice_check UYGUN): hook "Aynı dört yüz elli lira. Hangisi acıtır?" (2,6 → 2,1 sn) ve "Buna ödeme acısı denir. Kart acıyı silmez, erteler!" (yeni başlık kartıyla). Süre 19,15 → 20,5 sn.
-
-Bekleyenler: S5 tam ekran uygulama akışı ve ~17,5 sn'ye kısaltma. Aşağıdaki senaryo bu tam sürümü anlatıyor.
+Bekleyen: tam ekran uygulama akışı (S5) ve 16 sn altına kısaltma.
 
 ## v1 panel özeti
 

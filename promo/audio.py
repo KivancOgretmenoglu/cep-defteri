@@ -1352,9 +1352,13 @@ def cue_cinema(t0, skip=0, o=None):
 def cue_payPain(t0, skip=0, o=None):
     o = o or {}
     T = at(t0, skip)
-    if 'pay' in o:
+    if 'hookEnd' in o:  # hook: ekstre şoku önce, sonra yukarı fırlar
+        put(SFX, slam_hit(0.8), T(0.05), 0.7)
+        put(SFX, stereo_move(whoosh(0.35, 500, 3000), 0.4, 0.4), T(o['hookEnd'] - 0.3), 0.45)
+    if 'pay' in o and 'hookEnd' not in o:
         put(SFX, woodblock(True), T(o['pay'] - 0.7), 0.55)  # tahmin anı: tik-tak-tik
         put(SFX, woodblock(False), T(o['pay'] - 0.45), 0.6); put(SFX, woodblock(True), T(o['pay'] - 0.2), 0.6)
+    if 'pay' in o:
         for i in range(3):
             tb = o['pay'] + i * 0.4
             put(SFX, flutter(0.35), T(tb), 0.5, pan=-0.5)

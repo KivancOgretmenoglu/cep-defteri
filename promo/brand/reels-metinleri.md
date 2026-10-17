@@ -330,20 +330,20 @@ En son neye "paraya yazık" diye katlandın? Yorumlara yaz 👇
 #batıkmaliyet #sinema #öğrencibütçesi #davranışsalekonomi #paraipuçları
 ```
 
-## 16 · odeme-acisi (kavram: ödeme acısı, seslendirme: Buğra, döngülü, 20,5 sn)
+## 16 · odeme-acisi (kavram: ödeme acısı, seslendirme: Buğra, döngülü, 20,9 sn, v5)
 
 **Açıklama:**
 ```
-Ödeme acısı: aynı 450 TL nakitte mi acır, kartta mı? 💳
+Ekstre 4.300 TL geldi, nereye gittiğini hatırlıyor musun? 💳
 
-Nakitte her banknot elinden çıkarken hissedersin. Kartta sadece "bip"; acı kaybolmaz, ay sonuna ertelenir.
-Acı olmayınca fren de olmaz: sepete +45, +55, +60 derken ay sonu ekstre gelir.
-Buna ödeme acısı denir: parayı elinden çıkarken hissetmek harcamayı frenler, kartta bu fren zayıflar. Bu bir eğilim, herkeste aynı güçte değil. Tutarlar örnek (ekstre: market 610 + yemek 1.150 + kahve 765 + abonelik 425 + kıyafet 1.350).
-Araştırma: MIT'deki bir deneyde kartla ödeyecek olanlar aynı maç biletine nakitle ödeyeceklerden çok daha yüksek fiyat teklif etti (Prelec & Simester, 2001).
+Ödeme acısı: parayı öderken hissettiğin o küçük "ah". Nakitte her banknotta hissedersin, kartta sadece "bip" dersin.
+Ödeme anı acımayınca fren de zayıflar: sepete +45, +55, +60 derken hesap ay sonuna kalır.
+Bu bir eğilim, herkeste aynı güçte değil. Araştırma: MIT'deki bir deneyde kartla ödeyecek olanlar aynı maç biletine nakitle ödeyeceklerden çok daha yüksek fiyat teklif etti (Prelec & Simester, 2001).
+Tutarlar örnek (ekstre: market 610 + yemek 1.150 + kahve, abonelik ve kıyafet 2.540).
 
-Çözüm basit: kartla ödediysen hemen yaz. Yazınca harcama görünür olur, fren geri gelir.
+Çözüm basit: kartla ödediysen hemen yaz, harcaman gözünün önünde olsun.
 
-Kartla ödeyince sepetine en son ne ekledin? Yorumlara yaz 👇
+Senin bu ayki ekstren kaç geldi? Yorumlara yaz 👇
 📌 Kaydet, bir dahaki kartlı alışverişte aç.
 
 #ödemeacısı #kredikartı #öğrencibütçesi #davranışsalekonomi #paraipuçları
