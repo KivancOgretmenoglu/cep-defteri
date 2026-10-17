@@ -1018,7 +1018,7 @@ function defineValue() {
       el('div', 'abs', g, { left: '138px', top: '138px', width: '28px', height: '28px', background: '#2A1E1A' });
       const lb = el('div', 'abs it', g, { left: 0, right: 0, top: '168px', textAlign: 'center', fontSize: '38px', color: '#6e5f55' }); lb.textContent = 'ACI';
       const q = el('div', 'abs it', g, { left: '128px', top: '26px', fontSize: '80px', color: '#4351A3' }); q.textContent = '?';
-      return { g, nd, q };
+      return { g, nd, q, lb };
     };
     const gl = gauge(L), gr = gauge(R);
     const price = [L, R].map((cx) => { const p = el('div', 'abs it', s.root, { left: px(cx - 200), width: '400px', top: '888px', textAlign: 'center', fontSize: '84px', color: '#2A1E1A' }); p.textContent = '450 TL'; return p; });
@@ -1049,6 +1049,7 @@ function defineValue() {
     const ekv = ek.querySelector('.ekv');
     // defter
     const nb = el('div', 'abs', s.root, { left: '600px', top: '882px', width: '400px', height: '196px', boxSizing: 'border-box', background: 'repeating-linear-gradient(#FFFDF4 0 46px, #BFD3EA 46px 49px)', border: '6px solid #2A1E1A', borderRadius: '14px', zIndex: 6, display: 'none', padding: '44px 34px' });
+    el('div', 'abs', nb, { left: '18px', top: '6px', fontSize: '26px', fontWeight: 800, letterSpacing: '.12em', color: '#AE4716' }).textContent = 'CEP DEFTERİ';
     const nbt = el('div', 'it', nb, { fontSize: '88px', color: '#C0392B', lineHeight: '1', whiteSpace: 'nowrap' });
     const ah2 = el('div', 'abs it', s.root, { left: '915px', top: '1090px', fontSize: '84px', color: '#D9622B', display: 'none', zIndex: 6, textShadow: '4px 4px 0 #fff, -2px -2px 0 #fff' }); ah2.textContent = 'ah';
     const ST = (arr, lt, d) => (arr || []).reduce((a, p) => (lt >= p[0] ? p : a), [0, d]);
@@ -1057,30 +1058,38 @@ function defineValue() {
       const PAY = ev('pay'), BIP = ev('bip'), EX = ev('extras'), EKS = ev('ekS'), EKR = ev('ekR'), W = ev('write'), FEEL = ev('feel');
       // tahmin: soru işaretleri
       [gl, gr].forEach((g) => { g.q.style.display = lt < PAY ? 'block' : 'none'; g.q.style.transform = `scale(${1 + 0.15 * Math.sin(lt * 7)})`; });
+      const amp = lt < PAY ? 1 - E.out(prog(lt, PAY - 0.35, 0.35)) : 0, hunt = (ph) => amp * (0.17 + 0.15 * Math.sin(lt * 4.4 + ph));
+      const hopL = 34 * Math.sin(prog(lt, 1.35, 0.32) * Math.PI), hopR = 34 * Math.sin(prog(lt, 1.75, 0.32) * Math.PI);
+      vs.style.transform = `scale(${1 + 0.3 * (1 - E.out(prog(lt, 0, 0.45))) + 0.08 * Math.sin(prog(lt, 1.35, 0.4) * Math.PI)})`;
+      const say450 = 0.16 * Math.sin(prog(lt, 0.35, 0.6) * Math.PI);
+      price[0].style.transform = `scale(${1 + say450})`;
+      // ad anında "ACI" etiketleri kırmızı nabız
+      const nm = prog(lt, ev('name'), 0.6);
+      [gl, gr].forEach((g) => { g.lb.style.transform = `scale(${1 + 0.7 * Math.sin(nm * Math.PI)})`; g.lb.style.color = nm > 0 && nm < 1 ? '#E8322A' : '#6e5f55'; });
       // sol ibre: her banknotta yükselir
       let vl = 0;
       [0, 1, 2].forEach((i) => { vl += 0.32 * E.back(prog(lt, PAY + i * 0.4 + 0.15, 0.3)); });
-      vl = Math.min(1, vl) + (vl > 0.6 ? Math.sin(lt * 37) * 0.015 : 0);
+      vl = Math.min(1, vl) + (vl > 0.6 ? Math.sin(lt * 37) * 0.015 : 0) + hunt(0);
       gl.nd.style.transform = `rotate(${-90 + 180 * vl}deg)`;
       // sağ ibre: bip'te kıpırdar, ekstrede tavan, yazınca orta
       let vr = 0.03 + 0.07 * Math.exp(-Math.max(0, lt - BIP) * 6) * (lt >= BIP ? 1 : 0);
       if (lt >= EKR) vr = 0.03 + 0.97 * E.back(prog(lt, EKR, 0.35)) + Math.sin(lt * 31) * 0.015;
       if (lt >= W) vr = lerp(vr, 0.04, E.out(prog(lt, W, 0.3)));
       if (lt >= FEEL) vr = 0.04 + 0.5 * E.back(prog(lt, FEEL, 0.45)) + Math.sin(lt * 9) * 0.01;
-      gr.nd.style.transform = `rotate(${-90 + 180 * Math.min(1.05, vr)}deg)`;
+      gr.nd.style.transform = `rotate(${-90 + 180 * Math.min(1.05, vr + hunt(Math.PI))}deg)`;
       // fiyat: sepet büyüdükçe artar
       const INC = [45, 55, 60], land = (i) => EX + i * 0.35 + 0.3;
       const pc = INC.reduce((a, v, i) => a + v * E.out(prog(lt, land(i), 0.25)), 0);
       price[1].textContent = lt >= W ? '450 TL' : `${fmt(450 + pc)} TL`;
-      price[1].style.transform = `scale(${1 + INC.reduce((a, v, i) => a + 0.14 * Math.sin(prog(lt, land(i), 0.25) * Math.PI), 0)})`;
+      price[1].style.transform = `scale(${1 + say450 + INC.reduce((a, v, i) => a + 0.14 * Math.sin(prog(lt, land(i), 0.25) * Math.PI), 0)})`;
       price[1].style.color = pc > 1 && lt < W ? '#C0392B' : '#2A1E1A';
-      price[1].style.display = lt >= W + 0.3 && lt < ev('cta') ? 'none' : 'block';
+      price[1].style.display = lt >= EKS + 0.3 && lt < ev('cta') ? 'none' : 'block';  // ekstre ve defter boyunca gizli: 610 TL arada geri görünmesin
       // banknotlar kasaya uçar
       bills.forEach((b, i) => {
         const p = prog(lt, PAY + i * 0.4, 0.55);
         const x0 = L + 30 + i * 26, y0 = 1250 - i * 14, e = E.inOut(p);
         b.style.display = p < 1 ? 'block' : 'none';
-        b.style.transform = `translate(${lerp(x0, L, e) - 77}px,${lerp(y0, 895, e) - Math.sin(p * Math.PI) * 90}px) rotate(${(-12 + i * 10) * (1 - e) + Math.sin(p * Math.PI) * 20}deg) scale(${1 - 0.6 * e})`;
+        b.style.transform = `translate(${lerp(x0, L, e) - 77}px,${lerp(y0, 895, e) - Math.sin(p * Math.PI) * 90 - hopL}px) rotate(${(-12 + i * 10) * (1 - e) + Math.sin(p * Math.PI) * 20}deg) scale(${1 - 0.6 * e})`;
         b.style.opacity = 1 - Math.max(0, p - 0.7) * 3.3;
       });
       ahs.forEach((a, i) => {
@@ -1091,7 +1100,7 @@ function defineValue() {
       });
       // kart POS'a gider, bip
       const go = E.inOut(prog(lt, BIP - 0.35, 0.3)), back = E.inOut(prog(lt, BIP + 0.45, 0.3));
-      const cpx = lerp(R + 30, 850, go - back), cpy = lerp(1260, 1035, go - back);
+      const cpx = lerp(R + 30, 850, go - back), cpy = lerp(1260, 1035, go - back) - hopR;
       card.style.transform = `translate(${cpx - 72}px,${cpy - 42}px) rotate(${lerp(-14, 8, go - back)}deg)`;
       card.style.display = lt >= W + 0.2 && lt < ev('cta') ? 'none' : 'block';
       const bp = prog(lt, BIP, 0.8);
@@ -1131,7 +1140,7 @@ function defineValue() {
       const SL = ST(o.left, lt, 'idle'), SR = ST(o.right, lt, 'idle');
       let x = L, y = FL, rot = 0, sx = 1, sy = 1, k = lt - SL[0];
       sweat.style.display = 'none';
-      if (SL[1] === 'idle') { cl.set('calm', null, blink(lt)); rot = Math.sin(lt * 2) * 3; }
+      if (SL[1] === 'idle') { cl.set('calm', null, blink(lt)); rot = Math.sin(lt * 2) * 3; y -= hopL; }
       else if (SL[1] === 'pay') {
         cl.set('thoughtful', 'face', 'squeeze');
         const j = [0, 1, 2].reduce((a, i) => a + Math.exp(-Math.max(0, lt - (PAY + i * 0.4 + 0.15)) * 7) * (lt >= PAY + i * 0.4 + 0.15 ? 1 : 0), 0);
@@ -1142,7 +1151,8 @@ function defineValue() {
       else if (SL[1] === 'happy') { cl.set('celebrate', 'up', 'happy'); const h = hop(lt, 0.45, 30); y -= h.y; sx = h.sx; sy = h.sy; }
       cl.put(x, y, { rot, sx, sy });
       x = R; y = FL; rot = 0; sx = 1; sy = 1; k = lt - SR[0];
-      if (SR[1] === 'idle') { cr.set('calm', null, blink(lt + 0.7)); rot = Math.sin(lt * 2 + 1) * 3; }
+      if (SR[1] === 'idle') { cr.set('calm', null, blink(lt + 0.7)); rot = Math.sin(lt * 2 + 1) * 3; y -= hopR; }
+      else if (SR[1] === 'sad') { cr.set('thoughtful', null, 'half'); rot = -6 + Math.sin(lt * 1.5) * 2; y += 10 * E.out(Math.min(1, k * 3)); }
       else if (SR[1] === 'tap') { cr.set('happy', 'up', 'happy'); const h = hop(lt, 0.5, 24); y -= h.y; sx = h.sx; sy = h.sy; }
       else if (SR[1] === 'greedy') { cr.set('celebrate', 'up', 'happy'); const h = hop(lt, 0.32, 40); y -= h.y; sx = h.sx; sy = h.sy; rot = Math.sin(lt * 9) * 6; }
       else if (SR[1] === 'shock') { cr.set('curious', 'up', 'x'); const j = Math.exp(-k * 4); rot = 14 * Math.sin(k * 18) * j; y -= 60 * j; }
@@ -1175,8 +1185,10 @@ function defineValue() {
     // zarflar
     const envs = Array.from({ length: 7 }, (_, i) => pixEl(s.root, ZARF, ZARF_C, 11, { zIndex: 3 }));
     // harcamalar
+    const led = el('div', 'abs', s.root, { left: '776px', top: '626px', width: '284px', height: '344px', boxSizing: 'border-box', background: 'repeating-linear-gradient(#FFFDF4 0 86px, #BFD3EA 86px 89px)', backgroundPosition: '0 52px', border: '6px solid #2A1E1A', borderRadius: '14px', display: 'none', zIndex: 3, transformOrigin: '50% 0%' });
+    el('div', 'abs', led, { left: '16px', top: '8px', fontSize: '26px', fontWeight: 800, letterSpacing: '.12em', color: '#AE4716' }).textContent = 'CEP DEFTERİ';
     const buys = [[PIZZAP, PIZZAP_C, 10, '-450', 0], [PADP, PADP_C, 8, '-600', 12], [HEADPH, HEADPH_C, 7, '-450', 2]].map(([r, c, cell, t, dy], i) => {
-      const row = el('div', 'abs', s.root, { left: '790px', top: px(650 + i * 100), width: '260px', height: '90px', display: 'none', zIndex: 4 });
+      const row = el('div', 'abs', s.root, { left: '792px', top: px(690 + i * 90), width: '260px', height: '90px', display: 'none', zIndex: 4 });
       row.innerHTML = `<div style="position:absolute;left:0;top:${dy}px">${pix(r, c, cell)}</div><div class="it" style="position:absolute;left:112px;top:4px;font-size:68px;line-height:1;color:#C0392B;text-shadow:4px 4px 0 #fff">${t}</div>`;
       return row;
     });
@@ -1200,6 +1212,11 @@ function defineValue() {
     const same = el('div', 'abs it', s.root, { left: '540px', top: '872px', fontSize: '72px', color: '#2A1E1A', background: '#F2B63C', padding: '8px 26px', borderRadius: '14px', border: '6px solid #2A1E1A', display: 'none', zIndex: 4, whiteSpace: 'nowrap' }); same.textContent = 'AYNI PARA';
     const eq = el('div', 'abs', s.root, { left: '486px', top: '738px', width: '108px', height: '74px', display: 'none' });
     eq.innerHTML = '<div style="height:22px;background:#2A1E1A;border-radius:4px"></div><div style="height:22px;margin-top:30px;background:#2A1E1A;border-radius:4px"></div>';
+    const clock = el('div', 'abs it', s.root, { left: '96px', top: '812px', fontSize: '44px', color: '#fff', background: '#2F8F5A', padding: '6px 18px', borderRadius: '12px', border: '5px solid #2A1E1A', display: 'none', zIndex: 3, whiteSpace: 'nowrap', transformOrigin: '50% 0%' }); clock.textContent = '= 1 HAFTA MESAİ';
+    const bub = el('div', 'abs', s.root, { left: '742px', top: '1078px', width: '300px', height: '150px', boxSizing: 'border-box', background: '#fff', border: '6px solid #2A1E1A', borderRadius: '40px', display: 'none', zIndex: 5, transformOrigin: '15% 100%' });
+    bub.innerHTML = `<div style="position:absolute;left:22px;top:30px">${pix(PIZZAP, PIZZAP_C, 8)}</div><div style="position:absolute;left:104px;top:44px">${pix(PADP, PADP_C, 6)}</div><div style="position:absolute;left:186px;top:28px">${pix(HEADPH, HEADPH_C, 6)}</div>`
+      + '<div style="position:absolute;left:-26px;top:118px;width:28px;height:28px;border-radius:50%;background:#fff;border:5px solid #2A1E1A"></div><div style="position:absolute;left:-50px;top:150px;width:16px;height:16px;border-radius:50%;background:#fff;border:4px solid #2A1E1A"></div>';
+    const bq = el('div', 'abs it', s.root, { left: '992px', top: '1040px', fontSize: '110px', color: '#C0392B', display: 'none', zIndex: 6, textShadow: '5px 5px 0 #fff' }); bq.textContent = '?';
     const m = new Mascot(s.root, { who: 'karamel', w: 520 });
     const ST = (arr, lt, d) => (arr || []).reduce((a, p) => (lt >= p[0] ? p : a), [0, d]);
     s.update = (lt) => {
@@ -1228,6 +1245,9 @@ function defineValue() {
         e.style.opacity = 0.95;
       });
       // harcamalar cüzdandan uçar
+      const lp = prog(lt, D1 - 0.1, 0.25);
+      led.style.display = lp > 0 && lt < WK ? 'block' : 'none';
+      led.style.transform = `scaleY(${E.back(lp)})`;
       buys.forEach((row, i) => {
         const p = prog(lt, [D1, D2, D3][i], 0.3);
         row.style.display = p > 0 && lt < WK ? 'block' : 'none';
@@ -1253,6 +1273,13 @@ function defineValue() {
       same.style.display = sp > 0 ? 'block' : 'none';
       same.style.transform = `translateX(-50%) scale(${lerp(2.2, 1, E.out(sp))}) rotate(-6deg)`;
       eq.style.display = lt >= LB + 0.3 ? 'block' : 'none';
+      const ck = prog(lt, ev('clock'), 0.35);
+      clock.style.display = ck > 0 ? 'block' : 'none';
+      clock.style.transform = `translateY(${(1 - E.out(ck)) * -70}px) rotate(${-4 + (1 - ck) * -10}deg) scale(${E.back(ck)})`;
+      const bp = prog(lt, ev('ask'), 0.35);
+      bub.style.display = bq.style.display = bp > 0 && lt < ev('cta') ? 'block' : 'none';
+      bub.style.transform = `scale(${E.back(bp)})`;
+      bq.style.transform = `scale(${E.back(prog(lt, ev('ask') + 0.25, 0.3))}) rotate(${Math.sin(lt * 6) * 10}deg)`;
       // Karamel
       const S = ST(o.karamel, lt, 'rich'), k = lt - S[0];
       let x = 540, y = FL, rot = 0, sx = 1, sy = 1;
@@ -1265,6 +1292,7 @@ function defineValue() {
         tray.style.display = 'block'; tray.style.transform = `translate(${x + 190}px,${y - 410 + Math.sin(lt * 10) * 6}px) rotate(${Math.sin(lt * 5) * 6}deg)`;
         sweat.forEach((w, i) => { const q = ((lt + i * 0.35) % 0.7) / 0.7; w.style.display = 'block'; w.style.transform = `translate(${x - 120 + i * 230}px,${y - 420 + q * 70}px)`; w.style.opacity = 1 - q * 0.6; });
       }
+      else if (S[1] === 'aha') { m.set('curious', 'up', 'wide'); const j = Math.exp(-k * 5); y -= 50 * Math.sin(Math.min(1, k * 3) * Math.PI) * j + 0; rot = Math.sin(lt * 2) * 3; }
       else if (S[1] === 'shrug') { m.set('curious', null, 'wide'); rot = Math.sin(lt * 2) * 4; }
       else if (S[1] === 'think') { m.set('thoughtful', null, 'mood'); rot = -6 + Math.sin(lt * 1.6) * 3; }
       else if (S[1] === 'ok') { m.set('celebrate', 'up', 'happy'); const h = hop(lt, 0.45, 34); y -= h.y; sx = h.sx; sy = h.sy; }

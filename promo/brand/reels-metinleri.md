@@ -334,7 +334,7 @@ En son neye "paraya yazık" diye katlandın? Yorumlara yaz 👇
 
 **Açıklama:**
 ```
-Aynı 450 TL. Nakitte mi acır, kartta mı? 💳
+Ödeme acısı: aynı 450 TL nakitte mi acır, kartta mı? 💳
 
 Nakitte her banknot elinden çıkarken hissedersin. Kartta sadece "bip".
 Acı olmayınca fren de olmaz: sepete +45, +55, +60 derken ay sonu ekstre gelir.
@@ -343,6 +343,7 @@ Buna ödeme acısı denir. Tutarlar örnek.
 Çözüm basit: kartla ödediysen hemen yaz. Yazınca acı geri gelir.
 
 Kartla ödeyince sepetine en son ne ekledin? Yorumlara yaz 👇
+📌 Kaydet, bir dahaki kartlı alışverişte aç.
 
 #ödemeacısı #kredikartı #öğrencibütçesi #davranışsalekonomi #paraipuçları
 ```
@@ -360,6 +361,7 @@ Para aynı para. "Hediye" ya da "maaş" diye etiketi yok. Buna bulunmuş para et
 Harcamadan önce sor: "Çalışarak kazansaydım böyle harcar mıydım?"
 
 Harçlığın en hızlı neye gitti? Yorumlara yaz 👇
+📌 Kaydet, bir dahaki harçlıkta aç.
 
 #bulunmuşpara #bayramharçlığı #öğrencibütçesi #davranışsalekonomi #paraipuçları
 ```

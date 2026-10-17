@@ -1414,6 +1414,10 @@ def cue_harclik(t0, skip=0, o=None):
         put(SFX, ding_ding(), T(o['name']), 0.5)
     if 'think' in o:
         put(SFX, bloop(700, 500, 0.08, 0.3), T(o['think']))
+    if 'clock' in o:
+        put(SFX, stamp(), T(o['clock'] + 0.2), 0.45, pan=-0.4); put(SFX, pling(1318, 0.25, 0.3), T(o['clock'] + 0.3), pan=-0.4)
+    if 'ask' in o:
+        put(SFX, bloop(500, 1100, 0.1, 0.35), T(o['ask']), pan=0.4); put(SFX, bloop(900, 600, 0.08, 0.3), T(o['ask'] + 0.25), pan=0.4)
     if 'cta' in o:
         put(SFX, popper(), T(o['cta']), 0.45); put(SFX, woof(), T(o['cta'] + 0.3), 0.45)
 
