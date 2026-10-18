@@ -234,11 +234,30 @@ def estimate_caps(text, a, b, y, mx=4):
         if len(cur) >= mx or re.search(r'[.,:?!]$', w) or len(' '.join(words[i] for i in cur) + ' ' + nxt) > 17:
             out.append(cur); cur = []
     if cur: out.append(cur)
+    # tek sözcükle kalan kısa öbeği önceki öbekle dengele: "Buna çapa etkisi / denir." → "Buna çapa / etkisi denir."
+    w8 = lambda g: sum(syl[i] for i in g)
+    for j in range(1, len(out)):
+        a_, b_ = out[j - 1], out[j]
+        if len(b_) == 1 and len(a_) >= 2 and not re.search(r'[.,:?!]$', words[a_[-1]]):
+            na, nb = a_[:-1], [a_[-1]] + b_
+            if len(' '.join(words[i] for i in nb)) <= 17 and abs(w8(na) - w8(nb)) < abs(w8(a_) - w8(b_)):
+                out[j - 1], out[j] = na, nb
     caps = []
     for g in out:
         end = times[g[-1] + 1] if g[-1] + 1 < len(times) else b
         caps.append([round(times[g[0]] - 0.03, 2), round(end + 0.3, 2), ' '.join(words[k] for k in g), y, [times[k] for k in g]])
     return caps
+
+
+LINE_LUFS = -20.5  # her satır bu yüksekliğe çekilir: ham ElevenLabs satırları 8 LU'ya kadar farklı çıkabiliyor
+
+
+def lufs(x):
+    """Mono sinyalin entegre yüksekliği (EBU R128, ffmpeg ebur128)."""
+    err = subprocess.run(['ffmpeg', '-v', 'info', '-f', 'f32le', '-ar', str(SR), '-ac', '1', '-i', '-', '-af', 'ebur128', '-f', 'null', '-'],
+                         input=x.astype(np.float32).tobytes(), capture_output=True).stderr.decode()
+    m = re.findall(r'I:\s+(-?[\d.]+) LUFS', err)
+    return float(m[-1]) if m else None
 
 
 def cmd_place(name):
@@ -256,9 +275,13 @@ def cmd_place(name):
         if tp != 1: af.append(f'atempo={tp}')
         cmd = ['ffmpeg', '-v', 'error', '-i', os.path.join(HERE, f)] + (['-af', ','.join(af)] if af else []) + ['-f', 'f32le', '-ac', '1', '-ar', str(SR), '-']
         x, _ = trim(np.frombuffer(subprocess.run(cmd, capture_output=True).stdout, dtype=np.float32))
+        L = lufs(x)
+        # satırlar arası yükseklik eşitlemesi; çok kısa satırda ebur128 −70 döner, o zaman dokunma
+        g = 0.0 if L is None or L <= -69 else float(np.clip(r.get('voiceLufs', LINE_LUFS) - L, -12, 12))
+        x = x * 10 ** (g / 20)
         i = int(t0 * SR)
         track[i : i + len(x)] += x[: max(0, n - i)]
-        print(f'{t0:6.2f}–{t0 + len(x) / SR:5.2f} sn  {f}')
+        print(f'{t0:6.2f}–{t0 + len(x) / SR:5.2f} sn  {f}  ({g:+.1f} dB)')
         if len(item) > 2 and item[2]:  # metin varsa hece ağırlıklı kelime zamanlı altyazı
             caps += estimate_caps(item[2], t0, t0 + len(x) / SR, r.get('captionY', 1330), r.get('captionMaxWords', 4))
     if caps and r.get('captionUntil'):  # CTA kutusu gelmeden altyazı biter

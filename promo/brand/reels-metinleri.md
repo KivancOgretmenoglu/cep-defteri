@@ -373,15 +373,20 @@ Harçlığın en hızlı neye gitti? Yorumlara yaz 👇
 **Açıklama:**
 ```
 Çapa etkisi: üstü çizili fiyat neden ucuz görünür? ⚓
+En son hangi üstü çizili fiyat aklını çeldi? Yorumlara yaz 👇
 
-Etikette 4.000 TL'nin üstü çizilip 2.500 TL yazınca Pamuk montu kelepir sandı. Oysa 5 dakika önce yan dükkânda aynı montu aynı fiyata görüp "pahalı" demişti.
-Fiyat aynı; değişen tek şey ilk gördüğü sayı. Buna çapa etkisi denir: aklımız ilk gördüğü sayıya takılır, sonrakileri ona göre tartar. Tutarlar örnek.
-Araştırma: Çarkta 65 gören katılımcılar, BM'deki Afrika ülkelerinin oranını 10 görenlerden çok daha yüksek tahmin etti (Tversky ve Kahneman, 1974).
+Pamuk, üstü çizili 4.000 TL'nin yanında 2.500 TL'yi görünce montu kelepir sandı. 5 dakika önce yan dükkânda aynı montu aynı fiyata "pahalı" bulmuştu.
+Fiyat aynı; asıl değişen ilk gördüğü sayı. Buna çapa etkisi denir: ilk sayı, sonrakileri tarttığın ölçü olur. Tutarlar örnek.
+Araştırma: Gözlerinin önünde çevrilen şans çarkında 65 çıkanlar BM'deki Afrika ülkelerinin oranını %45, 10 çıkanlar %25 tahmin etti (medyan; Tversky ve Kahneman, 1974). Çarktaki sayı rastgeleydi: çapa, sayı doğru olmasa da işler.
 
-Çapayı sen seç: alışverişe çıkmadan bütçeni yaz, etikete sonra bak.
+📌 Kaydet, indirimde şu 3 soruyu sor:
+1) Bütçem kaç?
+2) Üstü çizili sayıyı kapatsam yine alır mıydım?
+3) Başka yerde kaç?
 
-En son hangi üstü çizili fiyata kandın? Yorumlara yaz 👇
-📌 Kaydet, bir dahaki indirimde aç.
+Bütçeni Cep Defteri'ne yaz, etikete sonra bak. Android erken erişim yakında.
 
-#çapaetkisi #indirim #öğrencibütçesi #davranışsalekonomi #paraipuçları
+#çapaetkisi #indirim #öğrencibütçesi #davranışsalekonomi #paraipuçları #cepdefteri
 ```
+
+**Yayın notu:** 28 Ekim–10 Kasım arasında paylaş (11.11 ve Efsane Cuma öncesi indirim dönemi). Kapak karesi olarak 0,8 sn'yi seç. İlk yorumu sabitle: "Burada mesele mağazanın dürüstlüğü değil, ilk gördüğümüz sayının aklımızı çelmesi. Tutarlar örnek." "İndirim yanılgısı" reelsiyle arasında en az 5–7 gün bırak.

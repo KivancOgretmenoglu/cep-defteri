@@ -3663,15 +3663,15 @@
       ]
     },
     "captionPixel": true,
-    "captionY": 992,
+    "captionY": 1016,
     "captionMaxWords": 3,
     "captionUntil": 19.7,
     "boxes": [
       [
         0,
         4.15,
-        "Üstü çizili fiyat<br><b>yalan söylüyor</b>",
-        296,
+        "Üstü çizili fiyat<br><b>aklını çeliyor</b>",
+        308,
         {
           "size": 92,
           "pulse": true
@@ -3680,8 +3680,8 @@
       [
         4.2,
         6.3,
-        "Pamuk'a göre<br><b>kelepir!</b>",
-        296,
+        "Pamuk ikna oldu:<br><b>“Hemen alayım!”</b>",
+        308,
         {
           "size": 88,
           "pulse": true
@@ -3689,9 +3689,19 @@
       ],
       [
         6.4,
+        9.9,
+        "5 dakika önce,<br><b>yan dükkânda</b>",
+        308,
+        {
+          "size": 88,
+          "pulse": true
+        }
+      ],
+      [
+        9.95,
         11.45,
-        "Yan dükkânda aynı fiyat:<br><b>“Pahalı!”</b>",
-        296,
+        "Aynı mont, aynı fiyat:<br><b>“Pahalı!”</b>",
+        308,
         {
           "size": 80,
           "pulse": true
@@ -3701,7 +3711,7 @@
         11.55,
         14.95,
         "Fiyat aynı.<br><b>Değişen: ilk sayı</b>",
-        296,
+        308,
         {
           "size": 84,
           "pulse": true
@@ -3711,7 +3721,7 @@
         15.0,
         16.95,
         "Çapa etkisi:<br><b>ilk sayı aklını bağlar</b>",
-        296,
+        308,
         {
           "size": 78,
           "pulse": true
@@ -3721,7 +3731,7 @@
         17.0,
         19.7,
         "Önce bütçene bak,<br><b>sonra etikete</b>",
-        296,
+        308,
         {
           "size": 82,
           "pulse": true
@@ -3729,9 +3739,9 @@
       ],
       [
         19.75,
-        22.0,
+        22.25,
         "Üstü çizili fiyata kanan<br><b>arkadaşına gönder</b>",
-        296,
+        308,
         {
           "size": 74,
           "pulse": true
@@ -3740,8 +3750,8 @@
       [
         22.3,
         22.6,
-        "Üstü çizili fiyat<br><b>yalan söylüyor</b>",
-        296,
+        "Üstü çizili fiyat<br><b>aklını çeliyor</b>",
+        308,
         {
           "size": 92,
           "pulse": true
@@ -3853,7 +3863,7 @@
         "Çapayı sen seç: önce kendi bütçene bak, sonra etikete."
       ],
       [
-        19.75,
+        19.9,
         "assets/voice/capa/q7.mp3"
       ]
     ]

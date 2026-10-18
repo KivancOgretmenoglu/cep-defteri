@@ -1438,18 +1438,19 @@ def cue_anchor(t0, skip=0, o=None):
         put(SFX, paper_tear(0.25), T(0.05), 0.4); put(SFX, pling(1568, 0.3, 0.3), T(0.35), pan=0.4)
         for i in range(3):
             put(SFX, woodblock(i % 2 == 1), T(o['reveal'] - 0.75 + i * 0.25), 0.55)
-    if 'reveal' in o:  # kelepir!
-        put(SFX, cash_register(), T(o['reveal']), 0.4); put(SFX, ding_ding(), T(o['reveal'] + 0.1), 0.4)
-        for i in range(4):
-            put(SFX, bloop(700 + 150 * i, 1400 + 150 * i, 0.06, 0.25), T(o['reveal'] + 0.3 + i * 0.22), pan=-0.3)
+    if 'reveal' in o:  # kelepir! (kasa tahmin boşluğunda başlar, "Pamuk'a göre" açık kalsın)
+        put(SFX, cash_register(), T(o['reveal'] - 0.15), 0.4); put(SFX, ding_ding(), T(o['reveal'] + 0.1), 0.2)
+        for i in range(2):
+            put(SFX, bloop(700 + 300 * i, 1400 + 300 * i, 0.06, 0.25), T(o['reveal'] + 0.5 + i * 0.44), pan=-0.3)
     if 'rewind' in o:  # VHS geri sarma
-        put(SFX, stereo_move(whoosh(0.4, 4000, 300), 0.6, -0.6), T(o['rewind']), 0.55)
+        put(SFX, stereo_move(whoosh(0.25, 4000, 300), 0.6, -0.6), T(o['rewind'] - 0.2), 0.55)  # satır boşluğunda biter
         for i in range(6):
             put(SFX, key_click(0.35), T(o['rewind'] + 0.45 + i * 0.16), pan=-0.5 + i * 0.12)  # yan dükkâna yürüyüş
     if 'pricey' in o:
-        put(SFX, bloop(330, 160, 0.18, 0.45), T(o['pricey'])); put(SFX, sad_trombone()[: int(0.7 * SR)], T(o['pricey'] + 0.1), 0.3)
+        tb = sad_trombone()[: int(0.7 * SR)].copy(); tb[-int(0.06 * SR):] *= np.linspace(1, 0, int(0.06 * SR))  # kesilen son nota tıklamasın
+        put(SFX, bloop(330, 160, 0.18, 0.45), T(o['pricey'])); put(SFX, tb, T(o['pricey'] + 0.1), 0.22)
     if 'back' in o:  # ileri sarma: şimdi
-        put(SFX, stereo_move(whoosh(0.3, 300, 4000), -0.6, 0.6), T(o['back']), 0.5)
+        put(SFX, stereo_move(whoosh(0.3, 300, 4000), -0.6, 0.6), T(o['back'] - 0.15), 0.5)
         put(SFX, bloop(500, 1100, 0.07, 0.35), T(o['back'] + 0.45), pan=-0.4); put(SFX, bloop(500, 1100, 0.07, 0.35), T(o['back'] + 0.7), pan=0.4)
         put(SFX, pling(1318, 0.3, 0.35), T(o['back'] + 0.55))
     if 'first' in o:
@@ -1459,14 +1460,14 @@ def cue_anchor(t0, skip=0, o=None):
             put(SFX, clink(), T(o['name'] + i * 0.06), 0.25, pan=-0.3)
         put(SFX, slam_hit(0.7), T(o['name'] + 0.33), 0.6); put(SFX, boom(0.5), T(o['name'] + 0.33), 0.35)
     if 'lesson' in o:  # defter gelir, çapa deftere taşınır
-        put(SFX, stereo_move(whoosh(0.3, 800, 2400), 0.6, 0.2), T(o['lesson']), 0.4)
+        put(SFX, stereo_move(whoosh(0.3, 800, 2400), 0.6, 0.2), T(o['lesson'] - 0.15), 0.4)
         for i in range(4):
             put(SFX, clink(), T(o['lesson'] + 0.5 + i * 0.08), 0.22, pan=0.3)
         put(SFX, slam_hit(0.5), T(o['lesson'] + 1.2), 0.45)
     if 'over' in o:
         put(SFX, stamp(), T(o['over']), 0.6); put(SFX, bloop(400, 220, 0.12, 0.35), T(o['over'] + 0.2))
-    if 'cta' in o:
-        put(SFX, popper(), T(o['cta']), 0.45); put(SFX, ding_ding(), T(o['cta'] + 0.25), 0.35)
+    if 'cta' in o:  # konfeti çağrı satırından önce; zil yok (çağrının ilk sözcüğünü örtüyordu)
+        put(SFX, popper(), T(o['cta']), 0.45)
 
 
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
@@ -1829,11 +1830,11 @@ def master(mix, target_db=-15.5):
     rms = np.sqrt((loud ** 2).mean()) if len(loud) else 1e-3
     mix = mix * (10 ** (target_db / 20) / rms)
     mix = np.tanh(mix * 1.1) / 1.1 * 0.97
-    # örnekler arası tepe (true peak) ≤ −1 dBFS: AAC'ye çevrilirken kırpılmasın
+    # örnekler arası tepe (true peak) ≤ −2,5 dBFS: AAC kodlaması ~1 dB taşırır, mp4'te ≤ −1,5 dBTP kalsın
     from scipy.signal import resample_poly
     tp = max(np.abs(resample_poly(mix[:, c], 4, 1)).max() for c in range(2))
-    if tp > 0.89:
-        mix *= 0.89 / tp
+    if tp > 0.75:
+        mix *= 0.75 / tp
     fade = np.ones(N)
     fl = int((0.02 if REEL.get('loop') else 0.4) * SR)  # döngülü reels başa sessizce bağlanır
     fade[-fl:] = np.linspace(1, 0, fl)
