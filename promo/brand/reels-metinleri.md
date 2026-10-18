@@ -367,3 +367,21 @@ Harçlığın en hızlı neye gitti? Yorumlara yaz 👇
 
 #bulunmuşpara #bayramharçlığı #öğrencibütçesi #davranışsalekonomi #paraipuçları
 ```
+
+## 18 · capa-etkisi (kavram: çapa etkisi, seslendirme: Buğra, döngülü, 22,6 sn)
+
+**Açıklama:**
+```
+Çapa etkisi: üstü çizili fiyat neden ucuz görünür? ⚓
+
+Etikette 4.000 TL'nin üstü çizilip 2.500 TL yazınca Pamuk montu kelepir sandı. Oysa 5 dakika önce yan dükkânda aynı montu aynı fiyata görüp "pahalı" demişti.
+Fiyat aynı; değişen tek şey ilk gördüğü sayı. Buna çapa etkisi denir: aklımız ilk gördüğü sayıya takılır, sonrakileri ona göre tartar. Tutarlar örnek.
+Araştırma: Çarkta 65 gören katılımcılar, BM'deki Afrika ülkelerinin oranını 10 görenlerden çok daha yüksek tahmin etti (Tversky ve Kahneman, 1974).
+
+Çapayı sen seç: alışverişe çıkmadan bütçeni yaz, etikete sonra bak.
+
+En son hangi üstü çizili fiyata kandın? Yorumlara yaz 👇
+📌 Kaydet, bir dahaki indirimde aç.
+
+#çapaetkisi #indirim #öğrencibütçesi #davranışsalekonomi #paraipuçları
+```

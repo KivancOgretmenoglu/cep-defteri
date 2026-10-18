@@ -199,10 +199,31 @@ def cmd_make(name):
     print(f'Sonraki adım: python3 promo/audio.py {name} && node promo/render.mjs video {name}')
 
 
+ONES = ['', 'bir', 'iki', 'üç', 'dört', 'beş', 'altı', 'yedi', 'sekiz', 'dokuz']
+TENS = ['', 'on', 'yirmi', 'otuz', 'kırk', 'elli', 'altmış', 'yetmiş', 'seksen', 'doksan']
+
+
+def tr_number(n):
+    """1.234 → 'bin iki yüz otuz dört' (altyazıda rakam yazılan sayının okunuşu, hece sayımı için)."""
+    def three(k):
+        h, t, o = k // 100, k % 100 // 10, k % 10
+        return ([] if h < 2 else [ONES[h]]) + (['yüz'] if h else []) + ([TENS[t]] if t else []) + ([ONES[o]] if o else [])
+    th, rest = divmod(n, 1000)
+    return ' '.join(([] if th < 2 else three(th)) + (['bin'] if th else []) + three(rest)) or 'sıfır'
+
+
+def syllables(w):
+    """Kelimenin hece sayısı; "2.500" gibi rakamlar okunuşlarına göre sayılır."""
+    digits = re.sub(r'[^0-9]', '', w)
+    if digits and len(digits) <= 6:
+        w = tr_number(int(digits))
+    return max(1, len(re.findall(r'[aeıioöuüAEIİOÖUÜ]', w)))
+
+
 def estimate_caps(text, a, b, y, mx=4):
     """Satırın konuşma aralığına kelimeleri hece sayısına göre yayar; ≤4 kelimelik öbekler."""
     words = text.split()
-    syl = [max(1, len(re.findall(r'[aeıioöuüAEIİOÖUÜ]', w))) + (0.6 if re.search(r'[.,:?!]$', w) else 0) for w in words]
+    syl = [syllables(w) + (0.6 if re.search(r'[.,:?!]$', w) else 0) for w in words]
     tot, acc, times = sum(syl), 0, []
     for s_ in syl:
         times.append(round(a + (b - a) * acc / tot, 2)); acc += s_

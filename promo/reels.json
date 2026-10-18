@@ -3617,5 +3617,245 @@
         "assets/voice/bulunmus/p7.mp3"
       ]
     ]
+  },
+  "capa-etkisi": {
+    "title": "Kavram: çapa etkisi (sesli)",
+    "end": 22.6,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.45,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        6.35,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ],
+      [
+        6.35,
+        11.5,
+        "lofi"
+      ],
+      [
+        11.5,
+        22.6,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          6.3,
+          6.55
+        ]
+      ],
+      "lowpass": [
+        [
+          6.55,
+          11.45
+        ]
+      ]
+    },
+    "captionPixel": true,
+    "captionY": 992,
+    "captionMaxWords": 3,
+    "captionUntil": 19.7,
+    "boxes": [
+      [
+        0,
+        4.15,
+        "Üstü çizili fiyat<br><b>yalan söylüyor</b>",
+        296,
+        {
+          "size": 92,
+          "pulse": true
+        }
+      ],
+      [
+        4.2,
+        6.3,
+        "Pamuk'a göre<br><b>kelepir!</b>",
+        296,
+        {
+          "size": 88,
+          "pulse": true
+        }
+      ],
+      [
+        6.4,
+        11.45,
+        "Yan dükkânda aynı fiyat:<br><b>“Pahalı!”</b>",
+        296,
+        {
+          "size": 80,
+          "pulse": true
+        }
+      ],
+      [
+        11.55,
+        14.95,
+        "Fiyat aynı.<br><b>Değişen: ilk sayı</b>",
+        296,
+        {
+          "size": 84,
+          "pulse": true
+        }
+      ],
+      [
+        15.0,
+        16.95,
+        "Çapa etkisi:<br><b>ilk sayı aklını bağlar</b>",
+        296,
+        {
+          "size": 78,
+          "pulse": true
+        }
+      ],
+      [
+        17.0,
+        19.7,
+        "Önce bütçene bak,<br><b>sonra etikete</b>",
+        296,
+        {
+          "size": 82,
+          "pulse": true
+        }
+      ],
+      [
+        19.75,
+        22.0,
+        "Üstü çizili fiyata kanan<br><b>arkadaşına gönder</b>",
+        296,
+        {
+          "size": 74,
+          "pulse": true
+        }
+      ],
+      [
+        22.3,
+        22.6,
+        "Üstü çizili fiyat<br><b>yalan söylüyor</b>",
+        296,
+        {
+          "size": 92,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "anchor",
+        0,
+        {
+          "ask": 2.3,
+          "reveal": 4.2,
+          "rewind": 6.35,
+          "pricey": 10.6,
+          "back": 11.5,
+          "first": 13.6,
+          "name": 15.0,
+          "lesson": 16.45,
+          "over": 18.6,
+          "cta": 19.75,
+          "pamuk": [
+            [
+              0,
+              "wow"
+            ],
+            [
+              2.3,
+              "think"
+            ],
+            [
+              4.2,
+              "love"
+            ],
+            [
+              6.53,
+              "walk"
+            ],
+            [
+              7.6,
+              "look"
+            ],
+            [
+              10.6,
+              "nope"
+            ],
+            [
+              11.65,
+              "shrug"
+            ],
+            [
+              15.0,
+              "aha"
+            ],
+            [
+              16.45,
+              "budget"
+            ],
+            [
+              18.6,
+              "nod"
+            ],
+            [
+              19.75,
+              "happy"
+            ]
+          ]
+        }
+      ],
+      [
+        "anchor",
+        22.0,
+        {
+          "wdur": 0.25
+        }
+      ]
+    ],
+    "voiceTempo": 1.2,
+    "voiceFilter": "brand",
+    "voiceFiles": [
+      [
+        0.1,
+        "assets/voice/capa/q1m2.mp3",
+        "4.000 değil, 2.500 lira! Ucuz mu?"
+      ],
+      [
+        4.2,
+        "assets/voice/capa/q2m.mp3",
+        "Pamuk'a göre kelepir! Hemen almak istiyor!"
+      ],
+      [
+        6.4,
+        "assets/voice/capa/q3k.mp3",
+        "Oysa 5 dakika önce, yan dükkânda aynı montu aynı fiyata görüp “pahalı” demişti!"
+      ],
+      [
+        11.55,
+        "assets/voice/capa/q4.mp3",
+        "Fiyat aynı. Değişen tek şey, ilk gördüğü sayı."
+      ],
+      [
+        15.0,
+        "assets/voice/capa/q5.mp3",
+        "Buna çapa etkisi denir."
+      ],
+      [
+        16.45,
+        "assets/voice/capa/q6.mp3",
+        "Çapayı sen seç: önce kendi bütçene bak, sonra etikete."
+      ],
+      [
+        19.75,
+        "assets/voice/capa/q7.mp3"
+      ]
+    ]
   }
 }

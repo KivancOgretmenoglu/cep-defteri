@@ -22,7 +22,7 @@ Rakam içeren her örnek "örnek" diye etiketlensin.
 
 ### Kafamızın oyunları
 1. **Batık maliyet** – "Kötü filmi sonuna kadar izlemek seni iki kez kaybettirir" · Diken 250 TL'lik bilette uyuyakalır · Ders: geri gelmeyecek parayı karara katma. ✅ üretildi (300 TL bilet, KAL/ÇIK anketi)
-2. **Çapa etkisi** – "Bu üstü çizili fiyat sana yalan söylüyor" · Pamuk ~~4.000~~ 2.500 TL montu ucuz sanır · Ders: kendi bütçeni referans al.
+2. **Çapa etkisi** – "Bu üstü çizili fiyat sana yalan söylüyor" · Pamuk ~~4.000~~ 2.500 TL montu ucuz sanır · Ders: kendi bütçeni referans al. ✅ üretildi (BUTİK / yan dükkân geri sarması, çapa, Cep Defteri bütçesi 2.000 TL)
 3. **Tuzak seçenek** – "Orta boy kahve satılmak için orada değil" · S 120 / M 170 / L 175 · Ders: ortadaki olmasa ne alırdım? ✅ üretildi
 4. **Bulunmuş para** – "Bayram harçlığı neden 3 günde biter?" · Karamel · Ders: paranın etiketi yok. ✅ üretildi (1.500 TL harçlık, HEDİYE/MAAŞ etiketleri)
 5. **Sahiplik etkisi** – "Eski telefonunu neden kimse senin fiyatına almıyor?" · Ceviz · Ders: alıcının gözüyle fiyatla.
