@@ -1337,6 +1337,26 @@ function defineValue() {
     const ev = (k) => o[k] ?? 99;
     const wallA = el('div', 'abs', s.root, { inset: 0, background: 'repeating-linear-gradient(90deg, #F6EEE6 0 64px, #F0E1D3 64px 128px)' });
     const wallB = el('div', 'abs', s.root, { inset: 0, background: 'radial-gradient(circle, #CFE3D8 8px, transparent 9px) 0 0 / 60px 60px, #E8F2EC', display: 'none' });
+    // zemin: butikte ahşap parke ve halı, yan dükkânda karo; aşağı indikçe sıralar kalınlaşır (perspektif)
+    const FY = 1410;  // ayakların (≈1505) gerisinde yer derinliği kalsın
+    const floor = (base, row) => {
+      const f = el('div', 'abs', s.root, { left: 0, width: '1080px', top: px(FY), height: px(1920 - FY), overflow: 'hidden' });
+      el('div', 'abs', f, { left: 0, right: 0, top: 0, height: '18px', background: base });  // süpürgelik
+      let y = 18;
+      [26, 30, 34, 40, 46, 54, 62, 72, 84, 98].forEach((h, i) => { row(f, y, h, i); y += h; });
+      el('div', 'abs', f, { inset: 0, background: 'linear-gradient(rgba(42,30,26,0) 30%, rgba(42,30,26,.14))' });
+      return f;
+    };
+    const floorA = floor('linear-gradient(#B57A45 0 4px, #8B5A2B 4px 15px, #6E4522 15px)', (f, y, h, i) => {
+      const L = 150 + i * 26;  // tahta boyu öne doğru uzar, derzler sıra sıra kayar
+      el('div', 'abs', f, { left: 0, right: 0, top: px(y), height: px(h), background: `linear-gradient(#A06B3C 0 3px, #E3B47E 3px 6px, ${i % 2 ? '#CB9661' : '#D4A06A'} 6px)` });
+      el('div', 'abs', f, { left: px(-((i * 137) % L)), width: px(1080 + L), top: px(y + 3), height: px(h - 3), background: `repeating-linear-gradient(90deg, transparent 0 ${L - 4}px, #AA7444 ${L - 4}px ${L}px)` });
+    });
+    el('div', 'abs', floorA, { left: '250px', top: '49px', width: '580px', height: '92px', boxSizing: 'border-box', borderRadius: '50%', background: '#D98E6E', border: '7px solid #A85E43', boxShadow: 'inset 0 0 0 9px #E9B08F, inset 0 0 0 13px #F6D2B4' });  // halı
+    const floorB = floor('linear-gradient(#B9D8C6 0 4px, #8FB8A2 4px 15px, #77A08A 15px)', (f, y, h, i) => {
+      const T = Math.round(h * 1.7), off = i % 2 ? T : 0;  // dama karo
+      el('div', 'abs', f, { left: 0, right: 0, top: px(y), height: px(h), background: `linear-gradient(#B5CFC1 0 3px, transparent 3px), repeating-linear-gradient(90deg, #B5CFC1 0 3px, transparent 3px ${T}px), repeating-linear-gradient(90deg, #E8F2EC 0 ${T}px, #D3E6DB ${T}px ${2 * T}px)`, backgroundPosition: `0 0, ${off}px 0, ${off}px 0` });
+    });
     const amb = ambient(s.root, { cy: 860, glow: 'rgba(255,214,190,.5)' });
     const sign = el('div', 'abs it', s.root, { left: '330px', width: '420px', top: '582px', height: '84px', boxSizing: 'border-box', background: '#2A1E1A', color: '#FFD25A', fontSize: '58px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '14px', border: '6px solid #8B5A2B', letterSpacing: '.06em' });
     // mağaza: askı demiri, askıda mont, ipte etiket
@@ -1372,7 +1392,8 @@ function defineValue() {
     // çapa ve zinciri
     const chain = el('div', 'abs', s.root, { width: '12px', background: 'repeating-linear-gradient(#5b6573 0 16px, transparent 16px 22px)', display: 'none', zIndex: 5 });
     const anc = pixEl(s.root, ANCHORP, ANCHORP_C, 9, { display: 'none', zIndex: 6, transformOrigin: '50% 0%' });
-    // Pamuk, konuşma balonu, kalpler
+    // Pamuk, gölgesi, konuşma balonu, kalpler
+    const shadow = el('div', 'abs', s.root, { left: 0, top: 0, width: '300px', height: '44px', borderRadius: '50%', background: 'rgba(42,30,26,.24)' });
     const m = new Mascot(s.root, { who: 'pamuk', w: 440 });
     const bub = el('div', 'abs it', s.root, { left: '760px', top: '1128px', fontSize: '66px', background: '#fff', border: '7px solid #2A1E1A', borderRadius: '30px', padding: '4px 26px 10px', display: 'none', zIndex: 6, whiteSpace: 'nowrap', transformOrigin: '0% 100%', boxShadow: '0 8px 0 rgba(42,30,26,.2)' });
     const hearts = [0, 1, 2, 3].map(() => pixEl(s.root, HEARTP, HEARTP_C, 9, { display: 'none', zIndex: 5 }));
@@ -1398,8 +1419,8 @@ function defineValue() {
       shop.style.transform = inTr ? `translateX(${Math.sin(lt * 90) * 24}px)` : 'none';
       rwl.style.display = B || inTr ? 'block' : 'none';
       rwl.textContent = lt < BK ? '◀◀ 5 DK ÖNCE' : '▶▶ ŞİMDİ';
-      wallA.style.display = B ? 'none' : 'block';
-      wallB.style.display = B ? 'block' : 'none';
+      wallA.style.display = floorA.style.display = B ? 'none' : 'block';
+      wallB.style.display = floorB.style.display = B ? 'block' : 'none';
       // tabela ve mağaza (A ya da B)
       shop.style.display = C ? 'none' : 'block';
       sign.style.display = C ? 'none' : 'flex';
@@ -1482,6 +1503,9 @@ function defineValue() {
       else if (S[1] === 'nod') { m.set('happy', null, 'happy'); rot = Math.sin(lt * 9) * 5; if (k > 0.25) { say('ALMAM!', '#C0392B', 0.25); bub.style.fontSize = '66px'; } }
       else if (S[1] === 'happy') { m.set('celebrate', 'up', 'happy'); const h = hop(lt, 0.45, 34); y -= h.y; sx = h.sx; sy = h.sy; }
       m.put(x, y, { rot, sx, sy, flip });
+      const sk = 1 - Math.min(0.45, Math.max(0, 1534 - y) / 220);  // zıpladıkça gölge küçülüp açılır
+      shadow.style.transform = `translate(${x - 150}px,1480px) scale(${sk})`;
+      shadow.style.opacity = sk;
       // çağrı: 'gönder' derken kâğıt uçak sağa, paylaş düğmesine doğru uçar
       const pl = prog(lt, CTA + 1.85, 0.42);
       plane.style.display = lt >= CTA + 1.6 && pl < 1 ? 'block' : 'none';
