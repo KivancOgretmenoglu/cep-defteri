@@ -390,3 +390,26 @@ Bütçeni Cep Defteri'ne yaz, etikete sonra bak. Android erken erişim yakında.
 ```
 
 **Yayın notu:** 28 Ekim–10 Kasım arasında paylaş (11.11 ve Efsane Cuma öncesi indirim dönemi). Kapak karesi olarak 0,8 sn'yi seç. İlk yorumu sabitle: "Burada mesele mağazanın dürüstlüğü değil, ilk gördüğümüz sayının aklımızı çelmesi. Tutarlar örnek." "İndirim yanılgısı" reelsiyle arasında en az 5–7 gün bırak.
+
+## 19 · ultimatom (kavram: ültimatom oyunu, seslendirme: Buğra, döngülü, 26,4 sn)
+
+**Açıklama:**
+```
+Bedava 100 TL'yi reddeder misin? 🎲
+Sen Diken olsan? Yoruma K (kabul) ya da R (ret) yaz 👇
+
+Masada 1.000 TL var. Ceviz böler, Diken seçer: KABUL derse bölüşüm geçerli, RET derse ikisi de 0 TL alır.
+Ceviz'in teklifi: 900 bana, 100 sana. Diken reddetti.
+Hesapta 100 TL, 0 TL'den iyidir. Ama insanlar adaletsiz buldukları teklifi cezalandırmak için kendi paylarından vazgeçebiliyor. Buna ültimatom oyunu denir. Tutarlar örnek.
+Araştırma: Oyun ilk kez Güth ve arkadaşlarının 1982 deneyinde test edildi. Sonraki deneylerin özeti: toplamın %20'sinden az teklifler yaklaşık yarı yarıya reddediliyor (Camerer, 2003).
+
+Bölüşürken sor: "Karşı tarafta ben olsam bu teklifi kabul eder miydim?"
+
+Hesabı hep kendine bölen arkadaşına gönder.
+📌 Kaydet, bir dahaki ortak hesapta aç.
+Arkadaşlarla hesabı Cep Defteri'nde bölüş: kimin payı ne, kim kime borçlu, defterde dursun. Android erken erişim yakında.
+
+#ültimatomoyunu #oyunteorisi #davranışsalekonomi #öğrencibütçesi #paraipuçları #cepdefteri
+```
+
+**Yayın notu:** Kapak karesi olarak 0,5 sn'yi seç (başlık + lambanın altındaki masa). İlk yorumu sabitle: "Tek doğru cevap yok: 100 TL, 0 TL'den fazla; ama adaletsiz teklife hayır demek de bir mesaj. Sen hangisini seçerdin? Tutarlar örnek." Geri sayımdaki "DURDUR, KARAR VER" anı yorum içindir: K ve R yorumlarına yanıt ver, R diyenlere "neden?" diye sor. Hesap bölüşmeyle ilgili başka bir reelsle arasında en az 5–7 gün bırak.

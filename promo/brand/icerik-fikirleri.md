@@ -18,7 +18,7 @@ Rakam içeren her örnek "örnek" diye etiketlensin.
 
 ---
 
-## 25 kavram reelsi (fırsat maliyeti kalıbında: kavram + maskot hikâyesi + tahmin anı + tek ders)
+## 26 kavram reelsi (fırsat maliyeti kalıbında: kavram + maskot hikâyesi + tahmin anı + tek ders)
 
 ### Kafamızın oyunları
 1. **Batık maliyet** – "Kötü filmi sonuna kadar izlemek seni iki kez kaybettirir" · Diken 250 TL'lik bilette uyuyakalır · Ders: geri gelmeyecek parayı karara katma. ✅ üretildi (300 TL bilet, KAL/ÇIK anketi)
@@ -50,3 +50,6 @@ Rakam içeren her örnek "örnek" diye etiketlensin.
 23. **Hesap bölüşme ikilemi** – "Hesap bölünecekse neden herkes pahalısını söyler?".
 24. **Enflasyon** – "Kumbaradaki 1.000 TL her ay küçülüyor" (örnek oran, yatırım tavsiyesi yok).
 25. **Acil durum fonu** – "Telefonun ekranı kırıldı. Paran var mı?".
+
+### Oyun teorisi
+26. **Ültimatom oyunu** – "Bedava 100 TL'yi reddeder misin?" · Ceviz böler, Diken seçer · Ders: adil böl, yoksa iki taraf da 0. ✅ üretildi (sinematik: lamba, geri sayım, KABUL/RET düğmeleri; 900/100 teklif, deney ızgarası, 500/500)

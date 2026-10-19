@@ -3867,5 +3867,216 @@
         "assets/voice/capa/q7.mp3"
       ]
     ]
+  },
+  "ultimatom": {
+    "end": 26.4,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.45,
+    "noMusicVariant": true,
+    "musicPlan": [
+      [
+        0,
+        15.65,
+        "horror",
+        {
+          "beatsEnd": 9.2
+        }
+      ],
+      [
+        15.65,
+        23.2,
+        "lofi"
+      ],
+      [
+        23.2,
+        25.85,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ],
+      [
+        25.85,
+        26.4,
+        "horror"
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          11.4,
+          12.85
+        ]
+      ]
+    },
+    "captionPixel": true,
+    "captionY": 740,
+    "captionMaxWords": 3,
+    "captionUntil": 23.1,
+    "boxes": [
+      [
+        0,
+        2.45,
+        "Bedava 100 TL'yi<br><b>reddeder misin?</b>",
+        308,
+        {
+          "size": 90,
+          "pulse": true
+        }
+      ],
+      [
+        2.5,
+        5.7,
+        "Ceviz böler, Diken seçer:<br><b>RET = ikisi de 0 TL</b>",
+        308,
+        {
+          "size": 72,
+          "pulse": true
+        }
+      ],
+      [
+        5.75,
+        9.1,
+        "Teklif:<br><b>900 bana, 100 sana</b>",
+        308,
+        {
+          "size": 88,
+          "pulse": true
+        }
+      ],
+      [
+        9.2,
+        12.8,
+        "Sen Diken olsan?<br><b>KABUL mü, RET mi?</b>",
+        308,
+        {
+          "size": 84,
+          "pulse": true
+        }
+      ],
+      [
+        12.85,
+        15.55,
+        "RET!<br><b>İkisi de 0 TL</b>",
+        308,
+        {
+          "size": 92,
+          "pulse": true
+        }
+      ],
+      [
+        15.65,
+        18.95,
+        "Saçma mı? İnsanların<br><b>yarısı da reddediyor</b>",
+        308,
+        {
+          "size": 80,
+          "pulse": true
+        }
+      ],
+      [
+        19.05,
+        23.1,
+        "Ültimatom oyunu: adil böl,<br><b>yoksa iki taraf da 0</b>",
+        308,
+        {
+          "size": 70,
+          "pulse": true
+        }
+      ],
+      [
+        23.15,
+        25.8,
+        "Hesabı hep kendine bölen<br><b>arkadaşına gönder</b>",
+        308,
+        {
+          "size": 74,
+          "pulse": true
+        }
+      ],
+      [
+        26.1,
+        26.4,
+        "Bedava 100 TL'yi<br><b>reddeder misin?</b>",
+        308,
+        {
+          "size": 90,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "ultimatum",
+        0,
+        {
+          "rules": 2.5,
+          "offer": 5.75,
+          "split": 7.1,
+          "cut": 8.1,
+          "slide": 8.3,
+          "ask": 9.2,
+          "count": 11.42,
+          "ret": 12.85,
+          "sci": 15.6,
+          "name": 19.0,
+          "fair": 20.96,
+          "yes": 21.55,
+          "cta": 23.15,
+          "dim": 25.35
+        }
+      ],
+      [
+        "ultimatum",
+        25.85,
+        {
+          "wdur": 0.3
+        }
+      ]
+    ],
+    "voiceTempo": 1.2,
+    "voiceFilter": "brand",
+    "voiceFiles": [
+      [
+        0.1,
+        "assets/voice/ultimatom/u1k.mp3",
+        "Masada 1.000 lira var. Ama bir şartla."
+      ],
+      [
+        2.55,
+        "assets/voice/ultimatom/u2.mp3",
+        "Ceviz böler. Diken reddederse, ikisi de sıfır!"
+      ],
+      [
+        5.75,
+        "assets/voice/ultimatom/u3k.mp3",
+        "Ceviz'in teklifi: 900 bana, 100 sana."
+      ],
+      [
+        9.2,
+        "assets/voice/ultimatom/u4b.mp3",
+        "Sen Diken olsan? Kabul mü, ret mi?"
+      ],
+      [
+        12.95,
+        "assets/voice/ultimatom/u5.mp3",
+        "Diken reddetti. İkisi de sıfır!"
+      ],
+      [
+        15.65,
+        "assets/voice/ultimatom/u6.mp3",
+        "Saçma mı? Deneylerde insanların yarısı aynısını yapıyor."
+      ],
+      [
+        19.05,
+        "assets/voice/ultimatom/u7.mp3",
+        "Buna ültimatom oyunu denir. Adil böl; yoksa iki taraf da sıfır."
+      ],
+      [
+        23.2,
+        "assets/voice/ultimatom/u8m.mp3"
+      ]
+    ]
   }
 }

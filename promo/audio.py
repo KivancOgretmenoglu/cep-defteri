@@ -1470,6 +1470,77 @@ def cue_anchor(t0, skip=0, o=None):
         put(SFX, popper(), T(o['cta']), 0.45)
 
 
+def cue_ultimatum(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    thump = lambda v: np.sin(2 * np.pi * phase(glide(70, 40, 0.18))) * expd(0.18, 16) * v
+    sub = lambda d=1.0: np.tanh(np.sin(2 * np.pi * phase(glide(65, 30, d))) * expd(d, 3) * 1.4)  # zilsiz alt vuruş: sesi örtmez
+    if 'rules' in o:  # loş oda: lamba gıcırdar; kurallar anlatılırken plaka ve düğmeler yanar
+        R = o['rules']
+        put(SFX, sub(1.2), T(0.02), 0.55); put(SFX, creak(0.5), T(0.05), 0.3, pan=0.2)
+        put(SFX, fm_bell(659, 0.9, 0.2), T(R))
+        put(SFX, pling(1318, 0.15, 0.35), T(R + 0.1), pan=0.3)
+        put(SFX, bloop(330, 160, 0.18, 0.28), T(R + 0.85), pan=0.5)
+    if 'offer' in o:  # Ceviz yakın plan
+        put(SFX, stereo_move(whoosh(0.3, 2000, 400, 0.6), 0.3, -0.3), T(o['offer'] - 0.12), 0.28)
+    if 'split' in o:  # 900 Ceviz'e kayar, deftere yazılır
+        S = o['split']
+        put(SFX, flutter(0.35), T(S), 0.35, pan=-0.3)
+        for i in range(4):
+            put(SFX, key_click(0.28), T(S + 0.3 + i * 0.11), pan=-0.5)
+    if 'cut' in o:
+        put(SFX, stereo_move(whoosh(0.25, 400, 2000, 0.6), -0.3, 0.3), T(o['cut'] - 0.1), 0.22)
+    if 'slide' in o:  # 100 Diken'e itilir
+        S = o['slide']
+        put(SFX, stereo_move(whoosh(0.35, 900, 2600, 0.7), -0.2, 0.5), T(S), 0.3)
+        put(SFX, bloop(500, 300, 0.1, 0.28), T(S + 0.42), pan=0.4)
+        for i in range(3):
+            put(SFX, key_click(0.25), T(S + 0.2 + i * 0.12), pan=-0.5)
+    if 'ask' in o:  # Diken yakın plan: alt vuruş, kalp atışı hızlanır (value.js'teki nabızla aynı takvim)
+        A, R = o['ask'], o['ret']
+        put(SFX, sub(1.0), T(A), 0.6)
+        t, k = A + 0.2, 0
+        while t < R - 0.1:
+            put(SFX, thump(0.9), T(t)); put(SFX, thump(0.6), T(t + 0.16))
+            t += max(0.3, 0.56 - 0.04 * k); k += 1
+    if 'count' in o:  # 3 · 2 · 1, son anda nefes
+        C, R = o['count'], o['ret']
+        for j in range(3):
+            put(SFX, pluck(81, 0.13, 'square', 0.5, cut=4000, v=0.3), T(C + j * (R - C) / 3))
+        put(SFX, inhale(0.3), T(R - 0.32), 0.6)
+    if 'ret' in o:  # RET: çarpma, büzer, para dağılır, lamba sarsılır, defter çizilir
+        R = o['ret']
+        put(SFX, slam_hit(0.8), T(R), 0.9); put(SFX, sub(1.2), T(R), 0.9)
+        put(SFX, buzzer(0.22), T(R + 0.01), 0.45)
+        put(SFX, flutter(0.5), T(R + 0.05), 0.35, pan=-0.2)
+        put(SFX, creak(0.45), T(R + 0.2), 0.25, pan=0.2)
+        put(SFX, paper_tear(0.2), T(R + 0.35), 0.25, pan=-0.5)
+        put(SFX, stamp(), T(R + 0.45), 0.4, pan=-0.4)
+    if 'sci' in o:  # ışıklar yanar; deney: kişiler belirir, beşi RET der, kalanı KABUL
+        S = o['sci']
+        put(SFX, key_click(0.6), T(S - 0.02)); put(SFX, stereo_move(whoosh(0.4, 400, 3000, 0.6), -0.4, 0.4), T(S), 0.28)
+        for i in range(10):
+            put(SFX, bloop(500 + 40 * i, 900 + 60 * i, 0.05, 0.12), T(S + 0.25 + i * 0.05), pan=-0.6 + 0.13 * i)
+        for j in range(5):
+            put(SFX, bloop(420, 220, 0.12, 0.2), T(S + 1.0 + j * 0.3), pan=-0.5 + 0.25 * j)
+        put(SFX, pling(1046, 0.15, 0.4), T(S + 2.45), pan=-0.3); put(SFX, pling(1318, 0.15, 0.4), T(S + 2.5), pan=0.3)
+    if 'name' in o:  # aydınlık masa: 1.000 TL geri gelir
+        put(SFX, stereo_move(whoosh(0.35, 2400, 500, 0.6), 0.3, -0.3), T(o['name']), 0.28)
+        put(SFX, flutter(0.3), T(o['name'] + 0.15), 0.25)
+    if 'fair' in o:  # 500 / 500
+        F = o['fair']
+        put(SFX, flutter(0.4), T(F), 0.3)
+        put(SFX, bloop(600, 900, 0.07, 0.25), T(F + 0.3), pan=-0.4); put(SFX, bloop(600, 900, 0.07, 0.25), T(F + 0.35), pan=0.4)
+    if 'yes' in o:  # KABUL: tık, zil, TAMAM damgası
+        Y = o['yes']
+        put(SFX, ui_tap(0.8), T(Y), pan=0.3); put(SFX, ding_ding(), T(Y + 0.05), 0.25)
+        put(SFX, stamp(), T(Y + 0.15), 0.4, pan=-0.4)
+    if 'cta' in o:  # konfeti çağrı satırından önce
+        put(SFX, popper(), T(o['cta'] - 0.1), 0.45)
+    if 'dim' in o:  # ışık söner; döngü karanlık odaya döner
+        put(SFX, key_click(0.45), T(o['dim'])); put(SFX, creak(0.4), T(o['dim'] + 0.1), 0.2, pan=0.2)
+
+
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
 # ═════════ ANA MÜZİK ═════════
@@ -1618,9 +1689,9 @@ def horror(a, b, last=True, **kw):
     bed = drone + cluster + sub
     bed[: int(0.15 * SR)] *= np.linspace(0, 1, int(0.15 * SR))
     put(MUS, np.stack([bed, np.roll(bed, 300)], 1)[: int(L * SR)], a)
-    # kalp atışı, giderek hızlanır
+    # kalp atışı, giderek hızlanır (beatsEnd: sahne kendi atışını devralırsa burada durur)
     tm = 0.05
-    while tm < L - 0.15:
+    while tm < min(L, kw.get('beatsEnd', b) - a) - 0.15:
         gap = lerp_(0.85, 0.36, tm / L)
         for j, v in ((0, 0.9), (0.16, 0.6)):
             h = np.sin(2 * np.pi * phase(glide(70, 40, 0.18))) * expd(0.18, 16) * v

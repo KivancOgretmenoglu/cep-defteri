@@ -84,6 +84,9 @@ const MONTP = ['......oooooo......', '.....offffffo.....', '....offhhhhffo....',
 const MONTP_C = { o: '#2A1E1A', C: '#E0893A', d: '#B8652A', Z: '#5B4636', P: '#F2B63C', f: '#F3E1C7', h: '#7A4A24', k: '#8B5A2B' };
 const PLANEP = ['oo............', 'oWoo..........', '.oWWoo........', '.oWWWWoo......', '..oWWWWWoo....', '..oWWWWWWWoo..', '...oWWWWWWWWWo', '..oGGGGGGGoo..', '.oGGGGGoo.....', 'oGGGoo........', 'ooo...........'];
 const PLANEP_C = { o: '#2A1E1A', W: '#FFFFFF', G: '#C9D6E8' };
+const PAWP = ['.o.o.o.', 'oBoBoBo', 'oBBBBBo', 'oBBBBBo', 'oBBBBBo', '.oBBBo.', '..ooo..'];
+const PAWP_C = { o: '#2A1E1A', B: '#A07C5C' };
+const PERSONP = ['..ooo..', '.oSSSo.', '.oSSSo.', '..ooo..', '.ooooo.', 'oCCCCCo', 'oCCCCCo', 'oCCCCCo', '.oo.oo.', '.oo.oo.'];
 const HEARTP = ['.oo.oo.', 'oRRoRRo', 'oRRRRRo', '.oRRRo.', '..oRo..', '...o...'];
 const HEARTP_C = { o: '#2A1E1A', R: '#E8507A' };
 const PLATEP = ['oooooooooooo', '.oSSSSSSSSo.', '..oooooooo..'];
@@ -1510,6 +1513,224 @@ function defineValue() {
       const pl = prog(lt, CTA + 1.85, 0.42);
       plane.style.display = lt >= CTA + 1.6 && pl < 1 ? 'block' : 'none';
       plane.style.transform = `translate(${lerp(600, 1180, pl * pl)}px,${lerp(1190, 980, pl) - Math.sin(pl * Math.PI) * 90}px) rotate(${-12 - 14 * pl}deg) scale(${E.back(prog(lt, CTA + 1.6, 0.2))})`;
+    };
+  };
+
+  /* Ültimatom oyunu: karanlık oda, tek lamba, masada 1.000 TL. Ceviz böler; Diken kabul ederse paylaşırlar, reddederse ikisi de 0.
+     Sinema bölümü bantlı ve karanlık; ışıklar açılınca deney grafiği, sonra aydınlık masada adil bölüşüm. */
+  SCENES.ultimatum = (t0, o = {}) => {
+    const s = scene(t0, '#120D0B', undefined, o.wdur ?? 0.4);
+    const ev = (k) => o[k] ?? 99;
+    const RULES = ev('rules'), OFFER = ev('offer'), SPLIT = ev('split'), CUT = ev('cut'), SLIDE = ev('slide'), ASK = ev('ask'), COUNT = ev('count'), RET = ev('ret');
+    const SCI = ev('sci'), NAME = ev('name'), FAIR = ev('fair'), YES = ev('yes'), CTA = ev('cta'), DIM = ev('dim');
+    // kamera: yakın çekimlerde bütün sahne bu katmanda ölçeklenir
+    const cam = el('div', 'abs', s.root, { left: 0, top: 0, width: '1080px', height: '1920px', transformOrigin: '0 0' });
+    const room = el('div', 'abs', cam, { inset: 0, background: 'radial-gradient(ellipse 700px 900px at 540px 1000px, #3B2B22 0%, #21180F 55%, #120D0B 100%)' });
+    const day = el('div', 'abs', cam, { inset: 0, background: 'linear-gradient(#F3E7DA, #E5D3C0)', opacity: 0 });
+    pattern(day, 'rgba(120,80,50,.08)');
+    // tavandan sarkan lamba ve ışık konisi (ip ucundan sallanır)
+    const lamp = el('div', 'abs', cam, { left: 0, top: 0, width: '1080px', height: '1920px', transformOrigin: '540px 0px' });
+    const cone = el('div', 'abs', lamp, { left: '120px', top: '690px', width: '840px', height: '620px', clipPath: 'polygon(45% 0, 55% 0, 100% 100%, 0 100%)', background: 'linear-gradient(rgba(255,221,160,.36), rgba(255,221,160,.04))' });
+    el('div', 'abs', lamp, { left: '533px', top: 0, width: '14px', height: '590px', background: '#2B2421' });
+    el('div', 'abs', lamp, { left: '428px', top: '580px', width: '224px', height: '96px', clipPath: 'polygon(30% 0, 70% 0, 100% 100%, 0 100%)', background: 'linear-gradient(#6A5B51, #3B322D)' });
+    el('div', 'abs', lamp, { left: '420px', top: '670px', width: '240px', height: '12px', background: '#2B2421', borderRadius: '6px' });
+    const bulb = el('div', 'abs', lamp, { left: '512px', top: '680px', width: '56px', height: '38px', borderRadius: '0 0 28px 28px', background: '#FFF1C1', boxShadow: '0 10px 80px 40px rgba(255,214,140,.5)' });
+    const dust = Array.from({ length: 16 }, (_, i) => ({ e: el('div', 'abs', cam, { width: '8px', height: '8px', background: '#FFE8BE' }), x: 330 + ((i * 197) % 420), y: (i * 331) % 560, sp: 10 + (i % 5) * 6, ph: i * 1.7 }));
+    // oyuncular masanın arkasında
+    const cz = new Mascot(cam, { who: 'ceviz', w: 420 }), dk = new Mascot(cam, { who: 'diken', w: 420 });
+    const zeros = [230, 850].map((x) => { const z = el('div', 'abs it', cam, { left: px(x - 120), width: '240px', top: '880px', textAlign: 'center', fontSize: '88px', color: '#FF6B57', display: 'none', textShadow: '5px 0 0 #2A1E1A, -5px 0 0 #2A1E1A, 0 5px 0 #2A1E1A, 0 -5px 0 #2A1E1A' }); z.textContent = '0 TL'; return z; });
+    // masa: perspektifli üst yüzey, ön yüz, pirinç plaka
+    el('div', 'abs', cam, { left: '70px', top: '1250px', width: '940px', height: '104px', clipPath: 'polygon(5% 0, 95% 0, 100% 100%, 0 100%)', background: 'linear-gradient(#80583A, #5F3F29)' });
+    el('div', 'abs', cam, { left: '70px', top: '1352px', width: '940px', height: '260px', background: 'linear-gradient(#4A3020 0 10px, #3A261A 10px)' });
+    const plate = el('div', 'abs it', cam, { left: '350px', top: '1500px', width: '380px', height: '80px', boxSizing: 'border-box', background: 'linear-gradient(#E0AE4C, #A8782A)', border: '5px solid #2A1E1A', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '60px', color: '#2A1E1A', letterSpacing: '.1em' });
+    plate.textContent = 'ÜLTİMATOM';
+    // Cep Defteri: anlaşma deftere yazılır
+    const led = el('div', 'abs', cam, { left: '80px', top: '1236px', width: '252px', height: '122px', boxSizing: 'border-box', background: 'repeating-linear-gradient(#FFFDF4 0 31px, #BFD3EA 31px 33px)', border: '5px solid #2A1E1A', borderRadius: '10px', transform: 'rotate(-4deg)', padding: '4px 12px', zIndex: 2 });
+    led.innerHTML = '<div style="font-size:23px;font-weight:800;color:#AE4716;letter-spacing:.06em">CEP DEFTERİ</div><div class="it la" style="font-size:36px;color:#2A1E1A;margin-top:2px;height:36px"></div><div class="it lb" style="font-size:36px;color:#2A1E1A;height:36px"></div>';
+    const la = led.querySelector('.la'), lb = led.querySelector('.lb');
+    const strike = el('div', 'abs', led, { left: '8px', right: '8px', top: '44px', height: '62px', display: 'none', background: 'linear-gradient(transparent 14px, #C0392B 14px 21px, transparent 21px 47px, #C0392B 47px 54px, transparent 54px)' });
+    const stampLed = (txt, col) => { const e = el('div', 'abs it', cam, { left: '134px', top: '1262px', fontSize: '48px', color: '#fff', background: col, padding: '2px 16px 6px', borderRadius: '10px', border: '5px solid #2A1E1A', display: 'none', whiteSpace: 'nowrap', transformOrigin: '50% 50%', zIndex: 3 }); e.textContent = txt; return e; };
+    const zeroStamp = stampLed('0 · 0', '#C0392B'), okStamp = stampLed('TAMAM', '#2F8F5A');
+    // 1.000 TL: 4 × 200 + 2 × 100
+    const notes = [1, 0, 0, 0, 0, 1].map((ci) => { const e = el('div', 'abs', cam, { left: 0, top: 0, width: '143px', height: '65px', transformOrigin: '50% 50%' }); e.innerHTML = pix(NOTE, NOTE_CS[ci], 13); return e; });
+    // RET: para piksel piksel dağılır
+    const pops = [
+      new Burst(cam, { n: 26, t0: RET, ox: 371, oy: 1196, colors: ['#F4BCD8', '#A8467E', '#B5D0EE', '#2F5F9E'], speed: 700, grav: 2000, life: 1.1, size: [12, 24], upBias: 0.4 }),
+      new Burst(cam, { n: 10, t0: RET, ox: 683, oy: 1222, colors: ['#B5D0EE', '#2F5F9E', '#6E9BD6'], speed: 600, grav: 2000, life: 1.0, size: [12, 22], upBias: 0.4 }),
+    ];
+    const lbl = (x, y) => el('div', 'abs it', cam, { left: px(x - 160), width: '320px', top: px(y), textAlign: 'center', fontSize: '66px', color: '#F2B63C', display: 'none', textShadow: '5px 0 0 #2A1E1A, -5px 0 0 #2A1E1A, 0 5px 0 #2A1E1A, 0 -5px 0 #2A1E1A' });
+    const total = lbl(540, 1059), lC = lbl(371, 1071), lD = lbl(683, 1119);
+    // KABUL / RET düğmeleri
+    const btn = (x, col, dark, label) => {
+      const b = el('div', 'abs', cam, { left: px(x - 64), top: '1290px', width: '128px', height: '64px' });
+      el('div', 'abs', b, { left: 0, top: '18px', width: '128px', height: '46px', borderRadius: '50%', background: '#2A1E1A' });
+      const cap = el('div', 'abs', b, { left: '10px', top: 0, width: '108px', height: '50px', borderRadius: '50%', background: col, border: '5px solid #2A1E1A', boxSizing: 'border-box', boxShadow: `inset 0 -8px 0 ${dark}` });
+      const t = el('div', 'abs it', cam, { left: px(x - 100), width: '200px', top: '1376px', textAlign: 'center', fontSize: '46px', color: col, letterSpacing: '.06em' });
+      t.textContent = label;
+      return cap;
+    };
+    const yesCap = btn(710, '#3FB06F', '#2F8F5A', 'KABUL'), noCap = btn(910, '#E04A3A', '#A8301F', 'RET');
+    // Diken'in kolu ve pençesi düğmelerin üstünde gidip gelir
+    const arm = el('div', 'abs', cam, { left: 0, top: 0, width: '30px', height: '10px', background: '#A07C5C', border: '5px solid #2A1E1A', borderRadius: '16px', transformOrigin: '0 50%', display: 'none' });
+    const paw = pixEl(cam, PAWP, PAWP_C, 10, { display: 'none' });
+    // sinema katmanları: kenar karartma, film çizikleri, bantlar
+    const vig = el('div', 'abs', s.root, { inset: 0, zIndex: 17, pointerEvents: 'none', background: 'radial-gradient(ellipse 75% 62% at 50% 56%, transparent 52%, rgba(0,0,0,.62) 100%)' });
+    const scr = [0, 1].map(() => el('div', 'abs', s.root, { top: '236px', width: '3px', height: '1364px', background: 'rgba(255,240,210,.13)', zIndex: 18, display: 'none' }));
+    const flash = el('div', 'abs', s.root, { inset: 0, zIndex: 21, opacity: 0, pointerEvents: 'none' });
+    const barT = el('div', 'abs', s.root, { left: 0, top: 0, width: '1080px', height: '236px', background: '#0B0807', zIndex: 30 });
+    const barB = el('div', 'abs', s.root, { left: 0, top: '1600px', width: '1080px', height: '320px', background: '#0B0807', zIndex: 30 });
+    // karar anı: geri sayım halkası ve "durdur" çağrısı
+    const ring = el('div', 'abs', s.root, { left: '836px', top: '860px', width: '220px', height: '220px', borderRadius: '50%', display: 'none', zIndex: 24 });
+    const num = el('div', 'abs it', ring, { left: '18px', top: '18px', width: '184px', height: '184px', borderRadius: '50%', background: 'rgba(18,13,11,.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '160px', color: '#fff' });
+    const halt = el('div', 'abs', s.root, { left: 0, right: 0, top: '736px', textAlign: 'center', zIndex: 24, display: 'none' });
+    halt.innerHTML = '<span class="it" style="display:inline-block;font-size:56px;color:#fff;background:rgba(18,13,11,.85);padding:6px 24px 10px;border-radius:14px;border:4px solid #F2B63C"><span style="display:inline-block;width:12px;height:40px;background:#F2B63C;margin-right:8px;vertical-align:-4px"></span><span style="display:inline-block;width:12px;height:40px;background:#F2B63C;margin-right:22px;vertical-align:-4px"></span>DURDUR, KARAR VER</span>';
+    // ışıklar açılınca: deneylerden 10 kişi, %20'nin altındaki teklife yarısı RET der
+    const sci = el('div', 'abs', s.root, { inset: 0, background: '#F6EEE6', zIndex: 10, display: 'none' });
+    pattern(sci);
+    const sciNote = el('div', 'abs', sci, { left: '60px', right: '60px', top: '596px', textAlign: 'center', fontSize: '50px', fontWeight: 800, color: '#2A1E1A' });
+    sciNote.innerHTML = '%20\'den az teklif: <span style="color:#C0392B">yarısı RET</span>';
+    const src = el('div', 'abs', sci, { left: 0, right: 0, top: '1486px', textAlign: 'center', fontSize: '32px', fontWeight: 700, color: '#8A7B6E' });
+    src.textContent = 'Güth vd. 1982 · Camerer 2003';
+    const RED = [0, 2, 4, 6, 8];
+    const people = Array.from({ length: 10 }, (_, i) => {
+      const x = 97 + (i % 5) * 190, y = 880 + Math.floor(i / 5) * 290;
+      const fig = (c, d) => pixEl(sci, PERSONP, { o: '#2A1E1A', S: '#F3C9A8', C: c }, 18, { left: px(x), top: px(y), transformOrigin: '50% 100%', display: d });
+      const tag = el('div', 'abs it', sci, { left: px(x - 4), width: '134px', boxSizing: 'border-box', top: px(y + 190), textAlign: 'center', fontSize: '44px', color: '#fff', background: '#C0392B', border: '4px solid #2A1E1A', borderRadius: '10px', display: 'none' });
+      tag.textContent = 'RET';
+      return { g: fig('#9AA3AD', 'block'), r: fig('#E04A3A', 'none'), k: fig('#3FB06F', 'none'), tag };
+    });
+    const kick = (lt, t, a) => (lt >= t ? a * Math.exp(-(lt - t) * 1.6) * Math.sin((lt - t) * 7) : 0);
+    s.update = (lt) => {
+      const F = lt >= NAME;  // aydınlık masa: adil bölüşüm
+      // kamera planları (kesme): geniş, Ceviz yakın, geniş, Diken yakın, RET'te geniş
+      let z = 1, fx = 540, fy = 1060;
+      if (lt < RULES) z = 1 + 0.06 * prog(lt, 0, 2.4);
+      else if (lt >= OFFER && lt < CUT) { z = 1.5 + 0.08 * prog(lt, OFFER, CUT - OFFER); fx = 380; fy = 1090; }
+      else if (lt >= CUT && lt < ASK) { z = 1.1; fx = 560; fy = 1100; }
+      else if (lt >= ASK && lt < RET) { z = 1.45 + 0.3 * E.inOut(prog(lt, ASK, RET - ASK)); fx = 820; fy = 1130; }
+      let beat = -9;  // kalp atışları (audio.py ile aynı takvim)
+      for (let t = ASK + 0.2, k = 0; t < RET - 0.1; t += Math.max(0.3, 0.56 - 0.04 * k), k++) if (lt >= t) beat = t;
+      z *= 1 + 0.014 * Math.exp(-(lt - beat) * 10);
+      const sx = shake(lt, RET, 22, 0.5) + shake(lt, YES, 8, 0.3);
+      cam.style.transform = `translate(${540 - fx * z + sx}px,${1060 - fy * z}px) scale(${z})`;
+      // ışık: sinemada karanlık, deneyde ve adil sahnede aydınlık, döngüden önce yine karanlık
+      const L = lt < SCI ? 0 : lt < DIM ? E.inOut(prog(lt, SCI, 0.35)) : 1 - E.inOut(prog(lt, DIM, 0.45));
+      const fl = lt >= RET && lt < RET + 0.7 ? [1, 0.25, 1, 0.1, 0.8, 1, 0.3, 1][Math.floor((lt - RET) * 12) % 8] : 1;
+      day.style.opacity = L;
+      bulb.style.opacity = fl;
+      cone.style.opacity = fl * (1 - L);
+      room.style.filter = `brightness(${0.7 + 0.3 * fl})`;
+      lamp.style.transform = `rotate(${7 * Math.cos(lt * 2.2) * Math.exp(-lt * 0.12) + 1.5 * Math.sin(lt * 1.3) + kick(lt, RET, 9) + kick(lt, CTA, 5)}deg)`;
+      dust.forEach((d) => {
+        d.e.style.transform = `translate(${d.x + Math.sin(lt + d.ph) * 14}px,${700 + ((((d.y - lt * d.sp) % 560) + 560) % 560)}px)`;
+        d.e.style.opacity = (1 - L) * (0.25 + 0.35 * (Math.sin(lt * 2 + d.ph) + 1));
+      });
+      barT.style.transform = `translateY(${-250 * L}px)`;
+      barB.style.transform = `translateY(${330 * L}px)`;
+      vig.style.opacity = 1 - 0.85 * L;
+      const fi = Math.floor(lt * 12);
+      scr.forEach((e, i) => { e.style.display = L < 0.5 && (fi + i * 5) % 7 === 0 ? 'block' : 'none'; e.style.left = px((fi * 397 + i * 211) % 1080); });
+      plate.style.boxShadow = `0 0 ${46 * Math.sin(Math.PI * prog(lt, RULES, 1.6))}px ${14 * Math.sin(Math.PI * prog(lt, RULES, 1.6))}px rgba(242,182,60,.85)`;
+      // para: teklifte 900 Ceviz'e, 100 Diken'e; RET'te savrulur; adil sahnede 500 / 500
+      const sp1 = E.inOut(prog(lt, SPLIT, 0.5)), sp2 = E.out(prog(lt, SLIDE, 0.45)), fp = E.inOut(prog(lt, FAIR, 0.5));
+      const OFF = [[300, 1191], [300, 1179], [300, 1167], [300, 1155], [300, 1143], [612, 1191]];
+      const FAIRP = [[300, 1191], [300, 1179], [612, 1191], [612, 1179], [300, 1167], [612, 1167]];
+      notes.forEach((n, i) => {
+        let x = 469, y = 1191 - i * 12, sc = 1, op = 1;
+        if (!F) {
+          const k = i < 5 ? sp1 : sp2;
+          x = lerp(x, OFF[i][0], k); y = lerp(y, OFF[i][1], k) - Math.sin(k * Math.PI) * 26;
+          if (lt >= RET) { const q = prog(lt, RET, 0.12); sc = 1 + 0.3 * q; op = 1 - q; }
+        } else { x = lerp(x, FAIRP[i][0], fp); y = lerp(y, FAIRP[i][1], fp) - Math.sin(fp * Math.PI) * 22; }
+        n.style.transform = `translate(${x}px,${y}px) scale(${sc})`;
+        n.style.opacity = op;
+      });
+      pops.forEach((b) => b.update(F ? -1 : lt));
+      total.textContent = '1.000 TL';
+      total.style.display = (!F && sp1 < 0.5) || (F && fp < 0.5) ? 'block' : 'none';
+      lC.textContent = F ? '500' : '900'; lD.textContent = F ? '500' : '100';
+      lC.style.display = (!F && sp1 > 0.6 && lt < RET) || (F && fp > 0.6) ? 'block' : 'none';
+      lD.style.display = (!F && sp2 > 0.6 && lt < RET) || (F && fp > 0.6) ? 'block' : 'none';
+      const lp = (t) => `scale(${E.back(prog(lt, t, 0.25))})`;
+      lC.style.transform = lp(F ? FAIR + 0.3 : SPLIT + 0.3); lD.style.transform = lp(F ? FAIR + 0.3 : SLIDE + 0.27);
+      lC.style.top = px(F ? 1095 : 1071); lD.style.top = px(F ? 1095 : 1119);
+      // defter: harf harf yazılır; RET'te çizilir, adil sahnede yeni sayfa
+      const typed = (txt, a) => txt.slice(0, Math.floor(prog(lt, a, 0.45) * txt.length));
+      la.textContent = F ? typed('CEVİZ 500', FAIR + 0.4) : typed('CEVİZ 900', SPLIT + 0.3);
+      lb.textContent = F ? typed('DİKEN 500', FAIR + 0.6) : typed('DİKEN 100', SLIDE + 0.2);
+      strike.style.display = !F && lt >= RET + 0.35 ? 'block' : 'none';
+      zeroStamp.style.display = !F && lt >= RET + 0.45 ? 'block' : 'none';
+      zeroStamp.style.transform = `scale(${lerp(2, 1, E.out(prog(lt, RET + 0.45, 0.2)))}) rotate(-8deg)`;
+      okStamp.style.display = F && lt >= YES + 0.15 ? 'block' : 'none';
+      okStamp.style.transform = `scale(${lerp(2, 1, E.out(prog(lt, YES + 0.15, 0.2)))}) rotate(-8deg)`;
+      zeros.forEach((e) => { e.style.display = !F && lt >= RET + 0.55 ? 'block' : 'none'; e.style.transform = `scale(${E.back(prog(lt, RET + 0.55, 0.3))})`; });
+      // düğmeler: kurallar anlatılırken sırayla parlar; basılınca çöker
+      const glow = (cap, t, d, c) => { const g = Math.sin(Math.PI * prog(lt, t, d)); cap.style.filter = g > 0 ? `drop-shadow(0 0 ${22 * g}px ${c})` : 'none'; };
+      glow(yesCap, RULES + 0.1, 0.9, '#7CF2A8'); if (lt < RULES + 0.9) noCap.style.filter = 'none';
+      if (lt >= RULES + 0.85) glow(noCap, RULES + 0.85, 1.2, '#FF8A7A');
+      const press = (t) => (lt >= t && lt < t + 0.45 ? 12 : 0);
+      noCap.style.transform = `translateY(${F ? 0 : press(RET)}px)`;
+      yesCap.style.transform = `translateY(${F ? press(YES) : 0}px)`;
+      // pençe: kararsız gidip gelir, son anda RET'e (adil sahnede KABUL'e) basar
+      let pv = false, ppx = 810, ppy = 1276;
+      if (!F && lt >= ASK && lt < RET + 0.6) {
+        pv = true;
+        ppx = lerp(710, 910, (Math.sin((lt - ASK) * 2.4 - 1.57) + 1) / 2); ppy = 1272 + Math.sin(lt * 7) * 6;
+        const g = prog(lt, RET - 0.3, 0.3);
+        ppx = lerp(ppx, 910, g); ppy = lerp(ppy, 1302, g * g);
+        if (lt >= RET) ppy = 1302 - 56 * E.out(prog(lt, RET + 0.15, 0.3));
+      }
+      if (F && lt >= YES - 0.5 && lt < YES + 0.6) {
+        pv = true;
+        const g = prog(lt, YES - 0.5, 0.5);
+        ppx = lerp(830, 710, E.out(g)); ppy = lerp(1272, 1302, g * g);
+        if (lt >= YES) ppy = 1302 - 56 * E.out(prog(lt, YES + 0.15, 0.3));
+      }
+      paw.style.display = arm.style.display = pv ? 'block' : 'none';
+      paw.style.transform = `translate(${ppx - 35}px,${ppy - 70}px)`;
+      // kol: Diken'in gövdesinden (masa kenarının hemen üstü) pençeye
+      const ax = 820, ay = 1236, bx = ppx, by = ppy - 36, len = Math.hypot(bx - ax, by - ay);
+      arm.style.width = px(len); arm.style.transform = `translate(${ax}px,${ay - 10}px) rotate(${Math.atan2(by - ay, bx - ax)}rad)`;
+      // flaşlar: RET kırmızı, KABUL yeşil
+      const fr = !F && lt >= RET ? 0.5 * Math.exp(-(lt - RET) * 5) : 0, fg = F && lt >= YES ? 0.32 * Math.exp(-(lt - YES) * 5) : 0;
+      flash.style.background = fr >= fg ? '#E04A3A' : '#3FB06F'; flash.style.opacity = Math.max(fr, fg);
+      // geri sayım 3·2·1
+      const cd = lt >= COUNT && lt < RET;
+      ring.style.display = cd ? 'block' : 'none';
+      halt.style.display = cd && lt >= COUNT + 0.27 ? 'block' : 'none';
+      if (cd) {
+        const k = prog(lt, COUNT, RET - COUNT), st = Math.min(2, Math.floor(k * 3)), loc = k * 3 - st;
+        ring.style.background = `conic-gradient(#E04A3A ${360 * (1 - k)}deg, rgba(255,255,255,.18) 0)`;
+        num.textContent = String(3 - st);
+        num.style.transform = `scale(${1 + 0.3 * (1 - E.out(Math.min(1, loc * 3)))})`;
+      }
+      // deney: kişiler belirir, beşi sırayla RET der, kalanı KABUL
+      const S = lt >= SCI && lt < NAME + 0.3;
+      sci.style.display = S ? 'block' : 'none';
+      sci.style.opacity = Math.min(prog(lt, SCI + 0.05, 0.25), 1 - prog(lt, NAME, 0.25));
+      if (S) people.forEach((p, i) => {
+        const ri = RED.indexOf(i), red = ri >= 0 && lt >= SCI + 1.0 + ri * 0.3, green = ri < 0 && lt >= SCI + 2.45;
+        const pop = `scale(${E.back(prog(lt, SCI + 0.25 + i * 0.05, 0.25))})`;
+        p.g.style.transform = p.r.style.transform = p.k.style.transform = pop;
+        p.g.style.display = red || green ? 'none' : 'block'; p.r.style.display = red ? 'block' : 'none'; p.k.style.display = green ? 'block' : 'none';
+        p.tag.style.display = red ? 'block' : 'none';
+        p.tag.style.transform = `scale(${E.back(prog(lt, SCI + 1.0 + ri * 0.3, 0.2))}) rotate(-6deg)`;
+      });
+      // oyuncular
+      let c = ['happy', null, 'half'], d = ['calm', null, 'mood'];
+      if (lt >= SPLIT) c = ['happy', 'face', 'half'];
+      if (lt >= SLIDE + 0.25) d = ['curious', null, 'wide'];
+      if (lt >= ASK) d = ['thoughtful', 'face', 'squeeze'];
+      if (lt >= RET) { c = ['curious', 'up', 'x']; d = ['calm', null, 'half']; }
+      if (F) { c = ['calm', null, 'mood']; d = ['calm', null, 'mood']; }
+      if (F && lt >= YES) { c = ['happy', 'wave', 'happy']; d = ['happy', 'up', 'happy']; }
+      if (F && lt >= CTA) { c = ['celebrate', 'up', 'happy']; d = ['celebrate', 'up', 'happy']; }
+      const bl = (e, off) => (e === 'mood' && ((lt + off) * 1000) % 2900 < 120 ? 'closed' : e);
+      cz.set(c[0], c[1], bl(c[2], 0.3)); dk.set(d[0], d[1], bl(d[2], 1.1));
+      let cx = 230, cy = 1310, cr = Math.sin(lt * 1.4) * 2, dy = 1310, dr = Math.sin(lt * 1.2 + 1) * 2;
+      if (!F && lt >= RET) { const k = lt - RET; cr = -10 * Math.exp(-k * 3) * Math.cos(k * 14); cx -= 18 * Math.exp(-k * 2); }
+      if (F && lt >= CTA) { cy -= hop(lt, 0.48, 30).y; dy -= hop(lt, 0.48, 30, 0.24).y; }
+      cz.put(cx, cy, { rot: cr }); dk.put(850, dy, { rot: dr });
     };
   };
 
