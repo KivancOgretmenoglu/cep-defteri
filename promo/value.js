@@ -1600,13 +1600,13 @@ function defineValue() {
     // ışıklar yanınca: deney panosu (yaklaşık on kişiden beşi düşük teklife RET der)
     const sci = el('div', 'abs', s.root, { inset: 0, background: '#F6EEE6', zIndex: 10, display: 'none' });
     pattern(sci);
-    const src = el('div', 'abs', sci, { left: 0, right: 0, top: '612px', textAlign: 'center', fontSize: '36px', fontWeight: 800, color: '#4A3B30' });
+    const src = el('div', 'abs', sci, { left: 0, right: 0, top: '606px', textAlign: 'center', fontSize: '40px', fontWeight: 800, color: '#4A3B30' });
     src.textContent = 'Kaynak: Camerer 2003';
     const RED = [0, 2, 4, 6, 8];
     const people = Array.from({ length: 10 }, (_, i) => {
       const x = 97 + (i % 5) * 190, y = 880 + Math.floor(i / 5) * 290;
       const fig = (c, d) => pixEl(sci, PERSONP, { o: '#2A1E1A', S: '#F3C9A8', C: c }, 18, { left: px(x), top: px(y), transformOrigin: '50% 100%', display: d });
-      const tag = (txt, bg) => { const t = el('div', 'abs it', sci, { left: px(x - 14), width: '154px', boxSizing: 'border-box', top: px(y + 190), textAlign: 'center', fontSize: '40px', color: '#fff', background: bg, border: '4px solid #2A1E1A', borderRadius: '10px', display: 'none' }); t.textContent = txt; return t; };
+      const tag = (txt, bg) => { const t = el('div', 'abs it', sci, { left: px(x - 14), width: '154px', boxSizing: 'border-box', top: px(y + 186), textAlign: 'center', fontSize: '48px', color: '#fff', background: bg, border: '4px solid #2A1E1A', borderRadius: '10px', display: 'none' }); t.textContent = txt; return t; };
       return { g: fig('#9AA3AD', 'block'), r: fig('#E04A3A', 'none'), k: fig('#3FB06F', 'none'), tag: tag('RET', '#C0392B'), ok: tag('KABUL', '#2F8F5A') };
     });
     const kick = (lt, t, a) => (lt >= t ? a * Math.exp(-(lt - t) * 1.6) * Math.sin((lt - t) * 7) : 0);
@@ -1623,15 +1623,15 @@ function defineValue() {
       else if (lt < DP) { z = 1.38 + 0.04 * prog(lt, RULES, 0.8); fx = 330; fy = 1140; }       // "Ceviz böler"
       else if (lt < BACK) { z = 1.38 + 0.06 * prog(lt, DP, 1.15); fx = 820; fy = 1140; }       // "Diken reddederse"
       else if (lt < OFFER) { z = 1 + 0.04 * prog(lt, BACK, 1.3); }
-      else if (lt < CUT) { z = 1.5 + 0.08 * prog(lt, OFFER, CUT - OFFER); fx = 380; fy = 1090; }
+      else if (lt < CUT) { z = 1.4 + 0.08 * prog(lt, OFFER, CUT - OFFER); fx = 380; fy = 1120; }
       else if (lt < SLIDE + 0.25) { z = 1; }
       else if (lt < RET) { z = 1.45 + 0.13 * ramp(SLIDE + 0.25, RET - SLIDE - 0.25); fx = 820; fy = 1150; }  // Diken: şok, sonra karar
       else if (lt < RET + 1.2) { z = 1; }
-      else if (lt < RET + 1.9) { z = 2 + 0.05 * prog(lt, RET + 1.2, 0.7); fx = 215; fy = 1290; }  // defter yakın planı
-      else if (lt < RET + 2.4) { z = 1.5; fx = 300; fy = 1100; }                                  // Ceviz: şaşkın
+      else if (lt < RET + 1.9) { z = 1.8 + 0.05 * prog(lt, RET + 1.2, 0.7); fx = 215; fy = 1330; }  // defter yakın planı
+      else if (lt < RET + 2.4) { z = 1.5; fx = 300; fy = 1130; }                                  // Ceviz: şaşkın
       else if (lt < SCI) { z = 1.32 + 0.06 * prog(lt, RET + 2.4, SCI - RET - 2.4); fx = 830; fy = 1130; }  // Diken: soğuk bakış
       else if (lt >= ULT - 0.1 && lt < ULT + 0.7) { z = 1.45 + 0.05 * prog(lt, ULT - 0.1, 0.8); fx = 500; fy = 1210; }  // "ültimatom": masa tabelası
-      else if (lt >= YES + 0.1 && lt < YES + 0.65) { z = 2; fx = 215; fy = 1290; }               // TAMAM
+      else if (lt >= YES + 0.1 && lt < YES + 0.65) { z = 1.8; fx = 215; fy = 1330; }             // TAMAM
       else if (lt >= CTA) { z = 1 + 0.12 * ramp(CTA, 2.4); fy = 1060 + 50 * ramp(CTA, 2.4); }    // soru: desteye yaklaş
       let beat = -9;
       beats.forEach((t) => { if (lt >= t) beat = t; });

@@ -3869,7 +3869,7 @@
     ]
   },
   "ultimatom": {
-    "end": 27.85,
+    "end": 28.25,
     "loop": true,
     "handheld": true,
     "musicGain": 0.45,
@@ -3890,15 +3890,15 @@
       ],
       [
         25.0,
-        27.3,
+        27.7,
         "pop",
         {
           "bpm": 108
         }
       ],
       [
-        27.3,
-        27.85,
+        27.7,
+        28.25,
         "horror"
       ]
     ],
@@ -4019,7 +4019,7 @@
       ],
       [
         25.0,
-        27.25,
+        27.65,
         "Sence 1.000 TL<br><b>nasıl bölünmeli?</b>",
         308,
         {
@@ -4029,17 +4029,27 @@
       ],
       [
         25.1,
-        27.25,
-        "Cep Defteri'yle hesabı adil böl",
+        27.65,
+        "Yoruma yaz: Ceviz kaç, Diken kaç?",
         596,
         {
-          "size": 38,
+          "size": 44,
           "quiet": true
         }
       ],
       [
-        27.55,
-        27.85,
+        25.2,
+        27.65,
+        "Cep Defteri'yle hesabı adil böl",
+        670,
+        {
+          "size": 34,
+          "quiet": true
+        }
+      ],
+      [
+        27.95,
+        28.25,
         "Bedava 100 TL'yi<br><b>reddeder misin?</b>",
         308,
         {
@@ -4069,12 +4079,12 @@
           "fair": 22.3,
           "yes": 22.9,
           "cta": 25.0,
-          "dim": 26.9
+          "dim": 27.3
         }
       ],
       [
         "ultimatum",
-        27.3,
+        27.7,
         {
           "wdur": 0.3
         }

@@ -391,7 +391,7 @@ Bütçeni Cep Defteri'ne yaz, etikete sonra bak. Android erken erişim yakında.
 
 **Yayın notu:** 28 Ekim–10 Kasım arasında paylaş (11.11 ve Efsane Cuma öncesi indirim dönemi). Kapak karesi olarak 0,8 sn'yi seç. İlk yorumu sabitle: "Burada mesele mağazanın dürüstlüğü değil, ilk gördüğümüz sayının aklımızı çelmesi. Tutarlar örnek." "İndirim yanılgısı" reelsiyle arasında en az 5–7 gün bırak.
 
-## 19 · ultimatom (kavram: ültimatom oyunu, seslendirme: Buğra, döngülü, 27,85 sn)
+## 19 · ultimatom (kavram: ültimatom oyunu, seslendirme: Buğra, döngülü, 28,25 sn)
 
 **Açıklama:**
 ```
@@ -412,4 +412,4 @@ Arkadaşlarla hesabı Cep Defteri'nde bölüş: kimin payı ne, kim kime borçlu
 #ültimatomoyunu #oyunteorisi #davranışsalekonomi #öğrencibütçesi #paraipuçları #cepdefteri
 ```
 
-**Yayın notu:** Kapak karesi olarak 0,0 sn'yi seç (ışık altında 1.000 TL + başlık; karaoke henüz yok). İlk yorumu sabitle: "Tek doğru cevap yok: 100 TL, 0 TL'den fazla; ama haksız teklife hayır demek de bir mesaj. Sen nasıl bölerdin? Tutarlar örnek." Videonun çağrısı bu reelste soru: "Sence 1.000 TL nasıl bölünmeli?" (yorum); "arkadaşına gönder" açıklamada. Gelen bölüşme önerilerine (ör. "600 / 400") ve K/R yorumlarına yanıt ver, R diyenlere "neden?" diye sor. Hesap bölüşmeyle ilgili başka bir reelsle arasında en az 5–7 gün bırak.
+**Yayın notu:** Kapak karesi olarak 2,0 sn'yi seç (başlık + iki maskot geniş planda; profil ızgarasında marka tanınır). İlk yorumu sabitle: "Tek doğru cevap yok: 100 TL, 0 TL'den fazla; ama haksız teklife hayır demek de bir mesaj. Sen nasıl bölerdin? Tutarlar örnek." Videonun çağrısı bu reelste soru: "Sence 1.000 TL nasıl bölünmeli?" + "Yoruma yaz: Ceviz kaç, Diken kaç?"; "arkadaşına gönder" açıklamada. Gelen bölüşme önerilerine (ör. "600 / 400") ve K/R yorumlarına yanıt ver, R diyenlere "neden?" diye sor. Hesap bölüşmeyle ilgili başka bir reelsle arasında en az 5–7 gün bırak.
