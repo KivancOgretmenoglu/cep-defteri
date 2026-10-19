@@ -18,7 +18,7 @@ Rakam içeren her örnek "örnek" diye etiketlensin.
 
 ---
 
-## 26 kavram reelsi (fırsat maliyeti kalıbında: kavram + maskot hikâyesi + tahmin anı + tek ders)
+## 32 kavram reelsi (fırsat maliyeti kalıbında: kavram + maskot hikâyesi + tahmin anı + tek ders)
 
 ### Kafamızın oyunları
 1. **Batık maliyet** – "Kötü filmi sonuna kadar izlemek seni iki kez kaybettirir" · Diken 250 TL'lik bilette uyuyakalır · Ders: geri gelmeyecek parayı karara katma. ✅ üretildi (300 TL bilet, KAL/ÇIK anketi)
@@ -53,3 +53,12 @@ Rakam içeren her örnek "örnek" diye etiketlensin.
 
 ### Oyun teorisi
 26. **Ültimatom oyunu** – "Bedava 100 TL'yi reddeder misin?" · Ceviz böler, Diken seçer · Ders: adil böl, yoksa iki taraf da 0. ✅ üretildi (sinematik: lamba, 3 sn geri sayım, KABUL/RET düğmeleri; 900/100 teklif, deney panosu, 500/500; kapanış sorusu "Sence 1.000 TL nasıl bölünmeli?")
+
+### Karar odası serisi (Ültimatom kalıbı: gerçek ikilem + sinematik sahne + 3 sn karar anı + yorumda cevaplanan soru)
+27. **Paylaş mı, çal mı?** (mahkûm ikilemi; TV yarışması "Golden Balls") – "1.000 TL'yi çalar mısın?" · stüdyo, spot ışıkları, iki altın top · İkisi PAYLAŞ → 500/500; biri ÇAL → hepsi onun; ikisi ÇAL → 0/0 · Ceviz kameraya döner: "Ben ÇAL diyeceğim, sonra yarısını veririm, söz" · Karar: P mi Ç mi? · Veri: gerçek yarışmada oyuncuların ≈%53'ü PAYLAŞ dedi (van den Assem, van Dolder ve Thaler, 2012) · Kapanış: "Karşındaki 'çalacağım' derse ne yaparsın?"
+28. **Ortalamanın 2/3'ü** (Keynes güzellik yarışması) – "Bu sayıyı tutturan kazanır" · borsa panosu · 0–100 arası sayıyı yoruma yaz; yorumların ortalamasının 2/3'üne en yakın kazanır · Düşünce basamakları: 50 → 33 → 22 → … → 0 · Veri: FT 1997 yarışmasında 1.486 okur, ortalama 18,9, kazanan 13 · İki bölümlü: 2. reels yorumlardan çıkan gerçek sonucu açıklar · Para ödülü yok (çekiliş/yarışma mevzuatı); kazanan adıyla anılır.
+29. **100 TL'lik açık artırma** (Shubik'in dolar müzayedesi) – "100 TL'ye 150 TL verir misin?" · müzayede salonu, tokmak · En yüksek teklif 100 TL'yi alır, ikinci en yüksek de teklifini öder · Ceviz–Diken teklif savaşı 100'ü geçer · Karar: ARTIR mı BIRAK mı? + "Sen kaçta dururdun?" · Ders: kaybı kurtarmak için batmak · Yayından önce doğrula: Bazerman'ın 20 dolar açık artırmalarında iki en yüksek teklifin toplamı hiç 39 doların altına inmedi.
+30. **Ev kasası** (kamu malı oyunu) – "Ev kasasına kaç TL koyarsın?" · gece mutfak, "EV KASASI" kavanozu, dört ev arkadaşı · Kasaya konan para ikiye katlanır, dörde eşit bölünür; Ceviz hiç koymadan pay alır · Turlar ilerledikçe kasa boşalır; bedavacıya ceza gelince katkı geri yükselir (Fehr ve Gächter, 2000; ilk turlarda katkı ≈%40–60) · Markaya en yakın: ortak masraf Cep Defteri'nde görünür · Kapanış: "Evinizin Ceviz'i kim?"
+31. **Güven makinesi** (güven oyunu) – "Arkadaşına güvenip parayı üçe katlar mısın?" · neon makine: "İÇİNE KOYDUĞUN PARA 3 KATINA ÇIKAR" · Karamel gönderir, Bilge ne kadar geri vereceğine karar verir · Veri: Berg, Dickhaut ve McCabe (1995): 32 kişiden 30'u gönderdi, ortalama 10 doların 5,16'sı · Yayından önce doğrula: geri dönen tutarın ortalaması · Kapanış: "Sen kaç gönderirdin, kaç geri verirdin?"
+32. **Yazı mı tura mı?** (kayıptan kaçınma; 7. maddenin karar odası biçimi) – "Bu bahsi oynar mısın?" · tek lamba, havada yavaş dönen 1 TL · Yazı: +150 TL, tura: −100 TL (beklenen değer +25 TL) · Karar: OYNA mı GEÇ mi? · Veri: çoğu insan reddeder; kayıp, aynı tutardaki kazançtan yaklaşık iki kat ağır (Kahneman ve Tversky) · Kapanış: "Kaç TL kazanma ihtimali olsa oynardın?"
+Sırada: Diktatör oyunu ("Ültimatom 2: RET hakkı olmasa Ceviz kaç verir?"), kazananın laneti (bozuk para kavanozu açık artırması), zaman tutarsızlığı (8. madde: "Bugün 1.000 mü, ay sonu 1.100 mü?" ve aynı soru bir yıl ileride).
