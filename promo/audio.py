@@ -981,7 +981,8 @@ def babble(captions, base=640):
 
 def cue_boxes(boxes):
     for bx in boxes:
-        if bx[0] > 0:
+        quiet = len(bx) > 4 and isinstance(bx[4], dict) and bx[4].get('quiet')  # sahnenin kendi geçiş sesi varsa
+        if bx[0] > 0 and not quiet:
             put(SFX, bloop(620, 980, 0.05, 0.22), bx[0])
 
 # ───────── yaratıcı hook sesleri ─────────
@@ -1473,73 +1474,106 @@ def cue_anchor(t0, skip=0, o=None):
 def cue_ultimatum(t0, skip=0, o=None):
     o = o or {}
     T = at(t0, skip)
-    thump = lambda v: np.sin(2 * np.pi * phase(glide(70, 40, 0.18))) * expd(0.18, 16) * v
+
+    def thump(v):  # kalp: alt vuruş + telefon hoparlöründe de duyulan üst katman
+        x = np.sin(2 * np.pi * phase(glide(70, 40, 0.18))) * expd(0.18, 16)
+        h = np.sin(2 * np.pi * phase(glide(170, 95, 0.1))) * expd(0.1, 30) * 0.45
+        x[: len(h)] += h
+        return x * v
+
     sub = lambda d=1.0: np.tanh(np.sin(2 * np.pi * phase(glide(65, 30, d))) * expd(d, 3) * 1.4)  # zilsiz alt vuruş: sesi örtmez
-    if 'rules' in o:  # loş oda: lamba gıcırdar; kurallar anlatılırken plaka ve düğmeler yanar
-        R = o['rules']
-        put(SFX, sub(1.2), T(0.02), 0.55); put(SFX, creak(0.5), T(0.05), 0.3, pan=0.2)
-        put(SFX, fm_bell(659, 0.9, 0.2), T(R))
-        put(SFX, pling(1318, 0.15, 0.35), T(R + 0.1), pan=0.3)
-        put(SFX, bloop(330, 160, 0.18, 0.28), T(R + 0.85), pan=0.5)
+
+    def buzz(d):  # ampul / floresan vızıltısı
+        t = tt(d)
+        x = wave_(phase(np.full(len(t), 100.0)), 'saw') * 0.5 + bp(noise(d), 2000, 6000) * 0.3
+        return bp(x, 150, 4000) * (0.5 + 0.5 * (np.sin(2 * np.pi * 9 * t) > 0)) * np.sin(np.pi * t / d) * 0.5
+
+    if 'rules' in o:
+        R, RV = o['rules'], o.get('reveal', 1.42)
+        DP, BACK = R + 0.8, R + 1.95
+        # ışık altında 1.000 TL: alt vuruş, ampul titrer, desteden parıltı geçer
+        put(SFX, sub(1.2), T(0.02), 0.55); put(SFX, buzz(0.26), T(0.12), 0.35, pan=0.1)
+        put(SFX, pling(2093, 0.12, 0.4), T(0.45), pan=0.15); put(SFX, creak(0.5), T(0.5), 0.18, pan=0.2)
+        # "Ama bir şartla": geniş plana açılış, ikisi irkilir; KABUL ve RET sırayla yanar
+        put(SFX, whoosh(0.35, 3000, 300, 0.7), T(RV - 0.08), 0.3)
+        put(SFX, sub(1.0), T(RV - 0.03), 0.5); put(SFX, slam_hit(0.6), T(RV - 0.03), 0.22)
+        put(SFX, pling(1318, 0.12, 0.35), T(RV + 0.15), pan=0.3)
+        put(SFX, bloop(330, 160, 0.18, 0.2), T(RV + 0.5), pan=0.5)
+        # "Ceviz böler" / "Diken reddederse" yakın planları, "ikisi de sıfır"da geniş plan
+        put(SFX, fm_bell(659, 0.9, 0.18), T(R))
+        put(SFX, stereo_move(whoosh(0.22, 500, 2500, 0.6), -0.3, -0.1), T(R - 0.1), 0.18)
+        put(SFX, stereo_move(whoosh(0.22, 500, 2500, 0.6), 0.1, 0.3), T(DP - 0.1), 0.18)
+        put(SFX, bloop(330, 160, 0.18, 0.24), T(DP + 0.05), pan=0.5)
+        put(SFX, stereo_move(whoosh(0.3, 2500, 400, 0.6), 0.2, -0.2), T(BACK - 0.1), 0.18)
+        for k in range(2):  # deste etiketi iki kez kırmızı "0 TL" yanar
+            put(SFX, buzzer(0.08), T(BACK + 0.55 + k * 0.26), 0.25)
     if 'offer' in o:  # Ceviz yakın plan
-        put(SFX, stereo_move(whoosh(0.3, 2000, 400, 0.6), 0.3, -0.3), T(o['offer'] - 0.12), 0.28)
-    if 'split' in o:  # 900 Ceviz'e kayar, deftere yazılır
+        put(SFX, stereo_move(whoosh(0.3, 2000, 400, 0.6), 0.3, -0.3), T(o['offer'] - 0.12), 0.25)
+    if 'split' in o:  # 900 Ceviz'e kayar (sayının altında efekt az)
         S = o['split']
-        put(SFX, flutter(0.35), T(S), 0.35, pan=-0.3)
-        for i in range(4):
-            put(SFX, key_click(0.28), T(S + 0.3 + i * 0.11), pan=-0.5)
-    if 'cut' in o:
-        put(SFX, stereo_move(whoosh(0.25, 400, 2000, 0.6), -0.3, 0.3), T(o['cut'] - 0.1), 0.22)
-    if 'slide' in o:  # 100 Diken'e itilir
-        S = o['slide']
-        put(SFX, stereo_move(whoosh(0.35, 900, 2600, 0.7), -0.2, 0.5), T(S), 0.3)
-        put(SFX, bloop(500, 300, 0.1, 0.28), T(S + 0.42), pan=0.4)
+        put(SFX, flutter(0.3), T(S - 0.1), 0.2, pan=-0.3)
         for i in range(3):
-            put(SFX, key_click(0.25), T(S + 0.2 + i * 0.12), pan=-0.5)
-    if 'ask' in o:  # Diken yakın plan: alt vuruş, kalp atışı hızlanır (value.js'teki nabızla aynı takvim)
+            put(SFX, key_click(0.15), T(S + 0.3 + i * 0.14), pan=-0.5)
+    if 'cut' in o:
+        put(SFX, stereo_move(whoosh(0.25, 400, 2000, 0.6), -0.3, 0.3), T(o['cut'] - 0.1), 0.18)
+    if 'slide' in o:  # 100 Diken'e itilir, üstüne "%10" yapışır
+        S = o['slide']
+        put(SFX, stereo_move(whoosh(0.2, 900, 2600, 0.7), -0.2, 0.5), T(S - 0.05), 0.16)
+        put(SFX, key_click(0.3), T(S + 0.3), pan=0.4)
+    if 'ask' in o:  # "Sen Diken olsan?": alt vuruş; kalp atışı hızlanır (value.js'teki nabızla aynı takvim)
         A, R = o['ask'], o['ret']
-        put(SFX, sub(1.0), T(A), 0.6)
+        put(SFX, sub(1.0), T(A - 0.03), 0.55)
         t, k = A + 0.2, 0
         while t < R - 0.1:
             put(SFX, thump(0.9), T(t)); put(SFX, thump(0.6), T(t + 0.16))
-            t += max(0.3, 0.56 - 0.04 * k); k += 1
-    if 'count' in o:  # 3 · 2 · 1, son anda nefes
+            t += max(0.42, 0.62 - 0.03 * k); k += 1
+    if 'count' in o:  # gerçek 3 saniye: her saniyede bip, aralarda saat tıkı, son anda nefes
         C, R = o['count'], o['ret']
-        for j in range(3):
-            put(SFX, pluck(81, 0.13, 'square', 0.5, cut=4000, v=0.3), T(C + j * (R - C) / 3))
+        n = int(round(R - C))
+        for j in range(n):
+            put(SFX, pluck(81 if j < n - 1 else 86, 0.14, 'square', 0.5, cut=4000, v=0.3), T(C + j))
+            put(SFX, tick(j % 2 == 0, 0.22), T(C + j + 0.5), pan=0.2)
         put(SFX, inhale(0.3), T(R - 0.32), 0.6)
-    if 'ret' in o:  # RET: çarpma, büzer, para dağılır, lamba sarsılır, defter çizilir
+    if 'ret' in o:  # RET: çarpma, büzer, para dağılır; defter yakın planında çizik ve damga ("İkisi"den önce)
         R = o['ret']
         put(SFX, slam_hit(0.8), T(R), 0.9); put(SFX, sub(1.2), T(R), 0.9)
         put(SFX, buzzer(0.22), T(R + 0.01), 0.45)
-        put(SFX, flutter(0.5), T(R + 0.05), 0.35, pan=-0.2)
-        put(SFX, creak(0.45), T(R + 0.2), 0.25, pan=0.2)
-        put(SFX, paper_tear(0.2), T(R + 0.35), 0.25, pan=-0.5)
-        put(SFX, stamp(), T(R + 0.45), 0.4, pan=-0.4)
-    if 'sci' in o:  # ışıklar yanar; deney: kişiler belirir, beşi RET der, kalanı KABUL
+        put(SFX, flutter(0.5), T(R + 0.05), 0.3, pan=-0.2)
+        put(SFX, creak(0.45), T(R + 0.3), 0.2, pan=0.2)
+        put(SFX, stereo_move(whoosh(0.2, 600, 2400, 0.6), 0.2, -0.3), T(R + 1.12), 0.14)
+        put(SFX, paper_tear(0.2), T(R + 1.25), 0.3, pan=-0.4)
+        put(SFX, stamp(), T(R + 1.4), 0.45, pan=-0.3)
+    if 'sci' in o:  # floresan titreyerek yanar; pano gelir; beşi RET, beşi KABUL
         S = o['sci']
-        put(SFX, key_click(0.6), T(S - 0.02)); put(SFX, stereo_move(whoosh(0.4, 400, 3000, 0.6), -0.4, 0.4), T(S), 0.28)
-        for i in range(10):
-            put(SFX, bloop(500 + 40 * i, 900 + 60 * i, 0.05, 0.12), T(S + 0.25 + i * 0.05), pan=-0.6 + 0.13 * i)
+        put(SFX, key_click(0.6), T(S - 0.02))
+        for k, v in ((0.0, 0.3), (0.1, 0.22), (0.25, 0.3)):
+            put(SFX, buzz(0.07), T(S + k), v)
+        put(SFX, stereo_move(whoosh(0.4, 400, 3000, 0.6), -0.4, 0.4), T(S + 0.42), 0.22)
+        for i in range(5):
+            put(SFX, bloop(500 + 80 * i, 900 + 120 * i, 0.05, 0.1), T(S + 0.55 + i * 0.1), pan=-0.6 + 0.3 * i)
         for j in range(5):
-            put(SFX, bloop(420, 220, 0.12, 0.2), T(S + 1.0 + j * 0.3), pan=-0.5 + 0.25 * j)
-        put(SFX, pling(1046, 0.15, 0.4), T(S + 2.45), pan=-0.3); put(SFX, pling(1318, 0.15, 0.4), T(S + 2.5), pan=0.3)
+            put(SFX, bloop(420, 220, 0.1, 0.13), T(S + 1.3 + j * 0.3), pan=-0.5 + 0.25 * j)
+        put(SFX, pling(1175, 0.12, 0.4), T(S + 2.75))
     if 'name' in o:  # aydınlık masa: 1.000 TL geri gelir
-        put(SFX, stereo_move(whoosh(0.35, 2400, 500, 0.6), 0.3, -0.3), T(o['name']), 0.28)
-        put(SFX, flutter(0.3), T(o['name'] + 0.15), 0.25)
+        put(SFX, stereo_move(whoosh(0.35, 2400, 500, 0.6), 0.3, -0.3), T(o['name']), 0.2)
+        put(SFX, flutter(0.3), T(o['name'] + 0.15), 0.18)
+    if 'ult' in o:  # "ültimatom": tabela parlar, girişteki çan geri gelir
+        put(SFX, stereo_move(whoosh(0.2, 500, 2500, 0.5), -0.1, 0.1), T(o['ult'] - 0.15), 0.14)
+        put(SFX, fm_bell(659, 1.0, 0.2), T(o['ult'] - 0.05))
     if 'fair' in o:  # 500 / 500
         F = o['fair']
-        put(SFX, flutter(0.4), T(F), 0.3)
-        put(SFX, bloop(600, 900, 0.07, 0.25), T(F + 0.3), pan=-0.4); put(SFX, bloop(600, 900, 0.07, 0.25), T(F + 0.35), pan=0.4)
-    if 'yes' in o:  # KABUL: tık, zil, TAMAM damgası
+        put(SFX, flutter(0.35), T(F - 0.05), 0.18)
+        put(SFX, bloop(600, 900, 0.07, 0.14), T(F + 0.3), pan=-0.4); put(SFX, bloop(600, 900, 0.07, 0.14), T(F + 0.35), pan=0.4)
+    if 'yes' in o:  # KABUL: tek zil, TAMAM damgası (defter yakın planı)
         Y = o['yes']
-        put(SFX, ui_tap(0.8), T(Y), pan=0.3); put(SFX, ding_ding(), T(Y + 0.05), 0.25)
-        put(SFX, stamp(), T(Y + 0.15), 0.4, pan=-0.4)
-    if 'cta' in o:  # konfeti çağrı satırından önce
-        put(SFX, popper(), T(o['cta'] - 0.1), 0.45)
-    if 'dim' in o:  # ışık söner; döngü karanlık odaya döner
-        put(SFX, key_click(0.45), T(o['dim'])); put(SFX, creak(0.4), T(o['dim'] + 0.1), 0.2, pan=0.2)
-
+        put(SFX, fm_bell(1568, 0.8, 0.2), T(Y + 0.05))
+        put(SFX, stamp(), T(Y + 0.2), 0.35, pan=-0.3)
+    if 'cta' in o:  # soru: para ortada toplanır, "?" belirir
+        C = o['cta']
+        put(SFX, flutter(0.3), T(C), 0.18)
+        put(SFX, bloop(500, 1100, 0.1, 0.2), T(C + 0.3), pan=0.1)
+    if 'dim' in o:  # ışık söner (soru bittikten sonra); döngü karanlık odaya döner
+        put(SFX, key_click(0.3), T(o['dim'])); put(SFX, creak(0.4), T(o['dim'] + 0.1), 0.15, pan=0.2)
 
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
@@ -1892,6 +1926,22 @@ mus = MUS * gain[:, None] * REEL.get('musicGain', 1.0)
 mus_wet = np.stack([fftconvolve(mus[:, c], ir[:, c] * 0.5)[:N] for c in range(2)], 1)
 
 
+def limit(mix, ceil=0.72, att=0.004, rel=0.15):
+    """Tepe sınırlayıcı: tepe önden görülür, kazanç 4 ms'de iner, 150 ms'de geri döner.
+    Tek bir sert vuruş (ör. çarpma) bütün karışımı kısmasın diye."""
+    from scipy.ndimage import minimum_filter1d, uniform_filter1d
+    need = np.minimum(1.0, ceil / np.maximum(np.abs(mix).max(1), 1e-9))
+    w = max(1, int(att * SR))
+    g = uniform_filter1d(minimum_filter1d(need, size=2 * w + 1), size=w)
+    k = np.exp(-1 / (rel * SR))
+    out = np.empty_like(g)
+    cur = 1.0
+    for i, x in enumerate(g):
+        cur = x if x < cur else x + (cur - x) * k
+        out[i] = cur
+    return mix * np.minimum(out, need)[:, None]
+
+
 def master(mix, target_db=-15.5):
     """Ortalama yüksekliği hedefe getirir (Reels için ≈ −14 LUFS), sonra yumuşak sınırlar."""
     mix = np.stack([hp(mix[:, c], 28) for c in range(2)], 1)
@@ -1901,6 +1951,8 @@ def master(mix, target_db=-15.5):
     rms = np.sqrt((loud ** 2).mean()) if len(loud) else 1e-3
     mix = mix * (10 ** (target_db / 20) / rms)
     mix = np.tanh(mix * 1.1) / 1.1 * 0.97
+    if REEL.get('limiter'):  # sert vuruşlu reels: tepeler yerel olarak sınırlanır
+        mix = limit(mix)
     # örnekler arası tepe (true peak) ≤ −2,5 dBFS: AAC kodlaması ~1 dB taşırır, mp4'te ≤ −1,5 dBTP kalsın
     from scipy.signal import resample_poly
     tp = max(np.abs(resample_poly(mix[:, c], 4, 1)).max() for c in range(2))

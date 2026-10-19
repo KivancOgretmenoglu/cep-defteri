@@ -3869,7 +3869,7 @@
     ]
   },
   "ultimatom": {
-    "end": 26.4,
+    "end": 27.85,
     "loop": true,
     "handheld": true,
     "musicGain": 0.45,
@@ -3877,28 +3877,28 @@
     "musicPlan": [
       [
         0,
-        15.65,
+        17.22,
         "horror",
         {
           "beatsEnd": 9.2
         }
       ],
       [
-        15.65,
-        23.2,
+        17.22,
+        25.0,
         "lofi"
       ],
       [
-        23.2,
-        25.85,
+        25.0,
+        27.3,
         "pop",
         {
           "bpm": 108
         }
       ],
       [
-        25.85,
-        26.4,
+        27.3,
+        27.85,
         "horror"
       ]
     ],
@@ -3906,14 +3906,14 @@
       "gaps": [
         [
           11.4,
-          12.85
+          14.42
         ]
       ]
     },
     "captionPixel": true,
     "captionY": 740,
     "captionMaxWords": 3,
-    "captionUntil": 23.1,
+    "captionUntil": 25.0,
     "boxes": [
       [
         0,
@@ -3932,13 +3932,95 @@
         308,
         {
           "size": 72,
-          "pulse": true
+          "pulse": true,
+          "quiet": true
         }
       ],
       [
         5.75,
+        7.06,
+        "Ceviz'in teklifi:",
+        308,
+        {
+          "size": 88,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        7.1,
         9.1,
-        "Teklif:<br><b>900 bana, 100 sana</b>",
+        "Ceviz'in teklifi:<br><b>900 bana, 100 sana</b>",
+        308,
+        {
+          "size": 88,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        9.2,
+        14.37,
+        "Sen Diken olsan?<br><b>KABUL mü, RET mi?</b>",
+        308,
+        {
+          "size": 84,
+          "pulse": true,
+          "quiet": true,
+          "dim": [
+            11.42,
+            14.42
+          ]
+        }
+      ],
+      [
+        14.42,
+        17.15,
+        "RET!<br><b>İkisi de 0 TL</b>",
+        308,
+        {
+          "size": 92,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        17.3,
+        20.6,
+        "Saçma mı? %20'den az teklifi<br><b>yaklaşık yarısı reddediyor</b>",
+        308,
+        {
+          "size": 64,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        20.65,
+        22.27,
+        "Bu oyunun adı:<br><b>ültimatom</b>",
+        308,
+        {
+          "size": 92,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        22.3,
+        25.0,
+        "Adil böl, yoksa<br><b>ikisi de 0 kalabilir</b>",
+        308,
+        {
+          "size": 80,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        25.0,
+        27.25,
+        "Sence 1.000 TL<br><b>nasıl bölünmeli?</b>",
         308,
         {
           "size": 88,
@@ -3946,58 +4028,18 @@
         }
       ],
       [
-        9.2,
-        12.8,
-        "Sen Diken olsan?<br><b>KABUL mü, RET mi?</b>",
-        308,
+        25.1,
+        27.25,
+        "Cep Defteri'yle hesabı adil böl",
+        596,
         {
-          "size": 84,
-          "pulse": true
+          "size": 38,
+          "quiet": true
         }
       ],
       [
-        12.85,
-        15.55,
-        "RET!<br><b>İkisi de 0 TL</b>",
-        308,
-        {
-          "size": 92,
-          "pulse": true
-        }
-      ],
-      [
-        15.65,
-        18.95,
-        "Saçma mı? İnsanların<br><b>yarısı da reddediyor</b>",
-        308,
-        {
-          "size": 80,
-          "pulse": true
-        }
-      ],
-      [
-        19.05,
-        23.1,
-        "Ültimatom oyunu: adil böl,<br><b>yoksa iki taraf da 0</b>",
-        308,
-        {
-          "size": 70,
-          "pulse": true
-        }
-      ],
-      [
-        23.15,
-        25.8,
-        "Hesabı hep kendine bölen<br><b>arkadaşına gönder</b>",
-        308,
-        {
-          "size": 74,
-          "pulse": true
-        }
-      ],
-      [
-        26.1,
-        26.4,
+        27.55,
+        27.85,
         "Bedava 100 TL'yi<br><b>reddeder misin?</b>",
         308,
         {
@@ -4017,19 +4059,22 @@
           "cut": 8.1,
           "slide": 8.3,
           "ask": 9.2,
+          "kabul": 10.23,
+          "retw": 10.89,
           "count": 11.42,
-          "ret": 12.85,
-          "sci": 15.6,
-          "name": 19.0,
-          "fair": 20.96,
-          "yes": 21.55,
-          "cta": 23.15,
-          "dim": 25.35
+          "ret": 14.42,
+          "sci": 17.22,
+          "name": 20.6,
+          "ult": 21.45,
+          "fair": 22.3,
+          "yes": 22.9,
+          "cta": 25.0,
+          "dim": 26.9
         }
       ],
       [
         "ultimatum",
-        25.85,
+        27.3,
         {
           "wdur": 0.3
         }
@@ -4059,23 +4104,30 @@
         "Sen Diken olsan? Kabul mü, ret mi?"
       ],
       [
-        12.95,
+        14.57,
         "assets/voice/ultimatom/u5.mp3",
         "Diken reddetti. İkisi de sıfır!"
       ],
       [
-        15.65,
+        17.27,
         "assets/voice/ultimatom/u6.mp3",
         "Saçma mı? Deneylerde insanların yarısı aynısını yapıyor."
       ],
       [
-        19.05,
-        "assets/voice/ultimatom/u7.mp3",
-        "Buna ültimatom oyunu denir. Adil böl; yoksa iki taraf da sıfır."
+        20.65,
+        "assets/voice/ultimatom/u7n.mp3",
+        "Bu oyunun adı ültimatom. Adil böl; yoksa ikisi de sıfır kalabilir."
       ],
       [
-        23.2,
-        "assets/voice/ultimatom/u8m.mp3"
+        25.1,
+        "assets/voice/ultimatom/u8q.mp3"
+      ]
+    ],
+    "limiter": true,
+    "captionCut": [
+      [
+        11.42,
+        14.42
       ]
     ]
   }

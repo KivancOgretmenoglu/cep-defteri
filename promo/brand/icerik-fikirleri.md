@@ -52,4 +52,4 @@ Rakam içeren her örnek "örnek" diye etiketlensin.
 25. **Acil durum fonu** – "Telefonun ekranı kırıldı. Paran var mı?".
 
 ### Oyun teorisi
-26. **Ültimatom oyunu** – "Bedava 100 TL'yi reddeder misin?" · Ceviz böler, Diken seçer · Ders: adil böl, yoksa iki taraf da 0. ✅ üretildi (sinematik: lamba, geri sayım, KABUL/RET düğmeleri; 900/100 teklif, deney ızgarası, 500/500)
+26. **Ültimatom oyunu** – "Bedava 100 TL'yi reddeder misin?" · Ceviz böler, Diken seçer · Ders: adil böl, yoksa iki taraf da 0. ✅ üretildi (sinematik: lamba, 3 sn geri sayım, KABUL/RET düğmeleri; 900/100 teklif, deney panosu, 500/500; kapanış sorusu "Sence 1.000 TL nasıl bölünmeli?")
