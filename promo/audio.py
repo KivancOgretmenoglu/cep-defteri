@@ -1575,6 +1575,117 @@ def cue_ultimatum(t0, skip=0, o=None):
     if 'dim' in o:  # ışık söner (soru bittikten sonra); döngü karanlık odaya döner
         put(SFX, key_click(0.3), T(o['dim'])); put(SFX, creak(0.4), T(o['dim'] + 0.1), 0.15, pan=0.2)
 
+
+def cue_sepet(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    Z = o.get('zero', 11.1)
+    C = o.get('count', 99)
+
+    def thump(v):  # kalp: alt vuruş + üst katman
+        x = np.sin(2 * np.pi * phase(glide(70, 40, 0.18))) * expd(0.18, 16)
+        h = np.sin(2 * np.pi * phase(glide(170, 95, 0.1))) * expd(0.1, 30) * 0.45
+        x[: len(h)] += h
+        return x * v
+
+    sub = lambda d=1.0: np.tanh(np.sin(2 * np.pi * phase(glide(65, 30, d))) * expd(d, 3) * 1.4)
+
+    def vibe(d):  # komodindeki telefon titrer
+        t = tt(d)
+        x = np.sin(2 * np.pi * 150 * t) * (0.6 + 0.4 * np.sign(np.sin(2 * np.pi * 23 * t)))
+        return lp(x, 900) * np.sin(np.pi * t / d) ** 0.5 * 0.5
+
+    def glitch(d=0.22):  # sayfa yenilenir: dijital cızırtı
+        n = int(d * SR)
+        steps = np.repeat(rng.uniform(-1, 1, n // 220 + 1), 220)[:n]
+        return bp(noise(d) * 0.4 + steps * 0.6, 500, 6000) * expd(d, 6) * 0.5
+
+    def lamp_buzz(d):  # lamba titreyerek yanar
+        t = tt(d)
+        x = wave_(phase(np.full(len(t), 100.0)), 'saw') * 0.5 + bp(noise(d), 2000, 6000) * 0.3
+        return bp(x, 150, 4000) * np.sin(np.pi * t / d) * 0.5
+
+    # açılış: sayacın yakın planı
+    put(SFX, sub(1.2), T(0.02), 0.5)
+    # sayaç her saniye tıklar (karar anına kadar hafif; karar anında bip olur)
+    n = 1
+    while Z - n >= 0:
+        if Z - n < C - 0.01:
+            put(SFX, tick(n % 2 == 0, 0.16), T(Z - n), pan=0.15)
+        n += 1
+    cut = lambda t, a=0.2, b=-0.2: put(SFX, stereo_move(whoosh(0.28, 2400, 500, 0.5), a, b), T(t - 0.08), 0.16)  # plan kesmesi
+    if 'room' in o:
+        cut(o['room'])
+    if 'prod' in o:
+        cut(o['prod'], -0.2, 0.2)
+        put(SFX, pling(1568, 0.1, 0.3), T(o['prod'] + 0.35), pan=0.2)  # fiyat parlar
+    if 'price' in o:  # eski fiyat gelir ve çizilir, %70 rozeti patlar
+        P = o['price']
+        put(SFX, paper_tear(0.18), T(P + 0.2), 0.22, pan=-0.3)
+        put(SFX, bloop(400, 1400, 0.08, 0.3), T(P + 0.45), pan=0.3)
+    if 'push' in o:  # "süre bitiyor": sayaca yaklaş
+        put(SFX, riser(0.45), T(o['push'] - 0.1), 0.25)
+    if 'face' in o:  # Ceviz terler; kalp atışı başlar ve hızlanır (value.js ile aynı takvim)
+        F = o['face']
+        cut(F)
+        t, k = F + 0.1, 0
+        while t < Z - 0.1:
+            put(SFX, thump(0.9), T(t)); put(SFX, thump(0.6), T(t + 0.16))
+            t += max(0.42, 0.62 - 0.03 * k); k += 1
+    if 'paw' in o:
+        cut(o['paw'], 0.3, 0.1)
+    if 'count' in o:  # gerçek 3 saniye: her saniye bip, aralarda saat tıkı, son anda nefes
+        for j in range(3):
+            put(SFX, pluck(81 if j < 2 else 86, 0.14, 'square', 0.5, cut=4000, v=0.3), T(C + j))
+            put(SFX, tick(j % 2 == 0, 0.22), T(C + j + 0.5), pan=0.2)
+        put(SFX, inhale(0.3), T(Z - 0.32), 0.6)
+        # 00:00 → SÜRE DOLDU: büzer, çarpma, alt vuruş
+        put(SFX, buzzer(0.5), T(Z), 0.5); put(SFX, slam_hit(0.7), T(Z), 0.6); put(SFX, sub(1.0), T(Z), 0.7)
+    if 'pull' in o:  # sayfayı aşağı çeker, bırakır; yükleniyor tıkırtısı
+        Pl, R = o['pull'], o.get('reset', o['pull'] + 1.6)
+        put(SFX, stereo_move(whoosh(0.8, 300, 900, 0.4), 0.3, 0.0), T(Pl), 0.12)
+        put(SFX, ui_tap(0.5), T(Pl + 1.0))
+        tk = Pl + 1.1
+        while tk < R - 0.05:
+            put(SFX, tick(True, 0.08), T(tk), pan=0.3)
+            tk += 0.12
+    if 'reset' in o:  # sayaç baştan başlar: cızırtı, sert vuruş, tiz tını; yeni sayaç tıklamaya devam eder
+        R = o['reset']
+        put(SFX, glitch(0.22), T(R - 0.05), 0.5)
+        put(SFX, slam_hit(1.0), T(R), 0.8); put(SFX, sub(1.2), T(R), 0.8)
+        put(SFX, pling(2637, 0.15, 0.6), T(R + 0.02), pan=0.2)
+        for k in range(1, 3):
+            put(SFX, tick(k % 2 == 0, 0.14), T(R + k), pan=0.15)
+    if 'shock' in o:  # Ceviz: "?"
+        S = o['shock']
+        cut(S)
+        put(SFX, boing(0.4, 0.22), T(S + 0.02))
+    if 'sci' in o:  # lamba yanar; pano: sayaçlar döner, örnek kart gelir, BİTMEDİ damgası
+        S = o['sci']
+        put(SFX, key_click(0.6), T(S - 0.02))
+        for k, v in ((0.0, 0.3), (0.1, 0.22), (0.25, 0.3)):
+            put(SFX, lamp_buzz(0.07), T(S + k), v, pan=0.4)
+        put(SFX, stereo_move(whoosh(0.4, 400, 3000, 0.6), -0.4, 0.4), T(S + 0.42), 0.22)
+        put(SFX, slot_roll(0.9), T(S + 0.6), 0.18)
+        put(SFX, slot_roll(0.6), T(S + 1.9), 0.18)
+        put(SFX, bloop(500, 900, 0.08, 0.2), T(S + 3.2))
+        put(SFX, stamp(), T(S + 4.6), 0.45, pan=0.2)
+    if 'app' in o:  # Cep Defteri açılır; kulaklık bütçeyi aşar
+        A = o['app']
+        put(SFX, stereo_move(whoosh(0.3, 600, 2600, 0.5), 0.4, -0.2), T(A - 0.05), 0.16)
+        put(SFX, fm_bell(1318, 0.6, 0.15), T(A + 0.1))
+        put(SFX, bloop(500, 300, 0.1, 0.18), T(A + 0.35), pan=0.2)
+        put(SFX, buzzer(0.12), T(A + 0.8), 0.25)
+    if 'down' in o:  # telefonu komodine bırakır, lambayı söndürür
+        D = o['down']
+        cut(D)
+        put(SFX, flutter(0.4), T(D + 0.1), 0.12, pan=-0.3)
+        put(SFX, woodblock(False), T(D + 0.55), 0.35, pan=-0.5)
+        put(SFX, key_click(0.4), T(D + 0.5), pan=0.5)
+    if 'buzz' in o:  # komodindeki telefon iki kez titrer
+        for k in range(2):
+            put(SFX, vibe(0.3), T(o['buzz'] + k * 0.42), 0.6, pan=-0.5)
+
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
 # ═════════ ANA MÜZİK ═════════

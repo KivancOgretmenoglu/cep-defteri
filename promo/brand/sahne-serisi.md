@@ -111,28 +111,34 @@ Kalıp: gerçek hayattan bir para ikilemi, bir film türünün sahnesinde anlat�
 ---
 
 ## 4. Gece 02.00: Sepet bombası
-**Durum:** üretiliyor (bu gece) · **Tür:** gerilim / bomba imhası · **Süre:** ~26 sn · **Oyuncu:** Ceviz
+**Durum:** üretildi (`out/sepet-bombasi.mp4`, 27,7 sn) · **Tür:** gerilim / bomba imhası · **Oyuncu:** Ceviz
 
 **Kanca (0. kare):** Karanlık oda, Ceviz'in yüzü telefon ışığında; ekranda kırmızı sayaç. Kutu: **"Bu sayaç sana yalan söylüyor"**
 
-**Akış**
-- 0–2,5 sn: Sayacın yakın planı (00:10, saniye saniye akıyor). Kamera geri çekilir: Ceviz yatakta, komodindeki dijital saat 02:00.
-- 2,5–6 sn: Telefon ekranı: kulaklık, üstü çizili 4.999 TL, 1.499 TL, "%70", "SATIN AL". Pençe düğmeye yaklaşır, alında ter.
-- 6–7 sn: "Alır mısın, bırakır mısın?"
-- 7–10 sn: Karar anı: sayacın son 3 saniyesi (gerçek 3 sn). Müzik durur, kalp atışı ve bip. Kutu: "AL mı, BIRAK mı? Yoruma yaz".
-- 10–11 sn: 00:00, "SÜRE DOLDU". Ceviz almaz.
-- 11–14 sn: Ceviz sayfayı aşağı çekip yeniler: sayaç 10:00'dan yeniden başlar, indirim hâlâ orada.
-- 14–19 sn: Pano: "11 bin alışveriş sitesi tarandı" → "361 sitede geri sayım sayacı" → "bazıları süre bitince de sürüyordu" + "Kaynak: Mathur ve ark. 2019".
-- 19–22 sn: Ders. Ceviz Cep Defteri'ni açar: "Elektronik: bu ay kalan 300 TL". Telefonu ters çevirir, oda kararır.
-- 22–25 sn: Kapanış sorusu.
-- 25–26 sn: Telefon yeniden yanar, sayaç 00:10 (döngü).
+**Akış (videodaki zamanlar)**
+- 0–1,2 sn: Sayacın yakın planı ("FLAŞ İNDİRİM BİTİYOR!", 00:12'den saniye saniye akıyor).
+- 1,2–2,75 sn: Oda: Ceviz yatakta, yüzü telefon ışığında; komodinde dijital saat 02:00.
+- 2,75–5,6 sn: Telefon ekranı: kulaklık, 1.499 TL, "Son 2 ürün!", "37 kişi bakıyor". "%70"de eski fiyat 4.999 TL gelip çizilir, rozet patlar.
+- 5,6–6,75 sn: "Ama süre bitiyor": sayacın yakın planı.
+- 6,75–7,45 sn: Ceviz'in yakın planı: terliyor, kalp atışı başlıyor.
+- 7,45–8,2 sn: Pençe "SATIN AL" düğmesinin yanına gelir.
+- 8,2–11,2 sn: Karar anı, sayacın son 3 saniyesi (gerçek 3 sn). Müzik ve altyazı susar; bip, kalp atışı. Çağrı: "AL mı, BIRAK mı? Yoruma yaz". Pençe kararsız gidip gelir.
+- 11,2 sn: 00:00, "SÜRE DOLDU", her şey griye döner. Ceviz almadı.
+- 11,7–13,3 sn: Ceviz sayfayı aşağı çekip yeniler; yükleniyor.
+- 13,3 sn: Sayaç 10:00'dan yeniden başlar, indirim hâlâ orada (beyaz flaş, sert vuruş).
+- 14,3–15,1 sn: Ceviz şaşkın ("?").
+- 15,1–21,1 sn: Lamba yanar; pano: 11.000 site tarandı → 361 sitede geri sayım sayacı → örnek kart "00:00" ve "BİTMEDİ!" damgası → "Süre bitti, indirim sürüyor" + "Kaynak: Mathur ve ark. 2019 (Princeton)".
+- 21,1–22,6 sn: Cep Defteri: "Elektronik · bu ay kalan 300 TL"; kulaklık satırı ve "BÜTÇEYİ 1.199 TL AŞAR".
+- 22,6–23,7 sn: Ceviz telefonu komodine bırakır, lambayı söndürür, uyur.
+- 23,7–27,15 sn: Kapanış sorusu; 26,4'te komodindeki telefon titreyip parlar, Ceviz döner bakar.
+- 27,15–27,7 sn: Sayacın yakın planı ve kanca kutusu (döngü: ilk kareyle aynı).
 
-**Seslendirme (taslak)**
+**Seslendirme (videodaki hali)**
 1. `[dramatic]` Gece iki. Sepette 1.499 liralık bir kulaklık.
 2. `[energetic]` Yüzde yetmiş indirim! Ama süre bitiyor.
-3. `[curious]` Alır mısın, bırakır mısın?
+3. Alır mısın... bırakır mısın? (iki v4 denemesi marka sesine uymadı; tarif gereği etiketsiz `eleven_multilingual_v2`)
 4. `[dramatic]` Sayfayı yenileyince... sayaç baştan başladı.
-5. `[excited]` Princeton'daki araştırmacılar 11 bin alışveriş sitesini taradı. Yüzlerce geri sayım buldular; bazıları süre bitince de devam ediyordu.
+5. `[excited]` Araştırmacılar 11 bin alışveriş sitesini taradı. Bazı sayaçlar, süre bitince de devam ediyordu.
 6. `[dramatic]` Sayaç değil, bütçen karar versin.
 7. `[playful]` Geri sayıma kanıp aldığın en gereksiz şey ne? Yoruma yaz.
 

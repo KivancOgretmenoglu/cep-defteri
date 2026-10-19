@@ -4140,5 +4140,251 @@
         14.42
       ]
     ]
+  },
+  "sepet-bombasi": {
+    "end": 27.7,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.45,
+    "noMusicVariant": true,
+    "limiter": true,
+    "musicPlan": [
+      [
+        0,
+        15.1,
+        "horror",
+        {
+          "beatsEnd": 6.75
+        }
+      ],
+      [
+        15.1,
+        23.7,
+        "lofi"
+      ],
+      [
+        23.7,
+        27.15,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ],
+      [
+        27.15,
+        27.7,
+        "horror"
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          8.2,
+          11.2
+        ]
+      ]
+    },
+    "captionPixel": true,
+    "captionY": 604,
+    "captionMaxWords": 3,
+    "captionUntil": 23.7,
+    "captionCut": [
+      [
+        8.2,
+        11.2
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        4.27,
+        "Bu sayaç sana<br><b>yalan söylüyor</b>",
+        300,
+        {
+          "size": 88,
+          "pulse": true
+        }
+      ],
+      [
+        4.32,
+        6.72,
+        "%70 indirim,<br><b>süre bitiyor!</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        6.77,
+        11.15,
+        "Alır mısın,<br><b>bırakır mısın?</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true,
+          "quiet": true,
+          "dim": [
+            8.2,
+            11.2
+          ]
+        }
+      ],
+      [
+        11.2,
+        13.22,
+        "Süre doldu…<br><b>peki yenilersen?</b>",
+        300,
+        {
+          "size": 88,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        13.27,
+        15.1,
+        "Sayaç<br><b>baştan başladı!</b>",
+        300,
+        {
+          "size": 92,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        15.3,
+        21.05,
+        "Bazı sayaçlar<br><b>süre bitince de sürüyor</b>",
+        300,
+        {
+          "size": 78,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        21.1,
+        23.65,
+        "Sayaç değil,<br><b>bütçen karar versin</b>",
+        300,
+        {
+          "size": 84,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        23.7,
+        27.349999999999998,
+        "Geri sayıma kanıp<br><b>ne aldın?</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true
+        }
+      ],
+      [
+        23.8,
+        27.349999999999998,
+        "Yoruma yaz: ne aldın, kaç TL?",
+        600,
+        {
+          "size": 44,
+          "quiet": true
+        }
+      ],
+      [
+        23.9,
+        27.349999999999998,
+        "Almadan önce Cep Defteri'ne bak",
+        672,
+        {
+          "size": 34,
+          "quiet": true
+        }
+      ],
+      [
+        27.4,
+        27.7,
+        "Bu sayaç sana<br><b>yalan söylüyor</b>",
+        300,
+        {
+          "size": 88,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "sepet",
+        0,
+        {
+          "room": 1.2,
+          "prod": 2.75,
+          "price": 4.37,
+          "push": 5.62,
+          "face": 6.75,
+          "paw": 7.45,
+          "count": 8.2,
+          "zero": 11.2,
+          "pull": 11.68,
+          "reset": 13.27,
+          "shock": 14.3,
+          "sci": 15.1,
+          "app": 21.1,
+          "down": 22.6,
+          "cta": 23.7,
+          "buzz": 26.4
+        }
+      ],
+      [
+        "sepet",
+        27.15,
+        {
+          "wdur": 0.3,
+          "zero": 11.75
+        }
+      ]
+    ],
+    "voiceTempo": 1.2,
+    "voiceFilter": "brand",
+    "voiceFiles": [
+      [
+        0.1,
+        "assets/voice/sepet/s1k.mp3",
+        "Gece iki. Sepette 1.499 liralık bir kulaklık."
+      ],
+      [
+        4.32,
+        "assets/voice/sepet/s2b.mp3",
+        "Yüzde 70 indirim! Ama süre bitiyor."
+      ],
+      [
+        6.78,
+        "assets/voice/sepet/s3m.mp3",
+        "Alır mısın, bırakır mısın?"
+      ],
+      [
+        11.62,
+        "assets/voice/sepet/s4.mp3",
+        "Sayfayı yenileyince... sayaç baştan başladı."
+      ],
+      [
+        15.3,
+        "assets/voice/sepet/s5.mp3",
+        "Araştırmacılar 11.000 alışveriş sitesini taradı. Bazı sayaçlar, süre bitince de devam ediyordu."
+      ],
+      [
+        21.1,
+        "assets/voice/sepet/s6.mp3",
+        "Sayaç değil, bütçen karar versin."
+      ],
+      [
+        23.8,
+        "assets/voice/sepet/s7b.mp3"
+      ]
+    ]
   }
 }

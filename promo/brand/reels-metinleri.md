@@ -413,3 +413,26 @@ Arkadaşlarla hesabı Cep Defteri'nde bölüş: kimin payı ne, kim kime borçlu
 ```
 
 **Yayın notu:** Kapak karesi olarak 2,0 sn'yi seç (başlık + iki maskot geniş planda; profil ızgarasında marka tanınır). İlk yorumu sabitle: "Tek doğru cevap yok: 100 TL, 0 TL'den fazla; ama haksız teklife hayır demek de bir mesaj. Sen nasıl bölerdin? Tutarlar örnek." Videonun çağrısı bu reelste soru: "Sence 1.000 TL nasıl bölünmeli?" + "Yoruma yaz: Ceviz kaç, Diken kaç?"; "arkadaşına gönder" açıklamada. Gelen bölüşme önerilerine (ör. "600 / 400") ve K/R yorumlarına yanıt ver, R diyenlere "neden?" diye sor. Hesap bölüşmeyle ilgili başka bir reelsle arasında en az 5–7 gün bırak.
+
+## 20 · sepet-bombasi (kavram: sahte aciliyet / geri sayım sayacı, seslendirme: Buğra, döngülü, 27,7 sn)
+
+**Açıklama:**
+```
+O geri sayım sayacı gerçekten bitiyor mu? ⏳
+Sen olsan alır mıydın, bırakır mıydın? Geri sayıma kanıp aldığın en gereksiz şey neydi? Yoruma yaz 👇
+📌 Kaydet; almadan önce Cep Defteri'nde o ayki bütçene bak. Android erken erişim yakında.
+
+Gece 02.00. Sepette %70 indirimli bir kulaklık, ekranda "FLAŞ İNDİRİM BİTİYOR!" ve akan bir sayaç.
+Ceviz 3 saniye düşündü, almadı. Süre doldu. Sayfayı yeniledi: sayaç 10:00'dan yeniden başladı, indirim hâlâ oradaydı.
+Bunun adı sahte aciliyet: "hemen al" baskısıyla düşünmeden aldırmak. Tutarlar örnek.
+Araştırma: Princeton'daki araştırmacılar yaklaşık 11 bin alışveriş sitesini taradı; 361 sitede 393 geri sayım sayacı buldular. Bazılarında süre bittikten sonra da kampanya devam ediyordu (Mathur ve ark., 2019).
+
+Sayaç acele ettirdiğinde sor: "Bu ay bu kalemde ne kadar param kaldı?"
+
+Gece alışveriş yapan arkadaşına gönder.
+Cep Defteri'nde kategorilere aylık sınır koy; sepete eklemeden önce kalanı gör.
+
+#sahteindirim #gerisayım #indirimtuzağı #onlinealışveriş #öğrencibütçesi #paraipuçları #cepdefteri
+```
+
+**Yayın notu:** Kapak karesi olarak 0,3 sn'yi seç (kırmızı sayaç + "Bu sayaç sana yalan söylüyor"). İlk yorumu sabitle: "Her geri sayım sahte değil; ama süre bitince sayfayı bir yenile, 10 saniyeni alır. Tutarlar örnek." Videonun çağrısı bu reelste de soru: sayımda "AL mı, BIRAK mı? Yoruma yaz", sonda "Geri sayıma kanıp ne aldın?" + "Yoruma yaz: ne aldın, kaç TL?"; "arkadaşına gönder" açıklamada. Yorumlarda alışveriş itiraflarına "kaç TL'ydi, sonra kullandın mı?" diye yanıt ver. İndirim ve çapa reelsleriyle arasında en az 5–7 gün bırak.

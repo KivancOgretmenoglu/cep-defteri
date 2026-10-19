@@ -91,6 +91,10 @@ const HEARTP = ['.oo.oo.', 'oRRoRRo', 'oRRRRRo', '.oRRRo.', '..oRo..', '...o...'
 const HEARTP_C = { o: '#2A1E1A', R: '#E8507A' };
 const PLATEP = ['oooooooooooo', '.oSSSSSSSSo.', '..oooooooo..'];
 const PLATEP_C = { o: '#2A1E1A', S: '#C9CCD2' };
+const MAGP = ['..oooo....', '.oLLLLo...', 'oLLWLLLo..', 'oLWLLLLo..', 'oLLLLLLo..', 'oLLLLLLo..', '.oLLLLoo..', '..ooooHHo.', '......oHHo', '.......oo.'];
+const MAGP_C = { o: '#2A1E1A', L: '#BFD3EA', W: '#FFFFFF', H: '#AE4716' };
+const TIMERP = ['...oooo...', '....oo....', '..oooooo..', '.oRRRRRRo.', 'oRRRRWRRRo', 'oRRRRWRRRo', 'oRRRRWWWRo', 'oRRRRRRRRo', '.oRRRRRRo.', '..oooooo..'];
+const TIMERP_C = { o: '#2A1E1A', R: '#E8322A', W: '#FFFFFF' };
 
 /** Dikkat dağıtmayan arka plan canlılığı: dönen ışık hüzmeleri, süzülen soluk pikseller, patlama kıvılcımları */
 function ambient(root, o = {}) {
@@ -1801,6 +1805,318 @@ function defineValue() {
       if (F && lt >= YES && lt < CTA) { cy -= hop(lt, 0.48, 18).y; dy -= hop(lt, 0.48, 18, 0.24).y; }
       if (F && lt >= CTA) { cr = Math.sin(lt * 2.4) * 4; dr = Math.sin(lt * 2.4 + 1.2) * 4; }  // düşünür gibi sallanırlar
       cz.put(cx, cy, { rot: cr }); dk.put(850, dy, { rot: dr });
+    };
+  };
+
+  /* Gece 02.00: sepet bombası. Yatakta Ceviz, telefonda %70 indirim ve geri sayım. Gerçek 3 saniyelik karar anı,
+   * sayaç bitince "SÜRE DOLDU", sayfa yenilenince sayaç baştan başlar; araştırma panosu, Cep Defteri ekranı, soru.
+   * İki dünya: A yatak odası, B telefon ekranı; kamera planları ikisi arasında keser. */
+  SCENES.sepet = (t0, o = {}) => {
+    const s = scene(t0, '#07080D', undefined, o.wdur ?? 0.4);
+    const ev = (k) => o[k] ?? 99;
+    const ROOM = ev('room'), PROD = ev('prod'), PRICE = ev('price'), PUSH = ev('push'), FACE = ev('face'), PAW = ev('paw'), COUNT = ev('count');
+    const PULL = ev('pull'), RESET = ev('reset'), SHOCK = ev('shock'), SCI = ev('sci'), APP = ev('app'), DOWN = ev('down'), CTA = ev('cta'), BUZZ = ev('buzz');
+    const ZERO = o.zero ?? 11.1, SPAN = 12;  // sayaç ZERO'da 00:00 olur; döngü kopyası açılıştaki rakamı göstersin diye kendi ZERO'sunu alır
+    const SY = 1120;  // odak noktasının ekrandaki yüksekliği: üstteki kutu ve altyazının altında kalan sahne alanı
+    const world = () => el('div', 'abs', s.root, { left: 0, top: 0, width: '1080px', height: '1920px', transformOrigin: '0 0' });
+
+    // ── A · yatak odası (gece) ──
+    const camA = world();
+    el('div', 'abs', camA, { left: '-80px', top: '-80px', width: '1240px', height: '2080px', background: 'linear-gradient(#0A0E1C, #141A31 55%, #0F1328)' });
+    const win = el('div', 'abs', camA, { left: '650px', top: '640px', width: '300px', height: '320px', boxSizing: 'border-box', border: '12px solid #2A2F48', background: 'linear-gradient(#121A3E, #22306A)', overflow: 'hidden' });
+    el('div', 'abs', win, { left: '190px', top: '22px', width: '58px', height: '58px', borderRadius: '50%', background: '#F3EBC8', boxShadow: '0 0 40px 12px rgba(243,235,200,.25)' });
+    [[24, 30], [84, 64], [150, 16], [40, 118], [236, 112], [112, 150]].forEach(([x, y]) => el('div', 'abs', win, { left: px(x), top: px(y), width: '6px', height: '6px', background: '#DDE3FF' }));
+    [[0, 206, 62, 110], [56, 176, 52, 140], [104, 222, 70, 90], [170, 192, 46, 120], [212, 232, 80, 80]].forEach(([x, y, w, h], i) => {
+      const b = el('div', 'abs', win, { left: px(x), top: px(y), width: px(w), height: px(h), background: '#0C1126' });
+      for (let k = 0; k < 3; k++) el('div', 'abs', b, { left: px(10 + ((k * 17 + i * 7) % (w - 22))), top: px(14 + k * 22), width: '8px', height: '10px', background: (k + i) % 2 ? '#F2C14E' : '#343A5C' });
+    });
+    el('div', 'abs', win, { left: '132px', top: 0, width: '12px', height: '100%', background: '#2A2F48' });
+    el('div', 'abs', win, { left: 0, top: '140px', width: '100%', height: '12px', background: '#2A2F48' });
+    el('div', 'abs', camA, { left: '606px', top: '626px', width: '58px', height: '370px', background: 'linear-gradient(90deg, #241D44, #362C62)' });
+    el('div', 'abs', camA, { left: '936px', top: '626px', width: '58px', height: '370px', background: 'linear-gradient(90deg, #362C62, #241D44)' });
+    el('div', 'abs', camA, { left: '590px', top: '612px', width: '420px', height: '16px', background: '#1E1838' });
+    el('div', 'abs', camA, { left: '300px', top: '960px', width: '700px', height: '760px', clipPath: 'polygon(50% 0, 93% 0, 58% 100%, 0 100%)', background: 'linear-gradient(rgba(150,170,255,.10), rgba(150,170,255,.02))' });  // ay ışığı
+    // karyola başlığı ve yastık
+    el('div', 'abs', camA, { left: '226px', top: '980px', width: '628px', height: '420px', boxSizing: 'border-box', border: '10px solid #22160F', borderRadius: '40px 40px 0 0', background: 'linear-gradient(#4A3428, #31221A)' });
+    el('div', 'abs', camA, { left: '266px', top: '1024px', width: '548px', height: '12px', background: '#5C4335' });
+    el('div', 'abs', camA, { left: '318px', top: '1166px', width: '444px', height: '150px', boxSizing: 'border-box', border: '8px solid #24273F', borderRadius: '60px', background: 'linear-gradient(#7C82AA, #5E6488)' });
+    const cz = new Mascot(camA, { who: 'ceviz', w: 480 });
+    // elindeki telefon (arkası görünür) ve iki pençe ucu
+    const php = el('div', 'abs', camA, { left: 0, top: 0, width: '80px', height: '124px', boxSizing: 'border-box', border: '6px solid #2A1E1A', borderRadius: '16px', background: 'linear-gradient(#2A2D3E, #1A1C28)', zIndex: 3, transformOrigin: '50% 50%' });
+    el('div', 'abs', php, { left: '8px', top: '8px', width: '18px', height: '18px', boxSizing: 'border-box', borderRadius: '50%', background: '#0B0C12', border: '3px solid #444A5E' });
+    const fingers = [0, 1].map(() => el('div', 'abs', camA, { left: 0, top: 0, width: '26px', height: '34px', boxSizing: 'border-box', border: '5px solid #2A1E1A', borderRadius: '10px', background: '#A8683A', zIndex: 4 }));
+    // battaniye
+    el('div', 'abs', camA, { left: '170px', top: '1374px', width: '740px', height: '420px', boxSizing: 'border-box', border: '8px solid #1A1530', borderRadius: '44px 44px 0 0', background: 'repeating-conic-gradient(#3E3469 0 25%, #483E7A 0 50%) 0 0 / 80px 80px', zIndex: 2 });
+    el('div', 'abs', camA, { left: '178px', top: '1382px', width: '724px', height: '40px', borderRadius: '36px 36px 0 0', background: '#5A4E92', zIndex: 2 });
+    // komodinler: solda telefonun bırakılacağı yer, sağda lamba ve saat
+    [[-40, 230], [890, 230]].forEach(([x, w]) => {
+      el('div', 'abs', camA, { left: px(x), top: '1296px', width: px(w), height: '420px', boxSizing: 'border-box', border: '8px solid #22160F', background: '#3A2A22', zIndex: 2 });
+      el('div', 'abs', camA, { left: px(x - 10), top: '1280px', width: px(w + 20), height: '26px', boxSizing: 'border-box', border: '6px solid #22160F', background: '#4C372B', zIndex: 2 });
+    });
+    const nsGlow = el('div', 'abs', camA, { left: '-110px', top: '1120px', width: '400px', height: '260px', borderRadius: '50%', background: 'radial-gradient(closest-side, rgba(150,210,255,.6), rgba(150,210,255,0))', opacity: 0, zIndex: 1 });
+    const lampGlow = el('div', 'abs', camA, { left: '700px', top: '840px', width: '560px', height: '560px', borderRadius: '50%', background: 'radial-gradient(closest-side, rgba(255,210,140,.55), rgba(255,210,140,0))', opacity: 0, zIndex: 1 });
+    el('div', 'abs', camA, { left: '1000px', top: '1150px', width: '12px', height: '136px', background: '#5A4A3A', zIndex: 2 });
+    const shade = el('div', 'abs', camA, { left: '936px', top: '1070px', width: '140px', height: '92px', clipPath: 'polygon(24% 0, 76% 0, 100% 100%, 0 100%)', background: '#6E604C', zIndex: 2 });
+    const clock = el('div', 'abs it', camA, { left: '880px', top: '1188px', width: '184px', height: '96px', boxSizing: 'border-box', border: '6px solid #2A1E1A', borderRadius: '12px', background: '#14141B', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '80px', color: '#FF4A3A', textShadow: '0 0 14px rgba(255,74,58,.8)', zIndex: 3 });
+    clock.innerHTML = '02<span>:</span>00';
+    const colon = clock.querySelector('span');
+    // telefon ışığı yüze vurur: soğuk beyaz; sayaç her saniye kırmızı nabız atar
+    const glow = (rgb) => el('div', 'abs', camA, { left: '340px', top: '1085px', width: '400px', height: '340px', borderRadius: '50%', background: `radial-gradient(closest-side, rgba(${rgb},.5), rgba(${rgb},.18) 60%, rgba(${rgb},0))`, mixBlendMode: 'screen', pointerEvents: 'none', zIndex: 5 });
+    const glowC = glow('150,200,255'), glowR = glow('255,60,40');
+    const beam = el('div', 'abs', camA, { left: '380px', top: '1110px', width: '320px', height: '200px', clipPath: 'polygon(0 0, 100% 0, 62% 100%, 38% 100%)', background: 'linear-gradient(rgba(150,200,255,0), rgba(150,200,255,.28))', mixBlendMode: 'screen', pointerEvents: 'none', zIndex: 5 });
+    const warm = el('div', 'abs', camA, { left: '-80px', top: '-80px', width: '1240px', height: '2080px', background: 'rgba(255,190,120,.18)', mixBlendMode: 'screen', opacity: 0, zIndex: 6, pointerEvents: 'none' });
+    const sweats = [0, 1].map(() => pixEl(camA, SWEAT, SWEAT_C, 9, { left: 0, top: 0, display: 'none', zIndex: 5 }));
+    const zz = [0, 1, 2].map((i) => { const e = el('div', 'abs it', camA, { left: 0, top: 0, fontSize: px(70 - i * 14), color: '#DDE3FF', display: 'none', zIndex: 5 }); e.textContent = 'z'; return e; });
+
+    // ── B · telefon ekranı (Ceviz'in gözünden) ──
+    const camB = world();
+    el('div', 'abs', camB, { left: '-300px', top: '-300px', width: '1680px', height: '2520px', background: 'radial-gradient(ellipse 760px 1000px at 840px 1300px, #1B2140, #07080D 70%)' });
+    el('div', 'abs', camB, { left: '150px', top: '640px', width: '780px', height: '1520px', boxSizing: 'border-box', border: '8px solid #2B2D36', borderRadius: '86px', background: '#121318', boxShadow: '0 0 140px 40px rgba(150,190,255,.16)' });
+    const scr = el('div', 'abs', camB, { left: '172px', top: '662px', width: '736px', height: '1476px', borderRadius: '64px', overflow: 'hidden', background: '#FFF8F2' });
+    const sb = el('div', 'abs', scr, { left: '40px', right: '40px', top: '10px', height: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '30px', fontWeight: 800, color: '#1E1A18', zIndex: 3 });
+    sb.innerHTML = '<span>02:00</span><span style="display:flex;gap:10px;align-items:center"><i style="display:block;width:30px;height:18px;background:#1E1A18;clip-path:polygon(0 100%,100% 0,100% 100%)"></i><i style="display:block;position:relative;width:46px;height:24px;box-sizing:border-box;border:3px solid #1E1A18;border-radius:6px"><b style="position:absolute;left:3px;top:3px;bottom:3px;width:9px;background:#E8322A"></b></i></span>';
+    const page = el('div', 'abs', scr, { left: 0, top: 0, width: '736px', height: '1476px' });
+    const search = el('div', 'abs', page, { left: '24px', right: '24px', top: '56px', height: '58px', boxSizing: 'border-box', borderRadius: '29px', background: '#F0E6DD', display: 'flex', alignItems: 'center', padding: '0 24px', fontSize: '28px', fontWeight: 600, color: '#9A8F88' });
+    search.innerHTML = `Ürün ara…<span style="margin-left:auto;position:relative;display:block;width:42px;height:30px">${pix(BASKETP, BASKETP_C, 3)}<b style="position:absolute;right:-12px;top:-12px;width:24px;height:24px;border-radius:50%;background:#E8322A;color:#fff;font-size:17px;display:flex;align-items:center;justify-content:center">1</b></span>`;
+    const ban = el('div', 'abs', page, { left: 0, right: 0, top: '124px', height: '226px', background: '#E8322A' });
+    const l1 = el('div', 'abs it', ban, { left: 0, right: 0, top: '12px', textAlign: 'center', fontSize: '50px', color: '#FFE08A', letterSpacing: '.04em' });
+    const dg = el('div', 'abs it', ban, { left: 0, right: 0, top: '54px', textAlign: 'center', fontSize: '166px', color: '#FFFFFF', letterSpacing: '.05em', textShadow: '0 8px 0 rgba(0,0,0,.22)', transformOrigin: '50% 55%' });
+    const track = el('div', 'abs', ban, { left: '60px', right: '60px', top: '204px', height: '10px', borderRadius: '5px', background: 'rgba(0,0,0,.28)', overflow: 'hidden' });
+    const fill = el('div', 'abs', track, { left: 0, top: 0, bottom: 0, width: '100%', background: '#FFE08A' });
+    const card = el('div', 'abs', page, { left: '24px', right: '24px', top: '362px', height: '168px', borderRadius: '26px', background: '#F3ECE6' });
+    el('div', 'abs', card, { left: px(344 - 77), top: '24px', width: '154px', height: '121px' }).innerHTML = pix(HEADPH, HEADPH_C, 11);
+    const scarce = el('div', 'abs', card, { left: '18px', top: '16px', padding: '4px 14px', borderRadius: '14px', background: '#FFE3DE', color: '#C0392B', fontSize: '26px', fontWeight: 800 });
+    scarce.textContent = 'Son 2 ürün!';
+    el('div', 'abs', card, { left: '20px', top: '62px', fontSize: '24px', fontWeight: 700, color: '#C0392B' }).textContent = '37 kişi bakıyor';
+    const badge = el('div', 'abs it', card, { right: '18px', top: '14px', padding: '0 16px 6px', borderRadius: '14px', border: '4px solid #2A1E1A', background: '#E8322A', color: '#fff', fontSize: '60px', transformOrigin: '50% 50%' });
+    badge.textContent = '%70';
+    el('div', 'abs', page, { left: '30px', top: '540px', fontSize: '38px', fontWeight: 700, color: '#2A1E1A' }).textContent = 'Kablosuz Kulaklık';
+    const oldP = el('div', 'abs', page, { left: '30px', top: '600px', fontSize: '42px', fontWeight: 600, color: '#9A8F88' });
+    oldP.textContent = '4.999 TL';
+    const strikeL = el('div', 'abs', oldP, { left: '-4px', top: '27px', height: '6px', width: '0', borderRadius: '3px', background: '#E8322A' });
+    const newP = el('div', 'abs', page, { right: '30px', top: '578px', fontSize: '90px', fontWeight: 800, color: '#E8322A', letterSpacing: '-.02em', transformOrigin: '100% 60%' });
+    newP.textContent = '1.499 TL';
+    const buy = el('div', 'abs', page, { left: '30px', right: '30px', top: '694px', height: '104px', borderRadius: '52px', background: '#F25C2A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '62px', fontWeight: 800, color: '#fff', letterSpacing: '.02em', transformOrigin: '50% 50%' });
+    [0, 1, 2].forEach((i) => el('div', 'abs', page, { left: px(30 + i * 230), top: '830px', width: '216px', height: '216px', borderRadius: '22px', background: '#F0E6DD' }));
+    const spin = el('div', 'abs', scr, { left: '336px', top: '60px', width: '64px', height: '64px', boxSizing: 'border-box', borderRadius: '50%', border: '9px solid #E8322A', borderTopColor: 'transparent', display: 'none', zIndex: 4 });
+    const rflash = el('div', 'abs', scr, { inset: 0, background: '#fff', opacity: 0, zIndex: 5 });
+    // Cep Defteri ekranı: elektronik bütçesinde kalan 300 TL
+    const app = el('div', 'abs', scr, { inset: 0, background: '#F6EEE6', display: 'none', zIndex: 2 });
+    const appHead = el('div', 'abs', app, { left: 0, right: 0, top: 0, height: '250px', background: '#AE4716' });
+    el('div', 'abs', appHead, { left: '40px', top: '150px', fontSize: '54px', fontWeight: 800, color: '#FFFCF6', letterSpacing: '-.02em' }).textContent = 'Cep Defteri';
+    const appCard = el('div', 'abs', app, { left: '30px', right: '30px', top: '270px', height: '330px', boxSizing: 'border-box', padding: '26px 34px', borderRadius: '34px', background: '#FFFCF6', boxShadow: '0 10px 30px rgba(60,20,0,.12)' });
+    appCard.innerHTML = '<div style="font-size:34px;font-weight:700;color:#6B5A4E">Elektronik · bu ay kalan</div>'
+      + '<div style="font-size:112px;font-weight:800;color:#2F8F5A;letter-spacing:-.03em;line-height:1.05;margin-top:6px">300 TL</div>'
+      + '<div style="height:22px;border-radius:11px;background:#E7E0D5;overflow:hidden;margin-top:20px"><div style="height:100%;width:80%;background:#AE4716;border-radius:11px"></div></div>'
+      + '<div style="font-size:28px;font-weight:600;color:#8A7D72;margin-top:10px">1.200 / 1.500 TL harcandı</div>';
+    const ghost = el('div', 'abs', app, { left: '30px', right: '30px', top: '620px', height: '110px', boxSizing: 'border-box', padding: '0 30px', borderRadius: '28px', border: '5px dashed #E8322A', background: '#FFE3DE', display: 'flex', alignItems: 'center', fontSize: '40px', fontWeight: 700, color: '#2A1E1A', transformOrigin: '50% 50%' });
+    ghost.innerHTML = 'Kulaklık<b style="margin-left:auto;color:#E8322A;font-size:46px">1.499 TL</b>';
+    const over = el('div', 'abs it', app, { left: 0, right: 0, top: '744px', textAlign: 'center', fontSize: '62px', color: '#C0392B', transformOrigin: '50% 50%' });
+    over.textContent = 'BÜTÇEYİ 1.199 TL AŞAR';
+    // Ceviz'in pençesi ve kolu (alttan girer)
+    const arm = el('div', 'abs', camB, { left: 0, top: 0, width: '72px', height: '900px', boxSizing: 'border-box', border: '6px solid #2A1E1A', borderRadius: '36px', background: '#A8683A', display: 'none' });
+    const paw = pixEl(camB, PAWP, { o: '#2A1E1A', B: '#A8683A' }, 16, { left: 0, top: 0, display: 'none' });
+
+    // ── üst katmanlar: araştırma panosu, kenar karartma, flaş, sinema bantları, karar çağrısı ──
+    const sci = el('div', 'abs', s.root, { inset: 0, background: '#F6EEE6', zIndex: 10, display: 'none' });
+    pattern(sci);
+    const ic1 = pixEl(sci, MAGP, MAGP_C, 12, { left: '104px', top: '770px', transformOrigin: '50% 50%' });
+    const ic2 = pixEl(sci, TIMERP, TIMERP_C, 12, { left: '104px', top: '1012px', transformOrigin: '50% 50%' });
+    const big = (y, col) => el('div', 'abs it', sci, { left: '262px', top: px(y), fontSize: '170px', color: col, transformOrigin: '0 50%' });
+    const n1 = big(744, '#2A1E1A'), n2 = big(988, '#E8322A');
+    const lab = (y, txt) => { const e = el('div', 'abs', sci, { left: '268px', top: px(y), fontSize: '44px', fontWeight: 700, color: '#6B5A4E' }); e.textContent = txt; return e; };
+    const lab1 = lab(902, 'alışveriş sitesi tarandı'), lab2 = lab(1146, 'sitede geri sayım sayacı');
+    const ex = el('div', 'abs', sci, { left: '120px', top: '1206px', width: '420px', height: '170px', boxSizing: 'border-box', borderRadius: '24px', border: '6px solid #2A1E1A', background: '#E8322A', transformOrigin: '50% 50%' });
+    const exN = el('div', 'abs it', ex, { left: 0, right: 0, top: '10px', textAlign: 'center', fontSize: '140px', color: '#fff' });
+    exN.textContent = '00:00';
+    const stampS = el('div', 'abs', sci, { left: '560px', top: '1240px', padding: '6px 22px', borderRadius: '16px', border: '8px solid #C0392B', background: 'rgba(255,255,255,.92)', color: '#C0392B', fontSize: '66px', fontWeight: 800, letterSpacing: '.02em', transformOrigin: '50% 50%' });
+    stampS.textContent = 'BİTMEDİ!';
+    const lab3 = el('div', 'abs', sci, { left: 0, right: 0, top: '1394px', textAlign: 'center', fontSize: '40px', fontWeight: 700, color: '#6B5A4E' });
+    lab3.textContent = 'Süre bitti, indirim sürüyor';
+    const src = el('div', 'abs', sci, { left: 0, right: 0, top: '1448px', textAlign: 'center', fontSize: '34px', fontWeight: 800, color: '#4A3B30' });
+    src.textContent = 'Kaynak: Mathur ve ark. 2019 (Princeton)';
+    const vig = el('div', 'abs', s.root, { inset: 0, zIndex: 17, pointerEvents: 'none', background: 'radial-gradient(ellipse 78% 62% at 50% 58%, transparent 50%, rgba(0,0,0,.66) 100%)' });
+    const flash = el('div', 'abs', s.root, { inset: 0, zIndex: 21, opacity: 0, pointerEvents: 'none' });
+    el('div', 'abs', s.root, { left: 0, top: 0, width: '1080px', height: '236px', background: '#05060A', zIndex: 30 });
+    el('div', 'abs', s.root, { left: 0, top: '1506px', width: '1080px', height: '414px', background: '#05060A', zIndex: 30 });  // alt bant: elde çekim titremesinde bile ekranda 1536'nın üstünde biter, sahne Instagram arayüzüne taşmaz
+    const pill = el('div', 'abs it', s.root, { left: 0, right: 0, top: '608px', display: 'none', justifyContent: 'center', zIndex: 24 });
+    const pin = el('div', '', pill, { padding: '4px 28px 10px', borderRadius: '16px', border: '4px solid #F2B63C', background: 'rgba(10,10,16,.9)', fontSize: '62px', color: '#fff', lineHeight: 1 });
+    pin.innerHTML = 'AL mı, BIRAK mı? <span style="color:#F2B63C">Yoruma yaz</span>';
+
+    // kalp atışları (audio.py ile aynı takvim): Ceviz terlemeye başlayınca gelir, sayımda hızlanır
+    const beats = [];
+    for (let t = FACE + 0.1, k = 0; t < ZERO - 0.1; t += Math.max(0.42, 0.62 - 0.03 * k), k++) beats.push(t);
+    const mmss = (x) => `${String(Math.floor(x / 60)).padStart(2, '0')}:${String(x % 60).padStart(2, '0')}`;
+    const on = (lt, t) => { const k = lt - t; return k < 0 ? 0 : k >= 0.4 ? 1 : [0.15, 0, 0.6, 0.1, 0.85, 0.4, 1, 1][Math.floor(k / 0.05)]; };
+    s.update = (lt) => {
+      const ramp = (a, d) => E.inOut(prog(lt, a, d));
+      // sayaç: ZERO'ya kadar saniye saniye; sonra "SÜRE DOLDU"; yenilenince 10:00'dan yeniden
+      const st = lt < ZERO ? 0 : lt < RESET ? 1 : 2;
+      const left = Math.ceil(ZERO - lt - 1e-9);
+      const since = st === 0 ? lt - ZERO + left : st === 2 ? (lt - RESET) % 1 : 9;  // son tıktan beri geçen süre
+      const urgent = lt >= COUNT && lt < ZERO;
+      dg.textContent = st === 0 ? mmss(left) : st === 1 ? '00:00' : mmss(600 - Math.floor(lt - RESET));
+      dg.style.transform = `scale(${1 + (urgent ? 0.14 : 0.06) * Math.exp(-since * 10)})`;
+      dg.style.color = urgent && since < 0.25 ? '#FFE08A' : '#FFFFFF';
+      dg.style.opacity = st === 1 && lt < ZERO + 0.9 && Math.floor((lt - ZERO) / 0.15) % 2 ? 0.25 : 1;
+      ban.style.background = st === 1 ? '#8C8580' : urgent && since < 0.12 ? '#FF4A3A' : '#E8322A';
+      l1.textContent = st === 1 ? 'SÜRE DOLDU' : 'FLAŞ İNDİRİM BİTİYOR!';
+      fill.style.width = (st === 0 ? clamp((ZERO - lt) / SPAN) : st === 1 ? 0 : 1 - (lt - RESET) / 600) * 100 + '%';
+      // fiyat: önce 1.499 TL; "%70"de eski fiyat gelip çizilir, rozet patlar; süre dolunca her şey griye döner
+      const gray = st === 1 ? 'grayscale(1) opacity(.7)' : 'none';
+      [newP, buy, badge, card].forEach((e) => (e.style.filter = gray));
+      newP.style.transform = `scale(${1 + 0.18 * Math.sin(Math.PI * prog(lt, PROD + 0.35, 0.4))})`;
+      oldP.style.opacity = lt >= PRICE ? 1 : 0;
+      oldP.style.transform = `translateX(${(1 - E.out(prog(lt, PRICE, 0.25))) * -60}px)`;
+      strikeL.style.width = E.out(prog(lt, PRICE + 0.2, 0.25)) * 190 + 'px';
+      badge.style.display = lt >= PRICE + 0.45 ? 'block' : 'none';
+      badge.style.transform = `rotate(${-8 + 3 * Math.sin(lt * 5)}deg) scale(${E.back(prog(lt, PRICE + 0.45, 0.3))})`;
+      buy.textContent = st === 1 ? 'SÜRE DOLDU' : 'SATIN AL';
+      buy.style.transform = `scale(${st === 1 ? 1 : 1 + 0.025 * Math.sin(lt * 8)})`;
+      buy.style.boxShadow = `inset 0 -10px 0 ${st === 1 ? '#6E6863' : '#B83C17'}, 0 0 ${st === 1 ? 0 : Math.round(30 + 20 * Math.sin(lt * 8))}px rgba(242,92,42,.55)`;
+      // sayfayı aşağı çekip yenileme; bırakınca yükleniyor, sonra beyaz flaş ve yeni sayaç
+      const drag = lt >= PULL && lt < PULL + 1.0 ? E.inOut(prog(lt, PULL, 0.85)) : lt >= PULL + 1.0 && lt < PULL + 1.3 ? 1 - E.out(prog(lt, PULL + 1.0, 0.25)) : 0;
+      page.style.transform = `translateY(${170 * drag}px)`;
+      page.style.opacity = lt >= PULL + 1.0 && lt < RESET ? 0.55 : 1;
+      spin.style.display = lt >= PULL + 0.25 && lt < RESET ? 'block' : 'none';
+      spin.style.top = px(lt < PULL + 1.0 ? 52 + 60 * drag : 60);
+      spin.style.transform = `rotate(${Math.round(lt * 720)}deg)`;
+      rflash.style.opacity = lt >= RESET ? 0.9 * Math.exp(-(lt - RESET) * 7) : 0;
+      // Cep Defteri ekranı kayarak gelir; kulaklık bütçeyi aşar
+      app.style.display = lt >= APP && lt < DOWN + 0.5 ? 'block' : 'none';
+      app.style.transform = `translateX(${(1 - E.out(prog(lt, APP, 0.3))) * 100}%)`;
+      ghost.style.opacity = prog(lt, APP + 0.35, 0.2);
+      ghost.style.transform = `scale(${E.back(prog(lt, APP + 0.35, 0.3))})`;
+      over.style.opacity = lt >= APP + 0.8 ? 1 : 0;
+      over.style.transform = `scale(${lerp(1.8, 1, E.out(prog(lt, APP + 0.8, 0.2)))}) rotate(-3deg)`;
+      // pençe: düğmenin yanında; sayımda yaklaşır, çekilir, titrer; süre dolunca iner; sonra sayfayı çeker
+      let pv = false, ppx = 800, ppy = 1760;
+      if (lt >= PAW && lt < ZERO + 0.6) {
+        pv = true;
+        ppy = lerp(1760, 1430, E.out(prog(lt, PAW, 0.45)));
+        if (lt >= COUNT) {
+          const k = lt - COUNT;
+          ppy = 1430 - 26 * Math.max(0, Math.sin(k * 3.3)) + Math.sin(lt * 41) * 3;
+          ppx = 800 - 30 * Math.max(0, Math.sin(k * 2.1));
+        }
+        if (lt >= ZERO) { const q = prog(lt, ZERO, 0.45); ppy += 360 * q * q; }
+      }
+      if (lt >= PULL - 0.35 && lt < PULL + 1.35) {
+        pv = true;
+        ppx = 860;
+        ppy = lerp(1760, 1010, E.out(prog(lt, PULL - 0.35, 0.35))) + 170 * (lt < PULL + 1.0 ? drag : 1) + 760 * E.inOut(prog(lt, PULL + 1.0, 0.35));
+      }
+      paw.style.display = arm.style.display = pv ? 'block' : 'none';
+      paw.style.transform = `translate(${ppx - 56}px,${ppy - 56}px)`;
+      arm.style.transform = `translate(${ppx - 36}px,${ppy + 20}px)`;
+
+      // oda: lamba SCI'de titreyerek yanar, DOWN'da söner
+      const L = lt < SCI ? 0 : lt < DOWN + 0.5 ? on(lt, SCI) : 1 - E.inOut(prog(lt, DOWN + 0.5, 0.3));
+      lampGlow.style.opacity = L;
+      shade.style.background = L > 0.5 ? '#F6D9A0' : '#6E604C';
+      warm.style.opacity = L;
+      colon.style.opacity = Math.floor(lt * 2) % 2 ? 0.15 : 1;
+      // telefon ışığı: elde tuttukça yüzde; sayaç tıklarında kırmızı nabız; SÜRE DOLDU'da söner; sıfırlanınca kırmızı patlama
+      const held = lt < DOWN + 0.35, dkBeam = 1 - prog(lt, DOWN, 0.2);
+      const cool = held ? (st === 1 ? 0.35 : 0.7) : Math.max(0, 0.7 * (1 - prog(lt, DOWN + 0.35, 0.3)));
+      glowC.style.opacity = cool;
+      beam.style.opacity = cool * (dkBeam);
+      const red = st === 0 ? (urgent ? 0.85 : 0.5) * Math.exp(-since * 5) : st === 2 && lt < SCI ? 0.8 * Math.exp(-(lt - RESET) * 2.5) + 0.35 * Math.exp(-since * 5) : 0;
+      glowR.style.opacity = held ? red : 0;
+      // Ceviz
+      let c = ['calm', null, 'half'];
+      if (lt >= PROD) c = ['curious', null, 'wide'];
+      if (lt >= FACE) c = ['thoughtful', 'face', 'squeeze'];
+      if (lt >= ZERO) c = ['calm', null, 'wide'];
+      if (lt >= SHOCK) c = ['curious', null, 'wide'];
+      if (lt >= SCI) c = ['thoughtful', null, 'half'];
+      if (lt >= DOWN) c = ['happy', null, 'closed'];
+      if (lt >= CTA) c = ['calm', null, 'closed'];
+      if (lt >= BUZZ + 0.25) c = ['curious', null, 'half'];
+      if (lt >= BUZZ + 0.7) c = ['curious', null, 'wide'];
+      cz.set(c[0], c[1], c[2] === 'half' && (lt * 1000) % 3100 < 110 ? 'closed' : c[2]);
+      let cy = 1475, cr = Math.sin(lt * 1.3) * 1.5;
+      if (lt >= SHOCK && lt < SCI) { const k = lt - SHOCK; cy -= 26 * Math.exp(-k * 5) * Math.abs(Math.sin(k * 16)); cr += 5 * Math.exp(-k * 4) * Math.sin(k * 24); }
+      if (lt >= DOWN) cy += 46 * E.inOut(prog(lt, DOWN + 0.6, 0.6));
+      const sleep = lt >= DOWN + 1.2 && lt < BUZZ ? 0.018 * Math.sin(lt * 2.4) : 0;  // uykuda nefes alır
+      cz.put(540, cy, { rot: cr, sy: 1 + sleep, sx: 1 - sleep * 0.5, flip: lt >= BUZZ + 0.25 });  // titreşimde telefona döner
+      cz.root.style.filter = `brightness(${(0.62 + 0.33 * L).toFixed(3)})`;
+      // telefon: göğüs hizasında; DOWN'da sol komodine yüzüstü bırakılır; BUZZ'da titreyip parlar
+      const dk = E.inOut(prog(lt, DOWN, 0.55));
+      const pxp = lerp(540, 92, dk), pyp = lerp(1336, 1262, dk) - Math.sin(dk * Math.PI) * 90;
+      const jit = lt >= BUZZ && lt < BUZZ + 0.9 ? Math.sin(lt * 90) * 4 : 0;
+      php.style.transform = `translate(${pxp - 40 + jit}px,${pyp - 62}px) rotate(${-12 * Math.sin(dk * Math.PI)}deg) scale(${lerp(1, 1.25, dk)},${lerp(1, 0.2, dk)})`;
+      php.style.boxShadow = held ? `0 -6px 40px 10px rgba(165,210,255,${(0.35 * cool).toFixed(2)})` : lt >= BUZZ ? `0 0 ${Math.round(30 + 20 * Math.sin(lt * 20))}px 12px rgba(150,210,255,.6)` : 'none';
+      fingers.forEach((f, i) => {
+        f.style.display = dk < 0.3 ? 'block' : 'none';
+        f.style.transform = `translate(${pxp - 40 + (i ? 66 : -12)}px,${pyp - 12}px)`;
+      });
+      nsGlow.style.opacity = lt >= BUZZ ? 0.8 * (0.6 + 0.4 * Math.sin(lt * 20)) * (1 - prog(lt, BUZZ + 1.4, 0.4)) : 0;
+      sweats.forEach((e, i) => {
+        const a = FACE + 0.2 + i * 0.5, k = ((((lt - a) % 1.1) + 1.1) % 1.1) / 1.1;
+        e.style.display = (lt >= a && lt < PAW) || (lt >= SHOCK + 0.2 + i * 0.3 && lt < SCI) ? 'block' : 'none';
+        e.style.transform = `translate(${i ? 412 : 650}px,${1170 + k * 70}px)`;
+        e.style.opacity = 1 - k * 0.6;
+      });
+      zz.forEach((e, i) => {
+        const a = DOWN + 0.9 + i * 0.45, k = ((((lt - a) % 1.4) + 1.4) % 1.4) / 1.4;
+        e.style.display = lt >= a && lt < BUZZ ? 'block' : 'none';
+        e.style.transform = `translate(${640 + i * 40 + Math.sin(k * 6) * 14}px,${1100 - k * 170}px)`;
+        e.style.opacity = Math.sin(Math.PI * k);
+      });
+
+      // araştırma panosu: tarama sayacı, geri sayım sayacı, örnek kart ve BİTMEDİ damgası
+      const S = lt >= SCI + 0.45 && lt < APP;
+      sci.style.display = S ? 'block' : 'none';
+      sci.style.opacity = Math.min(prog(lt, SCI + 0.45, 0.2), 1 - prog(lt, APP - 0.15, 0.15));
+      if (S) {
+        const p1 = prog(lt, SCI + 0.55, 0.3), p2 = prog(lt, SCI + 1.8, 0.3);
+        [ic1, n1, lab1].forEach((e) => popIn(e, p1, { fromX: -120, fromY: 0 }));
+        [ic2, n2, lab2].forEach((e) => popIn(e, p2, { fromX: -120, fromY: 0 }));
+        n1.textContent = fmt(E.out(prog(lt, SCI + 0.6, 1.0)) * 11000);
+        n2.textContent = fmt(E.out(prog(lt, SCI + 1.9, 0.7)) * 361);
+        ic1.style.transform += ` rotate(${Math.sin(lt * 9) * 10 * (1 - prog(lt, SCI + 1.6, 0.3))}deg)`;
+        ic2.style.opacity = lt >= SCI + 2.6 && Math.floor(lt / 0.3) % 2 ? 0.4 : ic2.style.opacity;
+        popIn(ex, prog(lt, SCI + 3.2, 0.35), { fromY: 140 });
+        exN.style.opacity = Math.floor(lt / 0.35) % 2 ? 0.55 : 1;
+        stampS.style.opacity = lt >= SCI + 4.6 ? 1 : 0;
+        stampS.style.transform = `rotate(-8deg) scale(${lerp(2.2, 1, E.out(prog(lt, SCI + 4.6, 0.2)))})`;
+        lab3.style.opacity = prog(lt, SCI + 4.8, 0.3);
+        src.style.opacity = prog(lt, SCI + 0.8, 0.4);
+      }
+      vig.style.opacity = S ? 0.25 : 1;
+
+      // kamera planları (A: oda, B: ekran)
+      let W = 'B', z = 1, fx = 540, fy = SY;
+      if (lt < ROOM) { z = 1.85 + 0.12 * ramp(0, ROOM); fy = 914; }                                         // sayacın yakın planı
+      else if (lt < PROD) { W = 'A'; z = 1.08 - 0.08 * E.out(prog(lt, ROOM, 0.7)); fy = 1150; }             // oda: yatakta Ceviz, saat 02:00
+      else if (lt < PRICE) { z = 1.08 + 0.03 * prog(lt, PROD, PRICE - PROD); fy = 1112; }                   // ürün ve fiyat
+      else if (lt < PUSH) { z = 1.11 + 0.03 * prog(lt, PRICE, PUSH - PRICE); fy = 1116; }                   // "%70 indirim"
+      else if (lt < FACE) { z = 1.66 + 0.08 * ramp(PUSH, FACE - PUSH); fy = 914; }                         // "süre bitiyor": sayacın yakın planı
+      else if (lt < PAW) { W = 'A'; z = 1.75 + 0.06 * prog(lt, FACE, PAW - FACE); fy = 1225; }               // Ceviz terliyor
+      else if (lt < PULL) { const k = ramp(PAW, ZERO - PAW); z = 1.1 + 0.06 * k; fy = 1120 + 30 * k; }      // karar: sayaç, düğme, pençe
+      else if (lt < RESET) { z = 1.1; fy = 1110; }
+      else if (lt < SHOCK) { const k = E.out(prog(lt, RESET, 0.2)); z = lerp(1.1, 1.75, k) + 0.04 * prog(lt, RESET + 0.2, 0.8); fy = lerp(1110, 914, k); }  // 10:00
+      else if (lt < SCI) { W = 'A'; z = 1.55; fy = 1215; }                                                  // Ceviz: "?"
+      else if (lt < APP) { W = 'A'; z = 1 + 0.03 * prog(lt, SCI, APP - SCI); fy = 1150; }                   // lamba yanar, pano gelir
+      else if (lt < DOWN) { z = 1.1; fy = 1120; }                                                            // Cep Defteri
+      else if (lt < CTA) { W = 'A'; z = 1.2 - 0.12 * ramp(DOWN, CTA - DOWN); fx = 420; fy = 1220; }        // telefonu bırakır, uyur
+      else { W = 'A'; z = 1 + 0.06 * ramp(CTA, 3); fy = 1150; }                                             // soru
+      let beat = -9;
+      beats.forEach((t) => { if (lt >= t) beat = t; });
+      z *= 1 + 0.012 * Math.exp(-(lt - beat) * 10) + (W === 'B' ? 0.008 * Math.exp(-since * 12) : 0);
+      const sx = shake(lt, ZERO, 18, 0.45) + shake(lt, RESET, 24, 0.5) + shake(lt, SHOCK, 10, 0.3);
+      camA.style.display = W === 'A' ? 'block' : 'none';
+      camB.style.display = W === 'B' ? 'block' : 'none';
+      (W === 'A' ? camA : camB).style.transform = `translate(${540 - fx * z + sx}px,${SY - fy * z}px) scale(${z})`;
+      // flaşlar: süre dolunca kırmızı, sayaç sıfırlanınca beyaz
+      const fr = lt >= ZERO ? 0.45 * Math.exp(-(lt - ZERO) * 5) : 0, fw = lt >= RESET ? 0.55 * Math.exp(-(lt - RESET) * 6) : 0;
+      flash.style.background = fr >= fw ? '#E04A3A' : '#FFFFFF';
+      flash.style.opacity = Math.max(fr, fw);
+      // karar çağrısı (sayımda altyazının yerinde)
+      pill.style.display = urgent ? 'flex' : 'none';
+      pill.style.opacity = Math.min(1, (lt - COUNT) * 8);
+      pin.style.transform = `scale(${1 + 0.04 * Math.exp(-since * 10)})`;
     };
   };
 
