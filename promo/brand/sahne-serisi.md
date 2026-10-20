@@ -117,7 +117,7 @@ Kalıp: gerçek hayattan bir para ikilemi, bir film türünün sahnesinde anlat�
 
 **Akış (videodaki zamanlar)**
 - 0–1,2 sn: Sayacın yakın planı ("FLAŞ İNDİRİM BİTİYOR!", 00:12'den saniye saniye akıyor).
-- 1,2–2,75 sn: Oda: Ceviz yatakta, yüzü telefon ışığında; komodinde dijital saat 02:00.
+- 1,2–2,75 sn: Oda: Ceviz yatakta, yüzü telefon ışığında; komodinde dijital saat 02:00; battaniyenin üstünde "CEP DEFTERİ" defteri (oda planlarında hep görünür).
 - 2,75–5,6 sn: Telefon ekranı: kulaklık, 1.499 TL, "Son 2 ürün!", "37 kişi bakıyor". "%70"de eski fiyat 4.999 TL gelip çizilir, rozet patlar.
 - 5,6–6,75 sn: "Ama süre bitiyor": sayacın yakın planı.
 - 6,75–7,45 sn: Ceviz'in yakın planı: terliyor, kalp atışı başlıyor.
@@ -127,7 +127,7 @@ Kalıp: gerçek hayattan bir para ikilemi, bir film türünün sahnesinde anlat�
 - 11,7–13,3 sn: Ceviz sayfayı aşağı çekip yeniler; yükleniyor.
 - 13,3 sn: Sayaç 10:00'dan yeniden başlar, indirim hâlâ orada (beyaz flaş, sert vuruş).
 - 14,3–15,1 sn: Ceviz şaşkın ("?").
-- 15,1–21,1 sn: Lamba yanar; pano: 11.000 site tarandı → 361 sitede geri sayım sayacı → örnek kart "00:00" ve "BİTMEDİ!" damgası → "Süre bitti, indirim sürüyor" + "Kaynak: Mathur ve ark. 2019 (Princeton)".
+- 15,1–21,1 sn: Lamba yanar; pano: 11.000 site tarandı → 361 sitede geri sayım sayacı → 140 sitede sayaç aldatıcıydı + "BİTMEDİ!" damgası + "Kaynak: Mathur ve ark. 2019 (Princeton)".
 - 21,1–22,6 sn: Cep Defteri: "Elektronik · bu ay kalan 300 TL"; kulaklık satırı ve "BÜTÇEYİ 1.199 TL AŞAR".
 - 22,6–23,7 sn: Ceviz telefonu komodine bırakır, lambayı söndürür, uyur.
 - 23,7–27,15 sn: Kapanış sorusu; 26,4'te komodindeki telefon titreyip parlar, Ceviz döner bakar.
@@ -142,7 +142,7 @@ Kalıp: gerçek hayattan bir para ikilemi, bir film türünün sahnesinde anlat�
 6. `[dramatic]` Sayaç değil, bütçen karar versin.
 7. `[playful]` Geri sayıma kanıp aldığın en gereksiz şey ne? Yoruma yaz.
 
-**Kapanış kutusu:** "Geri sayıma kanıp ne aldın?" · alt satır: "Almadan önce Cep Defteri'ne bak"
+**Kapanış kutusu:** "Geri sayıma kanıp aldığın en gereksiz şey ne?" (seslendirmeyle aynı) · çip: "Yoruma yaz: ürünü ve fiyatını" · son 1,7 sn: "Almadan önce Cep Defteri'ne bak · @cep_defteri"
 **Açıklamanın ilk satırı:** O geri sayım sayacı gerçekten bitiyor mu? ⏳
 **Not:** "Sayfa yenilenince baştan başlıyordu" bilgisi makaleden değil, Nextgov haberinden. Panoda makalede örneği olan "süre bitince de sürüyordu" ifadesi kullanılır.
 

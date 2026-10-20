@@ -95,6 +95,8 @@ const MAGP = ['..oooo....', '.oLLLLo...', 'oLLWLLLo..', 'oLWLLLLo..', 'oLLLLLLo.
 const MAGP_C = { o: '#2A1E1A', L: '#BFD3EA', W: '#FFFFFF', H: '#AE4716' };
 const TIMERP = ['...oooo...', '....oo....', '..oooooo..', '.oRRRRRRo.', 'oRRRRWRRRo', 'oRRRRWRRRo', 'oRRRRWWWRo', 'oRRRRRRRRo', '.oRRRRRRo.', '..oooooo..'];
 const TIMERP_C = { o: '#2A1E1A', R: '#E8322A', W: '#FFFFFF' };
+const WARNP = ['....oo....', '...oYYo...', '...oYYo...', '..oYooYo..', '..oYooYo..', '.oYYooYYo.', '.oYYYYYYo.', 'oYYYooYYYo', 'oYYYYYYYYo', 'oooooooooo'];
+const WARNP_C = { o: '#2A1E1A', Y: '#F2B63C' };
 
 /** Dikkat dağıtmayan arka plan canlılığı: dönen ışık hüzmeleri, süzülen soluk pikseller, patlama kıvılcımları */
 function ambient(root, o = {}) {
@@ -1848,6 +1850,9 @@ function defineValue() {
     // battaniye
     el('div', 'abs', camA, { left: '170px', top: '1374px', width: '740px', height: '420px', boxSizing: 'border-box', border: '8px solid #1A1530', borderRadius: '44px 44px 0 0', background: 'repeating-conic-gradient(#3E3469 0 25%, #483E7A 0 50%) 0 0 / 80px 80px', zIndex: 2 });
     el('div', 'abs', camA, { left: '178px', top: '1382px', width: '724px', height: '40px', borderRadius: '36px 36px 0 0', background: '#5A4E92', zIndex: 2 });
+    // battaniyenin üstünde Cep Defteri defteri: marka ilk oda planından itibaren görünür
+    const book = el('div', 'abs', camA, { left: '648px', top: '1398px', width: '236px', height: '92px', boxSizing: 'border-box', border: '5px solid #2A1E1A', borderRadius: '8px 14px 14px 8px', background: 'linear-gradient(90deg, #7A2F0E 0 20px, #AE4716 20px 200px, #5C2209 200px 210px, #AE4716 210px)', transform: 'rotate(-7deg)', zIndex: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingLeft: '10px', fontSize: '30px', fontWeight: 800, color: '#FFFCF6', letterSpacing: '.04em' });
+    book.textContent = 'CEP DEFTERİ';
     // komodinler: solda telefonun bırakılacağı yer, sağda lamba ve saat
     [[-40, 230], [890, 230]].forEach(([x, w]) => {
       el('div', 'abs', camA, { left: px(x), top: '1296px', width: px(w), height: '420px', boxSizing: 'border-box', border: '8px solid #22160F', background: '#3A2A22', zIndex: 2 });
@@ -1926,13 +1931,10 @@ function defineValue() {
     const n1 = big(744, '#2A1E1A'), n2 = big(988, '#E8322A');
     const lab = (y, txt) => { const e = el('div', 'abs', sci, { left: '268px', top: px(y), fontSize: '44px', fontWeight: 700, color: '#6B5A4E' }); e.textContent = txt; return e; };
     const lab1 = lab(902, 'alışveriş sitesi tarandı'), lab2 = lab(1146, 'sitede geri sayım sayacı');
-    const ex = el('div', 'abs', sci, { left: '120px', top: '1206px', width: '420px', height: '170px', boxSizing: 'border-box', borderRadius: '24px', border: '6px solid #2A1E1A', background: '#E8322A', transformOrigin: '50% 50%' });
-    const exN = el('div', 'abs it', ex, { left: 0, right: 0, top: '10px', textAlign: 'center', fontSize: '140px', color: '#fff' });
-    exN.textContent = '00:00';
-    const stampS = el('div', 'abs', sci, { left: '560px', top: '1240px', padding: '6px 22px', borderRadius: '16px', border: '8px solid #C0392B', background: 'rgba(255,255,255,.92)', color: '#C0392B', fontSize: '66px', fontWeight: 800, letterSpacing: '.02em', transformOrigin: '50% 50%' });
+    const ic3 = pixEl(sci, WARNP, WARNP_C, 12, { left: '104px', top: '1256px', transformOrigin: '50% 50%' });
+    const n3 = big(1232, '#C0392B'), lab3 = lab(1390, 'sitede sayaç aldatıcıydı');
+    const stampS = el('div', 'abs', sci, { left: '590px', top: '1256px', padding: '6px 22px', borderRadius: '16px', border: '8px solid #C0392B', background: 'rgba(255,255,255,.92)', color: '#C0392B', fontSize: '66px', fontWeight: 800, letterSpacing: '.02em', transformOrigin: '50% 50%' });
     stampS.textContent = 'BİTMEDİ!';
-    const lab3 = el('div', 'abs', sci, { left: 0, right: 0, top: '1394px', textAlign: 'center', fontSize: '40px', fontWeight: 700, color: '#6B5A4E' });
-    lab3.textContent = 'Süre bitti, indirim sürüyor';
     const src = el('div', 'abs', sci, { left: 0, right: 0, top: '1448px', textAlign: 'center', fontSize: '34px', fontWeight: 800, color: '#4A3B30' });
     src.textContent = 'Kaynak: Mathur ve ark. 2019 (Princeton)';
     const vig = el('div', 'abs', s.root, { inset: 0, zIndex: 17, pointerEvents: 'none', background: 'radial-gradient(ellipse 78% 62% at 50% 58%, transparent 50%, rgba(0,0,0,.66) 100%)' });
@@ -2077,11 +2079,10 @@ function defineValue() {
         n2.textContent = fmt(E.out(prog(lt, SCI + 1.9, 0.7)) * 361);
         ic1.style.transform += ` rotate(${Math.sin(lt * 9) * 10 * (1 - prog(lt, SCI + 1.6, 0.3))}deg)`;
         ic2.style.opacity = lt >= SCI + 2.6 && Math.floor(lt / 0.3) % 2 ? 0.4 : ic2.style.opacity;
-        popIn(ex, prog(lt, SCI + 3.2, 0.35), { fromY: 140 });
-        exN.style.opacity = Math.floor(lt / 0.35) % 2 ? 0.55 : 1;
+        [ic3, n3, lab3].forEach((e) => popIn(e, prog(lt, SCI + 3.2, 0.3), { fromX: -120, fromY: 0 }));
+        n3.textContent = fmt(E.out(prog(lt, SCI + 3.3, 0.6)) * 140);
         stampS.style.opacity = lt >= SCI + 4.6 ? 1 : 0;
         stampS.style.transform = `rotate(-8deg) scale(${lerp(2.2, 1, E.out(prog(lt, SCI + 4.6, 0.2)))})`;
-        lab3.style.opacity = prog(lt, SCI + 4.8, 0.3);
         src.style.opacity = prog(lt, SCI + 0.8, 0.4);
       }
       vig.style.opacity = S ? 0.25 : 1;

@@ -4278,17 +4278,17 @@
       [
         23.7,
         27.349999999999998,
-        "Geri sayıma kanıp<br><b>ne aldın?</b>",
+        "Geri sayıma kanıp aldığın<br><b>en gereksiz şey ne?</b>",
         300,
         {
-          "size": 90,
+          "size": 74,
           "pulse": true
         }
       ],
       [
         23.8,
         27.349999999999998,
-        "Yoruma yaz: ne aldın, kaç TL?",
+        "Yoruma yaz: ürünü ve fiyatını",
         600,
         {
           "size": 44,
@@ -4296,9 +4296,9 @@
         }
       ],
       [
-        23.9,
+        25.6,
         27.349999999999998,
-        "Almadan önce Cep Defteri'ne bak",
+        "Almadan önce Cep Defteri'ne bak · @cep_defteri",
         672,
         {
           "size": 34,

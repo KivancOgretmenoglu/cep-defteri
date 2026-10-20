@@ -419,13 +419,13 @@ Arkadaşlarla hesabı Cep Defteri'nde bölüş: kimin payı ne, kim kime borçlu
 **Açıklama:**
 ```
 O geri sayım sayacı gerçekten bitiyor mu? ⏳
-Sen olsan alır mıydın, bırakır mıydın? Geri sayıma kanıp aldığın en gereksiz şey neydi? Yoruma yaz 👇
+Geri sayıma kanıp aldığın en gereksiz şey ne? Ürünü ve fiyatını yoruma yaz 👇
 📌 Kaydet; almadan önce Cep Defteri'nde o ayki bütçene bak. Android erken erişim yakında.
 
 Gece 02.00. Sepette %70 indirimli bir kulaklık, ekranda "FLAŞ İNDİRİM BİTİYOR!" ve akan bir sayaç.
-Ceviz 3 saniye düşündü, almadı. Süre doldu. Sayfayı yeniledi: sayaç 10:00'dan yeniden başladı, indirim hâlâ oradaydı.
+Sen olsan alır mıydın, bırakır mıydın? Ceviz 3 saniye düşündü, almadı. Süre doldu. Sayfayı yeniledi: sayaç 10:00'dan yeniden başladı, indirim hâlâ oradaydı.
 Bunun adı sahte aciliyet: "hemen al" baskısıyla düşünmeden aldırmak. Tutarlar örnek.
-Araştırma: Princeton'daki araştırmacılar yaklaşık 11 bin alışveriş sitesini taradı; 361 sitede 393 geri sayım sayacı buldular. Bazılarında süre bittikten sonra da kampanya devam ediyordu (Mathur ve ark., 2019).
+Araştırma: Princeton'daki araştırmacılar yaklaşık 11 bin alışveriş sitesini taradı; 361 sitede 393 geri sayım sayacı buldular. Çalışmanın yazarlarına göre 140 sitede sayaç aldatıcıydı: süre bittikten sonra da kampanya devam ediyordu (Mathur ve ark., 2019; Narayanan ve ark., 2020).
 
 Sayaç acele ettirdiğinde sor: "Bu ay bu kalemde ne kadar param kaldı?"
 
@@ -435,4 +435,4 @@ Cep Defteri'nde kategorilere aylık sınır koy; sepete eklemeden önce kalanı 
 #sahteindirim #gerisayım #indirimtuzağı #onlinealışveriş #öğrencibütçesi #paraipuçları #cepdefteri
 ```
 
-**Yayın notu:** Kapak karesi olarak 0,3 sn'yi seç (kırmızı sayaç + "Bu sayaç sana yalan söylüyor"). İlk yorumu sabitle: "Her geri sayım sahte değil; ama süre bitince sayfayı bir yenile, 10 saniyeni alır. Tutarlar örnek." Videonun çağrısı bu reelste de soru: sayımda "AL mı, BIRAK mı? Yoruma yaz", sonda "Geri sayıma kanıp ne aldın?" + "Yoruma yaz: ne aldın, kaç TL?"; "arkadaşına gönder" açıklamada. Yorumlarda alışveriş itiraflarına "kaç TL'ydi, sonra kullandın mı?" diye yanıt ver. İndirim ve çapa reelsleriyle arasında en az 5–7 gün bırak.
+**Yayın notu:** Kapak karesi olarak 0,3 sn'yi seç (kırmızı sayaç + "Bu sayaç sana yalan söylüyor"). İlk yorumu sabitle: "Her geri sayım sahte değil; ama süre bitince sayfayı bir yenile, 10 saniyeni alır. Tutarlar örnek." Videonun çağrısı bu reelste de soru: sayımda "AL mı, BIRAK mı? Yoruma yaz", sonda seslendirmeyle aynı cümle "Geri sayıma kanıp aldığın en gereksiz şey ne?" + "Yoruma yaz: ürünü ve fiyatını"; son 1,7 sn'de "Almadan önce Cep Defteri'ne bak · @cep_defteri"; "arkadaşına gönder" açıklamada. "140 sitede aldatıcı sayaç" rakamı çalışmanın yazarlarının 2020 tarihli özetinden (Narayanan, Mathur, Chetty ve Kshirsagar); makaledeki tanımı yayından önce bir kez kontrol et. Yorumlarda alışveriş itiraflarına "kaç TL'ydi, sonra kullandın mı?" diye yanıt ver. İndirim ve çapa reelsleriyle arasında en az 5–7 gün bırak.

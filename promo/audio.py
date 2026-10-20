@@ -1668,7 +1668,8 @@ def cue_sepet(t0, skip=0, o=None):
         put(SFX, stereo_move(whoosh(0.4, 400, 3000, 0.6), -0.4, 0.4), T(S + 0.42), 0.22)
         put(SFX, slot_roll(0.9), T(S + 0.6), 0.18)
         put(SFX, slot_roll(0.6), T(S + 1.9), 0.18)
-        put(SFX, bloop(500, 900, 0.08, 0.2), T(S + 3.2))
+        put(SFX, bloop(500, 900, 0.08, 0.2), T(S + 3.2))  # aldatıcı sayaç satırı
+        put(SFX, slot_roll(0.6), T(S + 3.3), 0.18)
         put(SFX, stamp(), T(S + 4.6), 0.45, pan=0.2)
     if 'app' in o:  # Cep Defteri açılır; kulaklık bütçeyi aşar
         A = o['app']
