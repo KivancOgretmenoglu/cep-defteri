@@ -81,32 +81,41 @@ Kalıp: gerçek hayattan bir para ikilemi, bir film türünün sahnesinde anlat�
 ---
 
 ## 3. Aynadaki sen
-**Durum:** sırada · **Tür:** bilim kurgu / dram · **Süre:** ~25 sn · **Oyuncular:** Ceviz ve 60 yaşındaki Ceviz (gri tüyler, gözlük)
+**Durum:** üretildi (`out/aynadaki-sen.mp4`, 26,2 sn) · **Tür:** bilim kurgu / dram · **Oyuncular:** Ceviz (arkadan) ve aynadaki 60 yaşındaki Ceviz (gri tüyler, altın çerçeveli gözlük, beyaz kaşlar)
 
-**Kanca (0. kare):** Karanlık banyo, aynada titreyen yaşlı bir yüz. Kutu: **"60 yaşındaki sen konuşuyor"**
+**Kanca (0. kare):** Karanlık banyo, aynada cızırdayan yaşlı bir yüz. Kutu: **"60 yaşındaki sen konuşuyor"**
 
-**Akış**
-- 0–3 sn: Gece yarısı, telefona bildirim: "Harçlık yattı: 1.000 TL". Ceviz aynanın önünde, mutlu.
-- 3–7 sn: Ayna titrer, ışık cızırdar; yansıma yaşlanır. Yaşlı Ceviz tek cümle söyler (kutu): "Bunun kaçı bana?"
-- 7–10 sn: Lavabonun üstünde iki kavanoz: ŞİMDİ ve SONRA. Karar anı, 3 sn sayım. Kutu: "Kaçını ayırırsın? Yoruma yaz".
-- 10–16 sn: Pano: iki yüz (bugünkü ve yaşlandırılmış), iki çubuk: 80 $ ve 172 $. Kutu: "Yaşlı yüzünü görenler 2 kat fazla ayırdı" + "Kaynak: Hershfield ve ark. 2011".
-- 16–20 sn: Ders: "Gelecekteki sen bir yabancı değil." Ceviz SONRA kavanozuna para atar; telefonda Cep Defteri'ndeki hedef çubuğu dolar.
-- 20–24 sn: Kapanış sorusu.
-- 24–25 sn: Ayna yeniden titrer (döngü).
+**Akış (videodaki zamanlar)**
+- 0–0,85 sn: Karanlık banyo, aynada yaşlı Ceviz'in yüzü cızırdar.
+- 0,85 sn: Işık yanar, aynada genç Ceviz. Aynanın köşesinde "CEP DEFTERİ'NE YAZ!" notu (banyo planlarında hep görünür).
+- 1,25–2,6 sn: Telefonun kilit ekranı: "BANKA · Harçlık yattı +1.000 TL". "Bin lira"da tutar büyür, paralar saçılır.
+- 2,6–3,45 sn: Ceviz sevinçle zıplar, yansıması da.
+- 3,0–5,34 sn: "Ayna titredi": lamba göz kırpar, yansıma donar. Saat tıkırtısı hızlanır, yansıma yaşlanır.
+- 5,34 sn: Yaşlı Ceviz tam belirir (vuruş, derin çan). Ceviz "!" ile sıçrar.
+- 6,52–7,85 sn: Yakın plan: "Bunun kaçı bana?" (seste hafif ayna yankısı).
+- 7,85–9,75 sn: Tezgâhta ŞİMDİ ve SONRA kavanozları. Pençe 1.000 TL'lik desteyle aralarından yükselir; yaşlı Ceviz'in elinde kum saati.
+- 9,75–12,75 sn: Karar anı (gerçek 3 sn): müzik ve altyazı susar, kum akar, kalp atışı ve bip. Pençe bir ŞİMDİ'ye, bir SONRA'ya eğilir. Çağrı: "Kaçını ayırırsın? Yoruma yaz".
+- 12,9–17,3 sn: Ayna panoya döner: "kendi yüzü" ve "yaşlı yüzü". Paralar iki "emeklilik" kavanozuna düşer, yaşlınınki daha çok dolar. Kaynak: Hershfield ve ark. 2011 (Stanford).
+- 17,3–19,0 sn: "Gelecekteki sen bir yabancı değil": Ceviz ve yaşlı Ceviz aynı anda el sallar.
+- 19,0–19,98 sn: Bir 200'lük SONRA kavanozuna düşer.
+- 19,98 sn: "Sensin.": aynadaki yüzün yarısı genç, yarısı yaşlı.
+- 20,62–23,2 sn: Cep Defteri, Yatırım → Birikim hedefleri: "+ Hedef", "Gelecekteki ben" 200 / 2.000 TL (%10).
+- 22,35–25,62 sn: Kapanış sorusu; banyoda iki Ceviz el sallar.
+- 25,62–26,2 sn: Işık söner, aynada yaşlı yüz yeniden cızırdar (döngü: ilk kareyle aynı).
 
-**Seslendirme**
-1. `[dramatic]` Gece yarısı. Harçlık yattı: 1.000 lira.
-2. `[curious]` Ayna titredi ve 60 yaşındaki Ceviz tek bir soru sordu.
-3. `[dramatic]` "Bunun kaçı bana?"
+**Seslendirme (videodaki hali; yedi satır da ilk denemede marka sesine uydu)**
+1. `[dramatic]` Gece yarısı. Harçlık yattı: bin lira.
+2. `[curious]` Ayna titredi ve altmış yaşındaki Ceviz tek bir soru sordu.
+3. `[dramatic]` "Bunun kaçı bana?" (videoda hafif ayna yankısıyla)
 4. `[curious]` Sen olsan kaçını ayırırdın?
-5. `[excited]` Bir deneyde yaşlandırılmış yüzünü görenler, emeklilik için yaklaşık iki kat fazla para ayırdı.
+5. `[excited]` Bir deneyde, yaşlandırılmış yüzünü görenler emeklilik için daha çok para ayırdı.
 6. `[dramatic]` Çünkü gelecekteki sen bir yabancı değil. Sensin.
-7. `[playful]` 1.000 liranın kaçını gelecekteki sene ayırırdın? Yoruma yaz.
+7. `[playful]` Bin liranın kaçını gelecekteki sana ayırırsın? Yoruma yaz!
 
-**Kapanış kutusu:** "1.000 TL'nin kaçı gelecekteki sene?" · alt satır: "Cep Defteri'nde ona bir hedef aç"
-**Uygulamayla bağı:** Birikim hesabına hedef (hedef çubuğu).
+**Kapanış kutusu:** "1.000 TL'nin kaçını gelecekteki sana ayırırsın?" (seslendirmeyle aynı) · çip: "Yoruma yaz: kaç TL?" · son 1,5 sn: "Cep Defteri'nde ona hedef aç · @cep_defteri"
+**Uygulamayla bağı:** Yatırım ekranındaki "Birikim hedefleri". Hedef bir yatırım hesabına bağlanır, çubuk net katkıyı gösterir.
 **Açıklamanın ilk satırı:** 60 yaşındaki sen bu harçlığın kaçını isterdi? 🪞
-**Yayından önce doğrula:** 172/80 rakamı hangi deneyden geliyor ve anlamlı mı. CLEAR incelemesine göre ilk deneyin sonucu anlamlı değil; 18–35 yaş örnekleminde fark anlamlı. Rakam doğrulanamazsa panoda sayı verilmez, "daha çok ayırdı" yazılır. Kaynak: Hershfield ve ark. (2011), *Journal of Marketing Research*.
+**Doğrulama sonucu:** "2 kat" kullanılmadı. 172 $ / 80 $ farkı ilk deneyden (sanal gerçeklik, üniversite öğrencileri) geliyor ve DOL CLEAR incelemesine göre istatistiksel olarak anlamlı değil. Anlamlı fark, 18–35 yaş arası yetişkinlerle yapılan deneyde: yaşlandırılmış yüzünü görenler varsayımsal gelirlerinin daha büyük bir kısmını emekliliğe ayırdı. Videoda ve panoda bu yüzden yalnız "daha çok" deniyor; panodaki kavanoz seviyeleri temsilî. Kaynak: Hershfield ve ark. (2011), *Journal of Marketing Research*.
 
 ---
 

@@ -7,11 +7,11 @@
 let OVL = null;
 function setupOverlays(reel) {
   const layer = el('div', 'abs', stage, { inset: 0, zIndex: 40, pointerEvents: 'none' });
-  // [başlangıç, bitiş, html, y, {size: yazı px, pulse: hafif nabız, dim: [a, b] arasında soluk}]
+  // [başlangıç, bitiş, html, y, {size: yazı px, pulse: hafif nabız, dim: [a, b] arasında soluk, dimTo: soluk opaklık (0,4)}]
   const boxes = (reel.boxes || []).map(([a, b, html, y = 250, o = {}]) => {
     const e = el('div', 'abs', layer, { left: '50px', right: '50px', top: px(y), textAlign: 'center', lineHeight: 1.5, transformOrigin: '50% 50%' });
     e.innerHTML = `<span class="igbox"${o.size ? ` style="font-size:${o.size}px;padding:4px ${Math.round(o.size * 0.33)}px;border-radius:${Math.round(o.size * 0.28)}px"` : ''}>${html}</span>`;
-    return { a, b, e, pulse: !!o.pulse, dim: o.dim };
+    return { a, b, e, pulse: !!o.pulse, dim: o.dim, dimTo: o.dimTo ?? 0.4 };
   });
   const caps = (reel.captions || []).map(([a, b, text, y = 1430, times]) => {
     const e = el('div', 'abs cap' + (reel.captionPixel ? ' it' : ''), layer, { left: '70px', right: '70px', top: px(y), textAlign: 'center' });
@@ -25,13 +25,13 @@ const capStep = (a, b, n) => Math.min(0.2, ((b - a) * 0.72) / n);
 
 function updateOverlays(t) {
   if (!OVL) return;
-  OVL.boxes.forEach(({ a, b, e, pulse, dim }) => {
+  OVL.boxes.forEach(({ a, b, e, pulse, dim, dimTo }) => {
     const on = t >= a && t < b;
     e.style.display = on ? 'block' : 'none';
     if (!on) return;
     // videonun başındaki kutu ilk karede hazır olmalı (kapak + hook)
     const k = a <= 0 ? 1 : E.back(prog(t, a, 0.28));
-    const fade = dim ? 1 - 0.6 * Math.min(prog(t, dim[0], 0.3), 1 - prog(t, dim[1] - 0.2, 0.2)) : 1;
+    const fade = dim ? 1 - (1 - dimTo) * Math.min(prog(t, dim[0], 0.3), 1 - prog(t, dim[1] - 0.2, 0.2)) : 1;
     e.style.opacity = (a <= 0 ? 1 : clamp(prog(t, a, 0.08) * 1.5)) * fade;
     const p = pulse ? 1 + 0.025 * Math.sin(t * 9) : 1;
     e.style.transform = `scale(${(0.85 + 0.15 * k) * p}) rotate(${pulse ? Math.sin(t * 4.5) * 1.2 : 0}deg)`;

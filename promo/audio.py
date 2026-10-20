@@ -1688,6 +1688,147 @@ def cue_sepet(t0, skip=0, o=None):
         for k in range(2):
             put(SFX, vibe(0.3), T(o['buzz'] + k * 0.42), 0.6, pan=-0.5)
 
+def cue_ayna(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+
+    def thump(v):  # kalp: alt vuruş + üst katman
+        x = np.sin(2 * np.pi * phase(glide(70, 40, 0.18))) * expd(0.18, 16)
+        h = np.sin(2 * np.pi * phase(glide(170, 95, 0.1))) * expd(0.1, 30) * 0.45
+        x[: len(h)] += h
+        return x * v
+
+    sub = lambda d=1.0: np.tanh(np.sin(2 * np.pi * phase(glide(65, 30, d))) * expd(d, 3) * 1.4)
+
+    def vibe(d):  # tezgâhtaki telefon titrer
+        t = tt(d)
+        x = np.sin(2 * np.pi * 150 * t) * (0.6 + 0.4 * np.sign(np.sin(2 * np.pi * 23 * t)))
+        return lp(x, 900) * np.sin(np.pi * t / d) ** 0.5 * 0.5
+
+    def glitch(d=0.22):  # aynada dijital cızırtı
+        n = int(d * SR)
+        steps = np.repeat(rng.uniform(-1, 1, n // 200 + 1), 200)[:n]
+        return bp(noise(d) * 0.4 + steps * 0.6, 400, 6500) * expd(d, 6) * 0.5
+
+    def lamp_buzz(d):  # lamba göz kırpar
+        t = tt(d)
+        x = wave_(phase(np.full(len(t), 100.0)), 'saw') * 0.5 + bp(noise(d), 2000, 6000) * 0.3
+        return bp(x, 150, 4000) * np.sin(np.pi * t / d) * 0.5
+
+    def sand(d):  # kum saatinden akan kum
+        return bp(noise(d), 2500, 7000) * 0.06 * np.minimum(1, tt(d) / 0.1)
+
+    cut = lambda t, a=0.2, b=-0.2: put(SFX, stereo_move(whoosh(0.28, 2400, 500, 0.5), a, b), T(t - 0.08), 0.16)  # plan kesmesi
+
+    # kanca: karanlık banyo, aynada yaşlı yüz cızırdar (döngü kopyası da bununla başlar)
+    put(SFX, sub(1.0), T(0.02), 0.45)
+    for k, v in ((0.02, 0.35), (0.3, 0.22), (0.55, 0.28)):
+        put(SFX, glitch(0.18), T(k), v, pan=0.2)
+    if 'light' in o:  # düğme; floresan titreyerek yanar
+        L = o['light']
+        put(SFX, key_click(0.6), T(L - 0.03), pan=-0.3)
+        for k, v in ((0.0, 0.25), (0.1, 0.18), (0.25, 0.25)):
+            put(SFX, lamp_buzz(0.07), T(L + k), v, pan=0.3)
+    if 'notif' in o:  # telefon titrer, bildirim
+        N = o['notif']
+        put(SFX, vibe(0.3), T(N - 0.12), 0.55, pan=0.3)
+        put(SFX, vibe(0.25), T(N + 0.25), 0.45, pan=0.3)
+        cut(N)
+        put(SFX, notif_ding(), T(N + 0.06), 0.5)
+    if 'amt' in o:  # "bin lira"
+        put(SFX, cash_register(), T(o['amt'] + 0.02), 0.32)
+    if 'dance' in o:  # sevinçle zıplar
+        D = o['dance']
+        cut(D)
+        t = D + 0.42
+        while t < o.get('flick', D + 1) + 0.45:
+            put(SFX, woodblock(True), T(t), 0.25, pan=-0.2)
+            t += 0.42
+    if 'flick' in o:  # ayna titrer: lamba göz kırpar, cızırtı
+        F = o['flick']
+        for k in (0.04, 0.3, 0.62):
+            put(SFX, lamp_buzz(0.08), T(F + k), 0.3, pan=0.3)
+            put(SFX, glitch(0.12), T(F + k), 0.22)
+    if 'age' in o:  # yaşlanma: hızlanan saat tıkırtısı (yıllar akar), yükseliş, cızırtılar
+        A, Od = o['age'], o.get('old', o['age'] + 1.4)
+        for k in (0.15, 0.55, 0.9, 1.2):
+            put(SFX, lamp_buzz(0.08), T(A + k), 0.25, pan=0.3)
+            put(SFX, glitch(0.15), T(A + k), 0.3)
+        t, gap = A, 0.3
+        while t < Od - 0.05:
+            put(SFX, tick(True, 0.2), T(t), pan=0.1)
+            t += gap
+            gap = max(0.05, gap * 0.82)
+        put(SFX, riser(Od - A), T(A), 0.22)
+    if 'old' in o:  # yaşlı yüz: sert vuruş, derin çan; Ceviz sıçrar
+        Od = o['old']
+        put(SFX, slam_hit(0.6), T(Od), 0.6); put(SFX, sub(1.4), T(Od), 0.7)
+        put(SFX, fm_bell(220, 2.2, 0.25, ratio=1.4), T(Od), 0.6)
+        put(SFX, boing(0.35, 0.18), T(Od + 0.05), pan=-0.4)
+    if 'ask' in o:  # "Bunun kaçı bana?"
+        cut(o['ask'])
+        put(SFX, sub(1.2), T(o['ask']), 0.4)
+    if 'jars' in o:  # kavanozlar, para destesi; kalp atışı başlar ve hızlanır (value.js ile aynı takvim)
+        J, Z = o['jars'], o.get('zero', 99)
+        cut(J)
+        put(SFX, clink(), T(J + 0.1), 0.3, pan=0.3)
+        put(SFX, flutter(0.4), T(J + 0.3), 0.14, pan=0.2)
+        t, k = J + 0.1, 0
+        while t < Z - 0.1:
+            put(SFX, thump(0.9), T(t)); put(SFX, thump(0.6), T(t + 0.16))
+            t += max(0.42, 0.62 - 0.03 * k); k += 1
+    if 'count' in o:  # gerçek 3 saniye: her saniye bip, kum akar, son anda nefes; süre dolunca çan
+        C, Z = o['count'], o.get('zero', o['count'] + 3)
+        for j in range(3):
+            put(SFX, pluck(81 if j < 2 else 86, 0.14, 'square', 0.5, cut=4000, v=0.3), T(C + j))
+            put(SFX, tick(j % 2 == 0, 0.22), T(C + j + 0.5), pan=0.2)
+        put(SFX, sand(Z - C), T(C), 1.0, pan=-0.4)
+        put(SFX, inhale(0.3), T(Z - 0.32), 0.6)
+        put(SFX, fm_bell(988, 1.0, 0.3), T(Z)); put(SFX, sub(0.8), T(Z), 0.5)
+    if 'sci' in o:  # aynada pano: yüzler belirir, paralar düşer, yaşlınınki daha çok dolar
+        S = o['sci']
+        put(SFX, glitch(0.22), T(S), 0.45)
+        put(SFX, stereo_move(whoosh(0.4, 400, 3000, 0.6), -0.4, 0.4), T(S + 0.05), 0.2)
+        put(SFX, bloop(400, 1100, 0.08, 0.25), T(S + 0.15), pan=-0.3)
+        put(SFX, bloop(500, 1300, 0.08, 0.25), T(S + 0.45), pan=0.3)
+        put(SFX, pling(1568, 0.12, 0.4), T(S + 1.05), pan=0.3)
+        for k in (2.35, 2.67, 2.99):
+            put(SFX, clink(), T(S + k + 0.35), 0.18, pan=-0.3)
+        for k in (2.3, 2.55, 2.8, 3.05, 3.3):
+            put(SFX, clink(), T(S + k + 0.35), 0.2, pan=0.3)
+        put(SFX, bloop(500, 1600, 0.1, 0.28), T(S + 3.45), pan=0.3)
+    if 'lesson' in o:  # pano kaybolur
+        put(SFX, glitch(0.18), T(o['lesson'] - 0.12), 0.35)
+    if 'wave' in o:  # aynı anda el sallarlar
+        for k in range(3):
+            put(SFX, woodblock(k % 2 == 0), T(o['wave'] + k * 0.36), 0.2)
+    if 'drop' in o:  # 200 TL SONRA kavanozuna düşer
+        Dr = o['drop']
+        cut(Dr - 0.45)
+        put(SFX, flutter(0.3), T(Dr), 0.15, pan=0.3)
+        put(SFX, clink(), T(Dr + 0.3), 0.35, pan=0.3)
+        put(SFX, pling(2093, 0.15, 0.5), T(Dr + 0.32), pan=0.3)
+    if 'split' in o:  # "Sensin": yüzün yarısı genç, yarısı yaşlı
+        Sp = o['split']
+        cut(Sp)
+        put(SFX, glitch(0.15), T(Sp), 0.3)
+        put(SFX, fm_bell(1318.5, 1.2, 0.2, ratio=2.0), T(Sp + 0.02))
+        put(SFX, fm_bell(659.3, 1.4, 0.18, ratio=2.0), T(Sp + 0.02))
+    if 'app' in o:  # Cep Defteri: "+ Hedef", yeni hedef, çubuk dolar
+        A = o['app']
+        put(SFX, stereo_move(whoosh(0.3, 600, 2600, 0.5), 0.4, -0.2), T(A - 0.05), 0.16)
+        put(SFX, ui_tap(0.6), T(A + 0.45))
+        put(SFX, bloop(500, 1300, 0.08, 0.25), T(A + 0.55))
+        put(SFX, slot_roll(0.6), T(A + 0.9), 0.15)
+        put(SFX, fm_bell(1568, 0.7, 0.18), T(A + 1.5))
+    if 'back' in o:
+        cut(o['back'])
+    if 'off' in o:  # ışık söner, yaşlı yüz döner (döngü)
+        Of = o['off']
+        put(SFX, key_click(0.6), T(Of - 0.02), pan=-0.3)
+        put(SFX, lamp_buzz(0.06), T(Of + 0.05), 0.2, pan=0.3)
+        put(SFX, glitch(0.2), T(Of + 0.12), 0.3)
+
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
 # ═════════ ANA MÜZİK ═════════

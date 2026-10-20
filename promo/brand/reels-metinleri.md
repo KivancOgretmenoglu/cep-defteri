@@ -436,3 +436,25 @@ Cep Defteri'nde kategorilere aylık sınır koy; sepete eklemeden önce kalanı 
 ```
 
 **Yayın notu:** Kapak karesi olarak 0,3 sn'yi seç (kırmızı sayaç + "Bu sayaç sana yalan söylüyor"). İlk yorumu sabitle: "Her geri sayım sahte değil; ama süre bitince sayfayı bir yenile, 10 saniyeni alır. Tutarlar örnek." Videonun çağrısı bu reelste de soru: sayımda "AL mı, BIRAK mı? Yoruma yaz", sonda seslendirmeyle aynı cümle "Geri sayıma kanıp aldığın en gereksiz şey ne?" + "Yoruma yaz: ürünü ve fiyatını"; son 1,7 sn'de "Almadan önce Cep Defteri'ne bak · @cep_defteri"; "arkadaşına gönder" açıklamada. "140 sitede aldatıcı sayaç" rakamı çalışmanın yazarlarının 2020 tarihli özetinden (Narayanan, Mathur, Chetty ve Kshirsagar); makaledeki tanımı yayından önce bir kez kontrol et. Yorumlarda alışveriş itiraflarına "kaç TL'ydi, sonra kullandın mı?" diye yanıt ver. İndirim ve çapa reelsleriyle arasında en az 5–7 gün bırak.
+
+## 21 · aynadaki-sen (kavram: gelecekteki benlik / yaşlandırılmış yüz, seslendirme: Buğra, döngülü, 26,2 sn)
+
+**Açıklama:**
+```
+60 yaşındaki sen bu harçlığın kaçını isterdi? 🪞
+1.000 TL'nin kaçını gelecekteki sana ayırırsın? Rakamını yoruma yaz 👇
+📌 Kaydet; Cep Defteri'nde gelecekteki sana bir birikim hedefi aç. Android erken erişim yakında.
+
+Gece yarısı, harçlık yattı: 1.000 TL. Ayna titredi, yansıma 60 yaşındaki Ceviz oldu ve tek bir soru sordu: "Bunun kaçı bana?"
+Sen olsan kaçını ŞİMDİ kavanozuna, kaçını SONRA kavanozuna koyardın?
+Araştırma: Stanford'daki araştırmacıların bir çalışmasında katılımcılara bilgisayarla yaşlandırılmış yüzleri gösterildi. Kendi yaşlı yüzünü görenler, emeklilik için gelirlerinin daha büyük bir kısmını ayırmak istedi (Hershfield ve ark., 2011).
+Araştırmacılara göre insanlar gelecekteki kendilerini çoğu zaman bir yabancı gibi düşünüyor. Yüzünü görünce o yabancı, sen oluyorsun.
+Tutarlar örnek.
+
+Harçlığı yattığı gün biten arkadaşına gönder.
+Cep Defteri'nde "Birikim hedefleri"nden bir hedef aç; her ay biraz ayır, çubuğun dolduğunu gör.
+
+#birikim #tasarruf #harçlık #gelecekteksen #öğrencibütçesi #paraipuçları #cepdefteri
+```
+
+**Yayın notu:** Kapak karesi olarak 0,2 sn'yi seç (karanlık banyo, aynada yaşlı Ceviz + "60 yaşındaki sen konuşuyor"). İlk yorumu sabitle: "Ceviz 1.000 TL'nin 200'ünü SONRA'ya koydu. Sen kaç? (Tutarlar örnek.)" Videonun çağrısı soru: sayımda "Kaçını ayırırsın? Yoruma yaz", sonda seslendirmeyle aynı cümle "1.000 TL'nin kaçını gelecekteki sana ayırırsın?" + "Yoruma yaz: kaç TL?"; son 1,5 sn'de "Cep Defteri'nde ona hedef aç · @cep_defteri"; "arkadaşına gönder" açıklamada. Videoda "2 kat" denmiyor: 172 $ / 80 $ farkı ilk deneyden ve DOL CLEAR incelemesine göre anlamlı değil; anlamlı fark 18–35 yaş arası yetişkinlerle yapılan deneyde, o yüzden yalnız "daha çok". Panodaki kavanoz seviyeleri temsilî. Yorumlara gelen rakamlara "neden o kadar?" diye yanıt ver; en çok verilen cevabı bir sonraki sahne reelsinin açılışında kullan. Sepet bombasıyla arasında en az 5–7 gün bırak.

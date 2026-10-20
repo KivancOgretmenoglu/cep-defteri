@@ -4386,5 +4386,265 @@
         "assets/voice/sepet/s7b.mp3"
       ]
     ]
+  },
+  "aynadaki-sen": {
+    "end": 26.2,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.45,
+    "noMusicVariant": true,
+    "limiter": true,
+    "musicPlan": [
+      [
+        0,
+        12.75,
+        "horror",
+        {
+          "beatsEnd": 6.5
+        }
+      ],
+      [
+        12.75,
+        22.35,
+        "lofi"
+      ],
+      [
+        22.35,
+        25.62,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ],
+      [
+        25.62,
+        26.2,
+        "horror"
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          9.75,
+          12.75
+        ]
+      ]
+    },
+    "captionPixel": true,
+    "captionY": 604,
+    "captionMaxWords": 3,
+    "captionUntil": 22.35,
+    "captionCut": [
+      [
+        9.75,
+        12.75
+      ]
+    ],
+    "scenes": [
+      [
+        "ayna",
+        0,
+        {
+          "light": 0.85,
+          "notif": 1.25,
+          "amt": 2.38,
+          "dance": 2.62,
+          "flick": 3.0,
+          "age": 3.94,
+          "old": 5.34,
+          "ask": 6.52,
+          "jars": 7.85,
+          "count": 9.75,
+          "zero": 12.75,
+          "sci": 12.9,
+          "lesson": 17.3,
+          "wave": 17.9,
+          "drop": 19.4,
+          "split": 19.98,
+          "app": 20.62,
+          "back": 23.2,
+          "off": 25.62
+        }
+      ],
+      [
+        "ayna",
+        25.78,
+        {
+          "wdur": 0.2
+        }
+      ]
+    ],
+    "voiceTempo": 1.2,
+    "voiceFilter": "brand",
+    "voiceFiles": [
+      [
+        0.1,
+        "assets/voice/ayna/a1.mp3",
+        "Gece yarısı. Harçlık yattı: 1.000 lira."
+      ],
+      [
+        3.0,
+        "assets/voice/ayna/a2.mp3",
+        "Ayna titredi ve 60 yaşındaki Ceviz tek bir soru sordu."
+      ],
+      [
+        6.52,
+        "assets/voice/ayna/a3e.mp3"
+      ],
+      [
+        7.85,
+        "assets/voice/ayna/a4.mp3",
+        "Sen olsan kaçını ayırırdın?"
+      ],
+      [
+        12.95,
+        "assets/voice/ayna/a5.mp3",
+        "Bir deneyde, yaşlandırılmış yüzünü görenler emeklilik için daha çok para ayırdı."
+      ],
+      [
+        17.3,
+        "assets/voice/ayna/a6.mp3",
+        "Çünkü gelecekteki sen bir yabancı değil. Sensin."
+      ],
+      [
+        22.42,
+        "assets/voice/ayna/a7.mp3"
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        2.95,
+        "60 yaşındaki sen<br><b>konuşuyor</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true
+        }
+      ],
+      [
+        3.0,
+        6.45,
+        "60 yaşındaki Ceviz'in<br><b>tek bir sorusu var</b>",
+        300,
+        {
+          "size": 80,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        6.5,
+        7.8,
+        "<b>“Bunun kaçı bana?”</b>",
+        300,
+        {
+          "size": 100,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        7.85,
+        12.75,
+        "Sen olsan<br><b>kaçını ayırırdın?</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true,
+          "quiet": true,
+          "dim": [
+            9.75,
+            12.75
+          ],
+          "dimTo": 0.7
+        }
+      ],
+      [
+        12.9,
+        17.25,
+        "Yaşlı yüzünü görenler<br><b>emekliliğe daha çok ayırdı</b>",
+        300,
+        {
+          "size": 68,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        17.3,
+        19.93,
+        "Gelecekteki sen<br><b>bir yabancı değil</b>",
+        300,
+        {
+          "size": 86,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        19.98,
+        20.58,
+        "<b>Sensin.</b>",
+        300,
+        {
+          "size": 120,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        20.62,
+        22.3,
+        "Gelecekteki sana<br><b>bir hedef aç</b>",
+        300,
+        {
+          "size": 86,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        22.35,
+        25.7,
+        "1.000 TL'nin kaçını<br><b>gelecekteki sana ayırırsın?</b>",
+        300,
+        {
+          "size": 68,
+          "pulse": true
+        }
+      ],
+      [
+        22.45,
+        25.7,
+        "Yoruma yaz: kaç TL?",
+        600,
+        {
+          "size": 44,
+          "quiet": true
+        }
+      ],
+      [
+        24.2,
+        25.7,
+        "Cep Defteri'nde ona hedef aç · @cep_defteri",
+        672,
+        {
+          "size": 34,
+          "quiet": true
+        }
+      ],
+      [
+        25.8,
+        26.2,
+        "60 yaşındaki sen<br><b>konuşuyor</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true,
+          "quiet": true
+        }
+      ]
+    ]
   }
 }
