@@ -117,8 +117,8 @@ Kalıp: gerçek hayattan bir para ikilemi, bir film türünün sahnesinde anlat�
 
 **Akış (videodaki zamanlar)**
 - 0–1,2 sn: Sayacın yakın planı ("FLAŞ İNDİRİM BİTİYOR!", 00:12'den saniye saniye akıyor).
-- 1,2–2,75 sn: Oda: Ceviz yatakta, yüzü telefon ışığında; komodinde dijital saat 02:00; battaniyenin üstünde "CEP DEFTERİ" defteri (oda planlarında hep görünür).
-- 2,75–5,6 sn: Telefon ekranı: kulaklık, 1.499 TL, "Son 2 ürün!", "37 kişi bakıyor". "%70"de eski fiyat 4.999 TL gelip çizilir, rozet patlar.
+- 1,2–2,35 sn: Oda: Ceviz yatakta, yüzü telefon ışığında; komodinde dijital saat 02:00; battaniyenin üstünde "CEP DEFTERİ" defteri (oda planlarında hep görünür).
+- 2,35–5,6 sn: Telefon ekranı: kulaklık, "Son 2 ürün!", "37 kişi bakıyor". Ekran açılır açılmaz eski fiyat 4.999 TL çizili durur, yanında 1.499 TL parlar, "%70" rozeti hemen patlar (1.499 indirimli fiyat olarak okunsun diye); "Yüzde yetmiş" denince rozet bir kez daha büyür.
 - 5,6–6,75 sn: "Ama süre bitiyor": sayacın yakın planı.
 - 6,75–7,45 sn: Ceviz'in yakın planı: terliyor, kalp atışı başlıyor.
 - 7,45–8,2 sn: Pençe "SATIN AL" düğmesinin yanına gelir.

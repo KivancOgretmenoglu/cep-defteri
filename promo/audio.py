@@ -1616,13 +1616,14 @@ def cue_sepet(t0, skip=0, o=None):
     cut = lambda t, a=0.2, b=-0.2: put(SFX, stereo_move(whoosh(0.28, 2400, 500, 0.5), a, b), T(t - 0.08), 0.16)  # plan kesmesi
     if 'room' in o:
         cut(o['room'])
-    if 'prod' in o:
-        cut(o['prod'], -0.2, 0.2)
-        put(SFX, pling(1568, 0.1, 0.3), T(o['prod'] + 0.35), pan=0.2)  # fiyat parlar
-    if 'price' in o:  # eski fiyat gelir ve çizilir, %70 rozeti patlar
-        P = o['price']
-        put(SFX, paper_tear(0.18), T(P + 0.2), 0.22, pan=-0.3)
-        put(SFX, bloop(400, 1400, 0.08, 0.3), T(P + 0.45), pan=0.3)
+    if 'prod' in o:  # ürün planı: eski fiyat çizilir, indirimli fiyat parlar, %70 rozeti patlar
+        Pd = o['prod']
+        cut(Pd, -0.2, 0.2)
+        put(SFX, paper_tear(0.18), T(Pd + 0.1), 0.22, pan=-0.3)
+        put(SFX, pling(1568, 0.1, 0.3), T(Pd + 0.35), pan=0.2)
+        put(SFX, bloop(400, 1400, 0.08, 0.3), T(Pd + 0.55), pan=0.3)
+    if 'price' in o:  # "Yüzde yetmiş indirim!": rozet bir kez daha büyür
+        put(SFX, bloop(500, 1600, 0.08, 0.26), T(o['price'] + 0.05), pan=0.3)
     if 'push' in o:  # "süre bitiyor": sayaca yaklaş
         put(SFX, riser(0.45), T(o['push'] - 0.1), 0.25)
     if 'face' in o:  # Ceviz terler; kalp atışı başlar ve hızlanır (value.js ile aynı takvim)

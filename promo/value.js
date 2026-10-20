@@ -1896,9 +1896,9 @@ function defineValue() {
     const badge = el('div', 'abs it', card, { right: '18px', top: '14px', padding: '0 16px 6px', borderRadius: '14px', border: '4px solid #2A1E1A', background: '#E8322A', color: '#fff', fontSize: '60px', transformOrigin: '50% 50%' });
     badge.textContent = '%70';
     el('div', 'abs', page, { left: '30px', top: '540px', fontSize: '38px', fontWeight: 700, color: '#2A1E1A' }).textContent = 'Kablosuz Kulaklık';
-    const oldP = el('div', 'abs', page, { left: '30px', top: '600px', fontSize: '42px', fontWeight: 600, color: '#9A8F88' });
+    const oldP = el('div', 'abs', page, { left: '30px', top: '596px', fontSize: '48px', fontWeight: 600, color: '#857A73' });
     oldP.textContent = '4.999 TL';
-    const strikeL = el('div', 'abs', oldP, { left: '-4px', top: '27px', height: '6px', width: '0', borderRadius: '3px', background: '#E8322A' });
+    const strikeL = el('div', 'abs', oldP, { left: '-4px', top: '31px', height: '7px', width: '0', borderRadius: '3px', background: '#E8322A' });
     const newP = el('div', 'abs', page, { right: '30px', top: '578px', fontSize: '90px', fontWeight: 800, color: '#E8322A', letterSpacing: '-.02em', transformOrigin: '100% 60%' });
     newP.textContent = '1.499 TL';
     const buy = el('div', 'abs', page, { left: '30px', right: '30px', top: '694px', height: '104px', borderRadius: '52px', background: '#F25C2A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '62px', fontWeight: 800, color: '#fff', letterSpacing: '.02em', transformOrigin: '50% 50%' });
@@ -1964,15 +1964,16 @@ function defineValue() {
       ban.style.background = st === 1 ? '#8C8580' : urgent && since < 0.12 ? '#FF4A3A' : '#E8322A';
       l1.textContent = st === 1 ? 'SÜRE DOLDU' : 'FLAŞ İNDİRİM BİTİYOR!';
       fill.style.width = (st === 0 ? clamp((ZERO - lt) / SPAN) : st === 1 ? 0 : 1 - (lt - RESET) / 600) * 100 + '%';
-      // fiyat: önce 1.499 TL; "%70"de eski fiyat gelip çizilir, rozet patlar; süre dolunca her şey griye döner
+      // fiyat: ürün planı açılır açılmaz eski fiyat 4.999 TL çizilir, 1.499 TL parlar, %70 rozeti patlar
+      // (1.499 indirimli fiyat olarak okunur); "Yüzde yetmiş" denince rozet bir kez daha büyür; süre dolunca her şey griye döner
       const gray = st === 1 ? 'grayscale(1) opacity(.7)' : 'none';
       [newP, buy, badge, card].forEach((e) => (e.style.filter = gray));
       newP.style.transform = `scale(${1 + 0.18 * Math.sin(Math.PI * prog(lt, PROD + 0.35, 0.4))})`;
-      oldP.style.opacity = lt >= PRICE ? 1 : 0;
-      oldP.style.transform = `translateX(${(1 - E.out(prog(lt, PRICE, 0.25))) * -60}px)`;
-      strikeL.style.width = E.out(prog(lt, PRICE + 0.2, 0.25)) * 190 + 'px';
-      badge.style.display = lt >= PRICE + 0.45 ? 'block' : 'none';
-      badge.style.transform = `rotate(${-8 + 3 * Math.sin(lt * 5)}deg) scale(${E.back(prog(lt, PRICE + 0.45, 0.3))})`;
+      oldP.style.opacity = lt >= PROD ? 1 : 0;
+      oldP.style.transform = `translateX(${(1 - E.out(prog(lt, PROD, 0.2))) * -60}px)`;
+      strikeL.style.width = E.out(prog(lt, PROD + 0.1, 0.25)) * 222 + 'px';
+      badge.style.display = lt >= PROD + 0.55 ? 'block' : 'none';
+      badge.style.transform = `rotate(${-8 + 3 * Math.sin(lt * 5)}deg) scale(${E.back(prog(lt, PROD + 0.55, 0.3)) * (1 + 0.35 * Math.sin(Math.PI * prog(lt, PRICE, 0.4)))})`;
       buy.textContent = st === 1 ? 'SÜRE DOLDU' : 'SATIN AL';
       buy.style.transform = `scale(${st === 1 ? 1 : 1 + 0.025 * Math.sin(lt * 8)})`;
       buy.style.boxShadow = `inset 0 -10px 0 ${st === 1 ? '#6E6863' : '#B83C17'}, 0 0 ${st === 1 ? 0 : Math.round(30 + 20 * Math.sin(lt * 8))}px rgba(242,92,42,.55)`;
