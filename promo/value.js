@@ -2786,7 +2786,7 @@ function defineValue() {
         u.pl.style.transform = `translate(${x - 48}px,${1236}px)`;
         const bp = prog(lt, BUBBLE + i * 0.22, 0.3);
         u.bub.style.display = bp > 0 && lt < ASK ? 'block' : 'none';
-        if (bp > 0) popIn(u.bub, bp, { fromY: 40, base: `translate(${x - 105}px,${1262 - u.h - (i % 2 ? 136 : 76)}px)` });
+        if (bp > 0) popIn(u.bub, bp, { fromY: 40, base: `translate(${clamp(x - 115, 40, 790)}px,${1262 - u.h - (i % 2 ? 136 : 76)}px)` });  // baloncuk kadrajda kalır
         u.sweat.style.display = hot === i ? 'block' : 'none';
         u.sweat.style.transform = `translate(${x + u.w / 2 - 14}px,${1262 - u.h + 10 + ((lt * 2) % 1) * 40}px)`;
         spots[i].style.opacity = lt < IN[i] ? 0 : lt >= DARK ? 0 : hot >= 0 ? (hot === i ? 1 : 0.18) : 0.75;
@@ -2844,9 +2844,9 @@ function defineValue() {
       else if (lt < LINEUP) { const q = ramp(BILGE, LINEUP - BILGE); z = 1.08 + 0.14 * q; fx = lerp(540, 640, q); fy = lerp(1080, 1170, q); }   // dedektif bakar
       else if (lt < ASK) { W = 'B'; z = 1.08 + 0.04 * prog(lt, LINEUP, ASK - LINEUP); fx = 530; fy = 1150; }                    // şüpheliler
       else if (lt < COUNT) { W = 'B'; z = 1.15; fx = 330; fy = 1150; }                                                          // "Sence katil kim?"
-      else if (lt < DARK) { W = 'B'; z = 1.06 + 0.05 * ramp(COUNT, ZERO - COUNT); fx = 530; fy = 1150; }                        // karar
-      else if (lt < REVEAL) { W = 'B'; z = 1.11; fx = 530; fy = 1150; }
-      else if (lt < SCI) { W = 'B'; const q = E.out(prog(lt, REVEAL - 0.1, 0.35)); z = lerp(1.11, 1.22, q); fx = lerp(530, 1100, q); fy = lerp(1150, 1080, q); }   // sıranın sonunda: BU SEFERLİK
+      else if (lt < DARK) { W = 'B'; z = 1.04 + 0.04 * ramp(COUNT, ZERO - COUNT); fx = 540; fy = 1150; }                        // karar
+      else if (lt < REVEAL) { W = 'B'; z = 1.08; fx = 540; fy = 1150; }
+      else if (lt < SCI) { W = 'B'; const q = E.out(prog(lt, REVEAL - 0.1, 0.35)); z = lerp(1.08, 1.22, q); fx = lerp(540, 1100, q); fy = lerp(1150, 1080, q); }   // sıranın sonunda: BU SEFERLİK
       else if (lt < EXC) { W = 'C'; z = 1.0 + 0.03 * prog(lt, SCI, EXC - SCI); fy = 1100; }                                     // pano
       else if (lt < APP) { W = 'C'; const q = E.out(prog(lt, EXC, 0.5)); z = lerp(1.03, 1.25, q); fx = lerp(540, 790, q); fy = lerp(1100, 1060, q); }   // grafik
       else if (lt < CTA) { W = 'D'; z = 1.04 + 0.04 * prog(lt, APP, CTA - APP); fy = 1090; }                                    // Cep Defteri
