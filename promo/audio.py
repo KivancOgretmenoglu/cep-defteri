@@ -2090,6 +2090,10 @@ def cue_vampir(t0, skip=0, o=None):
         cut(R)
         put(SFX, boing(0.35, 0.2), T(R + 0.02))
         put(SFX, inhale(0.25), T(R), 0.4)
+    if 'pull' in o:  # ipe sıçrar, kolunu kaldırıp boncuğu kavrar
+        P = o['pull']
+        put(SFX, stereo_move(whoosh(0.26, 500, 2400, 0.5), -0.3, 0.1), T(P), 0.12)
+        put(SFX, bloop(620, 380, 0.07, 0.3), T(P + 0.22), pan=0.1)
     if 'light' in o:  # ipi çeker, lamba yanar; vampirler cızırdayıp toza döner
         Lt = o['light']
         put(SFX, key_click(0.7), T(Lt - 0.03), pan=-0.1)

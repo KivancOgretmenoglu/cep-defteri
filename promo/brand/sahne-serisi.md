@@ -9,6 +9,7 @@ Kalıp: gerçek hayattan bir para ikilemi, bir film türünün sahnesinde anlat�
 - Karar anı gerçekten 3 saniye: müzik ve altyazı susar, kalp atışı ve bip sesleri duyulur. Kutu: "… mı, … mı? Yoruma yaz". Yalnız izleyici cevaplayabiliyorsa: kendi seçimi ya da ekrandaki seçeneklerden biri; bilmediği bir rakamı tahmin ettirmez (Abonelik vampirleri'nde yok).
 - Videoda kapanış sorusu, ardından ortak takip satırı (`assets/voice/ortak/takip.mp3`) ve takip kartı (Abonelik vampirleri'nden itibaren). "Arkadaşına gönder" ve "Kaydet" açıklamada.
 - Son kare ilk kareye bağlanır (döngü).
+- Çizimde fizik tutarlı: kol ve pati gövdeden çıkar; karakter bir şeye uzanacaksa önce ona yaklaşır (gövdeden kopuk uzayan kol yok). Tuttuğu nesneyi patileriyle kavrar. Başka karakterden alınan aksesuar (şapka vb.) yeni karakterin kafasına göre yeniden çizilir. Pipetle içilen şeyde pipetin ucu içeriğin içindedir (Abonelik vampirleri'nden itibaren).
 - TL tutarları örnektir. Araştırma bilgileri kaynaklıdır ve kaynak satırı ekranda görünür.
 
 ---
@@ -222,24 +223,24 @@ Kelime zamanları ElevenLabs Scribe ile ölçüldü (`assets/voice/katil/words.j
 ---
 
 ## 7. Abonelik vampirleri
-**Durum:** üretildi (`out/abonelik-vampirleri.mp4`, 32,5 sn) · **Tür:** korku · **Oyuncular:** Ceviz (gece şapkasıyla uyuyor), minik vampirler (müzik, dizi, oyun, bulut; gövdeleri uygulama simgesi), solgun "deneme üyeliği"
+**Durum:** üretildi (`out/abonelik-vampirleri.mp4`, 32,5 sn) · **Tür:** korku · **Oyuncular:** Ceviz (gece şapkasıyla uyuyor; bu sahnede aynalı, kuyruğu solda, boş yanı lambaya bakar), minik vampirler (müzik, dizi, oyun, bulut; gövdeleri uygulama simgesi), solgun "deneme üyeliği"
 
 **Kanca (0. kare):** Gece, ay ışığında cam kumbara; sırtında karanlık bir siluet pipetle içiyor, iki kırmızı göz parlıyor. Kutu: **"Kumbaranı geceleri kim emiyor?"**
 
 **Akış (videodaki zamanlar)**
-- 0–0,72 sn: Kumbaranın yakın planı: siluet pipetle içer, paralar camın içinden görünür.
+- 0–0,72 sn: Kumbaranın yakın planı: siluet pipetle içer; pipet yarıktan paraların içine iner, paralar camın içinden görünür.
 - 0,72–2,12 sn: Oda: Ceviz gece şapkasıyla uyuyor (z'ler), duvar saati 03.00, battaniyenin üstünde CEP DEFTERİ defteri (oda planlarında hep görünür).
 - 2,12–3,45 sn: Kumbaraya yaklaşma; "boşalıyor"da uzun bir yudum, para seviyesi iner.
 - 3,45 sn: Stanttaki telefon kendiliğinden yanar (03:00); siluet ışıktan kaçıp kumbaranın arkasına saklanır.
 - 3,98–7,5 sn: Telefon ekranı: dört uygulama simgesi "vampirler"de göz ve diş açar; adı söylenen kanat çırpıp kameraya doğru uçar: Müzik (5,48), Dizi (6,05), Oyun (6,67), Bulut (7,15).
-- 7,5–8,6 sn: Dördü kumbaranın başında, pipetlerinden para kırıntıları akıyor; 7,85'te etiketler: 100 / 250 / 150 / 50 TL, kumbaranın etiketi "AYDA 550 TL".
+- 7,5–8,6 sn: Dördü kumbaranın başında; pipetler yarıktan geçip para yığınına dalar (uçları seviyeyle birlikte iner), para kırıntıları yığından ağızlarına akar; 7,85'te etiketler: 100 / 250 / 150 / 50 TL, kumbaranın etiketi "AYDA 550 TL".
 - 8,6–11,6 sn: "En sinsisi"nde ay ışığı ve telefon titrer; telefonda örümcek ağlı eski bir bildirim (9,75): "Deneme süren bitti · Aboneliğin başladı: ayda 150 TL · 3 ay önce". "Unuttuğun"da (10,34) arkasından solgun vampir tırmanır; göğsünde "ÜCRETSİZ"i çizili "DENEME" kuşağı.
 - 11,6–13,6 sn: Beşi birden kumbarada (solgun olan telefonun tepesine tünemiş); "700"de etiket 700 TL olur (kasa sesi).
 - 13,6–19,49 sn: CEP DEFTERİ'nin sayfası: "ANKET · ABD · 1.000 KİŞİ", kaynak satırı; "yüzde kırk ikisi"nde (15,45) 100 kişilik ızgarada 42 kare kırmızıya döner, "%42 · kullanmayı bıraktığı aboneliğe hâlâ ödüyordu"; "unutmuştu"da **UNUTULDU!** damgası.
-- 19,49–21,35 sn: Ceviz "!" ile uyanır, lambanın ipini çeker (20,17): oda aydınlanır, vampirler çığlık atıp toza döner.
+- 19,49–21,35 sn: Ceviz "!" ile uyanır, yatağın ipe yakın ucuna sıçrar (19,75), omzundan kalkan koluyla boncuğu kavrayıp çeker (20,17): oda aydınlanır, vampirler çığlık atıp toza döner.
 - 21,35–23,8 sn: Cep Defteri, Bütçe ve planlar → Tüm planlar: Bulut depolama, Deneme üyeliği, Dizi, Müzik ve Oyun aboneliği alt alta gelir (uygulamadaki satır biçimi: "Her ay · Abonelikler · Banka"); deneme üyeliği satırı parlar.
-- 23,8–28,85 sn: Kapanış sorusu; aydınlık odada Ceviz telefonuna bakıyor, kumbaranın etiketi hâlâ "AYDA 700 TL".
-- 28,85–31,95 sn: Ortak takip satırı ve takip kartı (simge, cep_defteri, "Her hafta bir para tuzağı", mavi "Takip et"); "takip et"te (31,17) pençe düğmeye basar, düğme "Takip ediliyor" olur. 30,4'te komodinin karanlık rafında iki kırmızı göz belirir.
+- 23,8–28,85 sn: Kapanış sorusu; aydınlık odada Ceviz yatakta oturmuş, telefonu cevizini tuttuğu yerde iki patisiyle tutuyor (telefonun arkası bize dönük: sol üstte kamera, ortada piksel Apple logosu), kumbaranın etiketi hâlâ "AYDA 700 TL".
+- 28,85–31,95 sn: Ortak takip satırı ve takip kartı (Instagram'ın önerilen hesap kartı gibi ortalı: yuvarlak simge, cep_defteri, "Her hafta bir para tuzağı", kart genişliğinde mavi "Takip et"); "takip et"te (31,17) pençe düğmenin sağ ucuna basar (yazıyı kapatmaz), düğme "Takip ediliyor" olur. 30,4'te komodinin karanlık rafında iki kırmızı göz belirir.
 - 31,95–32,5 sn: Lamba söner; kumbaradaki gözler ve kanca kutusu (döngü: ilk kareyle aynı).
 
 **Seslendirme (videodaki hali)**
@@ -256,10 +257,12 @@ Kelime zamanları ElevenLabs Scribe ile ölçüldü (`assets/voice/katil/words.j
 
 **İlk sürümden farklar:** İlk sürümde (31,1 sn) vampirler kumbaraya yerleşince 3 saniyelik "Ayda kaç TL?" karar anı vardı. İzleyici Ceviz'in aboneliklerinin fiyatını bilmediği için tahmin edemiyordu; karar anı ve "Sence ayda kaç lira emiyorlar?" satırı çıkarıldı, etiketler doğrudan gelir. Araştırma satırı "133 $ eksik tahmin" yerine hikâyedeki unutulan vampire doğrudan bağlanan %42 bulgusu oldu (86 $ / 219 $ açıklamada). Kapanış sorusu izleyiciye anketteki deneyi yaptırır: önce tahmin, sonra tek tek sayım. En sona takip çağrısı eklendi.
 
+**Çizim düzeltmeleri (üçüncü tur):** Fıstık'ın pijama şapkasından türetilen şapka Ceviz'in sağ kulağına ve kuyruğuna taşıyordu; şapka Ceviz'in kafasına göre yeniden çizildi (siper iki kulağın arasında, ucu kuyruğun ters yanına sarkar). Lambayı yakarken gövdeden kopuk uzayan kol vardı; artık Ceviz ipe sıçrar, omzundan kalkan koluyla çeker (kolun kuyruğa takılmaması için Ceviz bu sahnede aynalı). Telefonu tutan parmak uçları havada duruyordu; telefon artık cevizin yerinde, iki patisiyle kavranıyor, arkası kamera ve Apple logosuyla belli. Pipetler kumbaranın boş camından içiyordu; artık yarıktan para yığınına iner. Takip kartının sağ yarısı boştu; kart ortalı düzene geçti.
+
 **Kapanış kutusu:** "Önce tahmin et, sonra tek tek say" · çip: "Yoruma yaz: tahminin kaç, gerçeği kaç?" · ardından takip kartı
 **Uygulamayla bağı:** Bütçe → + Plan → Ödeme, Her ay: her abonelik ayrı bir plan; "Tüm planlar"da alt alta görünür, ödemeler kullanılabilir paradan önceden düşülür.
 **Açıklamanın ilk satırı:** Kaç aboneliğe para ödediğini biliyor musun? 🧛
-**Doğrulama sonucu:** C+R Research'ün kendi sayfası ve CNBC (2 Haziran 2022): 22 Nisan–2 Mayıs 2022, ABD'de 1.000 kişi; %42'si kullanmayı bıraktığı bir aboneliğe hâlâ ödediğini unutmuş (C+R'ın ifadesi: "stopped using a subscription service(s) but forgot they were still paying for the service"); hızlı tahminlerin ortalaması 86 $, kategori kategori sayınca 219 $ (fark 133 $). Türkiye için birincil kaynağı bulunan benzer bir veri yok (haberlerde geçen ING Türkiye "%36"sının kaynağı bulunamadı), bu yüzden ABD anketi kullanıldı ve ekranda "ABD" yazıyor. Marka adı kullanılmadı; vampirler tür adıyla (müzik, dizi, oyun, bulut). TL tutarları örnek.
+**Doğrulama sonucu:** C+R Research'ün kendi sayfası ve CNBC (2 Haziran 2022): 22 Nisan–2 Mayıs 2022, ABD'de 1.000 kişi; %42'si kullanmayı bıraktığı bir aboneliğe hâlâ ödediğini unutmuş (C+R'ın ifadesi: "stopped using a subscription service(s) but forgot they were still paying for the service"); hızlı tahminlerin ortalaması 86 $, kategori kategori sayınca 219 $ (fark 133 $). Türkiye için birincil kaynağı bulunan benzer bir veri yok (haberlerde geçen ING Türkiye "%36"sının kaynağı bulunamadı), bu yüzden ABD anketi kullanıldı ve ekranda "ABD" yazıyor. Vampirlerde marka adı yok, tür adıyla (müzik, dizi, oyun, bulut); Ceviz'in telefonunun arkasında istek üzerine piksel Apple logosu var. TL tutarları örnek.
 
 ---
 

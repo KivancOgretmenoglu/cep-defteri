@@ -251,15 +251,44 @@ const VWING_C = { o: '#160E1E', D: '#4A2E5C' };
 // cam kumbara (30×20): o dış çizgi, g cam gövde (içi 3–16. satırlar), a kulak, l bacak, t kuyruk, s burun, n burun deliği, e göz, k para yarığı, h parıltı
 const PIG = ['..............................', '.........oo...................', '........oaaoooooooooo.........', '.......oaaggggkkkkgggoo.......', '......oogggggggggggggggoo.....', '.....ogggggggggggggghhgggo..o.', '....oggggggggggggggggghgggooto', '.ooooggeggggggggggggggghggoto.', 'ossssggggggggggggggggggggggoto', 'ossssggggggggggggggggggggggto.', 'osnsnggggggggggggggggggggggo..', 'ossssggggggggggggggggggggggo..', 'ossssgggggggggggggggggggggo...', '.oooogggggggggggggggggggggo...', '.....ogggggggggggggggggggo....', '......oogggggggggggggggoo.....', '.......ollggggggggggglo.......', '.......ollloooooooolllo.......', '.......olllo......olllo.......', '........ooo........ooo........'];
 
-/** 'cevizcap': gece şapkalı Ceviz (Fıstık'ın pijama şapkası, Ceviz'in başına aynı yerde oturuyor) */
+// Ceviz'in telefonunun arkası (18×30, hücresi Ceviz'inkinin üçte biri): sol üstte kamera, ortada Apple logosu
+const PHONE_CAM = ['.rrrrrr.', 'rLLLmmmr', 'rLgLmffr', 'rLLLmmmr', 'rmmmLLLr', 'rmmmLgLr', 'rmmmLLLr', '.rrrrrr.'];
+const APPLE_LOGO = ['....W..', '...W...', '.WW.WW.', 'WWWWWWW', 'WWWWW..', 'WWWWW..', 'WWWWWWW', '.WW.WW.'];
+const PHONE_BACK = [...Array(30)].map((_, j) => [...Array(18)].map((_, i) => {
+  const cam = PHONE_CAM[j - 2]?.[i - 2], logo = APPLE_LOGO[j - 11]?.[i - 5];
+  if (cam && cam !== '.') return cam;
+  if (logo && logo !== '.') return logo;
+  const e = Math.min(j, 29 - j), s = Math.min(i, 17 - i);  // köşeler yuvarlak
+  return e + s < 2 ? '.' : e === 0 || s === 0 || e + s === 2 ? 'o' : 'P';
+}).join(''));
+const PHONE_BACK_C = { o: '#14151C', P: '#3A3E52', r: '#596079', m: '#2A2D3C', L: '#0B0C12', g: '#9DB4FF', f: '#F2E6B8', W: '#E6E9F0' };
+// telefonu iki kenarından kavrayan patiler (Ceviz'in hücresiyle; aynalı sprite'ın 11–24. sütunları, 20–23. satırları)
+const HOLD_PAWS = ['.AAA......AAA.', 'ADDDA....ADDDA', 'ADBDA....ADBDA', '.AAA......AAA.'];
+// Ceviz'in gece şapkası (sprite'ın 0–8. satırları): siper iki kulağın arasında alnına oturur, ucu kuyruğun ters yanına, sola sarkar
+const CEVIZ_CAP = [
+  '................................',
+  '.........AAAA...................',
+  '.......AAJKKJA..................',
+  '.....AANAKJKKJA.................',
+  '....ANNNAJKKJKKA................',
+  '....ANNOA.AKJKKJKA..............',
+  '.....AOA..AJKKJKKA..............',
+  '.........ANNNNNNNNA.............',
+  '..........ANNNNNNA..............',
+];
+const CEVIZ_CAP_C = { A: '#2A1E1A', N: '#FBF6EC', O: '#E3D9C6', J: '#B8C4EE', K: '#6F82C8' };  // Fıstık'ın pijama şapkasının renkleri
+// 'reach' pozu: sol omuzdan çıkıp dirsekten yukarı kalkan kol (6–17. satırlar); sahnede Ceviz aynalı durur, kol lambanın ipine uzanır
+const CEVIZ_REACH = ['.AAA', 'ADDDA', 'ADBDA', 'ADDDA', '.ADDA', '.ADDA', '.ADDA', '..ADDA', '..ADDDA', '...ADDDA', '....ADDDA', '.....AADD'];
+
+/** 'cevizcap': gece şapkalı Ceviz; patisiz pozların 'reach' (kol yukarıda) çeşidiyle */
 function deriveCevizCap() {
   if (SP['cevizcap|calm|null|mood']) return;
   const grid = (rs) => { const g = new Map(); rs.forEach(([x, y, w, h, f]) => { for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) g.set(`${x + i},${y + j}`, f); }); return g; };
-  const pj = grid(SP['fistik@pajama|calm|null|closed']), pl = grid(SP['fistik|calm|null|closed']);
-  const cap = [...pj].filter(([p, f]) => +p.split(',')[1] < 9 && pl.get(p) !== f);
-  Object.keys(SP).filter((k) => k.startsWith('ceviz|')).forEach((k) => {
-    const g = grid(SP[k]);
-    cap.forEach(([p, f]) => g.set(p, f));
+  const keys = Object.keys(SP).filter((k) => k.startsWith('ceviz|'));
+  [...keys, ...keys.filter((k) => k.split('|')[2] === 'null').map((k) => k.replace('|null|', '|reach|'))].forEach((k) => {
+    const reach = k.includes('|reach|'), g = grid(SP[k.replace('|reach|', '|null|')]);
+    CEVIZ_CAP.forEach((r, y) => [...r].forEach((c, x) => c !== '.' && g.set(`${x},${y}`, CEVIZ_CAP_C[c])));
+    if (reach) CEVIZ_REACH.forEach((r, j) => [...r].forEach((c, x) => c !== '.' && g.set(`${x},${6 + j}`, { A: '#2A1E1A', D: '#A8683A', B: '#7E4A26' }[c])));
     const rows = {};
     g.forEach((f, p) => { const [x, y] = p.split(',').map(Number); (rows[y] = rows[y] || []).push([x, f]); });
     const out = [];
@@ -3006,6 +3035,11 @@ function defineValue() {
     el('div', 'abs', room, { left: '40px', top: '960px', width: '580px', height: '560px', boxSizing: 'border-box', border: '10px solid #22160F', borderRadius: '40px 40px 0 0', background: 'linear-gradient(#4A3428, #31221A)' });
     el('div', 'abs', room, { left: '80px', top: '1004px', width: '500px', height: '12px', background: '#5C4335' });
     el('div', 'abs', room, { left: '100px', top: '1146px', width: '460px', height: '150px', boxSizing: 'border-box', border: '8px solid #24273F', borderRadius: '60px', background: 'linear-gradient(#7C82AA, #5E6488)' });
+    // Ceviz bu sahnede aynalı: kuyruğu solda, boş yanı lambaya bakar. Lambanın ipi yatağın yanına sarkar; boncuk, Ceviz oturup
+    // kolunu kaldırınca ('reach') patisinin ortasına gelir (Ceviz'in arkasında kalır, patisi kavrar)
+    const CC = 420 / 32, BX = 640, BY = 1450 - 46 - 21.5 * CC, CZX = BX - 210 + 2.5 * CC;  // Ceviz'in sprite hücresi; boncuğun ortası; ipi çekerken Ceviz'in yeri
+    const cord = el('div', 'abs', room, { left: px(BX - 2), top: '948px', width: '4px', height: px(BY - 948), background: '#C9B48A' });
+    const bead = el('div', 'abs', room, { left: px(BX - 9), top: px(BY - 9), width: '18px', height: '18px', borderRadius: '50%', background: '#E0C890', boxShadow: 'inset -3px -3px 0 #A8925E' });
     const cz = new Mascot(room, { who: 'cevizcap', w: 420 });
     const zz = [0, 1, 2].map((i) => { const e = el('div', 'abs it', room, { left: 0, top: 0, fontSize: px(64 - i * 12), color: '#DDE3FF', display: 'none' }); e.textContent = 'z'; return e; });
     el('div', 'abs', room, { left: '20px', top: '1290px', width: '620px', height: '440px', boxSizing: 'border-box', border: '8px solid #1A1530', borderRadius: '44px 44px 0 0', background: 'repeating-conic-gradient(#3E3469 0 25%, #483E7A 0 50%) 0 0 / 80px 80px' });
@@ -3022,14 +3056,11 @@ function defineValue() {
     el('div', 'abs', room, { left: '618px', top: '846px', width: '22px', height: '62px', borderRadius: '6px', background: '#2A2420' });
     el('div', 'abs', room, { left: '630px', top: '862px', width: '40px', height: '12px', background: '#2A2420' });
     const shade = el('div', 'abs', room, { left: '598px', top: '874px', width: '112px', height: '74px', clipPath: 'polygon(22% 0, 78% 0, 100% 100%, 0 100%)', background: '#6E604C' });
-    const cord = el('div', 'abs', room, { left: '674px', top: '948px', width: '4px', height: '120px', background: '#C9B48A' });
-    const bead = el('div', 'abs', room, { left: '667px', top: '1064px', width: '18px', height: '18px', borderRadius: '50%', background: '#E0C890', boxShadow: 'inset -3px -3px 0 #A8925E' });
-    // Ceviz'in kolu: ipi çeker
-    const arm = el('div', 'abs', room, { left: 0, top: 0, width: '50px', height: '10px', boxSizing: 'border-box', border: '6px solid #2A1E1A', borderRadius: '25px', background: '#A8683A', transformOrigin: '25px 25px', display: 'none' });
-    const paw = pixEl(room, PAWP, { o: '#2A1E1A', B: '#A8683A' }, 9, { left: 0, top: 0, display: 'none' });
-    // Ceviz'in elindeki telefon (soruda) ve iki parmak ucu
-    const held = el('div', 'abs', room, { left: '250px', top: '1236px', width: '86px', height: '132px', boxSizing: 'border-box', border: '6px solid #2A1E1A', borderRadius: '16px', background: 'linear-gradient(#2A2D3E, #1A1C28)', display: 'none', zIndex: 3 });
-    const fingers = [0, 1].map((i) => el('div', 'abs', room, { left: px(i ? 322 : 236), top: '1300px', width: '26px', height: '34px', boxSizing: 'border-box', border: '5px solid #2A1E1A', borderRadius: '10px', background: '#A8683A', display: 'none', zIndex: 4 }));
+    // soruda Ceviz oturur; telefonu cevizini tuttuğu yerde iki patisiyle tutar, arkası bize dönük (sprite koordinatlarıyla yerleşir)
+    const SIT = 94;  // oturunca ne kadar yükselir
+    const held = el('div', 'abs', room, { left: px(330 - 210), top: px(1450 - SIT - 30 * CC), display: 'none', zIndex: 3 });
+    pixEl(held, PHONE_BACK, PHONE_BACK_C, CC / 3, { left: px(15 * CC), top: px(17 * CC) });  // aynalı sprite'ta gövdenin ortası 18. sütun
+    pixEl(held, HOLD_PAWS, { A: '#2A1E1A', D: '#A8683A', B: '#7E4A26' }, CC, { left: px(11 * CC), top: px(20 * CC) });
     const bang = el('div', 'abs', room, { left: '440px', top: '930px', fontSize: '160px', fontWeight: 800, lineHeight: 1, color: '#FFE08A', textShadow: '6px 0 0 #2A1E1A, -6px 0 0 #2A1E1A, 0 6px 0 #2A1E1A, 0 -6px 0 #2A1E1A, 4px 4px 0 #2A1E1A, -4px 4px 0 #2A1E1A, 4px -4px 0 #2A1E1A, -4px -4px 0 #2A1E1A', display: 'none', transformOrigin: '50% 100%' });
     bang.textContent = '!';
     const lurk = [0, 1].map((i) => el('div', 'abs', room, { left: px(904 + i * 34), top: '1440px', width: '16px', height: '10px', borderRadius: '50%', background: '#FF3A4A', boxShadow: '0 0 14px 5px rgba(255,40,60,.6)', display: 'none' }));
@@ -3056,6 +3087,11 @@ function defineValue() {
     const pig = el('div', 'abs', camA, { left: px(PX), top: px(PY), width: px(30 * PC), height: px(20 * PC) });
     const inBody = (c) => c === 'g' || c === 'h';
     el('div', 'abs', pig, { left: 0, top: 0 }).innerHTML = pix(PIG.map((r) => [...r].map((c) => (inBody(c) ? 'g' : '.')).join('')), { g: 'rgba(242,184,200,.2)' }, PC);
+    // pipetlerin kumbaradaki kısmı: yarıktan paraların içine iner (yığının arkasında kalır, uç paraların içinde)
+    const STRAW = '<g><line stroke="#2A1E1A" stroke-width="13" stroke-linecap="round"/><line stroke="#F4F1EA" stroke-width="7" stroke-linecap="round"/><line stroke="#E8322A" stroke-width="7" stroke-dasharray="7 9"/></g>';
+    const inner = el('div', 'abs', pig, { left: 0, top: 0, width: px(30 * PC), height: px(20 * PC) });
+    inner.innerHTML = `<svg width="${30 * PC}" height="${20 * PC}" overflow="visible">${STRAW.repeat(5)}</svg>`;
+    const innerG = [...inner.querySelectorAll('g')];
     const coin = (x, y) => 'YYYYyyyddpb'[(x * 7 + y * 13 + ((x * y) % 5)) % 11];
     const fill = el('div', 'abs', pig, { left: 0, top: 0 });
     fill.innerHTML = pix(PIG.map((r, y) => [...r].map((c, x) => (inBody(c) ? coin(x, y) : '.')).join('')), { Y: '#F2B63C', y: '#FFE08A', d: '#D9961E', p: '#F4BCD8', b: '#B5D0EE' }, PC);
@@ -3068,8 +3104,9 @@ function defineValue() {
 
     // pipetler (her biri: beyaz gövde, kırmızı şerit) ve pipetten yukarı akan para kırıntıları
     const straws = el('div', 'abs', camA, { left: 0, top: 0, width: '1080px', height: '1920px', pointerEvents: 'none' });
-    straws.innerHTML = '<svg width="1080" height="1920" viewBox="0 0 1080 1920" overflow="visible">' + [0, 1, 2, 3, 4].map(() => '<g><line stroke="#2A1E1A" stroke-width="13" stroke-linecap="round"/><line stroke="#F4F1EA" stroke-width="7" stroke-linecap="round"/><line stroke="#E8322A" stroke-width="7" stroke-dasharray="7 9"/><rect width="9" height="9" fill="#FFE08A"/></g>').join('') + '</svg>';
+    straws.innerHTML = '<svg width="1080" height="1920" viewBox="0 0 1080 1920" overflow="visible">' + STRAW.replace('</g>', '<rect width="9" height="9" fill="#FFE08A"/></g>').repeat(5) + '</svg>';
     const strawG = [...straws.querySelectorAll('g')];
+    const setLine = (g, x1, y1, x2, y2) => g.querySelectorAll('line').forEach((l) => { l.setAttribute('x1', x1); l.setAttribute('y1', y1); l.setAttribute('x2', x2); l.setAttribute('y2', y2); });
 
     // vampirler: gövde, iki kanat, parlayan gözler, fiyat etiketi; ışıkta toza dönerler
     const VC = 4;
@@ -3179,14 +3216,16 @@ function defineValue() {
     el('div', 'abs', s.root, { left: 0, right: 0, top: 0, height: '260px', zIndex: 17, pointerEvents: 'none', background: 'linear-gradient(rgba(5,6,10,.5), rgba(5,6,10,0))' });
     el('div', 'abs', s.root, { left: 0, right: 0, bottom: 0, height: '300px', zIndex: 17, pointerEvents: 'none', background: 'linear-gradient(rgba(5,6,10,0), rgba(5,6,10,.45))' });
     const flash = el('div', 'abs', s.root, { inset: 0, zIndex: 21, opacity: 0, pointerEvents: 'none', background: '#FFFFFF' });
-    // takip kartı (sondaki ortak takip satırıyla): simge, cep_defteri, "Her hafta bir para tuzağı"; pençe "Takip et"e basar
-    const fcard = el('div', 'abs', s.root, { left: '80px', right: '80px', top: '300px', height: '236px', boxSizing: 'border-box', borderRadius: '44px', background: '#FFFFFF', boxShadow: '0 24px 60px rgba(0,0,0,.45)', display: 'none', zIndex: 26, transformOrigin: '50% 50%' });
-    const ficon = el('img', 'abs', fcard, { left: '34px', top: '38px', width: '160px', height: '160px', borderRadius: '40px' });
+    // takip kartı (sondaki ortak takip satırıyla), Instagram'ın önerilen hesap kartı gibi ortalı: yuvarlak simge, cep_defteri,
+    // "Her hafta bir para tuzağı" ve kart genişliğinde "Takip et"; pençe düğmeye basar
+    const FW = 620, FT = 300;
+    const fcard = el('div', 'abs', s.root, { left: px((1080 - FW) / 2), top: px(FT), width: px(FW), height: '410px', borderRadius: '44px', background: '#FFFFFF', boxShadow: '0 24px 60px rgba(0,0,0,.45)', display: 'none', zIndex: 26, transformOrigin: '50% 50%', textAlign: 'center' });
+    const ficon = el('img', 'abs', fcard, { left: px(FW / 2 - 68), top: '34px', width: '136px', height: '136px', borderRadius: '50%', boxShadow: '0 0 0 4px #FFFFFF, 0 0 0 8px #E9E2D8' });
     ficon.src = 'assets/icon.png';
-    el('div', 'abs', fcard, { left: '226px', top: '30px', fontSize: '50px', fontWeight: 800, color: '#141414', letterSpacing: '-.01em' }).textContent = 'cep_defteri';
-    el('div', 'abs', fcard, { left: '226px', top: '92px', fontSize: '32px', fontWeight: 600, color: '#5E5650' }).textContent = 'Her hafta bir para tuzağı';
-    const fbtn = el('div', 'abs', fcard, { left: '226px', top: '146px', width: '330px', height: '66px', borderRadius: '18px', background: '#0095F6', color: '#FFFFFF', fontSize: '36px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', transformOrigin: '50% 50%' });
-    const FBX = 80 + 226 + 165, FBY = 300 + 146 + 33;  // düğmenin ekrandaki ortası
+    el('div', 'abs', fcard, { left: 0, right: 0, top: '186px', fontSize: '50px', fontWeight: 800, color: '#141414', letterSpacing: '-.01em' }).textContent = 'cep_defteri';
+    el('div', 'abs', fcard, { left: 0, right: 0, top: '252px', fontSize: '32px', fontWeight: 600, color: '#5E5650' }).textContent = 'Her hafta bir para tuzağı';
+    const fbtn = el('div', 'abs', fcard, { left: '44px', right: '44px', top: '310px', height: '72px', borderRadius: '18px', background: '#0095F6', color: '#FFFFFF', fontSize: '38px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', transformOrigin: '50% 50%' });
+    const FBX = 740, FBY = FT + 310 + 36;  // pençenin bastığı yer: düğmenin sağ ucu (yazıyı kapatmasın)
     const fpaw = pixEl(s.root, PAWP, { o: '#2A1E1A', B: '#A8683A' }, 16, { left: 0, top: 0, display: 'none', zIndex: 27, transformOrigin: '50% 30%' });
     const fring = el('div', 'abs', s.root, { left: px(FBX - 60), top: px(FBY - 60), width: '120px', height: '120px', boxSizing: 'border-box', borderRadius: '50%', border: '8px solid rgba(0,149,246,.75)', display: 'none', zIndex: 27 });
     const on = (lt, t) => { const k = lt - t; return k < 0 ? 0 : k >= 0.4 ? 1 : [0.15, 0, 0.6, 0.1, 0.85, 0.4, 1, 1][Math.floor(k / 0.05)]; };
@@ -3218,7 +3257,8 @@ function defineValue() {
       // kumbara: seviye düşer (kancada %62)
       let lv = 0.62 - 0.07 * E.inOut(prog(lt, DRAIN, 0.45)) - 0.16 * prog(lt, SIP, TOTAL - SIP);
       lv -= 0.08 * prog(lt, TOTAL, SCI - TOTAL) + 0.03 * prog(lt, ROUSE, LIGHT - ROUSE);
-      fill.style.clipPath = `inset(${((3 + (1 - lv) * 14) * PC).toFixed(1)}px 0 0 0)`;
+      const coinTop = PY + (3 + (1 - lv) * 14) * PC;  // para yığınının yüzü
+      fill.style.clipPath = `inset(${(coinTop - PY).toFixed(1)}px 0 0 0)`;
       pig.style.filter = `brightness(${(0.82 + 0.18 * L).toFixed(3)})`;
       // kumbaranın etiketi: vampirlerin etiketlerinden sonra 550 TL; HIT'te 700 TL
       const tagOn = lt >= TAGS + 0.75 && lt < OFF;
@@ -3261,16 +3301,19 @@ function defineValue() {
           [v.body, v.wl, v.wr, v.sash].forEach((e) => e && (e.style.filter = fl));
           v.eyes.forEach((e) => (e.style.opacity = dim < 0.5 || lt < LIGHT ? 1 : 0));
         }
-        // pipet: ağızdan yarığa; içinde para kırıntısı yukarı akar
-        const g = strawG[i], ls = g.querySelectorAll('line'), r = g.querySelector('rect');
+        // pipet: ağızdan yarığa, yarıktan aşağı paraların içine (uç, seviye düştükçe iner); para kırıntısı yığından ağza akar
+        const g = strawG[i], gi = innerG[i], r = g.querySelector('rect');
         const sv = vis && a > 0.5 && lt < LIGHT + 0.15;
-        g.style.display = sv ? 'inline' : 'none';
+        g.style.display = gi.style.display = sv ? 'inline' : 'none';
         if (sv) {
           const mx = x + shiver, my = y + bob + 24, sx2 = SLOT[0] + (i - 2) * 6, sy2 = SLOT[1] + 6;
-          ls.forEach((l) => { l.setAttribute('x1', mx); l.setAttribute('y1', my); l.setAttribute('x2', sx2); l.setAttribute('y2', sy2); });
-          const q = ((lt * 1.6 + i * 0.27) % 1);
-          r.setAttribute('x', lerp(sx2, mx, q) - 4.5); r.setAttribute('y', lerp(sy2, my, q) - 4.5);
-          g.style.filter = `brightness(${dim < 0.5 ? 0.3 : 1})`;
+          const tx = SLOT[0] + (i - 2) * 16, ty = coinTop + 18;
+          setLine(g, mx, my, sx2, sy2);
+          setLine(gi, sx2 - PX, sy2 - PY - 6, tx - PX, ty - PY);
+          const q = ((lt * 1.6 + i * 0.27) % 1), sx3 = lerp(sx2, tx, (coinTop - sy2) / (ty - sy2));  // sx3: pipetin yığına girdiği yer
+          const [kx, ky] = q < 0.35 ? [lerp(sx3, sx2, q / 0.35), lerp(coinTop, sy2, q / 0.35)] : [lerp(sx2, mx, (q - 0.35) / 0.65), lerp(sy2, my, (q - 0.35) / 0.65)];
+          r.setAttribute('x', kx - 4.5); r.setAttribute('y', ky - 4.5);
+          g.style.filter = gi.style.filter = `brightness(${dim < 0.5 ? 0.3 : 1})`;
         }
         // fiyat etiketleri: dört vampir kumbaraya yerleşince; deneme üyeliği geldiğinde onda
         const ta = i < 4 ? TAGS + 0.05 + i * 0.15 : TOTAL + 0.2;
@@ -3281,42 +3324,36 @@ function defineValue() {
         v.dust.update(lt);
       });
 
-      // Ceviz: uyur (gece şapkası, z'ler), ROUSE'da uyanır, ipi çekip lambayı yakar; soruda oturur, telefonuna bakar
+      // Ceviz: uyur (gece şapkası, z'ler), ROUSE'da uyanır; PULL'da ipe sıçrar, kolunu kaldırıp patisiyle boncuğu kavrar,
+      // LIGHT'ta aşağı çekip lambayı yakar; soruda oturur, telefonuna bakar
       const awake = lt >= ROUSE && lt < OFF;
       const sitting = lt >= CTA && lt < OFF;
+      const grab = lt >= PULL + 0.22 && lt < LIGHT + 0.45;
       let c = ['calm', null, 'closed'];
       if (awake) c = ['calm', null, 'wide'];
-      if (lt >= LIGHT + 0.3) c = ['happy', null, 'mood'];
+      if (grab) c = ['calm', 'reach', 'wide'];
+      if (lt >= LIGHT + 0.3) c = ['happy', grab ? 'reach' : null, 'mood'];
       if (sitting) c = ['happy', null, blink(lt, 0.3)];
       cz.set(...c);
+      const pullDy = lt >= LIGHT - 0.05 && lt < LIGHT + 0.3 ? 24 * Math.sin(Math.PI * prog(lt, LIGHT - 0.05, 0.35)) : 0;
+      cord.style.height = px(BY - 948 + pullDy);
+      bead.style.top = px(BY - 9 + pullDy);
       const breathe = awake ? 0 : 0.015 * Math.sin(lt * 2.2);
-      const rise = awake ? 46 * E.out(prog(lt, ROUSE, 0.3)) + (sitting ? 30 : 0) : 0;
+      const rise = sitting ? SIT : awake ? 46 * E.out(prog(lt, ROUSE, 0.3)) : 0;
       const jump = lt >= ROUSE && lt < ROUSE + 0.5 ? 26 * Math.exp(-(lt - ROUSE) * 6) * Math.abs(Math.sin((lt - ROUSE) * 14)) : 0;
-      cz.put(330, 1450 - rise - jump, { sy: 1 + breathe, sx: 1 - breathe * 0.5 });
+      const hq = prog(lt, PULL, 0.22), czx = lt < CTA ? lerp(330, CZX, E.inOut(hq)) : 330;  // ipe sıçrayış
+      cz.put(czx, 1450 - rise - jump - 44 * Math.sin(Math.PI * hq) + (grab ? pullDy : 0), { sy: 1 + breathe, sx: 1 - breathe * 0.5, flip: true });
       zz.forEach((e, i) => {
         const a2 = i * 0.45, k = ((((lt - a2) % 1.4) + 1.4) % 1.4) / 1.4;
         e.style.display = !awake && lt < OFF ? 'block' : 'none';
-        e.style.transform = `translate(${440 + i * 30 + Math.sin(k * 6) * 12}px,${1100 - k * 150}px)`;
+        e.style.transform = `translate(${500 + i * 30 + Math.sin(k * 6) * 12}px,${1100 - k * 150}px)`;
         e.style.opacity = Math.sin(Math.PI * k) * 0.9;
       });
-      bang.style.display = lt >= ROUSE && lt < ROUSE + 0.6 ? 'block' : 'none';
+      bang.style.display = lt >= ROUSE && lt < Math.min(ROUSE + 0.6, PULL + 0.12) ? 'block' : 'none';
+      bang.style.left = px(czx + 150);
       bang.style.transform = `scale(${E.back(prog(lt, ROUSE, 0.2))}) rotate(${Math.sin(lt * 30) * 4}deg)`;
-      // kol: omuzdan ipin boncuğuna uzanır, LIGHT'ta aşağı çeker
-      const reach = lt >= PULL && lt < LIGHT + 0.45;
-      arm.style.display = paw.style.display = reach ? 'block' : 'none';
-      const pullDy = lt >= LIGHT - 0.05 && lt < LIGHT + 0.3 ? 24 * Math.sin(Math.PI * prog(lt, LIGHT - 0.05, 0.35)) : 0;
-      cord.style.height = px(120 + pullDy);
-      bead.style.top = px(1064 + pullDy);
-      if (reach) {
-        const kk = E.out(prog(lt, PULL, 0.25)) * (1 - E.inOut(prog(lt, LIGHT + 0.2, 0.25)));
-        const sx0 = 430, sy0 = 1300, tx = lerp(sx0 + 20, 676, kk), ty = lerp(sy0 - 40, 1086 + pullDy, kk);
-        const len = Math.hypot(tx - sx0, ty - sy0), ang = Math.atan2(ty - sy0, tx - sx0);
-        Object.assign(arm.style, { left: px(sx0 - 25), top: px(sy0 - 25), width: px(len + 50), height: '50px', transform: `rotate(${ang}rad)` });
-        paw.style.transform = `translate(${tx - 31}px,${ty - 31}px) rotate(${ang + Math.PI / 2}rad)`;
-      }
       held.style.display = sitting ? 'block' : 'none';
-      fingers.forEach((f) => (f.style.display = sitting ? 'block' : 'none'));
-      held.style.transform = `translateY(${Math.sin(lt * 1.6) * 3}px)`;
+      held.style.transform = `translateY(${Math.sin(lt * 1.6) * 2}px)`;
       lurk.forEach((e, i) => (e.style.display = lt >= LURK && lt < OFF && (lt * 1000) % 1700 > 150 ? 'block' : 'none'));
 
       // B · ana ekran: simgeler WAKE'te uyanır (göz, diş); adları söylenince kameraya doğru uçar
