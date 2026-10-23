@@ -467,13 +467,13 @@ Harçlığın ayın 18'inde bitiyorsa katil büyük ihtimalle bu 🕵️
 Senin bu ayki "bu seferlik"in neydi? Ne olduğunu ve kaç TL tuttuğunu yoruma yaz 👇
 📌 Kaydet; Cep Defteri'nde "bu seferlikler" için her ay küçük bir plan aç. Android erken erişim yakında.
 
-Ayın 18'i. Ceviz'in harçlığı ölü bulundu. Şüpheliler sırada: kahve, yemek siparişi, taksi, abonelik. Hepsi aynı şeyi söylüyor: "Ben sadece 90 TL'yim!"
+Ayın 18'i. Ceviz'in harçlığı ölü bulundu. Şüpheliler sırada: kahve, yemek siparişi, taksi, abonelik. Hepsi aynı şeyi söylüyor: "Ben sadece 90 liraydım!"
 Sence katil kaç numara? Hiçbiri. Katil sıranın sonunda saklanıyordu: "Bu seferlik." Doğum günü, konser, bayram, "indirim vardı"…
 Araştırma: 7 çalışmada insanlar sıradan harcamalarını epey doğru tahmin etti ama istisnai harcamalarını toplamda eksik tahmin edip her birinde fazla harcadı; çünkü her biri tek seferlik sanılıyor (Sussman ve Alter, 2012).
 Her ay bir istisna varsa, istisna değildir. Tutarlar örnek.
 
 Harçlığı hep ayın ortasında biten arkadaşına gönder.
-Cep Defteri'nde Planlar → Plan ekle → Ödeme, Her ay: "Bu seferlikler" adıyla küçük bir tutar ayır.
+Cep Defteri'nde Bütçe → + Plan → Ödeme, Her ay: "Bu seferlikler" adıyla küçük bir tutar ayır.
 
 #harçlık #bütçe #öğrencibütçesi #paraipuçları #tasarruf #birikim #cepdefteri
 ```
