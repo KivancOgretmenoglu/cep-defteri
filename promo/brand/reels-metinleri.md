@@ -458,3 +458,24 @@ Cep Defteri'nde "Birikim hedefleri"nden bir hedef aç; her ay biraz ayır, çubu
 ```
 
 **Yayın notu:** Kapak karesi olarak 0,2 sn'yi seç (karanlık banyo, aynada yaşlı Ceviz + "60 yaşındaki sen konuşuyor"). İlk yorumu sabitle: "Ceviz 1.000 TL'nin 200'ünü SONRA'ya koydu. Sen kaç? (Tutarlar örnek.)" Videonun çağrısı soru: sayımda "Kaçını ayırırsın? Yoruma yaz", sonda seslendirmeyle aynı cümle "1.000 TL'nin kaçını gelecekteki sana ayırırsın?" + "Yoruma yaz: kaç TL?"; son 1,5 sn'de "Cep Defteri'nde ona hedef aç · @cep_defteri"; "arkadaşına gönder" açıklamada. Videoda "2 kat" denmiyor: 172 $ / 80 $ farkı ilk deneyden ve DOL CLEAR incelemesine göre anlamlı değil; anlamlı fark 18–35 yaş arası yetişkinlerle yapılan deneyde, o yüzden yalnız "daha çok". Panodaki kavanoz seviyeleri temsilî. Yorumlara gelen rakamlara "neden o kadar?" diye yanıt ver; en çok verilen cevabı bir sonraki sahne reelsinin açılışında kullan. Sepet bombasıyla arasında en az 5–7 gün bırak.
+
+## 22 · ayin-katili (kavram: istisnai harcamalar / "bu seferlik", seslendirme: Buğra, döngülü, ~27 sn; seslendirme gelince süre güncellenecek)
+
+**Açıklama:**
+```
+Harçlığın ayın 18'inde bitiyorsa katil büyük ihtimalle bu 🕵️
+Senin bu ayki "bu seferlik"in neydi? Ne olduğunu ve kaç TL tuttuğunu yoruma yaz 👇
+📌 Kaydet; Cep Defteri'nde "bu seferlikler" için her ay küçük bir plan aç. Android erken erişim yakında.
+
+Ayın 18'i. Ceviz'in harçlığı ölü bulundu. Şüpheliler sırada: kahve, yemek siparişi, taksi, abonelik. Hepsi aynı şeyi söylüyor: "Ben sadece 90 TL'yim!"
+Sence katil kaç numara? Hiçbiri. Katil sıranın sonunda saklanıyordu: "Bu seferlik." Doğum günü, konser, bayram, "indirim vardı"…
+Araştırma: 7 çalışmada insanlar sıradan harcamalarını epey doğru tahmin etti ama istisnai harcamalarını toplamda eksik tahmin edip her birinde fazla harcadı; çünkü her biri tek seferlik sanılıyor (Sussman ve Alter, 2012).
+Her ay bir istisna varsa, istisna değildir. Tutarlar örnek.
+
+Harçlığı hep ayın ortasında biten arkadaşına gönder.
+Cep Defteri'nde Planlar → Plan ekle → Ödeme, Her ay: "Bu seferlikler" adıyla küçük bir tutar ayır.
+
+#harçlık #bütçe #öğrencibütçesi #paraipuçları #tasarruf #birikim #cepdefteri
+```
+
+**Yayın notu:** Kapak karesi olarak 0,2 sn'yi seç (yağmurlu sokak, tebeşirle çizilmiş cüzdan, "18" takvim yaprağı + "Harçlığını kim öldürdü?"). İlk yorumu sabitle: "Dedektif notu: bu ayki bu seferliklerini topla, sonuca şaşıracaksın. (Tutarlar örnek.)" Videonun çağrısı soru: sayımda "Katil kaç numara? Yoruma yaz", sonda seslendirmeyle aynı cümle "Senin bu ayki 'bu seferlik'in neydi?" + "Yoruma yaz: ne, kaç TL?"; son 1,5 sn'de "Bu seferlikleri Cep Defteri'ne önceden yaz · @cep_defteri"; "arkadaşına gönder" açıklamada. Panodaki çubuklar temsilî: araştırmanın bulgusu yalnız yön olarak gösteriliyor (sıradanlarda tahmin ≈ gerçek, istisnalarda gerçek > tahmin); ikincil bir özetteki "neredeyse 2 kat" ifadesi makalede doğrulanamadığı için kullanılmadı. Makalenin önerdiği çözüm de videodaki ders: istisnaları tek tek değil, bir küme olarak görmek. Yorumlara gelen "bu seferlik"lere "bu ay toplam kaç TL tuttu?" diye yanıt ver; en çok gelenleri Para Mahkemesi ya da bir sonraki dava için not al. Aynadaki sen ile arasında en az 5–7 gün bırak.
