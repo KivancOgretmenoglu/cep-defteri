@@ -459,7 +459,7 @@ Cep Defteri'nde "Birikim hedefleri"nden bir hedef aç; her ay biraz ayır, çubu
 
 **Yayın notu:** Kapak karesi olarak 0,2 sn'yi seç (karanlık banyo, aynada yaşlı Ceviz + "60 yaşındaki sen konuşuyor"). İlk yorumu sabitle: "Ceviz 1.000 TL'nin 200'ünü SONRA'ya koydu. Sen kaç? (Tutarlar örnek.)" Videonun çağrısı soru: sayımda "Kaçını ayırırsın? Yoruma yaz", sonda seslendirmeyle aynı cümle "1.000 TL'nin kaçını gelecekteki sana ayırırsın?" + "Yoruma yaz: kaç TL?"; son 1,5 sn'de "Cep Defteri'nde ona hedef aç · @cep_defteri"; "arkadaşına gönder" açıklamada. Videoda "2 kat" denmiyor: 172 $ / 80 $ farkı ilk deneyden ve DOL CLEAR incelemesine göre anlamlı değil; anlamlı fark 18–35 yaş arası yetişkinlerle yapılan deneyde, o yüzden yalnız "daha çok". Panodaki kavanoz seviyeleri temsilî. Yorumlara gelen rakamlara "neden o kadar?" diye yanıt ver; en çok verilen cevabı bir sonraki sahne reelsinin açılışında kullan. Sepet bombasıyla arasında en az 5–7 gün bırak.
 
-## 22 · ayin-katili (kavram: istisnai harcamalar / "bu seferlik", seslendirme: Buğra, döngülü, ~27 sn; seslendirme gelince süre güncellenecek)
+## 22 · ayin-katili (kavram: istisnai harcamalar / "bu seferlik", seslendirme: Buğra, döngülü, 29 sn)
 
 **Açıklama:**
 ```

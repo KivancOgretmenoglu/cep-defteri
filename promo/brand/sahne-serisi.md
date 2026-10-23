@@ -5,7 +5,7 @@ Kalıp: gerçek hayattan bir para ikilemi, bir film türünün sahnesinde anlat�
 ## Hepsinde ortak
 - Ses: marka sesi tarifi (Buğra, `eleven_v4` + satır başında ton etiketi, satır başına tek üretim, `voice_check.py`). reels.json'da `"voiceTempo": 1.2`, `"voiceFilter": "brand"`.
 - Kanca en fazla 5 kelime ve 0. karede hazır. Kart başına en fazla 12 kelime.
-- Yazılar üst %14'e ve alt %20'ye girmez.
+- Yazılar üst %14'e ve alt %20'ye girmez. Görüntü ise tüm kareyi doldurur: siyah sinema bandı yok; gök, duvar ve zemin bu bantların altında da sürer, karakterler büyük çekilir (Ayın katili'nden itibaren).
 - Karar anı gerçekten 3 saniye: müzik ve altyazı susar, kalp atışı ve bip sesleri duyulur. Kutu: "… mı, … mı? Yoruma yaz".
 - Videodaki tek çağrı kapanış sorusu (Ültimatom'daki gibi). "Arkadaşına gönder" ve "Kaydet" açıklamada.
 - Son kare ilk kareye bağlanır (döngü).
@@ -49,34 +49,37 @@ Kalıp: gerçek hayattan bir para ikilemi, bir film türünün sahnesinde anlat�
 ---
 
 ## 2. Ayın katili
-**Durum:** üretimde: sahne ve ses efektleri hazır (`SCENES.katil`, reels.json `ayin-katili`), seslendirme bekleniyor (ElevenLabs bağlantısı) · **Tür:** kara film / polisiye · **Süre:** ~27 sn · **Oyuncular:** Dedektif Bilge (fötr şapka, CEP DEFTERİ defteri), şüpheliler, Ceviz
+**Durum:** üretildi (`out/ayin-katili.mp4`, 29,05 sn) · **Tür:** kara film / polisiye · **Oyuncular:** Dedektif Bilge (fötr şapka, CEP DEFTERİ defteri), şüpheliler (kahve, yemek siparişi, taksi, abonelik), kapüşonlu "BU SEFERLİK", Ceviz
 
-**Üretilecek seslendirme (marka sesi; bu metinle):** 1 `[dramatic]` Ayın on sekizi. Ceviz'in harçlığı ölü bulundu. · 2 `[curious]` Şüpheliler: kahve, yemek siparişi, taksi ve abonelik. · 3 `[energetic]` Hepsi aynı şeyi söylüyor: "Ben sadece doksan liraydım!" · 4 `[curious]` Sence katil kim? · 5 `[dramatic]` Hiçbiri. Katil: "Bu seferlik." · 6 `[excited]` Bir araştırmaya göre sıradan harcamayı doğru tahmin ediyoruz, istisnaları eksik. · 7 `[dramatic]` Her ay bir istisna varsa, istisna değildir. · 8 `[playful]` Senin bu ayki bu seferliğin neydi? Yoruma yaz! (Ses gelince reels.json'daki olay zamanları ve kutular satır sürelerine göre oturtulur.)
+**Kanca (0. kare):** Yağmur, sokak lambası, yerde tebeşirle çizilmiş cüzdan silueti, duvarda "18" takvim yaprağı, "OLAY YERİ" şeridinin arkasında ağlayan Ceviz. Kutu: **"Harçlığını kim öldürdü?"**
 
-**Kanca (0. kare):** Yağmur, sokak lambası, yerde tebeşirle çizilmiş cüzdan silueti. Kutu: **"Harçlığını kim öldürdü?"**
+**Akış (videodaki zamanlar)**
+- 0–3,2 sn: Olay yeri. Şimşek "Ayın 18'i"de (0,42) ve "ölü"de (2,4); 1,2'de Dedektif Bilge gelir, büyüteçle bakar.
+- 3,2–7,4 sn: Sıra odası, boy çizgili duvar. Kamera sırayı yakından tarar; her şüpheli adı söylenirken girer: 1 Kahve (4,1), 2 Yemek siparişi (4,74), 3 Taksi (5,82), 4 Abonelik (6,56).
+- 7,4–10,7 sn: Geniş plan; "Ben sadece 90 liraydım" denince dördünün de baloncuğu çıkar: "Sadece 90 TL!" (8,65).
+- 10,7–12,2 sn: Bilge kameraya döner: "Sence katil kim?"; kalp atışı başlar.
+- 12,2–15,2 sn: Karar anı (gerçek 3 sn): müzik ve altyazı susar, spot sırayla dört şüpheliyi gezer, bip ve kalp atışı. Çağrı: "Katil kaç numara? Yoruma yaz".
+- 15,3 sn: Işıklar söner: "Hiçbiri."
+- 16,8–18,05 sn: Şimşek "Bu seferlik"te; sıranın sonunda kırmızı spotta kapüşonlu **BU SEFERLİK**, kartları: doğum günü, konser, bayram, "indirim vardı".
+- 18,05–22,35 sn: Dedektifin panosu: polaroit, kartlar, "Tahmin mi, gerçek mi?" grafiği. "Sıradan harcamayı"da tahmin = gerçek (✓), "istisnaları"nda gerçek tahminin üstüne çıkar, "eksik"te **EKSİK!** damgası. Kaynak: Sussman ve Alter 2012.
+- 22,35–25,5 sn: Cep Defteri, Planlar: pençe "istisna değildir"de "+ Plan ekle"ye basar, liste uzar: "Bu seferlikler · Ödeme · Her ay · 500 TL".
+- 25,5–28,55 sn: Kapanış sorusu; sokakta dedektif defterine yazar, 26,75'te karanlık kapı aralığında gözler belirir.
+- 28,55–29,05 sn: Yeniden olay yeri ve kanca kutusu (döngü: ilk kareyle aynı).
 
-**Akış**
-- 0–3 sn: Şimşek. Sarı şerit: "OLAY YERİ". Duvardaki takvim yaprağı: 18.
-- 3–8 sn: Şüpheli sırası, boy çizgili duvar, numaralı tabelalar: 1 Kahve, 2 Yemek siparişi, 3 Taksi, 4 Abonelik. Her biri tabelasını kaldırır: "Ben sadece 90 TL'yim!"
-- 8–11 sn: Karar anı, 3 sn sayım. Kutu: "Katil kaç numara? Yoruma yaz".
-- 11–14 sn: Işıklar söner, sıranın sonunda beşinci bir gölge belirir: kapüşonlu **BU SEFERLİK**. Elinde kartlar: doğum günü, konser, bayram, "indirim vardı".
-- 14–19 sn: Dedektifin panosu. Kutu: "Sıradan harcamayı doğru tahmin ediyoruz, istisnaları eksik" + "Kaynak: Sussman ve Alter 2012".
-- 19–22 sn: Ders: "Her ay bir istisna varsa, istisna değildir." Cep Defteri raporu olay yeri incelemesi gibi açılır; bu seferlikler alt alta.
-- 22–26 sn: Kapanış sorusu.
-- 26–27 sn: Yeniden şimşek, tebeşir silueti (döngü).
-
-**Seslendirme**
-1. `[dramatic]` Ayın 18'i. Ceviz'in harçlığı ölü bulundu.
+**Seslendirme (videodaki hali; altı satır ilk denemede marka sesine uydu, 3,0–4,8 dB)**
+1. `[dramatic]` Ayın on sekizi. Ceviz'in harçlığı ölü bulundu.
 2. `[curious]` Şüpheliler: kahve, yemek siparişi, taksi ve abonelik.
-3. `[energetic]` Hepsi aynı şeyi söylüyor: "Ben sadece 90 liraydım!"
-4. `[curious]` Sence katil kim?
-5. `[dramatic]` Hiçbiri. Katil: "Bu seferlik."
-6. `[excited]` Araştırmalara göre sıradan harcamalarımızı epey doğru tahmin ediyoruz. Ama "istisna" dediklerimizi hep eksik hesaplıyoruz.
-7. `[dramatic]` Çünkü her ay bir istisna var.
-8. `[playful]` Senin bu ayki "bu seferlik"in neydi? Yoruma yaz.
+3. `[energetic]` Hepsi aynı şeyi söylüyor: "Ben sadece doksan liraydım!"
+4. Sence... katil kim? (iki v4 denemesi uymadı, 5,97 ve 6,67 dB; tarif gereği etiketsiz `eleven_multilingual_v2`, 5,44 dB)
+5. Hiçbiri! Katil... "Bu seferlik." (iki v4 denemesi uymadı, 7,25 ve 7,43 dB; etiketsiz `eleven_multilingual_v2`, 5,14 dB)
+6. `[excited]` Bir araştırmaya göre sıradan harcamayı doğru tahmin ediyoruz, istisnaları eksik.
+7. `[dramatic]` Her ay bir istisna varsa, istisna değildir.
+8. `[playful]` Senin bu ayki bu seferliğin neydi? Yoruma yaz!
 
-**Kapanış kutusu:** "Bu ayki 'bu seferlik'in neydi?" · alt satır: "Bu seferlikleri Cep Defteri'ne önceden yaz"
-**Uygulamayla bağı:** Raporlar ekranı; bu seferlikler önceden planlı kalem olarak yazılır. Makalenin önerdiği çözüm de bu: istisnaları tek tek değil, bir küme olarak görmek.
+Kelime zamanları ElevenLabs Scribe ile ölçüldü (`assets/voice/katil/words.json`, döküm metinle birebir aynı çıktı); olaylar ve altyazılar bu zamanlara oturur.
+
+**Kapanış kutusu:** "Senin bu ayki 'bu seferlik'in neydi?" (seslendirmeyle aynı) · çip: "Yoruma yaz: ne, kaç TL?" · son 1,5 sn: "Bu seferlikleri Cep Defteri'ne önceden yaz · @cep_defteri"
+**Uygulamayla bağı:** Planlar ekranı; bu seferlikler her ay için önceden planlı kalem olarak yazılır. Makalenin önerdiği çözüm de bu: istisnaları tek tek değil, bir küme olarak görmek.
 **Açıklamanın ilk satırı:** Harçlığın ayın 18'inde bitiyorsa katil büyük ihtimalle bu 🕵️
 **Yayından önce doğrula:** Makaledeki "istisnai harcama" tanımı ve 7 çalışmanın özeti. Kaynak: Sussman ve Alter (2012), *Journal of Consumer Research*.
 
