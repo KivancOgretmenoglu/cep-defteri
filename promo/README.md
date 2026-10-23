@@ -119,6 +119,9 @@ promo/make.sh sepet-3-hesap            # ses karışımı + video: konuşurken m
 - Aynı metin + ses + model bir kez üretilir (`out/voice-cache`); yeniden çalıştırmak kredi harcamaz.
 - **Marka sesi:** tarif `brand/marka-sesi.md` dosyasında. Yeni reelslerde `"voiceTempo": 1.2` ve `"voiceFilter": "brand"` kullan; `voice.py` marka EQ'sunu uygular.
 - Yeni satırları `python3 promo/voice_check.py assets/voice/<reels>/*.mp3` ile ölç: ses rengi önceki reelslere ≤ 5,5 dB uzaksa UYGUN.
+- Altyazı kelime zamanları: `voice.py place` hece sayısından tahmin eder (0,4 sn'ye kadar şaşabilir). Satırların klasöründe
+  `words.json` varsa (`{"k1.mp3": [kelime başlangıçları, ham mp3 saniyesi], ...}`, ör. ElevenLabs Scribe dökümünden) ölçülmüş
+  zamanlar kullanılır; kelime sayısı altyazı metniyle tutmazsa tahmine döner. Örnek: `assets/voice/katil/words.json`.
 - Sayıları yazıyla yaz ("iki bin dört yüz lira"): okunuşu daha güvenilir olur.
 - Yapay ses kullanıyorsan Instagram'da "Yapay zekâ bilgisi" etiketini aç. Ücretsiz planın sesi ticari kullanıma uygun değildir; yayın için ücretli plan gerekir.
 - Bu hat API'ye karşı henüz denenmedi (anahtar ve ağ izni olmadan); karışım ve altyazı tarafı sahte ses dosyasıyla sınandı.

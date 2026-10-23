@@ -220,13 +220,16 @@ def syllables(w):
     return max(1, len(re.findall(r'[aeıioöuüAEIİOÖUÜ]', w)))
 
 
-def estimate_caps(text, a, b, y, mx=4):
-    """Satırın konuşma aralığına kelimeleri hece sayısına göre yayar; ≤4 kelimelik öbekler."""
+def estimate_caps(text, a, b, y, mx=4, measured=None):
+    """Satırın konuşma aralığına kelimeleri hece sayısına göre yayar; ≤4 kelimelik öbekler.
+    measured: ölçülmüş kelime başlangıçları (video saniyesi) varsa tahmin yerine onlar kullanılır."""
     words = text.split()
     syl = [syllables(w) + (0.6 if re.search(r'[.,:?!]$', w) else 0) for w in words]
     tot, acc, times = sum(syl), 0, []
     for s_ in syl:
         times.append(round(a + (b - a) * acc / tot, 2)); acc += s_
+    if measured:
+        times = measured
     out, cur = [], []
     for k, w in enumerate(words):
         nxt = words[k + 1] if k + 1 < len(words) else ''
@@ -247,6 +250,14 @@ def estimate_caps(text, a, b, y, mx=4):
         end = times[g[-1] + 1] if g[-1] + 1 < len(times) else b
         caps.append([round(times[g[0]] - 0.03, 2), round(end + 0.3, 2), ' '.join(words[k] for k in g), y, [times[k] for k in g]])
     return caps
+
+
+def measured_words(f, n):
+    """Satırın klasöründeki words.json: {"<mp3 adı>": [kelime başlangıçları, ham mp3 saniyesi]} (ör. ElevenLabs Scribe dökümü).
+    Kelime sayısı altyazı metniyle tutmazsa kullanılmaz."""
+    p = os.path.join(os.path.dirname(f), 'words.json')
+    w = json.load(open(p, encoding='utf-8')).get(os.path.basename(f)) if os.path.exists(p) else None
+    return w if w and len(w) == n else None
 
 
 LINE_LUFS = -20.5  # her satır bu yüksekliğe çekilir: ham ElevenLabs satırları 8 LU'ya kadar farklı çıkabiliyor
@@ -274,7 +285,7 @@ def cmd_place(name):
         af = [voice_filter(r)] if voice_filter(r) else []  # ses rengini diğer reelslere eşitleyen EQ
         if tp != 1: af.append(f'atempo={tp}')
         cmd = ['ffmpeg', '-v', 'error', '-i', os.path.join(HERE, f)] + (['-af', ','.join(af)] if af else []) + ['-f', 'f32le', '-ac', '1', '-ar', str(SR), '-']
-        x, _ = trim(np.frombuffer(subprocess.run(cmd, capture_output=True).stdout, dtype=np.float32))
+        x, lead = trim(np.frombuffer(subprocess.run(cmd, capture_output=True).stdout, dtype=np.float32))
         L = lufs(x)
         # satırlar arası yükseklik eşitlemesi; çok kısa satırda ebur128 −70 döner, o zaman dokunma
         g = 0.0 if L is None or L <= -69 else float(np.clip(r.get('voiceLufs', LINE_LUFS) - L, -12, 12))
@@ -282,8 +293,10 @@ def cmd_place(name):
         i = int(t0 * SR)
         track[i : i + len(x)] += x[: max(0, n - i)]
         print(f'{t0:6.2f}–{t0 + len(x) / SR:5.2f} sn  {f}  ({g:+.1f} dB)')
-        if len(item) > 2 and item[2]:  # metin varsa hece ağırlıklı kelime zamanlı altyazı
-            caps += estimate_caps(item[2], t0, t0 + len(x) / SR, r.get('captionY', 1330), r.get('captionMaxWords', 4))
+        if len(item) > 2 and item[2]:  # metin varsa kelime zamanlı altyazı: ölçülmüş zamanlar (words.json) ya da hece ağırlıklı tahmin
+            wt = measured_words(os.path.join(HERE, f), len(item[2].split()))
+            real = [round(t0 + w / tp - lead, 2) for w in wt] if wt else None
+            caps += estimate_caps(item[2], t0, t0 + len(x) / SR, r.get('captionY', 1330), r.get('captionMaxWords', 4), real)
     if caps and r.get('captionUntil'):  # CTA kutusu gelmeden altyazı biter
         cu = r['captionUntil']
         caps = [c for c in caps if c[0] < cu - 0.2]

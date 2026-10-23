@@ -4648,7 +4648,7 @@
     ]
   },
   "ayin-katili": {
-    "end": 26.9,
+    "end": 29.05,
     "loop": true,
     "handheld": true,
     "musicGain": 0.45,
@@ -4657,47 +4657,47 @@
     "musicPlan": [
       [
         0,
-        16.0,
+        18.05,
         "horror",
         {
-          "beatsEnd": 9.95
+          "beatsEnd": 10.7
         }
       ],
       [
-        16.0,
-        23.75,
+        18.05,
+        25.5,
         "lofi"
       ],
       [
-        23.75,
-        26.4,
+        25.5,
+        28.55,
         "pop",
         {
           "bpm": 108
         }
       ],
       [
-        26.4,
-        26.9,
+        28.55,
+        29.05,
         "horror"
       ]
     ],
     "music": {
       "gaps": [
         [
-          10.9,
-          13.9
+          12.2,
+          15.2
         ]
       ]
     },
     "captionPixel": true,
     "captionY": 604,
     "captionMaxWords": 3,
-    "captionUntil": 23.75,
+    "captionUntil": 25.5,
     "captionCut": [
       [
-        10.9,
-        13.9
+        12.2,
+        15.2
       ]
     ],
     "scenes": [
@@ -4709,32 +4709,34 @@
           "lineup": 3.2,
           "in": [
             4.1,
-            4.65,
-            5.4,
-            5.9
+            4.74,
+            5.82,
+            6.56
           ],
-          "bubble": 8.2,
-          "ask": 9.95,
-          "count": 10.9,
-          "zero": 13.9,
-          "dark": 14.0,
-          "reveal": 15.0,
-          "cards": 15.45,
-          "sci": 16.0,
-          "normal": 17.1,
-          "exc": 19.5,
-          "app": 21.15,
-          "cta": 23.75,
-          "lurk": 25.0,
+          "wide": 7.4,
+          "bubble": 8.65,
+          "ask": 10.7,
+          "count": 12.2,
+          "zero": 15.2,
+          "dark": 15.3,
+          "reveal": 16.8,
+          "cards": 17.15,
+          "sci": 18.05,
+          "normal": 19.2,
+          "exc": 20.6,
+          "app": 22.35,
+          "tap": 24.25,
+          "cta": 25.5,
+          "lurk": 26.75,
           "bolts": [
-            0.3,
+            0.42,
             2.4
           ]
         }
       ],
       [
         "katil",
-        26.4,
+        28.55,
         {
           "wdur": 0.2
         }
@@ -4755,7 +4757,7 @@
       ],
       [
         3.2,
-        6.75,
+        7.35,
         "Dört şüpheli,<br><b>tek kurban</b>",
         300,
         {
@@ -4765,8 +4767,8 @@
         }
       ],
       [
-        6.85,
-        9.85,
+        7.4,
+        10.65,
         "Hepsi aynı şeyi diyor:<br><b>“Sadece 90 TL!”</b>",
         300,
         {
@@ -4776,8 +4778,8 @@
         }
       ],
       [
-        9.95,
-        13.9,
+        10.7,
+        15.2,
         "Sence<br><b>katil kim?</b>",
         300,
         {
@@ -4785,15 +4787,26 @@
           "pulse": true,
           "quiet": true,
           "dim": [
-            10.9,
-            13.9
+            12.2,
+            15.2
           ],
           "dimTo": 0.7
         }
       ],
       [
-        14.05,
-        15.95,
+        15.3,
+        16.75,
+        "<b>Hiçbiri.</b>",
+        300,
+        {
+          "size": 110,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        16.8,
+        18.0,
         "Katil:<br><b>BU SEFERLİK</b>",
         300,
         {
@@ -4803,8 +4816,8 @@
         }
       ],
       [
-        16.0,
-        21.1,
+        18.05,
+        22.3,
         "Sıradan harcama: doğru tahmin<br><b>İstisnalar: eksik</b>",
         300,
         {
@@ -4814,8 +4827,8 @@
         }
       ],
       [
-        21.15,
-        23.7,
+        22.35,
+        25.45,
         "Her ay bir istisna varsa,<br><b>istisna değildir</b>",
         300,
         {
@@ -4825,8 +4838,8 @@
         }
       ],
       [
-        23.75,
-        26.35,
+        25.5,
+        28.5,
         "Senin bu ayki<br><b>“bu seferlik”in neydi?</b>",
         300,
         {
@@ -4835,8 +4848,8 @@
         }
       ],
       [
-        23.85,
-        26.35,
+        25.6,
+        28.5,
         "Yoruma yaz: ne, kaç TL?",
         600,
         {
@@ -4845,8 +4858,8 @@
         }
       ],
       [
-        24.85,
-        26.35,
+        27.0,
+        28.5,
         "Bu seferlikleri Cep Defteri'ne önceden yaz · @cep_defteri",
         672,
         {
@@ -4855,8 +4868,8 @@
         }
       ],
       [
-        26.4,
-        26.9,
+        28.55,
+        29.05,
         "Harçlığını<br><b>kim öldürdü?</b>",
         300,
         {
@@ -4864,6 +4877,47 @@
           "pulse": true,
           "quiet": true
         }
+      ]
+    ],
+    "voiceFiles": [
+      [
+        0.1,
+        "assets/voice/katil/k1.mp3",
+        "Ayın 18'i. Ceviz'in harçlığı ölü bulundu."
+      ],
+      [
+        3.2,
+        "assets/voice/katil/k2.mp3",
+        "Şüpheliler: kahve, yemek siparişi, taksi ve abonelik."
+      ],
+      [
+        7.4,
+        "assets/voice/katil/k3.mp3",
+        "Hepsi aynı şeyi söylüyor: \"Ben sadece 90 liraydım!\""
+      ],
+      [
+        10.7,
+        "assets/voice/katil/k4m.mp3",
+        "Sence katil kim?"
+      ],
+      [
+        15.3,
+        "assets/voice/katil/k5m.mp3",
+        "Hiçbiri. Katil: \"Bu seferlik.\""
+      ],
+      [
+        18.1,
+        "assets/voice/katil/k6.mp3",
+        "Bir araştırmaya göre sıradan harcamayı doğru tahmin ediyoruz, istisnaları eksik."
+      ],
+      [
+        22.4,
+        "assets/voice/katil/k7.mp3",
+        "Her ay bir istisna varsa, istisna değildir."
+      ],
+      [
+        25.55,
+        "assets/voice/katil/k8.mp3"
       ]
     ]
   }
