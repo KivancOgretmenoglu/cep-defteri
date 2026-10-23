@@ -2577,9 +2577,12 @@ function defineValue() {
     const ev = (k) => o[k] ?? 99;
     const BILGE = ev('bilge'), LINEUP = ev('lineup'), IN = o.in || [99, 99, 99, 99], BUBBLE = ev('bubble'), ASK = ev('ask');
     const COUNT = ev('count'), ZERO = ev('zero'), DARK = ev('dark'), REVEAL = ev('reveal'), CARDS = ev('cards'), SCI = ev('sci');
-    const NORMAL = ev('normal'), EXC = ev('exc'), APP = ev('app'), CTA = ev('cta'), LURK = ev('lurk');
+    const NORMAL = ev('normal'), EXC = ev('exc'), APP = ev('app'), TAP = o.tap ?? APP + 0.45, CTA = ev('cta'), LURK = ev('lurk');
+    const WIDE = ev('wide');  // şüpheliler tek tek girerken kamera sırayı yakından tarar; burada geniş plana keser
     const BOLTS = o.bolts || [0.3];
-    const SY = 1080;  // odak noktasının ekrandaki yüksekliği: kutu ve altyazının altında kalan sahne alanı
+    // Sahne tüm kareyi doldurur (sinema bandı yok). Odak noktası kutu ve altyazının (300–720) altındaki alanın ortasına
+    // düşer; önemli şeyler Instagram'ın alt yazı bandına (~1650 altı) girmez, zemin ve gök o bantların altında da sürer.
+    const SY = 1180;
     const world = () => el('div', 'abs', s.root, { left: 0, top: 0, width: '1080px', height: '1920px', transformOrigin: '0 0' });
     const CARDD = [['Doğum günü', '#E8577A'], ['Konser', '#9B7BC6'], ['Bayram', '#2F8F5A'], ['İndirim vardı', '#E8322A']];
     const card = (parent, [txt, col], w, fs) => {
@@ -2595,21 +2598,21 @@ function defineValue() {
 
     // ── A · yağmurlu ara sokak ──
     const camA = world();
-    el('div', 'abs', camA, { left: '-200px', top: '-300px', width: '1480px', height: '720px', background: 'linear-gradient(#060912, #111830)' });  // gök
+    el('div', 'abs', camA, { left: '-200px', top: '-700px', width: '1480px', height: '1120px', background: 'linear-gradient(#060912 40%, #111830)' });  // gök
     const bolt = el('div', 'abs', camA, { left: '560px', top: '150px', width: '260px', height: '300px', opacity: 0 });
     bolt.innerHTML = '<svg width="260" height="300" viewBox="0 0 260 300"><polyline points="150,0 112,96 160,104 96,212 146,220 84,300" fill="none" stroke="#EAF2FF" stroke-width="9"/></svg>';
     el('div', 'abs', camA, { left: '-200px', top: '380px', width: '1480px', height: '900px', backgroundColor: '#2B2530', backgroundImage: 'linear-gradient(rgba(0,0,0,.38) 0 6px, transparent 6px), linear-gradient(90deg, rgba(0,0,0,.38) 0 6px, transparent 6px)', backgroundSize: '120px 56px' });  // tuğla duvar
     const win = el('div', 'abs', camA, { left: '470px', top: '450px', width: '150px', height: '170px', boxSizing: 'border-box', border: '10px solid #1A161E', background: 'linear-gradient(#3A3322, #241F18)' });  // uzakta sarı bir pencere
     el('div', 'abs', win, { left: '55px', top: 0, width: '10px', height: '100%', background: '#1A161E' });
-    const cal = el('div', 'abs', camA, { left: '736px', top: '660px', width: '190px', height: '220px', borderRadius: '8px', background: '#F4EFE4', boxShadow: '0 10px 20px rgba(0,0,0,.45)', overflow: 'hidden', transform: 'rotate(5deg)', transformOrigin: '50% 0' });
+    const cal = el('div', 'abs', camA, { left: '736px', top: '740px', width: '190px', height: '220px', borderRadius: '8px', background: '#F4EFE4', boxShadow: '0 10px 20px rgba(0,0,0,.45)', overflow: 'hidden', transform: 'rotate(5deg)', transformOrigin: '50% 0' });
     cal.innerHTML = '<div style="height:56px;background:#C0392B;color:#fff;font-family:Pixel;font-size:46px;display:flex;align-items:center;justify-content:center;letter-spacing:.08em">EKİM</div><div style="text-align:center;font-family:Pixel;font-size:150px;line-height:1;color:#2A1E1A;margin-top:4px">18</div>';
-    el('div', 'abs', camA, { left: '800px', top: '648px', width: '64px', height: '22px', background: 'rgba(240,230,200,.7)', transform: 'rotate(5deg)' });  // bant
+    el('div', 'abs', camA, { left: '800px', top: '728px', width: '64px', height: '22px', background: 'rgba(240,230,200,.7)', transform: 'rotate(5deg)' });  // bant
     el('div', 'abs', camA, { left: '150px', top: '470px', width: '24px', height: '820px', background: '#14161C', borderLeft: '5px solid #2E323D' });  // lamba direği
     el('div', 'abs', camA, { left: '150px', top: '468px', width: '118px', height: '16px', background: '#14161C' });
     el('div', 'abs', camA, { left: '228px', top: '470px', width: '72px', height: '40px', clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0 100%)', background: '#2A2E38' });
     const bulb = el('div', 'abs', camA, { left: '247px', top: '506px', width: '34px', height: '14px', borderRadius: '0 0 17px 17px', background: '#FFE7A8', boxShadow: '0 0 44px 20px rgba(255,220,140,.5)' });
     const cone = el('div', 'abs', camA, { left: '40px', top: '516px', width: '460px', height: '800px', clipPath: 'polygon(45% 0, 55% 0, 100% 100%, 0 100%)', background: 'linear-gradient(rgba(255,214,140,.3), rgba(255,214,140,.05))' });
-    el('div', 'abs', camA, { left: '-200px', top: '1250px', width: '1480px', height: '640px', background: 'linear-gradient(#1C2029, #101218)' });  // ıslak asfalt
+    el('div', 'abs', camA, { left: '-200px', top: '1250px', width: '1480px', height: '1000px', background: 'linear-gradient(#1C2029, #101218 60%)' });  // ıslak asfalt
     [[110, 1296, 320, 34], [690, 1452, 280, 28], [360, 1478, 210, 22]].forEach(([x, y, w, h]) => el('div', 'abs', camA, { left: px(x), top: px(y), width: px(w), height: px(h), borderRadius: '50%', background: 'linear-gradient(90deg, rgba(120,140,190,.16), rgba(255,214,140,.24), rgba(120,140,190,.1))' }));
     const chalk = el('div', 'abs', camA, { left: '392px', top: '1290px', width: '340px', height: '150px' });  // tebeşirle çizilmiş cüzdan
     chalk.innerHTML = '<svg width="340" height="150" viewBox="0 0 340 150" fill="none" stroke="#F4F1EA" stroke-width="7" stroke-dasharray="16 9" stroke-linecap="round">'
@@ -2627,19 +2630,21 @@ function defineValue() {
     const bookA = book(camA, 150, 24);
     el('div', 'abs', camA, { left: '950px', top: '800px', width: '150px', height: '452px', background: '#0B0A0E', boxShadow: 'inset 14px 0 0 #1E1A24' });  // karanlık kapı aralığı
     const lurk = [0, 1].map(() => el('div', 'abs', camA, { left: 0, top: 0, width: '16px', height: '10px', borderRadius: '50%', background: '#F2C14E', boxShadow: '0 0 14px 4px rgba(242,193,78,.6)', display: 'none' }));  // karanlıkta bekleyen gözler
-    const rain = Array.from({ length: 72 }, (_, i) => ({ x: ((i * 157) % 1400) - 160, y0: (i * 263) % 1500, v: 1500 + (i % 7) * 150, e: el('div', 'abs', camA, { left: 0, top: 0, width: '3px', height: px(42 + (i % 5) * 12), background: 'linear-gradient(rgba(170,190,230,0), rgba(170,190,230,.55))' }) }));
+    const rain = Array.from({ length: 86 }, (_, i) => ({ x: ((i * 157) % 1400) - 160, y0: (i * 263) % 1800, v: 1500 + (i % 7) * 150, e: el('div', 'abs', camA, { left: 0, top: 0, width: '3px', height: px(42 + (i % 5) * 12), background: 'linear-gradient(rgba(170,190,230,0), rgba(170,190,230,.55))' }) }));
 
     // ── B · şüpheli sırası ──
     const camB = world();
-    el('div', 'abs', camB, { left: '-700px', top: '-200px', width: '2500px', height: '1500px', background: '#262A33' });
-    for (let k = 0; k < 9; k++) {
+    el('div', 'abs', camB, { left: '-700px', top: '-600px', width: '2500px', height: '1900px', background: '#262A33' });
+    for (let k = -4; k < 9; k++) {  // boy çizgileri duvarı yazıların altından zemine kadar kaplar; sayılar kadrajın iki kenarında
       const y = 700 + k * 64;
-      el('div', 'abs', camB, { left: '-700px', top: px(y), width: '2500px', height: '4px', background: 'rgba(230,236,245,.2)' });
-      el('div', 'abs it', camB, { left: '-80px', top: px(y - 34), fontSize: '30px', color: 'rgba(230,236,245,.38)' }).textContent = String(180 - k * 10);
+      el('div', 'abs', camB, { left: '-700px', top: px(y), width: '2500px', height: k % 2 ? '4px' : '7px', background: `rgba(230,236,245,${k % 2 ? 0.14 : 0.24})` });
+      if (k % 2 === 0) [55, 985].forEach((x) => (el('div', 'abs it', camB, { left: px(x), top: px(y - 44), fontSize: '40px', color: 'rgba(230,236,245,.4)' }).textContent = String(180 - k * 10)));
     }
-    el('div', 'abs', camB, { left: '-700px', top: '1262px', width: '2500px', height: '640px', background: 'linear-gradient(#17191F, #0E0F13)' });
+    el('div', 'abs', camB, { left: '-700px', top: '1262px', width: '2500px', height: '1000px', backgroundColor: '#14161B', backgroundImage: 'linear-gradient(rgba(255,255,255,.035) 0 3px, transparent 3px), linear-gradient(#1B1E25, #0E0F13 50%)', backgroundSize: '100% 58px, 100% 100%' });
     const XS = [150, 400, 650, 900, 1180];  // beşinci yer geniş planda kadraj dışında kalır
+    XS.forEach((x) => el('div', 'abs', camB, { left: px(x - 46), top: '212px', width: '92px', height: '28px', borderRadius: '6px 6px 14px 14px', background: '#14161C', boxShadow: 'inset 0 -6px 0 #3A3F4C' }));  // tavandaki spot lambaları
     const spots = XS.map((x, i) => el('div', 'abs', camB, { left: px(x - 160), top: '236px', width: '320px', height: '1040px', clipPath: 'polygon(40% 0, 60% 0, 100% 100%, 0 100%)', background: i < 4 ? 'linear-gradient(rgba(255,248,220,.05), rgba(255,248,220,.2))' : 'linear-gradient(rgba(255,90,70,.06), rgba(255,90,70,.3))', opacity: 0 }));
+    const pools = XS.map((x, i) => el('div', 'abs', camB, { left: px(x - 190), top: '1236px', width: '380px', height: '84px', borderRadius: '50%', background: `radial-gradient(closest-side, ${i < 4 ? 'rgba(255,248,220,.22)' : 'rgba(255,90,70,.3)'}, transparent)`, opacity: 0 }));  // spotun zemindeki ışığı
     const plate = (parent, txt, w, fs) => {
       const p = el('div', 'abs it', parent, { left: 0, top: 0, width: px(w), height: '58px', boxSizing: 'border-box', border: '5px solid #2A1E1A', borderRadius: '8px', background: '#F4F1EA', color: '#2A1E1A', fontSize: px(fs), textAlign: 'center', lineHeight: '50px' });
       p.textContent = txt;
@@ -2655,9 +2660,10 @@ function defineValue() {
       const sweat = pixEl(camB, SWEAT, SWEAT_C, 8, { left: 0, top: 0, display: 'none' });
       return { wrap, pl, bub, sweat, w, h };
     });
-    const dimB = el('div', 'abs', camB, { left: '-700px', top: '-200px', width: '2500px', height: '2200px', background: '#030305', opacity: 0 });  // ışıklar söner
+    const dimB = el('div', 'abs', camB, { left: '-700px', top: '-600px', width: '2500px', height: '2900px', background: '#030305', opacity: 0 });  // ışıklar söner
     const spot5 = spots[4];
     camB.appendChild(spot5);  // kırmızı spot karanlığın üstünde kalır
+    camB.appendChild(pools[4]);
     const hood = el('div', 'abs', camB, { left: px(XS[4] - 144), top: px(1262 - 396), width: '288px', height: '396px', display: 'none', transformOrigin: '50% 100%' });
     hood.innerHTML = pix(SUS_HOOD, SUS_HOOD_C, 18);
     const eyesGlow = el('div', 'abs', hood, { left: '72px', top: '72px', width: '144px', height: '52px', borderRadius: '50%', background: 'radial-gradient(closest-side, rgba(242,193,78,.55), rgba(242,193,78,0))', mixBlendMode: 'screen' });
@@ -2668,8 +2674,12 @@ function defineValue() {
 
     // ── C · dedektif panosu ──
     const camC = world();
-    el('div', 'abs', camC, { left: '-200px', top: '-100px', width: '1480px', height: '2100px', background: '#18131A' });
+    el('div', 'abs', camC, { left: '-200px', top: '-500px', width: '1480px', height: '2900px', background: '#18131A' });
+    el('div', 'abs', camC, { left: '536px', top: '-500px', width: '8px', height: '930px', background: '#0C0A0E' });  // panonun üstünde sarkan lamba
+    el('div', 'abs', camC, { left: '450px', top: '420px', width: '180px', height: '86px', clipPath: 'polygon(30% 0, 70% 0, 100% 100%, 0 100%)', background: 'linear-gradient(#3A4A3A, #1E2A1E)' });
+    el('div', 'abs', camC, { left: '512px', top: '494px', width: '56px', height: '22px', borderRadius: '0 0 28px 28px', background: '#FFE7A8', boxShadow: '0 0 60px 26px rgba(255,220,140,.4)' });
     el('div', 'abs', camC, { left: '30px', top: '690px', width: '1020px', height: '820px', boxSizing: 'border-box', border: '22px solid #6B4A2E', background: 'radial-gradient(circle, rgba(0,0,0,.12) 2px, transparent 3px) 0 0 / 18px 18px, #B98A5A' });
+    el('div', 'abs', camC, { left: '-60px', top: '1510px', width: '1200px', height: '60px', background: 'linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,0))' });  // panonun gölgesi
     const pinEl = (parent, x, y) => el('div', 'abs', parent, { left: px(x - 9), top: px(y - 9), width: '18px', height: '18px', borderRadius: '50%', background: '#C0392B', boxShadow: '0 3px 0 #7A1E14', zIndex: 2 });
     const pol = el('div', 'abs', camC, { left: '86px', top: '752px', width: '250px', height: '300px', boxSizing: 'border-box', padding: '16px 16px 0', background: '#F4F1EA', boxShadow: '0 10px 20px rgba(0,0,0,.4)', transform: 'rotate(-4deg)', transformOrigin: '50% 0' });
     el('div', 'abs', pol, { left: '16px', top: '16px', width: '218px', height: '200px', background: '#20202A', overflow: 'hidden' }).innerHTML = `<div style="position:absolute;left:45px;top:16px">${pix(SUS_HOOD, SUS_HOOD_C, 8)}</div>`;
@@ -2698,6 +2708,7 @@ function defineValue() {
     miss.textContent = 'EKSİK!';
     const srcC = el('div', 'abs', chart, { left: 0, right: 0, bottom: '16px', textAlign: 'center', fontSize: '22px', fontWeight: 800, color: '#4A3B30' });
     srcC.textContent = 'Kaynak: Sussman ve Alter 2012';
+    el('div', 'abs', camC, { left: '-40px', top: '506px', width: '1160px', height: '1060px', clipPath: 'polygon(46% 0, 54% 0, 100% 100%, 0 100%)', background: 'linear-gradient(rgba(255,214,140,.2), rgba(255,214,140,.04))', pointerEvents: 'none' });  // lambanın ışığı
 
     // ── D · telefon: Cep Defteri, Planlar ──
     const camD = world();
@@ -2707,7 +2718,7 @@ function defineValue() {
     const head = el('div', 'abs', scr, { left: 0, right: 0, top: 0, height: '250px', background: '#AE4716' });
     el('div', 'abs', head, { left: '40px', top: '92px', fontSize: '30px', fontWeight: 700, color: '#FFD9C4' }).textContent = 'Cep Defteri';
     el('div', 'abs', head, { left: '40px', top: '134px', fontSize: '66px', fontWeight: 800, color: '#FFFCF6', letterSpacing: '-.02em' }).textContent = 'Planlar';
-    const pcard = el('div', 'abs', scr, { left: '30px', right: '30px', top: '280px', height: '560px', borderRadius: '34px', background: '#FFFCF6', boxShadow: '0 10px 30px rgba(60,20,0,.12)' });
+    const pcard = el('div', 'abs', scr, { left: '30px', right: '30px', top: '280px', height: '412px', borderRadius: '34px', background: '#FFFCF6', boxShadow: '0 10px 30px rgba(60,20,0,.12)' });
     const prow = (y, name, sub, amt) => {
       const r = el('div', 'abs', pcard, { left: '20px', right: '20px', top: px(y), height: '112px', boxSizing: 'border-box', padding: '16px 22px', borderRadius: '22px', background: '#F6F1EA', transformOrigin: '50% 50%' });
       r.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:36px;font-weight:800;color:#2A1E1A">${name}</span><span style="font-size:36px;font-weight:800;color:#2A1E1A">${amt}</span></div>`
@@ -2720,14 +2731,19 @@ function defineValue() {
     newRow.style.background = '#FFF3D6';
     const addP = el('div', 'abs', pcard, { left: '20px', right: '20px', top: '430px', height: '96px', borderRadius: '22px', border: '4px dashed #2B7178', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2B7178', fontSize: '34px', fontWeight: 800, transformOrigin: '50% 50%' });
     addP.textContent = '+ Plan ekle';
+    const lim = el('div', 'abs', scr, { left: '30px', right: '30px', top: '722px', height: '420px', boxSizing: 'border-box', padding: '30px 40px', borderRadius: '34px', background: '#FFFCF6', boxShadow: '0 10px 30px rgba(60,20,0,.12)' });  // altında kategori limitleri: ekranın altı boş kalmasın
+    lim.innerHTML = '<div style="font-size:36px;font-weight:800;color:#2A1E1A">Kategori limitleri</div>'
+      + [['Yemek & kafe', '1.370 TL / 2.500 TL', 55, '#AE4716'], ['Eğlence', '790 TL / 800 TL', 99, '#B8641E']].map(([n, a, p, c]) =>
+        `<div style="display:flex;justify-content:space-between;margin-top:30px;font-size:30px;font-weight:800;color:#2A1E1A"><span>${n}</span><span style="color:#6B5A4E">${a}</span></div>`
+        + `<div style="margin-top:12px;height:18px;border-radius:9px;background:#EDE3D8;overflow:hidden"><div style="width:${p}%;height:100%;background:${c}"></div></div>`).join('');
     const armD = el('div', 'abs', camD, { left: 0, top: 0, width: '72px', height: '900px', boxSizing: 'border-box', border: '6px solid #2A1E1A', borderRadius: '36px', background: '#A8683A', display: 'none' });
     const pawD = pixEl(camD, PAWP, { o: '#2A1E1A', B: '#A8683A' }, 16, { left: 0, top: 0, display: 'none' });
 
-    // ── üst katmanlar: kenar karartma, şimşek flaşı, sinema bantları, karar çağrısı ──
-    el('div', 'abs', s.root, { inset: 0, zIndex: 17, pointerEvents: 'none', background: 'radial-gradient(ellipse 78% 62% at 50% 58%, transparent 50%, rgba(0,0,0,.7) 100%)' });
+    // ── üst katmanlar: kenar karartma (sinema bandı yerine yumuşak geçiş), şimşek flaşı, karar çağrısı ──
+    el('div', 'abs', s.root, { inset: 0, zIndex: 17, pointerEvents: 'none', background: 'radial-gradient(ellipse 100% 72% at 50% 56%, transparent 58%, rgba(0,0,0,.5) 100%)' });
+    el('div', 'abs', s.root, { left: 0, right: 0, top: 0, height: '260px', zIndex: 17, pointerEvents: 'none', background: 'linear-gradient(rgba(5,6,10,.5), rgba(5,6,10,0))' });
+    el('div', 'abs', s.root, { left: 0, right: 0, bottom: 0, height: '300px', zIndex: 17, pointerEvents: 'none', background: 'linear-gradient(rgba(5,6,10,0), rgba(5,6,10,.45))' });
     const flash = el('div', 'abs', s.root, { inset: 0, zIndex: 21, opacity: 0, pointerEvents: 'none', background: '#DCE8FF' });
-    el('div', 'abs', s.root, { left: 0, top: 0, width: '1080px', height: '236px', background: '#05060A', zIndex: 30 });
-    el('div', 'abs', s.root, { left: 0, top: '1506px', width: '1080px', height: '414px', background: '#05060A', zIndex: 30 });  // alt bant: elde çekim titremesinde bile 1536'nın üstünde biter
     const pill = el('div', 'abs it', s.root, { left: 0, right: 0, top: '608px', display: 'none', justifyContent: 'center', zIndex: 24 });
     const pin = el('div', '', pill, { padding: '4px 28px 10px', borderRadius: '16px', border: '4px solid #F2B63C', background: 'rgba(10,10,16,.9)', fontSize: '62px', color: '#fff', lineHeight: 1 });
     pin.innerHTML = 'Katil kaç numara? <span style="color:#F2B63C">Yoruma yaz</span>';
@@ -2746,7 +2762,7 @@ function defineValue() {
 
       // sokak: yağmur, lamba titrer, Ceviz ağlar, dedektif gelir ve büyüteçle bakar; sonda defterine yazar, karanlıkta gözler
       rain.forEach((r) => {
-        const y = ((r.y0 + r.v * lt) % 1500) + 150;
+        const y = ((r.y0 + r.v * lt) % 1800) - 20;
         r.e.style.transform = `translate(${r.x + y * 0.14}px,${y}px) rotate(8deg)`;
       });
       const lampOn = Math.floor(lt * 7.3) % 23 === 5 ? 0.55 : 1;
@@ -2789,10 +2805,10 @@ function defineValue() {
         if (bp > 0) popIn(u.bub, bp, { fromY: 40, base: `translate(${clamp(x - 115, 40, 790)}px,${1262 - u.h - (i % 2 ? 136 : 76)}px)` });  // baloncuk kadrajda kalır
         u.sweat.style.display = hot === i ? 'block' : 'none';
         u.sweat.style.transform = `translate(${x + u.w / 2 - 14}px,${1262 - u.h + 10 + ((lt * 2) % 1) * 40}px)`;
-        spots[i].style.opacity = lt < IN[i] ? 0 : lt >= DARK ? 0 : hot >= 0 ? (hot === i ? 1 : 0.18) : 0.75;
+        spots[i].style.opacity = pools[i].style.opacity = lt < IN[i] ? 0 : lt >= DARK ? 0 : hot >= 0 ? (hot === i ? 1 : 0.18) : 0.75;
       });
       dimB.style.opacity = lt >= DARK ? (lt < REVEAL ? 0.92 : 0.62) : 0;
-      spot5.style.opacity = lt >= REVEAL ? 1 : 0;
+      spot5.style.opacity = pools[4].style.opacity = lt >= REVEAL ? 1 : 0;
       hood.style.display = pl5.style.display = lt >= REVEAL ? 'block' : 'none';
       hood.style.transform = `translateY(${(1 - E.out(prog(lt, REVEAL, 0.3))) * 40}px)`;
       eyesGlow.style.opacity = 0.6 + 0.4 * Math.sin(lt * 9);
@@ -2823,34 +2839,38 @@ function defineValue() {
       miss.style.transform = `rotate(-10deg) scale(${lerp(2, 1, E.out(prog(lt, EXC + 1.2, 0.2)))})`;
       srcC.style.opacity = prog(k, 0.8, 0.4);
 
-      // telefon: "+ Plan ekle" → "Bu seferlikler · Her ay · 500 TL"
-      const d = lt - APP;
+      // telefon: "+ Plan ekle" → "Bu seferlikler · Her ay · 500 TL" (pençe TAP anında düğmeye basar)
+      const d = lt - TAP + 0.45;
       addP.style.transform = `scale(${d >= 0.45 && d < 0.58 ? 0.94 : 1})`;
       newRow.style.opacity = clamp(prog(d, 0.55, 0.12));
       newRow.style.transform = `scale(${lerp(0.85, 1, E.back(prog(d, 0.55, 0.3)))})`;
       newRow.style.boxShadow = d >= 0.9 ? `0 0 0 ${Math.round(5 + 3 * Math.sin(lt * 6))}px rgba(242,182,60,.55)` : 'none';
-      addP.style.top = px(d >= 0.55 ? 430 : 284);
+      const grow = 148 * E.out(prog(d, 0.55, 0.25));  // liste uzar: düğme, kart ve altındaki limitler aşağı kayar
+      addP.style.top = px(284 + grow);
+      pcard.style.height = px(412 + grow);
+      lim.style.top = px(722 + grow);
       const tapping = d >= 0.1 && d < 0.95;
       pawD.style.display = armD.style.display = tapping ? 'block' : 'none';
       if (tapping) {
-        const py = lerp(1760, 1010, E.out(prog(d, 0.1, 0.3))) + 12 * (d >= 0.45 && d < 0.58 ? 1 : 0) + 800 * E.inOut(prog(d, 0.62, 0.33));
+        const py = lerp(1840, 1318, E.out(prog(d, 0.1, 0.3))) + 12 * (d >= 0.45 && d < 0.58 ? 1 : 0) + 800 * E.inOut(prog(d, 0.62, 0.33));  // parmak uçları "+ Plan ekle"nin ortasında
         pawD.style.transform = `translate(${540 - 56}px,${py - 56}px)`;
         armD.style.transform = `translate(${540 - 36}px,${py + 20}px)`;
       }
 
-      // kamera planları (A sokak, B sıra odası, C pano, D telefon)
+      // kamera planları (A sokak, B sıra odası, C pano, D telefon): dünya noktası (fx, fy) ekranda (540, SY)'ye düşer
       let W = 'A', z = 1, fx = 540, fy = SY;
-      if (lt < BILGE) { z = 1.04 + 0.04 * prog(lt, 0, 1.2); fy = 1080; }                                                       // olay yeri
-      else if (lt < LINEUP) { const q = ramp(BILGE, LINEUP - BILGE); z = 1.08 + 0.14 * q; fx = lerp(540, 640, q); fy = lerp(1080, 1170, q); }   // dedektif bakar
-      else if (lt < ASK) { W = 'B'; z = 1.08 + 0.04 * prog(lt, LINEUP, ASK - LINEUP); fx = 530; fy = 1150; }                    // şüpheliler
-      else if (lt < COUNT) { W = 'B'; z = 1.15; fx = 330; fy = 1150; }                                                          // "Sence katil kim?"
-      else if (lt < DARK) { W = 'B'; z = 1.04 + 0.04 * ramp(COUNT, ZERO - COUNT); fx = 540; fy = 1150; }                        // karar
-      else if (lt < REVEAL) { W = 'B'; z = 1.08; fx = 540; fy = 1150; }
-      else if (lt < SCI) { W = 'B'; const q = E.out(prog(lt, REVEAL - 0.1, 0.35)); z = lerp(1.08, 1.22, q); fx = lerp(540, 1100, q); fy = lerp(1150, 1080, q); }   // sıranın sonunda: BU SEFERLİK
-      else if (lt < EXC) { W = 'C'; z = 1.0 + 0.03 * prog(lt, SCI, EXC - SCI); fy = 1100; }                                     // pano
-      else if (lt < APP) { W = 'C'; const q = E.out(prog(lt, EXC, 0.5)); z = lerp(1.03, 1.25, q); fx = lerp(540, 790, q); fy = lerp(1100, 1060, q); }   // grafik
-      else if (lt < CTA) { W = 'D'; z = 1.04 + 0.04 * prog(lt, APP, CTA - APP); fy = 1090; }                                    // Cep Defteri
-      else { z = 1.06 + 0.04 * prog(lt, CTA, 3); fx = 600; fy = 990; }                                                         // soru
+      if (lt < BILGE) { z = 1.2 + 0.04 * prog(lt, 0, 1.2); fy = 1050; }                                                          // olay yeri
+      else if (lt < LINEUP) { const q = ramp(BILGE, LINEUP - BILGE); z = 1.24 + 0.12 * q; fx = lerp(540, 620, q); fy = lerp(1050, 1090, q); }   // dedektif bakar
+      else if (lt < Math.min(WIDE, ASK)) { W = 'B'; z = 1.75; fx = lerp(230, 820, E.inOut(prog(lt, IN[0] - 0.4, IN[3] - IN[0] + 1))); fy = 1048; }   // şüpheliler girerken sırayı yakından tarar
+      else if (lt < ASK) { W = 'B'; z = 1.06 + 0.02 * prog(lt, WIDE, ASK - WIDE); fx = 532; fy = 960; }                         // hepsi: "Sadece 90 TL!"
+      else if (lt < COUNT) { W = 'B'; z = 1.3; fx = 340; fy = 1230; }                                                           // "Sence katil kim?"
+      else if (lt < DARK) { W = 'B'; z = 1.06 + 0.02 * ramp(COUNT, ZERO - COUNT); fx = 532; fy = 960; }                         // karar
+      else if (lt < REVEAL) { W = 'B'; z = 1.08; fx = 532; fy = 960; }
+      else if (lt < SCI) { W = 'B'; const q = E.out(prog(lt, REVEAL - 0.1, 0.35)); z = lerp(1.08, 1.5, q); fx = lerp(532, 1175, q); fy = lerp(960, 1080, q); }   // sıranın sonunda: BU SEFERLİK
+      else if (lt < EXC) { W = 'C'; z = 1.05 + 0.03 * prog(lt, SCI, EXC - SCI); fy = 1062; }                                    // pano
+      else if (lt < APP) { W = 'C'; const q = E.out(prog(lt, EXC, 0.5)); z = lerp(1.08, 1.32, q); fx = lerp(540, 800, q); fy = lerp(1062, 1040, q); }   // grafik
+      else if (lt < CTA) { W = 'D'; z = 1.28 + 0.03 * prog(lt, APP, CTA - APP); fy = 1119; }                                    // Cep Defteri
+      else { z = 1.15 + 0.04 * prog(lt, CTA, 3); fx = 600; fy = 1060; }                                                         // soru
       let beat = -9;
       beats.forEach((t) => { if (lt >= t) beat = t; });
       z *= 1 + 0.012 * Math.exp(-(lt - beat) * 10);

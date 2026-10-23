@@ -1882,6 +1882,8 @@ def cue_katil(t0, skip=0, o=None):
             put(SFX, stereo_move(whoosh(0.25, 300, 1800, 0.5), 0.6, 0.0), T(ti), 0.2)
             put(SFX, key_click(0.35), T(ti), pan=-0.6 + 0.4 * i)
             put(SFX, woodblock(False), T(ti + 0.32), 0.3, pan=-0.6 + 0.4 * i)
+    if 'wide' in o:  # sırayı tarayan yakın plandan geniş plana kesme
+        cut(o['wide'])
     if 'bubble' in o:  # "Sadece 90 TL!" baloncukları
         for i in range(4):
             put(SFX, bloop(500 + 120 * i, 1200 + 150 * i, 0.07, 0.25), T(o['bubble'] + i * 0.22), pan=-0.6 + 0.4 * i)
@@ -1927,12 +1929,13 @@ def cue_katil(t0, skip=0, o=None):
         put(SFX, slot_roll(0.4), T(X), 0.15)
         put(SFX, riser(0.7), T(X + 0.45), 0.12)
         put(SFX, stamp(), T(X + 1.2), 0.45, pan=0.2)
-    if 'app' in o:  # Cep Defteri: "+ Plan ekle" → Bu seferlikler · Her ay
+    if 'app' in o:  # Cep Defteri: "+ Plan ekle" → Bu seferlikler · Her ay (pençe 'tap' anında basar, value.js ile aynı)
         Ap = o['app']
+        Tp = o.get('tap', Ap + 0.45)
         put(SFX, stereo_move(whoosh(0.3, 600, 2600, 0.5), 0.4, -0.2), T(Ap - 0.05), 0.16)
-        put(SFX, ui_tap(0.6), T(Ap + 0.45))
-        put(SFX, bloop(500, 1300, 0.08, 0.25), T(Ap + 0.55))
-        put(SFX, fm_bell(1568, 0.7, 0.18), T(Ap + 0.9))
+        put(SFX, ui_tap(0.6), T(Tp))
+        put(SFX, bloop(500, 1300, 0.08, 0.25), T(Tp + 0.1))
+        put(SFX, fm_bell(1568, 0.7, 0.18), T(Tp + 0.45))
     if 'cta' in o:  # sokağa dönüş: dedektif defterine yazar
         cut(C)
         put(SFX, scribble(0.7), T(C + 0.3), 0.6, pan=0.3)
