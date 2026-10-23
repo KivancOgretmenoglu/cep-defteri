@@ -1852,10 +1852,6 @@ def cue_katil(t0, skip=0, o=None):
         x[: int(0.05 * SR)] += bp(noise(0.05), 2000, 5000) * expd(0.05, 60) * 0.3
         return x * v
 
-    def scribble(d=0.6):  # kalem defterde
-        t = tt(d)
-        return bp(noise(d), 1800, 6000) * (0.5 + 0.5 * np.sin(2 * np.pi * 9 * t)) ** 2 * 0.25
-
     cut = lambda t, a=0.2, b=-0.2: put(SFX, stereo_move(whoosh(0.28, 2400, 500, 0.5), a, b), T(t - 0.08), 0.16)  # plan kesmesi
 
     # sokak planlarında yağmur ve şimşek; lamba arada bir göz kırpar (value.js ile aynı takvim)
@@ -1936,9 +1932,9 @@ def cue_katil(t0, skip=0, o=None):
         put(SFX, ui_tap(0.6), T(Tp))
         put(SFX, bloop(500, 1300, 0.08, 0.25), T(Tp + 0.1))
         put(SFX, fm_bell(1568, 0.7, 0.18), T(Tp + 0.45))
-    if 'cta' in o:  # sokağa dönüş: dedektif defterine yazar
+    if 'cta' in o:  # sokağa dönüş: dedektif defterini iki koluyla tutar
         cut(C)
-        put(SFX, scribble(0.7), T(C + 0.3), 0.6, pan=0.3)
+        put(SFX, flutter(0.22), T(C + 0.12), 0.16, pan=0.3)
     if 'lurk' in o:  # karanlık kapı aralığında gözler
         Lk = o['lurk']
         put(SFX, sub(1.0), T(Lk), 0.35)

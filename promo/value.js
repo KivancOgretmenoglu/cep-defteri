@@ -182,10 +182,24 @@ const SUS_HOOD = ['.....oooooo.....', '...ooHHHHHHoo...', '..oHHHHHHHHHHo..', '.
   'oHHHHHHHHHHHHHHo', 'oHHHHHHHHHHHHHHo', 'oHHHHHHHHHHHHHHo', 'oHHHHHHHHHHHHHHo', 'oHHHHHHHHHHHHHHo', 'oHHHHHHHHHHHHHHo', 'oHHHHHHHHHHHHHHo', 'oHHHHHHHHHHHHHHo', 'oHHHHHHHHHHHHHHo', 'oHHHHHHHHHHHHHHo', 'oHHHHHHHHHHHHHHo', '.oHHHHHHHHHHHHo.', '..oooooooooooo..'];
 const SUS_HOOD_C = { o: '#0B0910', H: '#3B3550', k: '#0E0C14', Y: '#F2C14E' };
 
-/** Dedektif Bilge: 'bilgedet' (Bilge + fötr şapka; şapka kaşların üstüne iner) */
+/** Dedektif Bilge: 'bilgedet' (Bilge + fötr şapka + trençkot). Şapka kaşların üstüne iner; kanatlar trençkotun kolları
+ * olur, gövdede yaka, gömlek ve kravat, kemer ve düğmeler. Alt gövde (satır 17–25) bütün pozlarda aynı olduğundan tek kalıp yeter. */
+const DET_WING = '#3E4A8C', DET_SLEEVE = '#A98550', DET_CUFF = '#7A5A30';
+const DET_COAT = [  // satır 17–25, x 9–22; '.': Bilge'nin kendi pikseli kalır (yanaklar, gaga ucu, kollar)
+  '..C........C..',
+  '.CCDWW.WWWDCC.',
+  '.CNCDWWWWDCNC.',
+  '.CCCCDTTDCCCC.',  // koyu kravat düğümü gaganın iki sıra altında (kırmızı ve gagaya bitişik olunca ağız gibi duruyordu)
+  '.BBBBBKKBBBBB.',
+  '.CCCCCCDCCCCC.',
+  'oCCNCCCDCCNCCo',
+  '.oDCCCCDCCCDo.',
+  '..oDDDDDDDDo..',
+];
 function deriveBilgeDet() {
   if (SP['bilgedet|calm|null|mood']) return;
   const O = '#2A1E1A', HAT = '#4A4550', CREASE = '#3A3540', BAND = '#8C2F2F';
+  const COAT_C = { C: '#C9A46C', D: '#9E7A45', W: '#F5E9CF', T: '#2F2A3D', N: '#4A3420', B: '#5E4426', K: '#E6B23C', o: O };
   Object.keys(SP).filter((k) => k.startsWith('bilge|')).forEach((k) => {
     const g = new Map();
     SP[k].forEach(([x, y, w, h, f]) => { for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) g.set(`${x + i},${y + j}`, f); });
@@ -197,6 +211,9 @@ function deriveBilgeDet() {
     [6, 7].forEach((y) => { set(9, y, O); set(22, y, O); });
     for (let x = 6; x < 26; x++) { set(x, 8, HAT); set(x, 9, O); }
     set(5, 8, O); set(26, 8, O);
+    g.forEach((f, p) => { if (f === DET_WING) g.set(p, DET_SLEEVE); });
+    [7, 8, 9, 22, 23, 24].forEach((x) => { if (g.get(`${x},22`) === DET_SLEEVE) set(x, 22, DET_CUFF); });
+    DET_COAT.forEach((row, j) => [...row].forEach((c, i) => { if (c !== '.') set(9 + i, 17 + j, COAT_C[c]); }));
     const rows = {};
     g.forEach((f, p) => { const [x, y] = p.split(',').map(Number); (rows[y] = rows[y] || []).push([x, f]); });
     const out = [];
@@ -2618,16 +2635,22 @@ function defineValue() {
     chalk.innerHTML = '<svg width="340" height="150" viewBox="0 0 340 150" fill="none" stroke="#F4F1EA" stroke-width="7" stroke-dasharray="16 9" stroke-linecap="round">'
       + '<path d="M20 30 Q20 14 36 14 L300 14 Q318 14 318 30 L318 118 Q318 134 300 134 L36 134 Q20 134 20 118 Z"/>'
       + '<path d="M212 52 L318 52 L318 98 L212 98 Q196 98 196 84 L196 66 Q196 52 212 52 Z"/><circle cx="238" cy="75" r="9"/></svg>';
-    [[300, 1440, 26], [760, 1300, 22], [790, 1338, 18]].forEach(([x, y, r]) => el('div', 'abs', camA, { left: px(x), top: px(y), width: px(r * 2), height: px(r * 2), boxSizing: 'border-box', borderRadius: '50%', border: '5px dashed #F4F1EA' }));  // tebeşir bozuk paralar
+    [[300, 1440, 26], [708, 1436, 20], [800, 1458, 16]].forEach(([x, y, r]) => el('div', 'abs', camA, { left: px(x), top: px(y), width: px(r * 2), height: px(r * 2), boxSizing: 'border-box', borderRadius: '50%', border: '5px dashed #F4F1EA' }));  // tebeşir bozuk paralar
     const marker = (x, y, n) => { const m = el('div', 'abs it', camA, { left: px(x), top: px(y), width: '64px', height: '58px', clipPath: 'polygon(18% 0, 82% 0, 100% 100%, 0 100%)', background: '#F2C14E', color: '#2A1E1A', fontSize: '46px', textAlign: 'center', lineHeight: '64px' }); m.textContent = n; };
     marker(320, 1376, '1'); marker(770, 1392, '2');
     const cz = new Mascot(camA, { who: 'ceviz', w: 280 });  // şeridin arkasında üzgün Ceviz
     const tears = [0, 1].map(() => pixEl(camA, SWEAT, SWEAT_C, 6, { left: 0, top: 0 }));
     const tape = el('div', 'abs it', camA, { left: '-260px', top: '1188px', width: '1600px', height: '64px', background: '#F2C14E', color: '#1A1A1A', fontSize: '44px', lineHeight: '64px', whiteSpace: 'nowrap', overflow: 'hidden', transform: 'rotate(-5deg)', boxShadow: '0 6px 12px rgba(0,0,0,.35)' });
     tape.textContent = 'OLAY YERİ · GİRMEYİN · '.repeat(8);
-    const bA = new Mascot(camA, { who: 'bilgedet', w: 440 });
-    const mag = pixEl(camA, MAGP, MAGP_C, 9, { left: 0, top: 0, display: 'none', transformOrigin: '50% 50%' });
-    const bookA = book(camA, 150, 24);
+    const bA = new Mascot(camA, { who: 'bilgedet', w: 440 });  // tebeşir çizimin sağında durur, delilin üstüne basmaz
+    const mag = pixEl(camA, MAGP, MAGP_C, 9, { left: 0, top: 0, display: 'none', transformOrigin: '76px 85px' });  // büyüteç: sapı sol kolun ucunda
+    const bookA = book(camA, 184, 22);  // kapanışta iki kolun arasında tuttuğu defter (yüzü ve ayakları kapatmasın diye yatık)
+    Object.assign(bookA.style, { height: '76px', paddingRight: '8%' });  // yazı ortada: kenarlardaki kanat uçlarının altında kalmasın
+    const armsA = el('div', 'abs', camA, { left: 0, top: 0, width: '440px', height: '412.5px', display: 'none' });  // kollar ve kanat uçları defterin üstünde: defter tutuluyor görünür
+    armsA.innerHTML = `<svg viewBox="0 0 32 30" width="100%" height="100%" shape-rendering="crispEdges">${SP['bilgedet|happy|null|mood']
+      .filter(([, y, , , f]) => y >= 17 && y <= 22 && (f === DET_SLEEVE || f === DET_CUFF))
+      .concat([[10, 21, 1, 2, DET_WING], [21, 21, 1, 2, DET_WING]])
+      .map(([x, y, w, h, f]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}"/>`).join('')}</svg>`;
     el('div', 'abs', camA, { left: '950px', top: '800px', width: '150px', height: '452px', background: '#0B0A0E', boxShadow: 'inset 14px 0 0 #1E1A24' });  // karanlık kapı aralığı
     const lurk = [0, 1].map(() => el('div', 'abs', camA, { left: 0, top: 0, width: '16px', height: '10px', borderRadius: '50%', background: '#F2C14E', boxShadow: '0 0 14px 4px rgba(242,193,78,.6)', display: 'none' }));  // karanlıkta bekleyen gözler
     const rain = Array.from({ length: 86 }, (_, i) => ({ x: ((i * 157) % 1400) - 160, y0: (i * 263) % 1800, v: 1500 + (i % 7) * 150, e: el('div', 'abs', camA, { left: 0, top: 0, width: '3px', height: px(42 + (i % 5) * 12), background: 'linear-gradient(rgba(170,190,230,0), rgba(170,190,230,.55))' }) }));
@@ -2776,15 +2799,17 @@ function defineValue() {
       });
       const closing = lt >= CTA;
       const bw = E.out(prog(lt, BILGE, 0.7));
-      let bx = closing ? 700 : lerp(1320, 790, bw);
       const walking = lt >= BILGE && lt < BILGE + 0.7;
       const looking = lt >= BILGE + 0.8 && !closing;
-      bA.set(closing ? (lt >= LURK ? 'curious' : 'happy') : looking ? 'thoughtful' : 'calm', closing ? (lt >= LURK ? null : 'face') : looking ? 'face' : null, blink(lt, 0.2));
-      bA.put(bx, 1400 - (walking ? Math.abs(Math.sin(lt * 14)) * 14 : 0));
+      const bx = closing ? 850 : lerp(1320, 850, bw), by = 1400 - (walking ? Math.abs(Math.sin(lt * 14)) * 14 : 0);
+      bA.set(closing ? (lt >= LURK ? 'curious' : 'happy') : looking ? 'thoughtful' : 'calm', closing ? null : looking ? 'face' : null, blink(lt, 0.2));
+      bA.put(bx, by);
       mag.style.display = looking ? 'block' : 'none';
-      mag.style.transform = `translate(${560 + Math.sin(lt * 3) * 60}px,${1250 + Math.cos(lt * 3) * 26}px) rotate(-20deg)`;
-      bookA.style.transform = closing ? `translate(${bx + 70}px,${1190 + Math.sin(lt * 4) * 4}px) rotate(-8deg)` : `translate(${bx + 90}px,1250px) rotate(10deg)`;
-      bookA.style.display = lt >= BILGE + 0.2 ? 'flex' : 'none';
+      mag.style.transform = `translate(${bx - 186}px,${by - 188}px) rotate(${-14 + Math.sin(lt * 3) * 6}deg)`;
+      bookA.style.display = closing ? 'flex' : 'none';
+      armsA.style.display = closing ? 'block' : 'none';
+      bookA.style.transform = `translate(${bx - 92}px,${by - 154}px)`;
+      armsA.style.transform = `translate(${bx - 220}px,${by - 412.5}px)`;
       lurk.forEach((e, i) => {
         e.style.display = closing && lt >= LURK && (lt * 1000) % 1900 > 140 ? 'block' : 'none';
         e.style.transform = `translate(${976 + i * 30}px,930px)`;
@@ -2860,7 +2885,7 @@ function defineValue() {
       // kamera planları (A sokak, B sıra odası, C pano, D telefon): dünya noktası (fx, fy) ekranda (540, SY)'ye düşer
       let W = 'A', z = 1, fx = 540, fy = SY;
       if (lt < BILGE) { z = 1.2 + 0.04 * prog(lt, 0, 1.2); fy = 1050; }                                                          // olay yeri
-      else if (lt < LINEUP) { const q = ramp(BILGE, LINEUP - BILGE); z = 1.24 + 0.12 * q; fx = lerp(540, 620, q); fy = lerp(1050, 1090, q); }   // dedektif bakar
+      else if (lt < LINEUP) { const q = ramp(BILGE, LINEUP - BILGE); z = 1.24 + 0.12 * q; fx = lerp(540, 680, q); fy = lerp(1050, 1090, q); }   // dedektif bakar
       else if (lt < Math.min(WIDE, ASK)) { W = 'B'; z = 1.75; fx = lerp(230, 820, E.inOut(prog(lt, IN[0] - 0.4, IN[3] - IN[0] + 1))); fy = 1048; }   // şüpheliler girerken sırayı yakından tarar
       else if (lt < ASK) { W = 'B'; z = 1.06 + 0.02 * prog(lt, WIDE, ASK - WIDE); fx = 532; fy = 960; }                         // hepsi: "Sadece 90 TL!"
       else if (lt < COUNT) { W = 'B'; z = 1.3; fx = 340; fy = 1230; }                                                           // "Sence katil kim?"
@@ -2870,7 +2895,7 @@ function defineValue() {
       else if (lt < EXC) { W = 'C'; z = 1.05 + 0.03 * prog(lt, SCI, EXC - SCI); fy = 1062; }                                    // pano
       else if (lt < APP) { W = 'C'; const q = E.out(prog(lt, EXC, 0.5)); z = lerp(1.08, 1.32, q); fx = lerp(540, 800, q); fy = lerp(1062, 1040, q); }   // grafik
       else if (lt < CTA) { W = 'D'; z = 1.28 + 0.03 * prog(lt, APP, CTA - APP); fy = 1119; }                                    // Cep Defteri
-      else { z = 1.15 + 0.04 * prog(lt, CTA, 3); fx = 600; fy = 1060; }                                                         // soru
+      else { z = 1.15 + 0.04 * prog(lt, CTA, 3); fx = 640; fy = 1060; }                                                         // soru
       let beat = -9;
       beats.forEach((t) => { if (lt >= t) beat = t; });
       z *= 1 + 0.012 * Math.exp(-(lt - beat) * 10);

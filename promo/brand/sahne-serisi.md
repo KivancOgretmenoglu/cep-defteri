@@ -49,12 +49,12 @@ Kalıp: gerçek hayattan bir para ikilemi, bir film türünün sahnesinde anlat�
 ---
 
 ## 2. Ayın katili
-**Durum:** üretildi (`out/ayin-katili.mp4`, 29,05 sn) · **Tür:** kara film / polisiye · **Oyuncular:** Dedektif Bilge (fötr şapka, CEP DEFTERİ defteri), şüpheliler (kahve, yemek siparişi, taksi, abonelik), kapüşonlu "BU SEFERLİK", Ceviz
+**Durum:** üretildi (`out/ayin-katili.mp4`, 29,05 sn) · **Tür:** kara film / polisiye · **Oyuncular:** Dedektif Bilge (fötr şapka, trençkot, CEP DEFTERİ defteri), şüpheliler (kahve, yemek siparişi, taksi, abonelik), kapüşonlu "BU SEFERLİK", Ceviz
 
 **Kanca (0. kare):** Yağmur, sokak lambası, yerde tebeşirle çizilmiş cüzdan silueti, duvarda "18" takvim yaprağı, "OLAY YERİ" şeridinin arkasında ağlayan Ceviz. Kutu: **"Harçlığını kim öldürdü?"**
 
 **Akış (videodaki zamanlar)**
-- 0–3,2 sn: Olay yeri. Şimşek "Ayın 18'i"de (0,42) ve "ölü"de (2,4); 1,2'de Dedektif Bilge gelir, büyüteçle bakar.
+- 0–3,2 sn: Olay yeri. Şimşek "Ayın 18'i"de (0,42) ve "ölü"de (2,4); 1,2'de trençkotlu Dedektif Bilge gelir, tebeşir çizimin yanında durur (delilin üstüne basmaz) ve sol kolundaki büyüteçle bakar.
 - 3,2–7,4 sn: Sıra odası, boy çizgili duvar. Kamera sırayı yakından tarar; her şüpheli adı söylenirken girer: 1 Kahve (4,1), 2 Yemek siparişi (4,74), 3 Taksi (5,82), 4 Abonelik (6,56).
 - 7,4–10,7 sn: Geniş plan; "Ben sadece 90 liraydım" denince dördünün de baloncuğu çıkar: "Sadece 90 TL!" (8,65).
 - 10,7–12,2 sn: Bilge kameraya döner: "Sence katil kim?"; kalp atışı başlar.
@@ -63,7 +63,7 @@ Kalıp: gerçek hayattan bir para ikilemi, bir film türünün sahnesinde anlat�
 - 16,8–18,05 sn: Şimşek "Bu seferlik"te; sıranın sonunda kırmızı spotta kapüşonlu **BU SEFERLİK**, kartları: doğum günü, konser, bayram, "indirim vardı".
 - 18,05–22,35 sn: Dedektifin panosu: polaroit, kartlar, "Tahmin mi, gerçek mi?" grafiği. "Sıradan harcamayı"da tahmin = gerçek (✓), "istisnaları"nda gerçek tahminin üstüne çıkar, "eksik"te **EKSİK!** damgası. Kaynak: Sussman ve Alter 2012.
 - 22,35–25,5 sn: Cep Defteri, Planlar: pençe "istisna değildir"de "+ Plan ekle"ye basar, liste uzar: "Bu seferlikler · Ödeme · Her ay · 500 TL".
-- 25,5–28,55 sn: Kapanış sorusu; sokakta dedektif defterine yazar, 26,75'te karanlık kapı aralığında gözler belirir.
+- 25,5–28,55 sn: Kapanış sorusu; sokakta dedektif CEP DEFTERİ'ni iki koluyla önünde tutar, 26,75'te karanlık kapı aralığında gözler belirir.
 - 28,55–29,05 sn: Yeniden olay yeri ve kanca kutusu (döngü: ilk kareyle aynı).
 
 **Seslendirme (videodaki hali; altı satır ilk denemede marka sesine uydu, 3,0–4,8 dB)**
