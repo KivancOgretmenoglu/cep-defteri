@@ -1829,6 +1829,118 @@ def cue_ayna(t0, skip=0, o=None):
         put(SFX, lamp_buzz(0.06), T(Of + 0.05), 0.2, pan=0.3)
         put(SFX, glitch(0.2), T(Of + 0.12), 0.3)
 
+def cue_katil(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    g = lambda k: o.get(k, 99)
+
+    def thump(v):  # kalp: alt vuruş + üst katman
+        x = np.sin(2 * np.pi * phase(glide(70, 40, 0.18))) * expd(0.18, 16)
+        h = np.sin(2 * np.pi * phase(glide(170, 95, 0.1))) * expd(0.1, 30) * 0.45
+        x[: len(h)] += h
+        return x * v
+
+    sub = lambda d=1.0: np.tanh(np.sin(2 * np.pi * phase(glide(65, 30, d))) * expd(d, 3) * 1.4)
+
+    def lamp_buzz(d):  # sokak lambası göz kırpar
+        t = tt(d)
+        x = wave_(phase(np.full(len(t), 100.0)), 'saw') * 0.5 + bp(noise(d), 2000, 6000) * 0.3
+        return bp(x, 150, 4000) * np.sin(np.pi * t / d) * 0.5
+
+    def step(v=0.5):  # ıslak zeminde adım
+        x = lp(noise(0.09), 900) * expd(0.09, 30) * 1.4
+        x[: int(0.05 * SR)] += bp(noise(0.05), 2000, 5000) * expd(0.05, 60) * 0.3
+        return x * v
+
+    def scribble(d=0.6):  # kalem defterde
+        t = tt(d)
+        return bp(noise(d), 1800, 6000) * (0.5 + 0.5 * np.sin(2 * np.pi * 9 * t)) ** 2 * 0.25
+
+    cut = lambda t, a=0.2, b=-0.2: put(SFX, stereo_move(whoosh(0.28, 2400, 500, 0.5), a, b), T(t - 0.08), 0.16)  # plan kesmesi
+
+    # sokak planlarında yağmur ve şimşek; lamba arada bir göz kırpar (value.js ile aynı takvim)
+    L, C, end = g('lineup'), g('cta'), DUR - t0
+    for a, b in ((0, min(L, end)), (C, end)):
+        if b > a + 0.05:
+            r = rain(b - a)
+            r[: int(0.08 * SR)] *= np.linspace(0, 1, int(0.08 * SR))
+            put(AMB, r * 0.9, T(a))
+    for b in o.get('bolts', [0.3]):
+        put(SFX, thunder(), T(b + 0.06), 0.5)
+    for n in range(12):
+        tb = (5 + 23 * n) / 7.3
+        if tb < min(L, end) or C <= tb < end:
+            put(SFX, lamp_buzz(0.14), T(tb), 0.18, pan=-0.5)
+    if 'bilge' in o:  # dedektif gelir
+        B = o['bilge']
+        for k in range(4):
+            put(SFX, step(0.45), T(B + k * 0.18), pan=0.5 - k * 0.1)
+    if 'lineup' in o:  # sıra odası: ışıklar yanar; şüpheliler sırayla girer, tabelalar
+        cut(L)
+        put(SFX, key_click(0.6), T(L + 0.05))
+        for i, ti in enumerate(o.get('in', [])):
+            put(SFX, stereo_move(whoosh(0.25, 300, 1800, 0.5), 0.6, 0.0), T(ti), 0.2)
+            put(SFX, key_click(0.35), T(ti), pan=-0.6 + 0.4 * i)
+            put(SFX, woodblock(False), T(ti + 0.32), 0.3, pan=-0.6 + 0.4 * i)
+    if 'bubble' in o:  # "Sadece 90 TL!" baloncukları
+        for i in range(4):
+            put(SFX, bloop(500 + 120 * i, 1200 + 150 * i, 0.07, 0.25), T(o['bubble'] + i * 0.22), pan=-0.6 + 0.4 * i)
+    if 'ask' in o:  # "Sence katil kim?": kalp atışı başlar ve hızlanır (value.js ile aynı takvim)
+        A, Z = o['ask'], g('zero')
+        cut(A)
+        t, k = A + 0.3, 0
+        while t < Z - 0.1:
+            put(SFX, thump(0.9), T(t)); put(SFX, thump(0.6), T(t + 0.16))
+            t += max(0.42, 0.62 - 0.03 * k); k += 1
+    if 'count' in o:  # gerçek 3 saniye: her saniye bip, spot sırayla dolaşır, son anda nefes
+        Cn, Z = o['count'], g('zero')
+        cut(Cn)
+        for j in range(3):
+            put(SFX, pluck(81 if j < 2 else 86, 0.14, 'square', 0.5, cut=4000, v=0.3), T(Cn + j))
+        for j in range(4):
+            put(SFX, key_click(0.45), T(Cn + j * 0.75), pan=-0.6 + 0.4 * j)
+        put(SFX, inhale(0.3), T(Z - 0.32), 0.6)
+    if 'dark' in o:  # ışıklar söner
+        put(SFX, key_click(0.8), T(o['dark'])); put(SFX, sub(0.9), T(o['dark']), 0.6)
+    if 'reveal' in o:  # şimşek: sıranın sonunda kapüşonlu
+        R = o['reveal']
+        put(SFX, thunder(), T(R), 0.6)
+        put(SFX, scare_sting(), T(R), 0.55)
+        put(SFX, slam_hit(0.7), T(R), 0.5)
+    if 'cards' in o:  # kartlarını açar
+        for i in range(4):
+            put(SFX, flutter(0.22), T(o['cards'] + i * 0.1), 0.14, pan=-0.4 + 0.27 * i)
+    if 'sci' in o:  # dedektif panosu: iğneler, ipler, grafik
+        S = o['sci']
+        cut(S)
+        put(SFX, tick(True, 0.4), T(S + 0.12))
+        put(SFX, bloop(400, 900, 0.07, 0.2), T(S + 0.37), pan=0.4)
+        put(SFX, stereo_move(whoosh(0.3, 900, 2600, 0.4), -0.3, 0.2), T(S + 0.45), 0.12)
+        for i in range(4):
+            put(SFX, tick(i % 2 == 0, 0.3), T(S + 0.6 + i * 0.1), pan=-0.4)
+    if 'normal' in o:  # sıradan harcama: tahmin = gerçek
+        N = o['normal']
+        put(SFX, slot_roll(0.6), T(N), 0.15)
+        put(SFX, pling(1568, 0.12, 0.4), T(N + 0.72), pan=-0.2)
+    if 'exc' in o:  # bu seferlikler: gerçek tahminin çok üstünde; EKSİK! damgası
+        X = o['exc']
+        put(SFX, slot_roll(0.4), T(X), 0.15)
+        put(SFX, riser(0.7), T(X + 0.45), 0.12)
+        put(SFX, stamp(), T(X + 1.2), 0.45, pan=0.2)
+    if 'app' in o:  # Cep Defteri: "+ Plan ekle" → Bu seferlikler · Her ay
+        Ap = o['app']
+        put(SFX, stereo_move(whoosh(0.3, 600, 2600, 0.5), 0.4, -0.2), T(Ap - 0.05), 0.16)
+        put(SFX, ui_tap(0.6), T(Ap + 0.45))
+        put(SFX, bloop(500, 1300, 0.08, 0.25), T(Ap + 0.55))
+        put(SFX, fm_bell(1568, 0.7, 0.18), T(Ap + 0.9))
+    if 'cta' in o:  # sokağa dönüş: dedektif defterine yazar
+        cut(C)
+        put(SFX, scribble(0.7), T(C + 0.3), 0.6, pan=0.3)
+    if 'lurk' in o:  # karanlık kapı aralığında gözler
+        Lk = o['lurk']
+        put(SFX, sub(1.0), T(Lk), 0.35)
+        put(SFX, pling(392, 0.12, 0.9), T(Lk + 0.02), pan=0.6)
+
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
 # ═════════ ANA MÜZİK ═════════

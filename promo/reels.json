@@ -4646,5 +4646,225 @@
         }
       ]
     ]
+  },
+  "ayin-katili": {
+    "end": 26.9,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.45,
+    "noMusicVariant": true,
+    "limiter": true,
+    "musicPlan": [
+      [
+        0,
+        16.0,
+        "horror",
+        {
+          "beatsEnd": 9.95
+        }
+      ],
+      [
+        16.0,
+        23.75,
+        "lofi"
+      ],
+      [
+        23.75,
+        26.4,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ],
+      [
+        26.4,
+        26.9,
+        "horror"
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          10.9,
+          13.9
+        ]
+      ]
+    },
+    "captionPixel": true,
+    "captionY": 604,
+    "captionMaxWords": 3,
+    "captionUntil": 23.75,
+    "captionCut": [
+      [
+        10.9,
+        13.9
+      ]
+    ],
+    "scenes": [
+      [
+        "katil",
+        0,
+        {
+          "bilge": 1.2,
+          "lineup": 3.2,
+          "in": [
+            4.1,
+            4.65,
+            5.4,
+            5.9
+          ],
+          "bubble": 8.2,
+          "ask": 9.95,
+          "count": 10.9,
+          "zero": 13.9,
+          "dark": 14.0,
+          "reveal": 15.0,
+          "cards": 15.45,
+          "sci": 16.0,
+          "normal": 17.1,
+          "exc": 19.5,
+          "app": 21.15,
+          "cta": 23.75,
+          "lurk": 25.0,
+          "bolts": [
+            0.3,
+            2.4
+          ]
+        }
+      ],
+      [
+        "katil",
+        26.4,
+        {
+          "wdur": 0.2
+        }
+      ]
+    ],
+    "voiceTempo": 1.2,
+    "voiceFilter": "brand",
+    "boxes": [
+      [
+        0,
+        3.1,
+        "Harçlığını<br><b>kim öldürdü?</b>",
+        300,
+        {
+          "size": 96,
+          "pulse": true
+        }
+      ],
+      [
+        3.2,
+        6.75,
+        "Dört şüpheli,<br><b>tek kurban</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        6.85,
+        9.85,
+        "Hepsi aynı şeyi diyor:<br><b>“Sadece 90 TL!”</b>",
+        300,
+        {
+          "size": 80,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        9.95,
+        13.9,
+        "Sence<br><b>katil kim?</b>",
+        300,
+        {
+          "size": 96,
+          "pulse": true,
+          "quiet": true,
+          "dim": [
+            10.9,
+            13.9
+          ],
+          "dimTo": 0.7
+        }
+      ],
+      [
+        14.05,
+        15.95,
+        "Katil:<br><b>BU SEFERLİK</b>",
+        300,
+        {
+          "size": 100,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        16.0,
+        21.1,
+        "Sıradan harcama: doğru tahmin<br><b>İstisnalar: eksik</b>",
+        300,
+        {
+          "size": 58,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        21.15,
+        23.7,
+        "Her ay bir istisna varsa,<br><b>istisna değildir</b>",
+        300,
+        {
+          "size": 80,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        23.75,
+        26.35,
+        "Senin bu ayki<br><b>“bu seferlik”in neydi?</b>",
+        300,
+        {
+          "size": 80,
+          "pulse": true
+        }
+      ],
+      [
+        23.85,
+        26.35,
+        "Yoruma yaz: ne, kaç TL?",
+        600,
+        {
+          "size": 44,
+          "quiet": true
+        }
+      ],
+      [
+        24.85,
+        26.35,
+        "Bu seferlikleri Cep Defteri'ne önceden yaz · @cep_defteri",
+        672,
+        {
+          "size": 32,
+          "quiet": true
+        }
+      ],
+      [
+        26.4,
+        26.9,
+        "Harçlığını<br><b>kim öldürdü?</b>",
+        300,
+        {
+          "size": 96,
+          "pulse": true,
+          "quiet": true
+        }
+      ]
+    ]
   }
 }
