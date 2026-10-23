@@ -49,7 +49,9 @@ Kalıp: gerçek hayattan bir para ikilemi, bir film türünün sahnesinde anlat�
 ---
 
 ## 2. Ayın katili
-**Durum:** sırada · **Tür:** kara film / polisiye · **Süre:** ~27 sn · **Oyuncular:** Dedektif Bilge, şüpheliler, Ceviz
+**Durum:** üretimde: sahne ve ses efektleri hazır (`SCENES.katil`, reels.json `ayin-katili`), seslendirme bekleniyor (ElevenLabs bağlantısı) · **Tür:** kara film / polisiye · **Süre:** ~27 sn · **Oyuncular:** Dedektif Bilge (fötr şapka, CEP DEFTERİ defteri), şüpheliler, Ceviz
+
+**Üretilecek seslendirme (marka sesi; bu metinle):** 1 `[dramatic]` Ayın on sekizi. Ceviz'in harçlığı ölü bulundu. · 2 `[curious]` Şüpheliler: kahve, yemek siparişi, taksi ve abonelik. · 3 `[energetic]` Hepsi aynı şeyi söylüyor: "Ben sadece doksan liraydım!" · 4 `[curious]` Sence katil kim? · 5 `[dramatic]` Hiçbiri. Katil: "Bu seferlik." · 6 `[excited]` Bir araştırmaya göre sıradan harcamayı doğru tahmin ediyoruz, istisnaları eksik. · 7 `[dramatic]` Her ay bir istisna varsa, istisna değildir. · 8 `[playful]` Senin bu ayki bu seferliğin neydi? Yoruma yaz! (Ses gelince reels.json'daki olay zamanları ve kutular satır sürelerine göre oturtulur.)
 
 **Kanca (0. kare):** Yağmur, sokak lambası, yerde tebeşirle çizilmiş cüzdan silueti. Kutu: **"Harçlığını kim öldürdü?"**
 
