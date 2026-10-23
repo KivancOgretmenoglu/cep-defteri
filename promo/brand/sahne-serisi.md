@@ -222,32 +222,43 @@ Kelime zamanları ElevenLabs Scribe ile ölçüldü (`assets/voice/katil/words.j
 ---
 
 ## 7. Abonelik vampirleri
-**Durum:** sırada · **Tür:** korku · **Süre:** ~24 sn · **Oyuncular:** Ceviz (uyuyor), minik vampirler
+**Durum:** üretildi (`out/abonelik-vampirleri.mp4`, 31,1 sn) · **Tür:** korku · **Oyuncular:** Ceviz (gece şapkasıyla uyuyor), minik vampirler (müzik, dizi, oyun, bulut; gövdeleri uygulama simgesi), solgun "deneme üyeliği"
 
-**Kanca (0. kare):** Gece, kumbaranın üstünde iki minik kırmızı göz. Kutu: **"Kumbaranı geceleri kim emiyor?"**
+**Kanca (0. kare):** Gece, ay ışığında cam kumbara; sırtında karanlık bir siluet pipetle içiyor, iki kırmızı göz parlıyor. Kutu: **"Kumbaranı geceleri kim emiyor?"**
 
-**Akış**
-- 0–3 sn: Ceviz uyuyor, telefon komodinde. Ekran kendiliğinden yanar.
-- 3–8 sn: Telefondan minik vampirler çıkar: müzik, dizi, oyun, bulut. Kumbaraya pipet sokarlar, kumbaradaki para seviyesi düşer.
-- 8–10 sn: En sonda solgun bir vampir: "Unuttuğun deneme üyeliği".
-- 10–13 sn: Karar anı, 3 sn sayım. Kutu: "Ayda kaç TL? Tahminini yaz".
-- 13–18 sn: Pano. Kutu: "İnsanlar abonelik harcamasını ayda ortalama 133 $ eksik tahmin etti" + "Kaynak: C+R Research 2022".
-- 18–21 sn: Ders. Ceviz uyanır, ışığı açar; Cep Defteri'nde aylık planlı kalemler alt alta. Vampirler ışıkta kaybolur.
-- 21–24 sn: Kapanış sorusu, ışık söner (döngü).
+**Akış (videodaki zamanlar)**
+- 0–0,72 sn: Kumbaranın yakın planı: siluet pipetle içer, paralar camın içinden görünür.
+- 0,72–2,12 sn: Oda: Ceviz gece şapkasıyla uyuyor (z'ler), duvar saati 03.00, battaniyenin üstünde CEP DEFTERİ defteri (oda planlarında hep görünür).
+- 2,12–3,45 sn: Kumbaraya yaklaşma; "boşalıyor"da uzun bir yudum, para seviyesi iner.
+- 3,45 sn: Stanttaki telefon kendiliğinden yanar (03:00); siluet ışıktan kaçıp kumbaranın arkasına saklanır.
+- 3,98–7,5 sn: Telefon ekranı: dört uygulama simgesi "vampirler"de göz ve diş açar; adı söylenen kanat çırpıp kameraya doğru uçar: Müzik (5,48), Dizi (6,05), Oyun (6,67), Bulut (7,15).
+- 7,5–9,6 sn: Dördü kumbaranın başında, pipetlerinden para kırıntıları akıyor; "Sence ayda kaç lira emiyorlar?", kalp atışı başlar.
+- 9,6–12,6 sn: Karar anı (gerçek 3 sn): müzik ve altyazı susar; her bipte bir yudum, seviye bir basamak iner. Çağrı: "Ayda kaç TL? Yoruma yaz".
+- 12,6–13,85 sn: Etiketler: 100 / 250 / 150 / 50 TL, kumbaranın etiketi "AYDA 550 TL". "En sinsisi"nde ay ışığı ve telefon titrer.
+- 13,85–15,7 sn: Telefonda örümcek ağlı eski bir bildirim: "Deneme süren bitti · Aboneliğin başladı: ayda 150 TL · 3 ay önce". "Unuttuğun"da arkasından solgun vampir tırmanır; göğsünde "ÜCRETSİZ"i çizili "DENEME" kuşağı.
+- 15,7–17,5 sn: Beşi birden kumbarada (solgun olan telefonun tepesine tünemiş); "700"de etiket 700 TL olur (kasa sesi).
+- 17,5–23,04 sn: CEP DEFTERİ'nin sayfası: "ANKET · ABD · 1.000 KİŞİ", ilk tahmin 86 $, tek tek sayınca 219 $, "eksik"te **133 $ EKSİK!** damgası. Kaynak: C+R Research 2022.
+- 23,04–24,9 sn: Ceviz "!" ile uyanır, lambanın ipini çeker (23,72): oda aydınlanır, vampirler çığlık atıp toza döner.
+- 24,9–27,2 sn: Cep Defteri, Bütçe ve planlar → Tüm planlar: Bulut depolama, Deneme üyeliği, Dizi, Müzik ve Oyun aboneliği alt alta gelir (uygulamadaki satır biçimi: "Her ay · Abonelikler · Banka"); deneme üyeliği satırı parlar.
+- 27,2–30,55 sn: Kapanış sorusu; aydınlık odada Ceviz telefonuna bakıyor, kumbaranın etiketi hâlâ "AYDA 700 TL"; 29,3'te komodinin karanlık rafında iki kırmızı göz belirir.
+- 30,55–31,1 sn: Lamba söner; kumbaradaki gözler ve kanca kutusu (döngü: ilk kareyle aynı).
 
-**Seslendirme**
-1. `[dramatic]` Gece üç. Ceviz uyuyor. Kumbara ise boşalıyor.
+**Seslendirme (videodaki hali)**
+1. Gece üç. Ceviz uyuyor... Kumbarası ise boşalıyor. (iki v4 denemesi uymadı, 6,32 ve 7,11 dB; tarif gereği etiketsiz `eleven_multilingual_v2`, 5,25 dB)
 2. `[curious]` Telefondan minik vampirler çıkıyor: müzik, dizi, oyun, bulut.
-3. `[dramatic]` En sinsisi: üç ay önce unuttuğun deneme üyeliği.
-4. `[curious]` Sence ayda kaç lira emiyorlar?
-5. `[excited]` ABD'de bir ankette insanlar abonelik harcamalarını ayda ortalama 133 dolar eksik tahmin etti.
-6. `[dramatic]` Vampirler ışıktan korkar. Aboneliklerini bir kere alt alta yaz.
-7. `[playful]` Sen kaç aboneliğe para ödüyorsun? Say, yoruma yaz.
+3. `[curious]` Sence ayda kaç lira emiyorlar?
+4. `[dramatic]` En sinsisi: üç ay önce unuttuğun deneme üyeliği.
+5. `[excited]` Toplam: ayda yedi yüz lira!
+6. `[excited]` ABD'de bir ankette insanlar abonelik harcamasını ayda ortalama yüz otuz üç dolar eksik tahmin etti.
+7. `[dramatic]` Vampirler ışıktan korkar. Aboneliklerini bir kere alt alta yaz.
+8. `[playful]` Sen kaç aboneliğe para ödüyorsun? Say, yoruma yaz!
 
-**Kapanış kutusu:** "Kaç aboneliğe para ödüyorsun?" · alt satır: "Cep Defteri'nde hepsini alt alta gör"
-**Uygulamayla bağı:** Abonelikler aylık planlı kalem olarak yazılır.
+2–8. satırlar ilk denemede marka sesine uydu (3,1–5,3 dB). Senaryodaki sıra değişti: deneme üyeliği karar anından sonra gelir (izleyici dört vampire bakıp tahmin eder, unutulan beşinci tahmini aşar: anketteki bulgunun aynısı) ve toplamı söyleyen 5. satır eklendi. Kelime zamanları ElevenLabs Scribe ile ölçüldü (`assets/voice/vampir/words.json`; sekiz satır tek dosyada birleştirilip bir kez döküldü, döküm metinle birebir aynı).
+
+**Kapanış kutusu:** "Kaç aboneliğe para ödüyorsun?" (seslendirmeyle aynı) · çip: "Yoruma yaz: kaç tane, ayda kaç TL?" · son 1,6 sn: "Hepsini Cep Defteri'nde alt alta gör · @cep_defteri"
+**Uygulamayla bağı:** Bütçe → + Plan → Ödeme, Her ay: her abonelik ayrı bir plan; "Tüm planlar"da alt alta görünür, ödemeler kullanılabilir paradan önceden düşülür.
 **Açıklamanın ilk satırı:** Kaç aboneliğe para ödediğini biliyor musun? 🧛
-**Yayından önce doğrula:** C+R Research anketi (2022, 1.000 ABD'li yetişkin). Türkiye'den benzer bir veri bulunursa o kullanılır. Marka adı (Netflix, Spotify) kullanılmaz, tür adı yazılır.
+**Doğrulama sonucu:** C+R Research'ün kendi sayfası ve CNBC (2 Haziran 2022): 22 Nisan–2 Mayıs 2022, ABD'de 1.000 kişi; hızlı tahminlerin ortalaması 86 $, kategori kategori sayınca 219 $ (fark 133 $); %42'si kullanmayı bıraktığı bir aboneliğe hâlâ ödediğini unutmuş. Türkiye için birincil kaynağı bulunan benzer bir veri yok (haberlerde geçen ING Türkiye "%36"sının kaynağı bulunamadı), bu yüzden ABD anketi kullanıldı ve ekranda "ABD" yazıyor. Marka adı kullanılmadı; vampirler tür adıyla (müzik, dizi, oyun, bulut). TL tutarları örnek.
 
 ---
 
@@ -259,4 +270,4 @@ Kelime zamanları ElevenLabs Scribe ile ölçüldü (`assets/voice/katil/words.j
 - Mathur ve ark. (2019): [Princeton proje sayfası](https://webtransparency.cs.princeton.edu/dark-patterns), [Nextgov](https://www.nextgov.com/emerging-tech/2019/12/dark-patterns-trick-you-spending-more-online/161859/)
 - Allcott ve ark. (2020): [SIEPR](https://siepr.stanford.edu/publications/working-paper/welfare-effects-social-media)
 - Chen ve Rao (2007): [RePEc](https://ideas.repec.org/a/oup/jconrs/v34y2007i3p327-340.html), [ScienceDaily](https://sciencedaily.com/releases/2007/05/070515110951.htm)
-- C+R Research (2022): [KTVU haberi](https://www.ktvu.com/news/many-underestimate-monthly-subscription-costs-133-survey-2022)
+- C+R Research (2022): [C+R Research](https://www.crresearch.com/blog/subscription-service-statistics-and-costs/), [CNBC](https://www.cnbc.com/2022/06/02/consumers-spend-133-more-monthly-on-subscriptions-than-they-realize.html), [KTVU haberi](https://www.ktvu.com/news/many-underestimate-monthly-subscription-costs-133-survey-2022)

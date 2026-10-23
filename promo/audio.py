@@ -1940,6 +1940,202 @@ def cue_katil(t0, skip=0, o=None):
         put(SFX, sub(1.0), T(Lk), 0.35)
         put(SFX, pling(392, 0.12, 0.9), T(Lk + 0.02), pan=0.6)
 
+def cue_vampir(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    g = lambda k: o.get(k, 99)
+
+    def thump(v):  # kalp: alt vuruş + üst katman
+        x = np.sin(2 * np.pi * phase(glide(70, 40, 0.18))) * expd(0.18, 16)
+        h = np.sin(2 * np.pi * phase(glide(170, 95, 0.1))) * expd(0.1, 30) * 0.45
+        x[: len(h)] += h
+        return x * v
+
+    sub = lambda d=1.0: np.tanh(np.sin(2 * np.pi * phase(glide(65, 30, d))) * expd(d, 3) * 1.4)
+
+    def slurp(d=0.5):  # pipetle içme: hava ve sıvı hışırtısı, gurultu, sonda ince ıslık
+        t = tt(d)
+        gur = 0.5 + 0.5 * np.sin(2 * np.pi * (14 + 10 * t / d) * t) ** 2
+        x = bp(noise(d), 900, 3600) * gur * np.sin(np.pi * t / d) ** 0.7
+        x += np.sin(2 * np.pi * phase(glide(650, 1250, d))) * 0.07 * (t / d) ** 2
+        return x * 0.55
+
+    def vibe(d):  # telefon titrer
+        t = tt(d)
+        x = np.sin(2 * np.pi * 150 * t) * (0.6 + 0.4 * np.sign(np.sin(2 * np.pi * 23 * t)))
+        return lp(x, 900) * np.sin(np.pi * t / d) ** 0.5 * 0.5
+
+    def glitch(d=0.22):  # ekran kendiliğinden yanar: dijital cızırtı
+        n = int(d * SR)
+        steps = np.repeat(rng.uniform(-1, 1, n // 220 + 1), 220)[:n]
+        return bp(noise(d) * 0.4 + steps * 0.6, 500, 6000) * expd(d, 6) * 0.5
+
+    def lamp_buzz(d):  # lamba titreyerek yanar / ay ışığı titrer
+        t = tt(d)
+        x = wave_(phase(np.full(len(t), 100.0)), 'saw') * 0.5 + bp(noise(d), 2000, 6000) * 0.3
+        return bp(x, 150, 4000) * np.sin(np.pi * t / d) * 0.5
+
+    def marker(d=0.4):  # keçeli kalem kâğıtta
+        t = tt(d)
+        x = bp(noise(d), 2500, 7000) * (0.6 + 0.4 * np.sin(2 * np.pi * 9 * t)) * np.sin(np.pi * t / d) ** 0.5
+        return (x * 0.6 + np.sin(2 * np.pi * phase(glide(1800, 2400, d))) * 0.04) * 0.5
+
+    def sizzle(d=0.5):  # ışıkta cızırdayıp toza dönmek
+        t = tt(d)
+        cr = np.zeros(len(t))
+        idx = rng.choice(len(cr), int(d * 900), replace=False)
+        cr[idx] = rng.uniform(0.2, 1, len(idx))
+        cr = np.convolve(cr, np.exp(-np.arange(40) / 6), 'same')
+        return (hp(noise(d), 3000) * 0.5 + bp(cr, 1500, 9000) * 0.8) * np.exp(-t * 3) * 0.6
+
+    def shriek(f0=2300):  # minik vampir çığlığı
+        d = 0.32
+        x = np.sin(2 * np.pi * phase(glide(f0, f0 * 0.42, d))) * np.sin(np.pi * np.linspace(0, 1, int(d * SR))) ** 0.5
+        return x * (0.7 + 0.3 * np.sin(2 * np.pi * 34 * tt(d))) * 0.2
+
+    cut = lambda t, a=0.2, b=-0.2: put(SFX, stereo_move(whoosh(0.28, 2400, 500, 0.5), a, b), T(t - 0.08), 0.16)  # plan kesmesi
+
+    # gece: cırcır böcekleri, duvar saati (ışık yanana kadar)
+    Lg, end = g('light'), DUR - t0
+    dark_end = min(Lg, end)
+    if dark_end > 0.1:
+        put(AMB, crickets(dark_end) * 0.5, T(0), pan=0.5)
+        for n in range(int(dark_end)):
+            if not (g('count') - 0.1 <= n < g('zero') + 0.1):
+                put(SFX, tick(n % 2 == 0, 0.09), T(n + 0.02), pan=-0.4)
+    # kanca: karanlıkta biri pipetle içiyor
+    put(SFX, slurp(0.55), T(0.05), 0.7, pan=0.3)
+    if 'wide' in o:
+        cut(o['wide'])
+        put(SFX, snore(0.6), T(1.48), 0.5, pan=-0.4)
+    if 'pig' in o:
+        cut(o['pig'], -0.2, 0.2)
+    if 'drain' in o:  # "boşalıyor": uzun bir yudum, paralar iner
+        D = o['drain']
+        put(SFX, slurp(0.6), T(D - 0.05), 0.9, pan=0.3)
+        put(SFX, clink(), T(D + 0.35), 0.35, pan=0.3)
+    if 'phone' in o:  # telefon kendiliğinden yanar; siluet saklanır
+        P = o['phone']
+        cut(P)
+        put(SFX, glitch(0.22), T(P), 0.5, pan=-0.2)
+        put(SFX, vibe(0.3), T(P + 0.05), 0.5, pan=-0.2)
+        put(SFX, fm_bell(988, 0.6, 0.12, ratio=3.1), T(P + 0.12), pan=-0.2)
+    if 'screen' in o:
+        cut(o['screen'])
+    if 'wake' in o:  # simgelerin gözleri açılır
+        W = o['wake']
+        put(SFX, scare_sting(), T(W), 0.32)
+        put(SFX, sub(0.8), T(W), 0.5)
+    for i, tO in enumerate(o.get('out', [])):  # simgeden çıkıp uçar: tık, kanat, cıyak
+        pan = -0.5 if i % 2 == 0 else 0.5
+        put(SFX, bloop(400 + 90 * i, 1500 + 120 * i, 0.08, 0.3), T(tO), pan=pan)
+        put(SFX, flutter(0.5), T(tO + 0.05), 0.35, pan=pan)
+        put(SFX, shriek(2000 + 180 * i), T(tO + 0.1), 0.8, pan=pan)
+    if 'sip' in o:  # dördü birden kumbarada: yudumlar ve yutkunmalar
+        S, C = o['sip'], g('count')
+        cut(S)
+        tk, k = S + 0.1, 0
+        while tk < C - 0.2:
+            put(SFX, slurp(0.42), T(tk), 0.45, pan=-0.6 + 0.4 * (k % 4))
+            if k % 3 == 2:
+                put(SFX, gulp(), T(tk + 0.35), 0.25, pan=-0.6 + 0.4 * (k % 4))
+            tk += 0.55; k += 1
+    if 'ask' in o:  # "Sence ayda kaç lira emiyorlar?": kalp atışı başlar ve hızlanır (value.js ile aynı takvim)
+        A, Z = o['ask'], g('zero')
+        t, k = A + 0.3, 0
+        while t < Z - 0.1:
+            put(SFX, thump(0.9), T(t)); put(SFX, thump(0.6), T(t + 0.16))
+            t += max(0.42, 0.62 - 0.03 * k); k += 1
+    if 'count' in o:  # gerçek 3 saniye: her saniye bip ve bir yudum (seviye basamak basamak iner), son anda nefes
+        Cn, Z = o['count'], g('zero')
+        for j in range(3):
+            put(SFX, pluck(81 if j < 2 else 86, 0.14, 'square', 0.5, cut=4000, v=0.3), T(Cn + j))
+            put(SFX, slurp(0.35), T(Cn + j + 0.08), 0.5, pan=0.2)
+        put(SFX, inhale(0.3), T(Z - 0.32), 0.6)
+    if 'zero' in o:  # etiketler: dört pop, kumbaranın etiketi döner
+        Z = o['zero']
+        for i in range(4):
+            put(SFX, bloop(500 + 110 * i, 1200 + 140 * i, 0.07, 0.26), T(Z + 0.05 + i * 0.15), pan=-0.6 + 0.4 * i)
+        put(SFX, slot_roll(0.4), T(Z + 0.75), 0.2)
+    if 'sneak' in o:  # "En sinsisi": ay ışığı titrer, telefon titrer
+        Sn = o['sneak']
+        for k, v in ((0.0, 0.25), (0.16, 0.2), (0.33, 0.25)):
+            put(SFX, lamp_buzz(0.08), T(Sn + k), v, pan=0.4)
+        put(SFX, vibe(0.45), T(Sn + 0.05), 0.6, pan=-0.3)
+        put(SFX, sub(1.0), T(Sn), 0.45)
+    if 'notif' in o:  # eski bildirim
+        N = o['notif']
+        cut(N)
+        put(SFX, notif_ding(), T(N), 0.35, pan=-0.1)
+    if 'crawl' in o:  # solgun vampir bildirimin arkasından tırmanır
+        Cr = o['crawl']
+        put(SFX, creak(0.42), T(Cr - 0.2), 0.5)
+        put(SFX, stereo_move(whoosh(0.8, 200, 900, 0.5), -0.2, 0.2), T(Cr), 0.25)
+        put(SFX, scare_sting(), T(Cr + 0.85), 0.42)
+        put(SFX, shriek(1500), T(Cr + 0.9), 0.6)
+    if 'total' in o:  # beşi birden: yudumlar
+        To, Sc = o['total'], g('sci')
+        cut(To)
+        tk, k = To + 0.15, 0
+        while tk < Sc - 0.3:
+            put(SFX, slurp(0.4), T(tk), 0.32, pan=-0.6 + 0.3 * (k % 5))
+            tk += 0.5; k += 1
+        put(SFX, bloop(420, 1100, 0.07, 0.24), T(To + 0.2), pan=-0.6)
+    if 'hit' in o:  # "700": kasa ve sert vuruş
+        H = o['hit']
+        put(SFX, cash_register(), T(H - 0.02), 0.45, pan=0.3)
+        put(SFX, slam_hit(0.8), T(H), 0.45)
+    if 'sci' in o:  # defter sayfası: kalemle başlık
+        S = o['sci']
+        cut(S)
+        put(SFX, flutter(0.3), T(S + 0.02), 0.2)
+        put(SFX, marker(0.55), T(S + 0.12), 0.35, pan=-0.2)
+    if 'bar1' in o:
+        put(SFX, marker(0.45), T(o['bar1']), 0.45, pan=-0.3)
+    if 'bar2' in o:
+        put(SFX, marker(0.6), T(o['bar2']), 0.5, pan=0.3)
+        put(SFX, riser(0.6), T(o['bar2'] + 0.05), 0.12)
+    if 'gap' in o:
+        put(SFX, marker(0.3), T(o['gap']), 0.4)
+        put(SFX, pling(1568, 0.1, 0.4), T(o['gap'] + 0.2), pan=0.2)
+    if 'miss' in o:
+        put(SFX, stamp(), T(o['miss']), 0.45, pan=-0.2)
+    if 'rouse' in o:  # Ceviz uyanır
+        R = o['rouse']
+        cut(R)
+        put(SFX, boing(0.35, 0.2), T(R + 0.02))
+        put(SFX, inhale(0.25), T(R), 0.4)
+    if 'light' in o:  # ipi çeker, lamba yanar; vampirler cızırdayıp toza döner
+        Lt = o['light']
+        put(SFX, key_click(0.7), T(Lt - 0.03), pan=-0.1)
+        for k, v in ((0.02, 0.3), (0.12, 0.22), (0.27, 0.3)):
+            put(SFX, lamp_buzz(0.07), T(Lt + k), v, pan=-0.1)
+        put(SFX, stereo_move(whoosh(0.4, 400, 3000, 0.6), -0.3, 0.3), T(Lt), 0.2)
+        for i in range(5):
+            tb = Lt + 0.12 + i * 0.07
+            put(SFX, shriek(2400 - 150 * i), T(tb - 0.04), 0.7, pan=0.2 + 0.15 * (i % 4))
+            put(SFX, sizzle(0.5), T(tb), 0.45, pan=0.2 + 0.15 * (i % 4))
+        put(SFX, bloop(900, 300, 0.12, 0.25), T(Lt + 0.5), pan=0.4)
+    if 'app' in o:  # Cep Defteri: satırlar alt alta
+        Ap = o['app']
+        put(SFX, stereo_move(whoosh(0.3, 600, 2600, 0.5), 0.4, -0.2), T(Ap - 0.05), 0.16)
+        put(SFX, fm_bell(1318, 0.5, 0.14), T(Ap + 0.1))
+        for i, tr in enumerate(o.get('rows', [])):
+            put(SFX, ui_tap(0.45), T(tr))
+            put(SFX, bloop(500 + 80 * i, 1100 + 120 * i, 0.06, 0.18), T(tr + 0.04))
+        if o.get('rows'):
+            put(SFX, fm_bell(1568, 0.7, 0.16), T(o['rows'][-1] + 0.3))
+    if 'cta' in o:
+        cut(o['cta'])
+    if 'lurk' in o:  # komodinin karanlık rafında gözler
+        Lk = o['lurk']
+        put(SFX, sub(1.0), T(Lk), 0.35)
+        put(SFX, pling(392, 0.12, 0.9), T(Lk + 0.02), pan=0.6)
+    if 'off' in o:  # lamba söner
+        Of = o['off']
+        put(SFX, key_click(0.8), T(Of)); put(SFX, sub(0.9), T(Of), 0.6)
+
+
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
 # ═════════ ANA MÜZİK ═════════

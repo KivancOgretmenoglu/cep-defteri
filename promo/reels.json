@@ -4920,5 +4920,281 @@
         "assets/voice/katil/k8.mp3"
       ]
     ]
+  },
+  "abonelik-vampirleri": {
+    "end": 31.1,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.45,
+    "noMusicVariant": true,
+    "limiter": true,
+    "musicPlan": [
+      [
+        0,
+        17.5,
+        "horror",
+        {
+          "beatsEnd": 7.5
+        }
+      ],
+      [
+        17.5,
+        27.2,
+        "lofi"
+      ],
+      [
+        27.2,
+        30.55,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ],
+      [
+        30.55,
+        31.1,
+        "horror"
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          9.6,
+          12.6
+        ]
+      ]
+    },
+    "captionPixel": true,
+    "captionY": 604,
+    "captionMaxWords": 3,
+    "captionUntil": 27.2,
+    "captionCut": [
+      [
+        9.6,
+        12.6
+      ]
+    ],
+    "scenes": [
+      [
+        "vampir",
+        0,
+        {
+          "wide": 0.72,
+          "pig": 2.12,
+          "drain": 2.91,
+          "phone": 3.45,
+          "screen": 3.98,
+          "wake": 4.27,
+          "out": [
+            5.48,
+            6.05,
+            6.67,
+            7.15
+          ],
+          "sip": 7.5,
+          "ask": 7.5,
+          "count": 9.6,
+          "zero": 12.6,
+          "sneak": 12.77,
+          "notif": 13.85,
+          "crawl": 14.44,
+          "total": 15.7,
+          "hit": 16.98,
+          "sci": 17.5,
+          "bar1": 18.9,
+          "bar2": 20.72,
+          "gap": 21.23,
+          "miss": 22.02,
+          "rouse": 23.04,
+          "pull": 23.3,
+          "light": 23.72,
+          "app": 24.9,
+          "rows": [
+            25.1,
+            25.48,
+            25.86,
+            26.24,
+            26.62
+          ],
+          "cta": 27.2,
+          "lurk": 29.3,
+          "off": 30.55
+        }
+      ],
+      [
+        "vampir",
+        30.6,
+        {
+          "wdur": 0.2
+        }
+      ]
+    ],
+    "voiceTempo": 1.2,
+    "voiceFilter": "brand",
+    "boxes": [
+      [
+        0,
+        3.4,
+        "Kumbaranı<br><b>geceleri kim emiyor?</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true
+        }
+      ],
+      [
+        3.45,
+        7.45,
+        "Telefondan<br><b>vampirler çıkıyor</b>",
+        300,
+        {
+          "size": 84,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        7.5,
+        12.6,
+        "Sence ayda<br><b>kaç TL emiyorlar?</b>",
+        300,
+        {
+          "size": 92,
+          "pulse": true,
+          "quiet": true,
+          "dim": [
+            9.6,
+            12.6
+          ],
+          "dimTo": 0.7
+        }
+      ],
+      [
+        12.65,
+        15.65,
+        "En sinsisi:<br><b>unuttuğun deneme üyeliği</b>",
+        300,
+        {
+          "size": 66,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        15.7,
+        17.45,
+        "Toplam:<br><b>ayda 700 TL</b>",
+        300,
+        {
+          "size": 104,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        17.5,
+        22.95,
+        "İnsanlar aboneliklerini<br><b>ayda 133 $ eksik tahmin etti</b>",
+        300,
+        {
+          "size": 62,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        23.0,
+        27.15,
+        "Vampirler ışıktan korkar:<br><b>hepsini alt alta yaz</b>",
+        300,
+        {
+          "size": 74,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        27.2,
+        30.5,
+        "Kaç aboneliğe<br><b>para ödüyorsun?</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true
+        }
+      ],
+      [
+        27.3,
+        30.5,
+        "Yoruma yaz: kaç tane, ayda kaç TL?",
+        600,
+        {
+          "size": 44,
+          "quiet": true
+        }
+      ],
+      [
+        28.9,
+        30.5,
+        "Hepsini Cep Defteri'nde alt alta gör · @cep_defteri",
+        672,
+        {
+          "size": 32,
+          "quiet": true
+        }
+      ],
+      [
+        30.6,
+        31.1,
+        "Kumbaranı<br><b>geceleri kim emiyor?</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true,
+          "quiet": true
+        }
+      ]
+    ],
+    "voiceFiles": [
+      [
+        0.1,
+        "assets/voice/vampir/v1m.mp3",
+        "Gece üç. Ceviz uyuyor. Kumbarası ise boşalıyor."
+      ],
+      [
+        3.45,
+        "assets/voice/vampir/v2.mp3",
+        "Telefondan minik vampirler çıkıyor: müzik, dizi, oyun, bulut."
+      ],
+      [
+        7.5,
+        "assets/voice/vampir/v3.mp3",
+        "Sence ayda kaç lira emiyorlar?"
+      ],
+      [
+        12.7,
+        "assets/voice/vampir/v4.mp3",
+        "En sinsisi: 3 ay önce unuttuğun deneme üyeliği."
+      ],
+      [
+        15.7,
+        "assets/voice/vampir/v5.mp3",
+        "Toplam: ayda 700 lira!"
+      ],
+      [
+        17.5,
+        "assets/voice/vampir/v6.mp3",
+        "ABD'de bir ankette insanlar abonelik harcamasını ayda ortalama 133 dolar eksik tahmin etti."
+      ],
+      [
+        22.95,
+        "assets/voice/vampir/v7.mp3",
+        "Vampirler ışıktan korkar. Aboneliklerini bir kere alt alta yaz."
+      ],
+      [
+        27.25,
+        "assets/voice/vampir/v8.mp3"
+      ]
+    ]
   }
 }
