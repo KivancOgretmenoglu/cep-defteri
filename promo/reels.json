@@ -4922,7 +4922,7 @@
     ]
   },
   "abonelik-vampirleri": {
-    "end": 31.1,
+    "end": 32.5,
     "loop": true,
     "handheld": true,
     "musicGain": 0.45,
@@ -4931,49 +4931,35 @@
     "musicPlan": [
       [
         0,
-        17.5,
+        13.6,
         "horror",
         {
-          "beatsEnd": 7.5
+          "beatsEnd": 11.6
         }
       ],
       [
-        17.5,
-        27.2,
+        13.6,
+        23.8,
         "lofi"
       ],
       [
-        27.2,
-        30.55,
+        23.8,
+        31.95,
         "pop",
         {
           "bpm": 108
         }
       ],
       [
-        30.55,
-        31.1,
+        31.95,
+        32.5,
         "horror"
       ]
     ],
-    "music": {
-      "gaps": [
-        [
-          9.6,
-          12.6
-        ]
-      ]
-    },
     "captionPixel": true,
     "captionY": 604,
     "captionMaxWords": 3,
-    "captionUntil": 27.2,
-    "captionCut": [
-      [
-        9.6,
-        12.6
-      ]
-    ],
+    "captionUntil": 23.8,
     "scenes": [
       [
         "vampir",
@@ -4992,38 +4978,36 @@
             7.15
           ],
           "sip": 7.5,
-          "ask": 7.5,
-          "count": 9.6,
-          "zero": 12.6,
-          "sneak": 12.77,
-          "notif": 13.85,
-          "crawl": 14.44,
-          "total": 15.7,
-          "hit": 16.98,
-          "sci": 17.5,
-          "bar1": 18.9,
-          "bar2": 20.72,
-          "gap": 21.23,
-          "miss": 22.02,
-          "rouse": 23.04,
-          "pull": 23.3,
-          "light": 23.72,
-          "app": 24.9,
+          "tags": 7.85,
+          "sneak": 8.67,
+          "notif": 9.75,
+          "crawl": 10.34,
+          "total": 11.6,
+          "hit": 12.88,
+          "sci": 13.6,
+          "pct": 15.45,
+          "miss": 18.78,
+          "rouse": 19.49,
+          "pull": 19.75,
+          "light": 20.17,
+          "app": 21.35,
           "rows": [
-            25.1,
-            25.48,
-            25.86,
-            26.24,
-            26.62
+            21.55,
+            21.93,
+            22.31,
+            22.69,
+            23.07
           ],
-          "cta": 27.2,
-          "lurk": 29.3,
-          "off": 30.55
+          "cta": 23.8,
+          "follow": 28.85,
+          "tapf": 31.17,
+          "lurk": 30.4,
+          "off": 31.95
         }
       ],
       [
         "vampir",
-        30.6,
+        32.0,
         {
           "wdur": 0.2
         }
@@ -5044,7 +5028,7 @@
       ],
       [
         3.45,
-        7.45,
+        8.55,
         "Telefondan<br><b>vampirler çıkıyor</b>",
         300,
         {
@@ -5054,24 +5038,8 @@
         }
       ],
       [
-        7.5,
-        12.6,
-        "Sence ayda<br><b>kaç TL emiyorlar?</b>",
-        300,
-        {
-          "size": 92,
-          "pulse": true,
-          "quiet": true,
-          "dim": [
-            9.6,
-            12.6
-          ],
-          "dimTo": 0.7
-        }
-      ],
-      [
-        12.65,
-        15.65,
+        8.6,
+        11.55,
         "En sinsisi:<br><b>unuttuğun deneme üyeliği</b>",
         300,
         {
@@ -5081,8 +5049,8 @@
         }
       ],
       [
-        15.7,
-        17.45,
+        11.6,
+        13.5,
         "Toplam:<br><b>ayda 700 TL</b>",
         300,
         {
@@ -5092,9 +5060,9 @@
         }
       ],
       [
-        17.5,
-        22.95,
-        "İnsanlar aboneliklerini<br><b>ayda 133 $ eksik tahmin etti</b>",
+        13.6,
+        19.35,
+        "İnsanların %42'si<br><b>unuttuğu aboneliğe ödüyordu</b>",
         300,
         {
           "size": 62,
@@ -5103,8 +5071,8 @@
         }
       ],
       [
-        23.0,
-        27.15,
+        19.4,
+        23.75,
         "Vampirler ışıktan korkar:<br><b>hepsini alt alta yaz</b>",
         300,
         {
@@ -5114,9 +5082,9 @@
         }
       ],
       [
-        27.2,
-        30.5,
-        "Kaç aboneliğe<br><b>para ödüyorsun?</b>",
+        23.8,
+        28.8,
+        "Önce tahmin et,<br><b>sonra tek tek say</b>",
         300,
         {
           "size": 90,
@@ -5124,9 +5092,9 @@
         }
       ],
       [
-        27.3,
-        30.5,
-        "Yoruma yaz: kaç tane, ayda kaç TL?",
+        23.9,
+        28.8,
+        "Yoruma yaz: tahminin kaç, gerçeği kaç?",
         600,
         {
           "size": 44,
@@ -5134,18 +5102,8 @@
         }
       ],
       [
-        28.9,
-        30.5,
-        "Hepsini Cep Defteri'nde alt alta gör · @cep_defteri",
-        672,
-        {
-          "size": 32,
-          "quiet": true
-        }
-      ],
-      [
-        30.6,
-        31.1,
+        32.0,
+        32.5,
         "Kumbaranı<br><b>geceleri kim emiyor?</b>",
         300,
         {
@@ -5167,33 +5125,32 @@
         "Telefondan minik vampirler çıkıyor: müzik, dizi, oyun, bulut."
       ],
       [
-        7.5,
-        "assets/voice/vampir/v3.mp3",
-        "Sence ayda kaç lira emiyorlar?"
-      ],
-      [
-        12.7,
+        8.6,
         "assets/voice/vampir/v4.mp3",
         "En sinsisi: 3 ay önce unuttuğun deneme üyeliği."
       ],
       [
-        15.7,
+        11.6,
         "assets/voice/vampir/v5.mp3",
         "Toplam: ayda 700 lira!"
       ],
       [
-        17.5,
-        "assets/voice/vampir/v6.mp3",
-        "ABD'de bir ankette insanlar abonelik harcamasını ayda ortalama 133 dolar eksik tahmin etti."
+        13.6,
+        "assets/voice/vampir/v6b.mp3",
+        "ABD'de bir ankette insanların %42'si kullanmayı bıraktığı bir aboneliğe hâlâ ödediğini unutmuştu."
       ],
       [
-        22.95,
+        19.4,
         "assets/voice/vampir/v7.mp3",
         "Vampirler ışıktan korkar. Aboneliklerini bir kere alt alta yaz."
       ],
       [
-        27.25,
-        "assets/voice/vampir/v8.mp3"
+        23.8,
+        "assets/voice/vampir/v8b.mp3"
+      ],
+      [
+        28.85,
+        "assets/voice/ortak/takip.mp3"
       ]
     ]
   }

@@ -6,4 +6,7 @@ Devamlılık için her yeni seslendirmede `promo/brand/marka-sesi.md` tarifini u
 - Üretilen her satırı `python3 promo/voice_check.py <dosyalar>` ile ölç. UYGUN çıkmayanı yeniden üret; yine olmazsa `eleven_multilingual_v2` ile etiketsiz üret.
 - Yeni reelslerde reels.json'a `"voiceTempo": 1.2` ve `"voiceFilter": "brand"` ekle.
 
-Diğer reels kuralları (hook, süre, tek çağrı, döngü): `promo/brand/izlenme-rehberi.md`.
+## Reels sonu: takip çağrısı
+Her yeni reelsin son satırı ortak takip satırıdır: `voiceFiles`'a altyazısız `["…", "assets/voice/ortak/takip.mp3"]` ("Her hafta bir para tuzağı. Kaçırmamak için takip et!"), ekranda da takip kartı. Yeniden üretme, aynı dosyayı kullan. Önce kapanış sorusu, sonra takip.
+
+Diğer reels kuralları (hook, süre, çağrılar, döngü): `promo/brand/izlenme-rehberi.md`.

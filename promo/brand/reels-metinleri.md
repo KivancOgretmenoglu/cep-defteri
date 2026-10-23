@@ -480,17 +480,17 @@ Cep Defteri'nde Bütçe → + Plan → Ödeme, Her ay: "Bu seferlikler" adıyla 
 
 **Yayın notu:** Kapak karesi olarak 0,2 sn'yi seç (yağmurlu sokak, tebeşirle çizilmiş cüzdan, "18" takvim yaprağı + "Harçlığını kim öldürdü?"). İlk yorumu sabitle: "Dedektif notu: bu ayki bu seferliklerini topla, sonuca şaşıracaksın. (Tutarlar örnek.)" Videonun çağrısı soru: sayımda "Katil kaç numara? Yoruma yaz", sonda seslendirmeyle aynı cümle "Senin bu ayki 'bu seferlik'in neydi?" + "Yoruma yaz: ne, kaç TL?"; son 1,5 sn'de "Bu seferlikleri Cep Defteri'ne önceden yaz · @cep_defteri"; "arkadaşına gönder" açıklamada. Panodaki çubuklar temsilî: araştırmanın bulgusu yalnız yön olarak gösteriliyor (sıradanlarda tahmin ≈ gerçek, istisnalarda gerçek > tahmin); ikincil bir özetteki "neredeyse 2 kat" ifadesi makalede doğrulanamadığı için kullanılmadı. Makalenin önerdiği çözüm de videodaki ders: istisnaları tek tek değil, bir küme olarak görmek. Yorumlara gelen "bu seferlik"lere "bu ay toplam kaç TL tuttu?" diye yanıt ver; en çok gelenleri Para Mahkemesi ya da bir sonraki dava için not al. Aynadaki sen ile arasında en az 5–7 gün bırak.
 
-## 23 · abonelik-vampirleri (kavram: unutulan abonelikler / harcamayı eksik tahmin, seslendirme: Buğra, döngülü, 31 sn)
+## 23 · abonelik-vampirleri (kavram: unutulan abonelikler / harcamayı eksik tahmin, seslendirme: Buğra, döngülü, 32,5 sn)
 
 **Açıklama:**
 ```
 Kaç aboneliğe para ödediğini biliyor musun? 🧛
-Sen kaç aboneliğe para ödüyorsun, ayda kaç TL tutuyor? Say, yoruma yaz 👇
+Önce tahmin et, sonra aboneliklerini tek tek say: fark kaç TL çıktı? İkisini de yoruma yaz 👇
 📌 Kaydet; aboneliklerini Cep Defteri'nde aylık plan olarak alt alta yaz. Android erken erişim yakında.
 
-Gece 03.00. Ceviz uyuyor, kumbarası ise boşalıyor. Telefondan minik vampirler çıkıyor: müzik, dizi, oyun, bulut. Hepsi pipetini kumbaraya sokmuş.
-Sence ayda kaç TL emiyorlar? Dördü 550 TL. Ama en sinsisi eski bir bildirimin arkasında saklanıyordu: 3 ay önce unutulan deneme üyeliği. Toplam: ayda 700 TL. Tutarlar örnek.
-Araştırma: ABD'de 1.000 kişiyle yapılan bir ankette insanların ilk tahmini ayda ortalama 86 dolardı; abonelikler tek tek sayılınca 219 dolar çıktı. Yani ayda ortalama 133 dolar eksik tahmin. Katılımcıların %42'si, kullanmayı bıraktığı bir aboneliğe hâlâ ödediğini unutmuştu (C+R Research, 2022).
+Gece 03.00. Ceviz uyuyor, kumbarası ise boşalıyor. Telefondan minik vampirler çıkıyor: müzik, dizi, oyun, bulut. Dördü ayda 550 TL emiyor.
+Ama en sinsisi eski bir bildirimin arkasında saklanıyordu: 3 ay önce unutulan deneme üyeliği. Toplam: ayda 700 TL. Tutarlar örnek.
+Araştırma: ABD'de 1.000 kişiyle yapılan bir ankette katılımcıların %42'si, kullanmayı bıraktığı bir aboneliğe hâlâ ödediğini unutmuştu. Aynı ankette insanların ilk tahmini ayda ortalama 86 dolardı; abonelikler tek tek sayılınca 219 dolar çıktı (C+R Research, 2022).
 Vampirler ışıktan korkar: aboneliklerini bir kere alt alta yaz, hangisini gerçekten kullandığını gör.
 
 Deneme üyeliğini iptal etmeyi hep unutan arkadaşına gönder.
@@ -499,4 +499,4 @@ Cep Defteri'nde Bütçe → + Plan → Ödeme, Her ay: her aboneliği ayrı bir 
 #abonelik #denemeüyeliği #tasarruf #öğrencibütçesi #paraipuçları #bütçe #cepdefteri
 ```
 
-**Yayın notu:** Kapak karesi olarak 0,2 sn'yi seç (ay ışığında cam kumbara, sırtında kırmızı gözlü siluet + "Kumbaranı geceleri kim emiyor?"). İlk yorumu sabitle: "Ceviz'in tahmini: 4 abonelik, 550 TL. Gerçeği: 5 abonelik, 700 TL. Seninki? (Tutarlar örnek.)" Videonun çağrısı soru: sayımda "Ayda kaç TL? Yoruma yaz", sonda seslendirmeyle aynı cümle "Kaç aboneliğe para ödüyorsun?" + "Yoruma yaz: kaç tane, ayda kaç TL?"; son 1,6 sn'de "Hepsini Cep Defteri'nde alt alta gör · @cep_defteri"; "arkadaşına gönder" açıklamada. Anket rakamları C+R Research'ün kendi sayfasından ve CNBC haberinden (22 Nisan–2 Mayıs 2022, ABD'de 1.000 kişi); C+R verisini kullananlardan kaynak bağlantısı istiyor, açıklamada adı geçiyor. Marka adı kullanılmadı, vampirler tür adıyla. Yorumlara gelen sayılara "en son hangisini iptal ettin?" diye yanıt ver; en çok unutulan abonelik türünü bir sonraki sahne reelsinin açılışında kullan. Ayın katili ile arasında en az 5–7 gün bırak (ikisi de karanlık sahne, kırmızı gözler).
+**Yayın notu:** Kapak karesi olarak 0,2 sn'yi seç (ay ışığında cam kumbara, sırtında kırmızı gözlü siluet + "Kumbaranı geceleri kim emiyor?"). İlk yorumu sabitle: "Ceviz'in kumbarasından 4 vampir 550 TL emiyordu, unuttuğu beşinciyle 700 TL. Seninki? Önce tahmin, sonra say. (Tutarlar örnek.)" Videoda karar anı yok; çağrılar sonda: önce seslendirmeyle aynı soru "Önce tahmin et, sonra tek tek say" + "Yoruma yaz: tahminin kaç, gerçeği kaç?", sonra ortak takip satırı ve takip kartı ("Her hafta bir para tuzağı. Kaçırmamak için takip et!"). "Arkadaşına gönder" açıklamada. Anket rakamları C+R Research'ün kendi sayfasından ve CNBC haberinden (22 Nisan–2 Mayıs 2022, ABD'de 1.000 kişi); C+R verisini kullananlardan kaynak bağlantısı istiyor, açıklamada adı geçiyor. Marka adı kullanılmadı, vampirler tür adıyla. Yorumlara gelen tahmin/gerçek çiftlerine "en çok hangisi şaşırttı?" diye yanıt ver; en büyük farkı bir sonraki sahne reelsinin açılışında kullan. Ayın katili ile arasında en az 5–7 gün bırak (ikisi de karanlık sahne, kırmızı gözler).

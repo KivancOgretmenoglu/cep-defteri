@@ -32,6 +32,7 @@ Tüm seslendirmelerde aynı ses ve aynı tarif kullanılır. Kulakta referans: *
 - `"voiceFilter": "brand"` → `voice.py` marka EQ'sunu uygular: 170 Hz −4 dB, 560 Hz −3 dB, 3,8 kHz üstü +3,5 dB. Bu EQ yeni satırların ses rengini eski reelslerdekine eşitler.
 - Hız 1.2 (batık maliyetten itibaren). Eski reelsler 1.15 ile kaldı, onlara dokunma.
 - Son satır (çağrı) altyazısız bırakılır; altyazı `captionUntil` ile çağrıdan önce biter.
+- En sona ortak takip satırı eklenir: `assets/voice/ortak/takip.mp3` ("Her hafta bir para tuzağı. Kaçırmamak için takip et!", `[playful]`, 3,83 dB; kelime zamanları `assets/voice/ortak/words.json`). Her reelste aynı dosya kullanılır, yeniden üretilmez.
 
 ## Neden bu tarif (16 Ekim 2026 ölçümü)
 - Önceki reelslerin satırları kendi aralarında **3,0–5,1 dB** farklı.

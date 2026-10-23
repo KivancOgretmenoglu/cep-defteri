@@ -2001,8 +2001,7 @@ def cue_vampir(t0, skip=0, o=None):
     if dark_end > 0.1:
         put(AMB, crickets(dark_end) * 0.5, T(0), pan=0.5)
         for n in range(int(dark_end)):
-            if not (g('count') - 0.1 <= n < g('zero') + 0.1):
-                put(SFX, tick(n % 2 == 0, 0.09), T(n + 0.02), pan=-0.4)
+            put(SFX, tick(n % 2 == 0, 0.09), T(n + 0.02), pan=-0.4)
     # kanca: karanlıkta biri pipetle içiyor
     put(SFX, slurp(0.55), T(0.05), 0.7, pan=0.3)
     if 'wide' in o:
@@ -2032,28 +2031,16 @@ def cue_vampir(t0, skip=0, o=None):
         put(SFX, flutter(0.5), T(tO + 0.05), 0.35, pan=pan)
         put(SFX, shriek(2000 + 180 * i), T(tO + 0.1), 0.8, pan=pan)
     if 'sip' in o:  # dördü birden kumbarada: yudumlar ve yutkunmalar
-        S, C = o['sip'], g('count')
+        S, To = o['sip'], g('total')
         cut(S)
         tk, k = S + 0.1, 0
-        while tk < C - 0.2:
+        while tk < To - 0.2:
             put(SFX, slurp(0.42), T(tk), 0.45, pan=-0.6 + 0.4 * (k % 4))
             if k % 3 == 2:
                 put(SFX, gulp(), T(tk + 0.35), 0.25, pan=-0.6 + 0.4 * (k % 4))
-            tk += 0.55; k += 1
-    if 'ask' in o:  # "Sence ayda kaç lira emiyorlar?": kalp atışı başlar ve hızlanır (value.js ile aynı takvim)
-        A, Z = o['ask'], g('zero')
-        t, k = A + 0.3, 0
-        while t < Z - 0.1:
-            put(SFX, thump(0.9), T(t)); put(SFX, thump(0.6), T(t + 0.16))
-            t += max(0.42, 0.62 - 0.03 * k); k += 1
-    if 'count' in o:  # gerçek 3 saniye: her saniye bip ve bir yudum (seviye basamak basamak iner), son anda nefes
-        Cn, Z = o['count'], g('zero')
-        for j in range(3):
-            put(SFX, pluck(81 if j < 2 else 86, 0.14, 'square', 0.5, cut=4000, v=0.3), T(Cn + j))
-            put(SFX, slurp(0.35), T(Cn + j + 0.08), 0.5, pan=0.2)
-        put(SFX, inhale(0.3), T(Z - 0.32), 0.6)
-    if 'zero' in o:  # etiketler: dört pop, kumbaranın etiketi döner
-        Z = o['zero']
+            tk += 0.7; k += 1
+    if 'tags' in o:  # etiketler: dört pop, kumbaranın etiketi döner
+        Z = o['tags']
         for i in range(4):
             put(SFX, bloop(500 + 110 * i, 1200 + 140 * i, 0.07, 0.26), T(Z + 0.05 + i * 0.15), pan=-0.6 + 0.4 * i)
         put(SFX, slot_roll(0.4), T(Z + 0.75), 0.2)
@@ -2090,14 +2077,12 @@ def cue_vampir(t0, skip=0, o=None):
         cut(S)
         put(SFX, flutter(0.3), T(S + 0.02), 0.2)
         put(SFX, marker(0.55), T(S + 0.12), 0.35, pan=-0.2)
-    if 'bar1' in o:
-        put(SFX, marker(0.45), T(o['bar1']), 0.45, pan=-0.3)
-    if 'bar2' in o:
-        put(SFX, marker(0.6), T(o['bar2']), 0.5, pan=0.3)
-        put(SFX, riser(0.6), T(o['bar2'] + 0.05), 0.12)
-    if 'gap' in o:
-        put(SFX, marker(0.3), T(o['gap']), 0.4)
-        put(SFX, pling(1568, 0.1, 0.4), T(o['gap'] + 0.2), pan=0.2)
+    if 'pct' in o:  # ızgarada 42 kare kırmızıya döner: hızlı keçeli kalem tıkları, sonda tını
+        Pc = o['pct']
+        for j in range(14):
+            put(SFX, tick(j % 2 == 0, 0.12), T(Pc + 0.9 * (1 - (1 - j / 14) ** 2)), pan=-0.4 + 0.06 * j)
+        put(SFX, marker(0.5), T(Pc), 0.3)
+        put(SFX, pling(1568, 0.12, 0.5), T(Pc + 0.92), pan=0.3)
     if 'miss' in o:
         put(SFX, stamp(), T(o['miss']), 0.45, pan=-0.2)
     if 'rouse' in o:  # Ceviz uyanır
@@ -2127,6 +2112,15 @@ def cue_vampir(t0, skip=0, o=None):
             put(SFX, fm_bell(1568, 0.7, 0.16), T(o['rows'][-1] + 0.3))
     if 'cta' in o:
         cut(o['cta'])
+    if 'follow' in o:  # takip kartı açılır
+        F = o['follow']
+        put(SFX, stereo_move(whoosh(0.3, 500, 2400, 0.5), -0.3, 0.2), T(F - 0.05), 0.18)
+        put(SFX, bloop(520, 1300, 0.07, 0.28), T(F + 0.05))
+    if 'tapf' in o:  # pençe "Takip et"e basar
+        Tf = o['tapf']
+        put(SFX, ui_tap(0.6), T(Tf))
+        put(SFX, fm_bell(1568, 0.7, 0.18), T(Tf + 0.06))
+        put(SFX, pling(2093, 0.1, 0.5), T(Tf + 0.12), pan=0.3)
     if 'lurk' in o:  # komodinin karanlık rafında gözler
         Lk = o['lurk']
         put(SFX, sub(1.0), T(Lk), 0.35)

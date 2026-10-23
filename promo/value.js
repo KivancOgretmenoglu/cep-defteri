@@ -2956,20 +2956,20 @@ function defineValue() {
   };
 
   /* Abonelik vampirleri: korku. Gece 03.00, Ceviz uyuyor; komodindeki cam kumbaradan karanlıkta biri pipetle içiyor. Telefon kendiliğinden
-   * yanar, uygulama simgeleri vampire döner ve sırayla çıkar (müzik, dizi, oyun, bulut), pipetlerini kumbaraya sokarlar. Gerçek 3 saniyelik
-   * karar anı ("Ayda kaç TL?"), etiketler: 550 TL; eski bir bildirimden solgun "deneme üyeliği" çıkar: ayda 700 TL. Defterde anket
-   * (C+R Research 2022: ilk tahmin 86 $, tek tek sayınca 219 $), Ceviz lambayı yakar, vampirler toza döner; Cep Defteri'nde abonelikler
-   * alt alta; soru; lamba söner, kumbaradaki kırmızı gözler döner (döngü).
+   * yanar, uygulama simgeleri vampire döner ve sırayla çıkar (müzik, dizi, oyun, bulut), pipetlerini kumbaraya sokarlar; etiketler: 550 TL.
+   * Eski bir bildirimden solgun "deneme üyeliği" çıkar: ayda 700 TL. Defterde anket (C+R Research 2022: %42'si kullanmayı bıraktığı aboneliğe
+   * hâlâ ödüyordu; 100 kişilik ızgara), Ceviz lambayı yakar, vampirler toza döner; Cep Defteri'nde abonelikler alt alta; soru ("önce tahmin et,
+   * sonra say"), takip kartı; lamba söner, kumbaradaki kırmızı gözler döner (döngü).
    * Dünyalar: A yatak odası, B telefon ekranı (ana ekran, bildirim, Cep Defteri), C defter sayfası; kamera aralarında keser. */
   SCENES.vampir = (t0, o = {}) => {
     deriveCevizCap();
     const s = scene(t0, '#05060A', undefined, o.wdur ?? 0.4);
     const ev = (k) => o[k] ?? 99;
     const WIDE = ev('wide'), PIGT = ev('pig'), DRAIN = ev('drain'), PHONE = ev('phone'), SCREEN = ev('screen'), WAKE = ev('wake');
-    const OUT = o.out || [99, 99, 99, 99], SIP = ev('sip'), ASK = ev('ask'), COUNT = ev('count'), ZERO = ev('zero'), SNEAK = ev('sneak');
-    const NOTIF = ev('notif'), CRAWL = ev('crawl'), TOTAL = ev('total'), HIT = ev('hit'), SCI = ev('sci'), BAR1 = ev('bar1'), BAR2 = ev('bar2');
-    const GAP = ev('gap'), MISS = ev('miss'), ROUSE = ev('rouse'), PULL = ev('pull'), LIGHT = ev('light'), APP = ev('app');
-    const ROWS = o.rows || [99, 99, 99, 99, 99], CTA = ev('cta'), LURK = ev('lurk'), OFF = ev('off');
+    const OUT = o.out || [99, 99, 99, 99], SIP = ev('sip'), TAGS = ev('tags'), SNEAK = ev('sneak');
+    const NOTIF = ev('notif'), CRAWL = ev('crawl'), TOTAL = ev('total'), HIT = ev('hit'), SCI = ev('sci'), PCT = ev('pct');
+    const MISS = ev('miss'), ROUSE = ev('rouse'), PULL = ev('pull'), LIGHT = ev('light'), APP = ev('app');
+    const ROWS = o.rows || [99, 99, 99, 99, 99], CTA = ev('cta'), FOLLOW = ev('follow'), TAPF = ev('tapf'), LURK = ev('lurk'), OFF = ev('off');
     const SY = 1180;  // odak noktasının ekrandaki yüksekliği: kutu ve altyazının altında, Instagram'ın alt bandının üstünde
     const world = () => el('div', 'abs', s.root, { left: 0, top: 0, width: '1080px', height: '1920px', transformOrigin: '0 0' });
     const SLOT = [964, 1095];  // kumbaranın para yarığı (dünya A)
@@ -3161,19 +3161,15 @@ function defineValue() {
     el('div', 'abs', page, { left: '118px', top: 0, width: '4px', height: '100%', background: 'rgba(214,60,60,.45)' });
     const pTitle = el('div', 'abs it', page, { left: '150px', top: '28px', fontSize: '58px', color: '#2B3A6B', whiteSpace: 'nowrap' });
     pTitle.textContent = 'ANKET · ABD · 1.000 KİŞİ';
-    const BASE = 690, BMAX = 450;  // sayfa içi taban çizgisi ve 219 $'ın yüksekliği
-    el('div', 'abs', page, { left: '170px', top: px(BASE), width: '700px', height: '6px', borderRadius: '3px', background: '#2A2E5A' });
-    const bar = (x, col) => el('div', 'abs', page, { left: px(x), bottom: px(904 - BASE), width: '170px', height: 0, background: `repeating-linear-gradient(-45deg, ${col} 0 14px, ${col}D9 14px 22px)`, borderRadius: '8px 8px 0 0' });
-    const b1 = bar(250, '#8E8A86'), b2 = bar(600, '#D9343E');
-    const val = (x, col) => { const e = el('div', 'abs it', page, { left: px(x - 40), width: '250px', textAlign: 'center', fontSize: '76px', color: col, opacity: 0 }); return e; };
-    const v1 = val(250, '#6E6A66'), v2 = val(600, '#C0392B');
-    const lab = (x, t) => { const e = el('div', 'abs', page, { left: px(x - 60), width: '290px', top: px(BASE + 18), textAlign: 'center', fontSize: '38px', fontWeight: 800, color: '#2A2E5A', lineHeight: 1.05 }); e.innerHTML = t; return e; };
-    lab(250, 'İlk tahmin'); lab(600, 'Tek tek<br>sayınca');
-    const Y86 = BASE - BMAX * 86 / 219, Y219 = BASE - BMAX;
-    const estL = el('div', 'abs', page, { left: '420px', top: px(Y86 - 3), width: '0', borderTop: '6px dashed #8E8A86' });  // tahmin seviyesi gerçeğin çubuğuna uzar
-    const gapL = el('div', 'abs', page, { left: '572px', top: px(Y219 + 6), width: '0', height: 0, borderLeft: '6px dashed #C0392B' });  // aradaki fark
-    const stampM = el('div', 'abs', page, { left: '150px', top: px((Y86 + Y219) / 2 - 90), padding: '4px 22px 8px', borderRadius: '16px', border: '8px solid #C0392B', background: 'rgba(255,255,255,.88)', color: '#C0392B', fontSize: '62px', fontWeight: 800, letterSpacing: '.02em', opacity: 0, transformOrigin: '50% 50%', whiteSpace: 'nowrap' });
-    stampM.textContent = '133 $ EKSİK!';
+    // 100 kişilik ızgara: kullanmayı bıraktığı aboneliğe hâlâ ödeyen 42 kişinin karesi kırmızıya döner
+    const GC = 40, GG = 6;  // kare ve aralık
+    const cells = Array.from({ length: 100 }, (_, k) => el('div', 'abs', page, { left: px(150 + (k % 10) * (GC + GG)), top: px(176 + Math.floor(k / 10) * (GC + GG)), width: px(GC), height: px(GC), borderRadius: '8px', background: 'rgba(42,46,90,.14)' }));
+    el('div', 'abs', page, { left: '150px', top: '648px', fontSize: '28px', fontWeight: 700, color: '#5A5E86' }).textContent = "Her kare: 100 kişiden 1'i";
+    const pct = el('div', 'abs it', page, { left: '640px', top: '186px', fontSize: '176px', color: '#C0392B', lineHeight: 1, opacity: 0 });
+    const pLab = el('div', 'abs', page, { left: '640px', top: '372px', width: '290px', fontSize: '34px', fontWeight: 800, color: '#2A2E5A', lineHeight: 1.12, opacity: 0 });
+    pLab.textContent = 'kullanmayı bıraktığı aboneliğe hâlâ ödüyordu';
+    const stampM = el('div', 'abs', page, { left: '540px', top: '590px', padding: '4px 20px 8px', borderRadius: '16px', border: '8px solid #C0392B', background: 'rgba(255,255,255,.88)', color: '#C0392B', fontSize: '54px', fontWeight: 800, letterSpacing: '.02em', opacity: 0, transformOrigin: '50% 50%', whiteSpace: 'nowrap' });
+    stampM.textContent = 'UNUTULDU!';
     pixEl(page, vampRows(0), { ...vampCols(0), C: '#FBF5E8', S: '#2A2E5A', o: '#2A2E5A', K: '#2A2E5A', R: '#C0392B' }, 4, { left: '24px', top: '430px', transform: 'rotate(-8deg)', opacity: 0.85 });  // kenar boşluğuna kalemle çizilmiş vampir
     const srcC = el('div', 'abs', page, { left: '152px', top: '96px', fontSize: '28px', fontWeight: 800, color: '#4A3B30' });
     srcC.textContent = 'Kaynak: C+R Research 2022';
@@ -3183,13 +3179,16 @@ function defineValue() {
     el('div', 'abs', s.root, { left: 0, right: 0, top: 0, height: '260px', zIndex: 17, pointerEvents: 'none', background: 'linear-gradient(rgba(5,6,10,.5), rgba(5,6,10,0))' });
     el('div', 'abs', s.root, { left: 0, right: 0, bottom: 0, height: '300px', zIndex: 17, pointerEvents: 'none', background: 'linear-gradient(rgba(5,6,10,0), rgba(5,6,10,.45))' });
     const flash = el('div', 'abs', s.root, { inset: 0, zIndex: 21, opacity: 0, pointerEvents: 'none', background: '#FFFFFF' });
-    const pill = el('div', 'abs it', s.root, { left: 0, right: 0, top: '608px', display: 'none', justifyContent: 'center', zIndex: 24 });
-    const pin = el('div', '', pill, { padding: '4px 28px 10px', borderRadius: '16px', border: '4px solid #F2B63C', background: 'rgba(10,10,16,.9)', fontSize: '62px', color: '#fff', lineHeight: 1 });
-    pin.innerHTML = 'Ayda kaç TL? <span style="color:#F2B63C">Yoruma yaz</span>';
-
-    // kalp atışları (audio.py ile aynı takvim): soru sorulunca başlar, sayımda hızlanır
-    const beats = [];
-    for (let t = ASK + 0.3, k = 0; t < ZERO - 0.1; t += Math.max(0.42, 0.62 - 0.03 * k), k++) beats.push(t);
+    // takip kartı (sondaki ortak takip satırıyla): simge, cep_defteri, "Her hafta bir para tuzağı"; pençe "Takip et"e basar
+    const fcard = el('div', 'abs', s.root, { left: '80px', right: '80px', top: '300px', height: '236px', boxSizing: 'border-box', borderRadius: '44px', background: '#FFFFFF', boxShadow: '0 24px 60px rgba(0,0,0,.45)', display: 'none', zIndex: 26, transformOrigin: '50% 50%' });
+    const ficon = el('img', 'abs', fcard, { left: '34px', top: '38px', width: '160px', height: '160px', borderRadius: '40px' });
+    ficon.src = 'assets/icon.png';
+    el('div', 'abs', fcard, { left: '226px', top: '30px', fontSize: '50px', fontWeight: 800, color: '#141414', letterSpacing: '-.01em' }).textContent = 'cep_defteri';
+    el('div', 'abs', fcard, { left: '226px', top: '92px', fontSize: '32px', fontWeight: 600, color: '#5E5650' }).textContent = 'Her hafta bir para tuzağı';
+    const fbtn = el('div', 'abs', fcard, { left: '226px', top: '146px', width: '330px', height: '66px', borderRadius: '18px', background: '#0095F6', color: '#FFFFFF', fontSize: '36px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', transformOrigin: '50% 50%' });
+    const FBX = 80 + 226 + 165, FBY = 300 + 146 + 33;  // düğmenin ekrandaki ortası
+    const fpaw = pixEl(s.root, PAWP, { o: '#2A1E1A', B: '#A8683A' }, 16, { left: 0, top: 0, display: 'none', zIndex: 27, transformOrigin: '50% 30%' });
+    const fring = el('div', 'abs', s.root, { left: px(FBX - 60), top: px(FBY - 60), width: '120px', height: '120px', boxSizing: 'border-box', borderRadius: '50%', border: '8px solid rgba(0,149,246,.75)', display: 'none', zIndex: 27 });
     const on = (lt, t) => { const k = lt - t; return k < 0 ? 0 : k >= 0.4 ? 1 : [0.15, 0, 0.6, 0.1, 0.85, 0.4, 1, 1][Math.floor(k / 0.05)]; };
     const flick = (lt, a, d) => (lt >= a && lt < a + d ? [1, 0.3, 0.9, 0.15, 0.7, 0.4][Math.floor((lt - a) / (d / 6))] : 1);
     s.update = (lt) => {
@@ -3217,17 +3216,16 @@ function defineValue() {
       phGlow.style.opacity = sk * (lt >= LIGHT ? 0.25 : 1) * (lt >= SNEAK && lt < SNEAK + 0.5 ? 1.3 : 1) * (lt >= CTA ? 0 : 1);
 
       // kumbara: seviye düşer (kancada %62)
-      let lv = 0.62 - 0.07 * E.inOut(prog(lt, DRAIN, 0.45)) - 0.07 * prog(lt, SIP, COUNT - SIP);
-      for (let j = 0; j < 3; j++) lv -= 0.06 * E.out(prog(lt, COUNT + j + 0.05, 0.3));
-      lv -= 0.04 * prog(lt, TOTAL, SCI - TOTAL) + 0.02 * prog(lt, ROUSE, LIGHT - ROUSE);
+      let lv = 0.62 - 0.07 * E.inOut(prog(lt, DRAIN, 0.45)) - 0.16 * prog(lt, SIP, TOTAL - SIP);
+      lv -= 0.08 * prog(lt, TOTAL, SCI - TOTAL) + 0.03 * prog(lt, ROUSE, LIGHT - ROUSE);
       fill.style.clipPath = `inset(${((3 + (1 - lv) * 14) * PC).toFixed(1)}px 0 0 0)`;
       pig.style.filter = `brightness(${(0.82 + 0.18 * L).toFixed(3)})`;
-      // kumbaranın etiketi: sayımdan sonra 550 TL; HIT'te 700 TL
-      const tagOn = lt >= ZERO + 0.75 && lt < OFF;
+      // kumbaranın etiketi: vampirlerin etiketlerinden sonra 550 TL; HIT'te 700 TL
+      const tagOn = lt >= TAGS + 0.75 && lt < OFF;
       pTag.style.display = tagStr.style.display = tagOn ? 'block' : 'none';
       if (tagOn) {
         const v = 550 + 150 * E.out(prog(lt, HIT - 0.05, 0.3));
-        pTagN.textContent = `${fmt(lt < ZERO + 1.1 ? 550 * E.out(prog(lt, ZERO + 0.75, 0.35)) : v)} TL`;
+        pTagN.textContent = `${fmt(lt < TAGS + 1.1 ? 550 * E.out(prog(lt, TAGS + 0.75, 0.35)) : v)} TL`;
         pTagN.style.color = lt >= HIT ? '#C0392B' : '#2A1E1A';
         pTag.style.borderColor = lt >= HIT ? '#C0392B' : '#2A1E1A';
         pTag.style.transform = `rotate(${Math.sin(lt * 2.2) * 3}deg) scale(${1 + 0.18 * Math.sin(Math.PI * prog(lt, HIT, 0.35))})`;
@@ -3253,7 +3251,7 @@ function defineValue() {
         if (burnt(i)) { const q = prog(lt, LIGHT + 0.12 + i * 0.07, 0.25); a *= 1 - q; sc = 1 + 0.4 * q; }
         v.w.style.display = vis && a > 0.01 ? 'block' : 'none';
         const flap = Math.floor((lt + i * 0.13) / 0.11) % 2;
-        const bob = Math.sin(lt * 5 + i) * 5 + (i < 4 && lt >= COUNT && lt < ZERO ? Math.sin(lt * 30 + i) * 2 : 0);
+        const bob = Math.sin(lt * 5 + i) * 5;
         const shiver = lt >= LIGHT && lt < LIGHT + 0.4 ? Math.sin(lt * 80 + i) * 5 : 0;
         if (vis) {
           if (v.flap !== flap) { v.flap = flap; v.wl.innerHTML = v.wr.innerHTML = pix(flap ? VWING_UP : VWING_DN, VWING_C, VC); }
@@ -3270,12 +3268,12 @@ function defineValue() {
         if (sv) {
           const mx = x + shiver, my = y + bob + 24, sx2 = SLOT[0] + (i - 2) * 6, sy2 = SLOT[1] + 6;
           ls.forEach((l) => { l.setAttribute('x1', mx); l.setAttribute('y1', my); l.setAttribute('x2', sx2); l.setAttribute('y2', sy2); });
-          const q = ((lt * (lt >= COUNT && lt < ZERO ? 2.6 : 1.6) + i * 0.27) % 1);
+          const q = ((lt * 1.6 + i * 0.27) % 1);
           r.setAttribute('x', lerp(sx2, mx, q) - 4.5); r.setAttribute('y', lerp(sy2, my, q) - 4.5);
           g.style.filter = `brightness(${dim < 0.5 ? 0.3 : 1})`;
         }
-        // fiyat etiketleri: sayım biter bitmez dört vampirde; deneme üyeliği geldiğinde onda
-        const ta = i < 4 ? ZERO + 0.05 + i * 0.15 : TOTAL + 0.2;
+        // fiyat etiketleri: dört vampir kumbaraya yerleşince; deneme üyeliği geldiğinde onda
+        const ta = i < 4 ? TAGS + 0.05 + i * 0.15 : TOTAL + 0.2;
         const tv = lt >= ta && lt < LIGHT + 0.1 && vis;
         v.tag.style.display = tv ? 'block' : 'none';
         if (tv) popIn(v.tag, prog(lt, ta, 0.3), { fromY: 30, base: `translate(${x}px,${y - 92 + bob * 0.5}px) translateX(-50%)` });
@@ -3372,19 +3370,15 @@ function defineValue() {
       pcard.style.height = px(90 + 92 * Math.min(5, nRows) + (nRows ? 12 : 0));
       prows[1].style.boxShadow = lt >= ROWS[4] + 0.3 ? `0 0 0 ${Math.round(5 + 3 * Math.sin(lt * 6))}px rgba(242,182,60,.55)` : 'none';
 
-      // C · defter: başlık, iki çubuk, aradaki fark, EKSİK damgası
-      const k1 = E.out(prog(lt, BAR1, 0.5)), k2 = E.out(prog(lt, BAR2, 0.6));
-      b1.style.height = px(BMAX * 86 / 219 * k1);
-      b2.style.height = px(BMAX * k2);
-      v1.style.opacity = k1 > 0 ? 1 : 0; v1.style.top = px(BASE - BMAX * 86 / 219 * k1 - 92);
-      v1.textContent = `${Math.round(86 * k1)} $`;
-      v2.style.opacity = k2 > 0 ? 1 : 0; v2.style.top = px(BASE - BMAX * k2 - 92);
-      v2.textContent = `${Math.round(219 * k2)} $`;
-      const gk = E.out(prog(lt, GAP, 0.35));
-      estL.style.width = px(350 * E.out(prog(lt, GAP - 0.1, 0.3)));
-      gapL.style.height = px((Y86 - Y219 - 6) * gk);
+      // C · defter: başlık; 100 kişilik ızgarada 42 kare sırayla kırmızıya döner, sayaç %42; UNUTULDU damgası
+      const nRed = Math.round(42 * E.out(prog(lt, PCT, 0.9)));
+      cells.forEach((c, k) => (c.style.background = k < nRed ? '#D9343E' : 'rgba(42,46,90,.14)'));
+      pct.style.opacity = lt >= PCT ? 1 : 0;
+      pct.textContent = `%${nRed}`;
+      pct.style.transform = `scale(${1 + 0.12 * Math.sin(Math.PI * prog(lt, PCT + 0.9, 0.3))})`;
+      pLab.style.opacity = prog(lt, PCT + 0.6, 0.3);
       stampM.style.opacity = lt >= MISS ? 1 : 0;
-      stampM.style.transform = `rotate(-7deg) scale(${lerp(2.2, 1, E.out(prog(lt, MISS, 0.2)))})`;
+      stampM.style.transform = `rotate(-8deg) scale(${lerp(2.2, 1, E.out(prog(lt, MISS, 0.2)))})`;
       pTitle.style.clipPath = `inset(0 ${(1 - E.out(prog(lt, SCI + 0.1, 0.6))) * 100}% 0 0)`;
       srcC.style.opacity = prog(lt, SCI + 0.5, 0.4);
 
@@ -3396,8 +3390,8 @@ function defineValue() {
       else if (lt < PHONE) { const q = E.out(prog(lt, PIGT, 0.4)); z = lerp(1.03, 1.75, q); fx = lerp(540, 958, q); fy = lerp(1150, 1130, q); }   // kumbara boşalıyor
       else if (lt < SCREEN) { z = 1.5 + 0.04 * prog(lt, PHONE, SCREEN - PHONE); fx = 860; fy = 1110; }                          // telefon kendiliğinden yanar
       else if (lt < SIP) { W = 'B'; z = 1.0 + 0.04 * prog(lt, SCREEN, SIP - SCREEN); fy = 1150; }                              // simgeler uyanır, vampirler çıkar
-      else if (lt < ZERO) { z = 1.85 + 0.1 * ramp(COUNT, ZERO - COUNT); fx = 968; fy = 1070; }                                // pipetle içerler; karar
-      else if (lt < NOTIF) { const q = E.out(prog(lt, ZERO, 0.4)); z = lerp(1.95, 1.5, q); fx = lerp(968, 960, q); fy = lerp(1070, 1110, q); }   // etiketler: 550 TL
+      else if (lt < TAGS) { z = 1.85 + 0.05 * prog(lt, SIP, TAGS - SIP); fx = 968; fy = 1070; }                                 // pipetle içerler
+      else if (lt < NOTIF) { const q = E.out(prog(lt, TAGS, 0.4)); z = lerp(1.9, 1.5, q); fx = lerp(968, 960, q); fy = lerp(1070, 1110, q); }   // etiketler: 550 TL
       else if (lt < TOTAL) { W = 'B'; z = 1.22 + 0.18 * ramp(CRAWL, TOTAL - CRAWL); fy = lerp(1110, 1050, ramp(CRAWL, 1.0)); }   // eski bildirim, solgun vampir
       else if (lt < SCI) { z = 1.36 + 0.03 * prog(lt, TOTAL, SCI - TOTAL); fx = 925; fy = 1095; }                              // beşi birden: 700 TL
       else if (lt < ROUSE) { W = 'C'; z = 1.0 + 0.03 * prog(lt, SCI, ROUSE - SCI); fy = 1170; }                                // defter: anket
@@ -3405,16 +3399,33 @@ function defineValue() {
       else if (lt < CTA) { W = 'B'; z = 1.0; fy = 1150; }                                                                     // Cep Defteri: alt alta
       else if (lt < OFF) { z = 1.04 + 0.04 * prog(lt, CTA, OFF - CTA); fx = 560; fy = 1150; }                                 // soru
       else { z = 1.08; fx = 560; fy = 1150; }                                                                                   // lamba söner (döngü kopyası kancayı getirir)
-      let beat = -9;
-      beats.forEach((t) => { if (lt >= t) beat = t; });
-      z *= 1 + 0.012 * Math.exp(-(lt - beat) * 10) + (W === 'B' && lt >= WAKE && lt < WAKE + 0.3 ? 0.03 * Math.exp(-(lt - WAKE) * 10) : 0);
+      z *= 1 + (W === 'B' && lt >= WAKE && lt < WAKE + 0.3 ? 0.03 * Math.exp(-(lt - WAKE) * 10) : 0);
       const sx = shake(lt, HIT, 12, 0.35) + shake(lt, LIGHT, 10, 0.3) + shake(lt, WAKE, 8, 0.3) + shake(lt, CRAWL + 0.85, 10, 0.3);
       [camA, camB, camC].forEach((c, i) => (c.style.display = 'ABC'[i] === W ? 'block' : 'none'));
       ({ A: camA, B: camB, C: camC })[W].style.transform = `translate(${540 - fx * z + sx}px,${SY - fy * z}px) scale(${z})`;
       flash.style.opacity = Math.max(lt >= LIGHT ? 0.5 * Math.exp(-(lt - LIGHT) * 6) : 0, lt >= HIT ? 0.18 * Math.exp(-(lt - HIT) * 8) : 0);
-      pill.style.display = lt >= COUNT && lt < ZERO ? 'flex' : 'none';
-      pill.style.opacity = Math.min(1, (lt - COUNT) * 8);
-      pin.style.transform = `scale(${1 + 0.04 * Math.exp(-((lt - COUNT) % 1) * 10)})`;
+      // takip kartı: FOLLOW'da açılır; TAPF'de pençe "Takip et"e basar, düğme "Takip ediliyor" olur
+      const fOn = lt >= FOLLOW && lt < OFF;
+      fcard.style.display = fOn ? 'block' : 'none';
+      if (fOn) popIn(fcard, prog(lt, FOLLOW, 0.35), { fromY: -60 });
+      const followed = lt >= TAPF + 0.02;
+      fbtn.textContent = followed ? 'Takip ediliyor' : 'Takip et';
+      fbtn.style.background = followed ? '#EFEFEF' : '#0095F6';
+      fbtn.style.color = followed ? '#141414' : '#FFFFFF';
+      const fd = lt - TAPF + 0.45;
+      fbtn.style.transform = `scale(${fd >= 0.42 && fd < 0.55 ? 0.94 : followed ? 1 + 0.08 * Math.sin(Math.PI * prog(fd, 0.55, 0.25)) : 1 + 0.03 * Math.sin(lt * 8)})`;
+      const ftap = fOn && fd >= 0.1 && fd < 0.95;  // pençe sağ alttan gelir, basar, geri çekilir; dokunuşta halka açılır
+      fpaw.style.display = ftap ? 'block' : 'none';
+      if (ftap) {
+        const k1 = E.out(prog(fd, 0.1, 0.3)), k2 = E.inOut(prog(fd, 0.62, 0.33));
+        const fx2 = lerp(FBX + 320, FBX + 8, k1) + 320 * k2, fy2 = lerp(FBY + 480, FBY + 16, k1) + 480 * k2 + (fd >= 0.42 && fd < 0.55 ? 8 : 0);
+        fpaw.style.transform = `translate(${fx2 - 56}px,${fy2 - 34}px) rotate(${-20 * (1 - k1) - 20 * k2}deg)`;
+        fpaw.style.opacity = 1 - k2;
+      }
+      const rk = prog(lt, TAPF, 0.4);
+      fring.style.display = fOn && rk > 0 && rk < 1 ? 'block' : 'none';
+      fring.style.transform = `scale(${0.4 + 1.6 * rk})`;
+      fring.style.opacity = 1 - rk;
     };
   };
 }
