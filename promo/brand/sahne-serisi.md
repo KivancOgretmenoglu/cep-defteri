@@ -266,6 +266,49 @@ Kelime zamanları ElevenLabs Scribe ile ölçüldü (`assets/voice/katil/words.j
 
 ---
 
+## 8. Ay sonuna iniş
+**Durum:** üretildi (`out/ay-sonuna-inis.mp4`, 34,7 sn) · **Tür:** uzay görevi · **Oyuncular:** Kaptan Ceviz (cam kask, beyaz tulum, kuyruğu dışarıda), görev kontrolde mikrofonlu kulaklıklı Bilge, roket HARÇLIK-1
+
+**Kanca (0. kare):** Uzay; yakıtı bitmiş, gövdesinde üç meteor çukuru olan HARÇLIK-1 eğik, sürükleniyor, lüleden ince duman. Sağ üstte Ay ("AY SONU"), aradaki kırmızı kesikli rotada "AY SONUNA 8 GÜN"; altta göstergede "YAKIT 0 TL" yanıp söner, takvim KASIM 22. Kutu: **"Paran ayın kaçında bitiyor?"**
+
+**Akış (videodaki zamanlar)**
+- 0–0,45 sn: Kanca karesi, kamera hafifçe yaklaşır; düşük yakıt alarmı, telsiz cızırtısı.
+- 0,45–3,85 sn: Rampa, ayın 1'i (YAKIT 8.000 TL, takvim KASIM 1). Kırmızı-beyaz kafes kule, gökte küçük Ay ve ona giden mavi rota. "Kaptan"da (1,32) kamera lomboza yaklaşır: cam kasklı Ceviz el sallar, camda parıltı kayar; 2,0'da kamera geri çekilir; 2,3'te ateşleme (kule kolları açılır, duman); "ay sonuna"da (2,7) Ay parlar; "iniş"te (3,24) kalkış: patlama, alev, sarsıntı.
+- 3,85–8,3 sn: Görev kontrol. Dev ekranda "GÖREV KONTROL · HARÇLIK-1", rota haritası (Dünya → Ay, 1-14-22-30 çentikleri), takvim 1'den 14'e akar ("14'ü"de, 4,27). Göstergeler söylendiği anda açılır: "Yakıt"ta (5,07) YAKIT, "4.000"de (5,62) 4.000 TL sayarak gelir; "Kalan plan"da (6,53) KALAN PLAN · ay sonuna kadar, "3.500"de (7,37) 3.500 TL. Önde kulaklıklı Bilge, masada CEP DEFTERİ defteri ve kupa (görev kontrol planlarında hep görünür). Ekran altyazının altında kalır.
+- 8,3–9,9 sn: "Sence yakıt yeter mi?": kamera Bilge'ye ve göstergelere yaklaşır, Bilge ekrana bakar; kalp atışı başlar.
+- 9,9–12,9 sn: Karar anı (gerçek 3 sn): müzik, seslendirme ve altyazı susar; kamera iki göstergede, takvimin yerinde yeşil "FARK +500 TL" (yeter gibi görünür), göstergeler sırayla parlar, ekranın köşesinde büyük 3-2-1, saniyede bir bip, kalp atışı hızlanır. Çağrı: "YETER mi, YETMEZ mi? Yoruma yaz".
+- 13,0–17,75 sn: Uzay; yıldızlar akar, takvim 14'ten 21'e ilerler, her yaprakta yakıt bir günlük plan kadar (~206 TL) düşer. "Meteorlar"da (14,14) alarm ve meteor yağmuru; adı söylenince etiketli meteor gelip gövdeye çarpar: Kırık ekran −1.450 TL (15,56), Doğum günü −500 TL (16,39), Kitap parası −400 TL (17,17). Her çarpmada patlama, sarsıntı, göstergede düşüş ve gövdede çukur; etiket çarpınca geldiği yana kayar, roketin üstünde kalmaz.
+- 17,75–20,6 sn: Kokpit. Yuvarlak pencerede uzakta Ay ("AY SONU"), kırmızı döner alarm, panelde yakıt saati E'de, "YAKIT BİTTİ" yanıp söner, "KASIM 22". "Houston"da (18,85) telsiz dalgaları, Ceviz kollarını kaldırır; "sorunumuz"da (19,72) motor öksürür, panelden kıvılcım, pencerede duman.
+- 20,6–25,5 sn: Dev ekranda araştırma: "ARAŞTIRMA · HAFTALIK HARCAMA"; "insanlar"da (21,48) TAHMİN (73) ve GERÇEK (100) çubukları dolar; tahminin eksik kısmı, içinde meteorlar olan kesikli kutu; "%27" sayarak gelir (23,68), "eksik"te **EKSİK!** damgası (24,38); "Akla sıradan harcamalar gelir, meteorlar gelmez."; kaynak satırı "Kaynak: %27 Peetz 2010 · neden: Howard ve ark. 2022".
+- 25,5–28,2 sn: Cep Defteri, Özet → "Kullanılabilir para" kartı (uygulamadaki satırlar): Kasım sonuna kadar 6.000,00 TL, günde yaklaşık 200,00 TL · 30 gün; Günlük hesaplarda 9.000 TL, − Yaklaşan ödemeler (2) 1.200 TL, − Kenarda tuttuğun birikim payı 1.800 TL, = Kullanılabilir 6.000 TL. "Yakıtı"nda (25,88) kamera birikim payı satırına iner, satır parlar, "↑ YEDEK YAKIT" ve benzin bidonu; "günlere"de (27,5) günlük tutara çıkar, "GÜNLÜK YAKIT ↓". Bu planda altyazı susar (kartın başlığını örtüyordu), satırı kutu taşır.
+- 28,2–31,2 sn: Kapanış sorusu; Ay yüzeyi, gökte Dünya, inmiş roket. Ceviz az yerçekiminde yavaş zıplar, 28,58'de "CEP DEFTERİ" bayrağını diker (toz), el sallar.
+- 31,2–34,2 sn: Ortak takip satırı ve takip kartı; 32,55'te gökte küçük bir meteor kayar; "takip et"te (33,3) beyaz eldivenli pati düğmenin sağ ucuna basar, düğme "Takip ediliyor" olur.
+- 34,2–34,7 sn: Yeniden yakıtı bitmiş roket ve kanca kutusu (döngü: ilk kareyle aynı).
+
+**Müzik:** rampada ve görev kontrolde yeni `space` türü (112 BPM kare dalga arpej, Am–F–G–Em, yavaş pad, sekizlik bas), meteorlardan kokpite kadar korku, araştırma ve uygulamada lofi, kapanışta pop. Karar anında müzik yok.
+
+**Seslendirme (videodaki hali)**
+1. `[energetic]` Ayın biri. Kaptan Ceviz'in görevi: ay sonuna iniş!
+2. `[curious]` Ayın on dördü. Yakıt: dört bin lira. Kalan plan: üç bin beş yüz.
+3. Sence... yakıt yeter mi? (iki v4 denemesi uymadı, ikisi de 5,94 dB; tarif gereği etiketsiz `eleven_multilingual_v2`, 4,20 dB. Videoda 1,3 hızla, karar anının sessizliği tam 9,9'da başlar)
+4. `[dramatic]` Ama planda olmayan meteorlar geldi: kırık ekran, doğum günü, kitap parası.
+5. `[dramatic]` Ayın yirmi ikisi. Houston, bir sorunumuz var! (videoda iki parça: "Houston…" kısmı telsiz süzgeçli, `i5r.mp3`; başında ve sonunda NASA tarzı telsiz bip'i)
+6. `[excited]` Bir araştırmada insanlar haftalık harcamalarını yaklaşık yüzde yirmi yedi eksik tahmin etti.
+7. `[dramatic]` Yedek yakıtı kenara koy, kalanını günlere böl.
+8. `[playful]` Senin paran ayın kaçında bitiyor? Yoruma yaz!
+9. `[playful]` Her hafta bir para tuzağı. Kaçırmamak için takip et! (ortak takip satırı, `assets/voice/ortak/takip.mp3`)
+
+1, 2 ve 4–8. satırlar ilk denemede marka sesine uydu (2,96–4,80 dB). Kelime zamanları ElevenLabs Scribe ile ölçüldü (`assets/voice/inis/words.json`; döküm metinle birebir aynı). Üretilen "Çünkü sıradan harcamalar aklımıza geliyor, meteorlar gelmiyor." satırı süre için çıkarıldı; bu bilgi araştırma ekranında yazılı.
+
+**reels-analiz sonrası düzeltmeler (ikinci sürüm):** Kancada roket küçültülüp sola alındı (göstergelere biniyordu), Ay büyüdü, rota etiketi "8 GÜN" yerine "AY SONUNA 8 GÜN", göstergeler büyüdü. Rampadaki lomboz yakınlaşması kısaldı, ateşleme 2,3'e alındı; yakın planda kırpılan Ay etiketi gizlenir. Görev kontrolde gösterge etiketleri söylendiği anda açılır, KALAN PLAN'ın yanında "ay sonuna kadar" yazar, ekran altyazının altına indi; Bilge'nin "?" işareti göstergeyi örtüyordu, sakin bakış pozu aldı. Karar anında takvimin yerine "FARK +500 TL" geldi. Uçuşta yakıt takvimle birlikte gün gün düşer (sürekli akış takvimle çelişiyordu), roket göstergelerden uzaklaştı, meteor etiketleri altyazının altında kalır. Kokpit paneli 100 px yukarı alındı ("YAKIT BİTTİ" ve "KASIM 22" Instagram'ın alt bandına giriyordu). Araştırma çubuklarına değerler (73 / 100) yazıldı, %27 ve EKSİK! damgası kaynak satırının üstünden kalktı, kaynak satırı büyüdü ve hangi bilginin kaynağı olduğunu söylüyor. Uygulama kartına uygulamada hep görünen "− Yaklaşan ödemeler" satırı eklendi; örnek rakamlar hikâyedeki 8.000 TL ile karışmasın diye 9.000 / 1.200 / 1.800 / 6.000 oldu; kamera satırdan satıra gider, kartın başlığı her an yazı kutusunun altında kalır. "Sence yakıt yeter mi?" 1,3 hızla çalınıyor (karar anının sessizliği geç başlıyordu). Kapanış çipi büyüdü.
+
+**Kapanış kutusu:** "Senin paran ayın kaçında bitiyor?" (seslendirmeyle aynı, kancayla aynı soru) · çip: "Yoruma yaz: ayın kaçı?" · ardından takip kartı
+**Uygulamayla bağı:** Özet'teki "Kullanılabilir para" kartı: günlük hesaplardaki para − yaklaşan ödemeler − kenarda tutulan birikim payı; "günde yaklaşık … · … gün" kalan parayı günlere böler. Birikim payı Bütçe ekranında "Günlük hesapta dokunmadan tuttuğun tutar" olarak girilir: meteorlar için yedek yakıt.
+**Açıklamanın ilk satırı:** Paran ayın kaçında bitiyor? 🚀
+**Doğrulama sonucu:** %27, Johanna Peetz'in 2010 doktora tezinin özetinden ("haftalık harcamalarını yaklaşık %27 eksik tahmin ettiler", Wilfrid Laurier Üniversitesi; danışman Roger Buehler). Aynı çalışmanın yayımlanan makalesi Peetz ve Buehler (2009, *PSPB*): katılımcılar gelecek haftada gerçekte harcadıklarından da, geçen hafta harcadıklarını hatırladıklarından da az harcayacaklarını tahmin etti; sonraki yayınlar bu bulguyu "yaklaşık %30" diye aktarıyor. Makalenin tam metnine bu ortamdan erişilemediği için videoda tezdeki %27 ve kaynak satırında "Peetz 2010" kullanıldı. "Akla sıradan harcamalar gelir" açıklaması Howard, Hardisty, Sussman ve Lukas'tan (2022, *Journal of Marketing Research*, 10 çalışma, N = 6.044; Kanada'da Vancity kredi kooperatifi üyeleriyle saha çalışması: tahminler her hafta gerçeğin altında kaldı; "bu hafta neden farklı olabilir?" diye sordurmak tahminleri gerçeğe yaklaştırdı). Hikâyedeki tutarlar örnek; meteorlar toplamı 2.350 TL, 14'ünden sonra günde ~206 TL planla yakıt 22'sinde biter (8 gün × 206 + 2.350 ≈ 4.000).
+
+---
+
 ## Kaynaklar
 - Gneezy, Haruvy ve Yafe (2004): [RePEc](https://ideas.repec.org/a/ecj/econjl/v114y2004i495p265-280.html), [özet](https://en.wikipedia.org/wiki/Unscrupulous_diner%27s_dilemma)
 - Bankrate (2021) borç anketi: [PDF](https://www.bankrate.com/pdfs/pr/20211213-lending-money-survey.pdf)
@@ -275,3 +318,5 @@ Kelime zamanları ElevenLabs Scribe ile ölçüldü (`assets/voice/katil/words.j
 - Allcott ve ark. (2020): [SIEPR](https://siepr.stanford.edu/publications/working-paper/welfare-effects-social-media)
 - Chen ve Rao (2007): [RePEc](https://ideas.repec.org/a/oup/jconrs/v34y2007i3p327-340.html), [ScienceDaily](https://sciencedaily.com/releases/2007/05/070515110951.htm)
 - C+R Research (2022): [C+R Research](https://www.crresearch.com/blog/subscription-service-statistics-and-costs/), [CNBC](https://www.cnbc.com/2022/06/02/consumers-spend-133-more-monthly-on-subscriptions-than-they-realize.html), [KTVU haberi](https://www.ktvu.com/news/many-underestimate-monthly-subscription-costs-133-survey-2022)
+- Peetz ve Buehler (2009): [DOI](https://doi.org/10.1177/0146167209345160) · Peetz (2010) doktora tezi: [Wilfrid Laurier](https://scholars.wlu.ca/etd/1101/)
+- Howard, Hardisty, Sussman ve Lukas (2022): [Journal of Marketing Research](https://journals.sagepub.com/doi/full/10.1177/00222437211068025), [PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC13038220/)

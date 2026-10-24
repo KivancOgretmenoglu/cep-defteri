@@ -500,3 +500,23 @@ Cep Defteri'nde Bütçe → + Plan → Ödeme, Her ay: her aboneliği ayrı bir 
 ```
 
 **Yayın notu:** Kapak karesi olarak 0,2 sn'yi seç (ay ışığında cam kumbara, sırtında kırmızı gözlü siluet + "Kumbaranı geceleri kim emiyor?"). İlk yorumu sabitle: "Ceviz'in kumbarasından 4 vampir 550 TL emiyordu, unuttuğu beşinciyle 700 TL. Seninki? Önce tahmin, sonra say. (Tutarlar örnek.)" Videoda karar anı yok; çağrılar sonda: önce seslendirmeyle aynı soru "Önce tahmin et, sonra tek tek say" + "Yoruma yaz: tahminin kaç, gerçeği kaç?", sonra ortak takip satırı ve takip kartı ("Her hafta bir para tuzağı. Kaçırmamak için takip et!"). "Arkadaşına gönder" açıklamada. Anket rakamları C+R Research'ün kendi sayfasından ve CNBC haberinden (22 Nisan–2 Mayıs 2022, ABD'de 1.000 kişi); C+R verisini kullananlardan kaynak bağlantısı istiyor, açıklamada adı geçiyor. Vampirlerde marka adı yok, tür adıyla; Ceviz'in telefonunun arkasında piksel Apple logosu var (istek üzerine; ücretli reklamda kullanılacaksa logosuz sürüm daha güvenli). Yorumlara gelen tahmin/gerçek çiftlerine "en çok hangisi şaşırttı?" diye yanıt ver; en büyük farkı bir sonraki sahne reelsinin açılışında kullan. Ayın katili ile arasında en az 5–7 gün bırak (ikisi de karanlık sahne, kırmızı gözler).
+
+## 24 · ay-sonuna-inis (kavram: bütçe yanılgısı / harcamayı eksik tahmin, seslendirme: Buğra, döngülü, 34,7 sn)
+
+**Açıklama:**
+```
+Paran ayın kaçında bitiyor? 🚀
+Ayın 14'ünde yakıt 4.000 TL, kalan plan 3.500 TL. Sence yeter mi? Cevabını ve paranın ayın kaçında bittiğini yoruma yaz 👇
+📌 Kaydet; ay başında yedek yakıtını ayır. Android erken erişim yakında.
+
+Ayın 1'i: Kaptan Ceviz'in görevi ay sonuna iniş. Ayın 14'ünde her şey yolunda görünüyor: 4.000 TL yakıt, 3.500 TL plan, arada 500 TL fark. Sonra planda olmayan meteorlar geliyor: kırık ekran, doğum günü, kitap parası. Ayın 22'sinde yakıt bitiyor. Tutarlar örnek.
+Araştırma: Haftalık harcamasını tahmin eden katılımcılar gerçekte harcadıklarından yaklaşık %27 az tahmin etti (Peetz, 2010; Peetz ve Buehler, 2009). Sebebi: tahmin ederken akla sıradan harcamalar geliyor, sıra dışı olanlar (tamir, hediye, beklenmedik masraf) gelmiyor (Howard, Hardisty, Sussman ve Lukas, 2022).
+Çözüm: ay başında yedek yakıtı kenara koy, kalanını günlere böl. Plan yaparken bir de kendine sor: "Bu ay neden farklı olabilir?" Araştırmada bu soru tahminleri gerçeğe yaklaştırdı.
+
+Parası hep ayın ortasında biten arkadaşına gönder.
+Cep Defteri'nde Bütçe → Birikim payı: günlük hesapta dokunmadan tuttuğun tutarı yaz; Özet'teki "Kullanılabilir para" onu ve yaklaşan ödemeleri düşer, kalanı günlere bölüp "günde yaklaşık" ne kadar harcayabileceğini söyler.
+
+#aysonu #bütçe #öğrencibütçesi #harçlık #paraipuçları #tasarruf #cepdefteri
+```
+
+**Yayın notu:** Kapak karesi olarak 0,2 sn'yi seç (yakıtı biten HARÇLIK-1, sağ üstte "AY SONU", kırmızı rotada "AY SONUNA 8 GÜN", altta "YAKIT 0 TL" ve "KASIM 22" + "Paran ayın kaçında bitiyor?"). Ayın 20'si civarında yayınla. İlk yorumu sabitle: "Ceviz'in yakıtı ayın 22'sinde bitti. Seninki ayın kaçında bitiyor? (Tutarlar örnek.)" Karar anında soru "YETER mi, YETMEZ mi?": rakamlar ekranda (FARK +500 TL), izleyici cevaplayabilir; çoğu "yeter" der, meteorlar bunu boşa çıkarır. Çağrılar sonda: önce seslendirmeyle aynı soru + "Yoruma yaz: ayın kaçı?", sonra ortak takip satırı ve takip kartı. "Arkadaşına gönder" ve "kaydet" açıklamada. %27 Peetz'in 2010 doktora tezinin özetinden; 2009 makalesini aktaranlar "~%30" diyor, videoda tezdeki rakam ve "Peetz 2010" kaynak satırı var. Uygulama kartındaki rakamlar (9.000 / 1.200 / 1.800 / 6.000) hikâyedeki rakamlardan bilerek farklı: kart yeni ayın ilk günü. Ayın katili ile konu komşu (istisnai harcamalar); aralarına en az bir hafta koy. Yorumlarda en sık söylenen günü bir sonraki reelsin açılışında kullan ("En çok ayın 2X'i dediniz").

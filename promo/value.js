@@ -3611,8 +3611,8 @@ function defineValue() {
     deriveSpace();
     const s = scene(t0, '#03040A', undefined, o.wdur ?? 0.4);
     const ev = (k) => o[k] ?? 99;
-    const LAUNCH = ev('launch'), KAPTAN = ev('kaptan'), MOONT = ev('moon'), IGN = ev('ign'), LIFT = ev('lift');
-    const MC = ev('mc'), D14 = ev('d14'), FUEL = ev('fuel'), PLAN = ev('plan'), ASK = ev('ask'), COUNT = ev('count'), ZERO = ev('zero');
+    const LAUNCH = ev('launch'), KAPTAN = ev('kaptan'), BACK = ev('back'), MOONT = ev('moon'), IGN = ev('ign'), LIFT = ev('lift');
+    const MC = ev('mc'), D14 = ev('d14'), FUELW = ev('fuelw'), FUEL = ev('fuel'), PLANW = ev('planw'), PLAN = ev('plan'), ASK = ev('ask'), COUNT = ev('count'), ZERO = ev('zero');
     const SPACE = ev('space'), ALERT = ev('alert'), MET = o.met || [99, 99, 99], D22 = ev('d22'), HOUSTON = ev('houston'), DEAD = ev('dead');
     const SCI = ev('sci'), BARS = ev('bars'), PCT = ev('pct'), MISS = ev('miss'), APP = ev('app'), RES = ev('res'), DAY = ev('day');
     const CTA = ev('cta'), FLAG = ev('flag'), FOLLOW = ev('follow'), TAPF = ev('tapf'), STREAK = ev('streak'), OFF = ev('off');
@@ -3629,7 +3629,7 @@ function defineValue() {
       if (lt < SPACE) return { day: lt < D14 ? 1 : 14, fuel: 4000 };
       if (lt < D22) {
         const day = 14 + 8 * prog(lt, SPACE, D22 - SPACE);
-        let fuel = 4000 - 206 * (day - 14);
+        let fuel = 4000 - 206 * Math.floor(day - 14);  // takvim yaprağı dönünce bir günlük plan düşer
         MET.forEach((m, i) => (fuel -= METF[i] * E.out(prog(lt, m, 0.35))));
         return { day, fuel: Math.max(0, fuel) };
       }
@@ -3656,8 +3656,8 @@ function defineValue() {
     const route = el('div', 'abs', camA, { left: 0, top: 0, width: '1080px', height: '1920px', pointerEvents: 'none' });
     route.innerHTML = '<svg width="1080" height="1920" overflow="visible"><path fill="none" stroke-width="9" stroke-linecap="round" stroke-dasharray="2 24"/></svg>';
     const routeP = route.querySelector('path');
-    const gap = el('div', 'abs it', camA, { left: 0, top: 0, padding: '0 14px 4px', borderRadius: '10px', background: '#C0392B', color: '#FFF4E0', fontSize: '46px', whiteSpace: 'nowrap', transform: 'translate(-50%,-50%) rotate(-28deg)' });
-    gap.textContent = '8 GÜN';
+    const gap = el('div', 'abs it', camA, { left: 0, top: 0, padding: '0 16px 4px', borderRadius: '12px', background: '#C0392B', color: '#FFF4E0', fontSize: '50px', whiteSpace: 'nowrap', transform: 'translate(-50%,-50%) rotate(-28deg)' });
+    gap.textContent = 'AY SONUNA 8 GÜN';
     // rampa: zemin, kırmızı-beyaz kule ve kolları, beton rampa, duman
     const pad = el('div', 'abs', camA, { left: 0, top: 0, width: '1080px', height: '1920px' });
     el('div', 'abs', pad, { left: '-300px', top: '1500px', width: '1680px', height: '700px', background: 'linear-gradient(#232A3A, #161B28)' });
@@ -3678,6 +3678,7 @@ function defineValue() {
     pixEl(rk, ROCKET, ROCKET_C, RC, { left: 0, top: 0 });
     const port = el('div', 'abs', rk, { left: px(10.5 * RC), top: px(16.5 * RC), width: px(10 * RC), height: px(10 * RC), borderRadius: '50%', overflow: 'hidden', background: '#14203A' });
     const czP = new Mascot(port, { who: 'cevizastro', w: 180 });
+    const glint = el('div', 'abs', port, { left: '-60px', top: '-20px', width: '26px', height: '160px', background: 'rgba(255,255,255,.55)', transform: 'rotate(30deg)', display: 'none' });
     pixEl(rk, ROCKET_RIM, ROCKET_C, RC, { left: 0, top: 0 });
     el('div', 'abs it', rk, { left: px(8 * RC), top: px(28.4 * RC), width: px(16 * RC), textAlign: 'center', fontSize: '36px', color: '#2A1E1A', lineHeight: 1 }).textContent = 'HARÇLIK-1';
     const dents = [[11, 33], [19, 26], [13, 37]].map(([x, y]) => el('div', 'abs', rk, { left: px(x * RC), top: px(y * RC), width: '34px', height: '22px', borderRadius: '50%', background: 'radial-gradient(#2A1E1A 30%, #6E6A66 60%, rgba(0,0,0,0) 72%)', display: 'none' }));
@@ -3697,13 +3698,13 @@ function defineValue() {
 
     // A'nın göstergeleri (ekrana sabit): yakıt (sol alt) ve takvim (sağ alt)
     const hud = el('div', 'abs', s.root, { inset: 0, zIndex: 18, pointerEvents: 'none', display: 'none' });
-    const fBox = el('div', 'abs', hud, { left: '40px', top: '1372px', width: '330px', height: '150px', boxSizing: 'border-box', borderRadius: '22px', background: 'rgba(6,10,24,.82)', border: '4px solid #3A4466', padding: '10px 20px' });
-    fBox.innerHTML = `<div style="${PIX};font-size:36px;color:#9FB0D8;line-height:36px">YAKIT</div><div class="v" style="${PIX};font-size:64px;color:#7CF2A0;line-height:64px;white-space:nowrap">8.000 TL</div>`
+    const fBox = el('div', 'abs', hud, { left: '34px', top: '1330px', width: '400px', height: '196px', boxSizing: 'border-box', borderRadius: '26px', background: 'rgba(6,10,24,.85)', border: '5px solid #3A4466', padding: '12px 24px' });
+    fBox.innerHTML = `<div style="${PIX};font-size:48px;color:#9FB0D8;line-height:48px">YAKIT</div><div class="v" style="${PIX};font-size:88px;color:#7CF2A0;line-height:88px;white-space:nowrap">8.000 TL</div>`
       + '<div style="position:absolute;left:20px;right:20px;bottom:14px;height:14px;border-radius:7px;background:#1C2440;overflow:hidden"><div class="b" style="height:100%;width:100%;background:#4CD27A"></div></div>';
     const fVal = fBox.querySelector('.v'), fBar = fBox.querySelector('.b');
-    const fDrop = el('div', 'abs it', hud, { left: '230px', top: '1330px', fontSize: '64px', color: '#FF5A4E', textShadow: '4px 4px 0 #2A1E1A', display: 'none', whiteSpace: 'nowrap' });
-    const cal = el('div', 'abs', hud, { left: '852px', top: '1372px', width: '186px', height: '150px', borderRadius: '18px', overflow: 'hidden', background: '#FFFDF8', boxShadow: '0 12px 26px rgba(0,0,0,.45)' });
-    cal.innerHTML = `<div style="height:42px;background:#D7372B;color:#fff;${PIX};font-size:36px;text-align:center;line-height:42px">KASIM</div><div class="d" style="${PIX};font-size:104px;line-height:104px;text-align:center;color:#2A1E1A">1</div>`;
+    const fDrop = el('div', 'abs it', hud, { left: '250px', top: '1250px', fontSize: '76px', color: '#FF5A4E', textShadow: '4px 4px 0 #2A1E1A', display: 'none', whiteSpace: 'nowrap' });
+    const cal = el('div', 'abs', hud, { left: '818px', top: '1330px', width: '230px', height: '196px', borderRadius: '22px', overflow: 'hidden', background: '#FFFDF8', boxShadow: '0 12px 26px rgba(0,0,0,.45)' });
+    cal.innerHTML = `<div style="height:54px;background:#D7372B;color:#fff;${PIX};font-size:46px;text-align:center;line-height:54px">KASIM</div><div class="d" style="${PIX};font-size:136px;line-height:140px;text-align:center;color:#2A1E1A">1</div>`;
     const calD = cal.querySelector('.d');
 
     // ── B · görev kontrol: dev ekran, masa, kulaklıklı Bilge ──
@@ -3731,33 +3732,35 @@ function defineValue() {
     const mark = el('div', 'abs', map, { left: 0, top: 0, width: '34px', height: '34px', transform: 'translate(-50%,-50%)' });
     mark.innerHTML = '<svg width="34" height="34"><path d="M17 2 L30 30 L17 23 L4 30 Z" fill="#FFE08A" stroke="#2A1E1A" stroke-width="3"/></svg>';
     const dayB = el('div', 'abs', tele, { left: '356px', top: '62px', width: '520px', height: '84px', borderRadius: '12px', background: 'rgba(127,216,255,.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 22px', boxSizing: 'border-box' });
-    dayB.innerHTML = `<span style="font-size:30px;font-weight:800;color:#9FB0D8;letter-spacing:.1em">TAKVİM</span><span class="d" style="${PIX};font-size:66px;color:#FFFFFF">AYIN 1'İ</span>`;
-    const dayBT = dayB.querySelector('.d');
-    const readout = (y, label, color) => {
+    dayB.innerHTML = `<span class="l" style="font-size:30px;font-weight:800;color:#9FB0D8;letter-spacing:.1em">TAKVİM</span><span class="d" style="${PIX};font-size:66px;color:#FFFFFF">AYIN 1'İ</span>`;
+    const dayBT = dayB.querySelector('.d'), dayBL = dayB.querySelector('.l');
+    const readout = (y, label, color, sub = '') => {
       const r = el('div', 'abs', tele, { left: '356px', top: px(y), width: '520px', height: '138px', borderRadius: '12px', background: 'rgba(127,216,255,.06)', border: `4px solid ${color}55`, boxSizing: 'border-box', padding: '10px 22px', opacity: 0 });
-      r.innerHTML = `<div style="font-size:30px;font-weight:800;color:${color};letter-spacing:.1em">${label}</div><div class="v" style="${PIX};font-size:84px;line-height:.95;color:${color}">0 TL</div>`;
+      r.innerHTML = `<div style="font-size:30px;font-weight:800;color:${color};letter-spacing:.1em">${label}<span style="font-size:24px;font-weight:700;letter-spacing:.02em;color:#BFD2F0;margin-left:14px;white-space:nowrap">${sub}</span></div><div class="v" style="${PIX};font-size:84px;line-height:.95;color:${color}">0 TL</div>`;
       return { r, v: r.querySelector('.v'), color };
     };
-    const rF = readout(160, 'YAKIT', '#7CF2A0'), rP = readout(310, 'KALAN PLAN', '#FFC857');
-    const cdg = el('div', 'abs it', tele, { right: '26px', top: '8px', fontSize: '60px', color: '#FF5A4E', display: 'none' });
+    const rF = readout(160, 'YAKIT', '#7CF2A0'), rP = readout(310, 'KALAN PLAN', '#FFC857', 'ay sonuna kadar');
+    const cdg = el('div', 'abs it', tele, { right: '24px', top: '2px', fontSize: '96px', lineHeight: 1, color: '#FF5A4E', display: 'none' });
     // ekran 2: araştırma. Haftalık harcama: tahmin ve gerçek çubukları; tahmindeki eksik kısım meteorlarla dolu; %27 EKSİK damgası
     const sciB = el('div', 'abs', bscr, { inset: 0, display: 'none', background: '#071A2C' });
     el('div', 'abs', sciB, { left: '30px', top: '20px', fontSize: '30px', fontWeight: 800, color: '#7FD8FF', letterSpacing: '.12em' }).textContent = 'ARAŞTIRMA · HAFTALIK HARCAMA';
     const bar = (y, label, color) => {
       el('div', 'abs', sciB, { left: '30px', top: px(y), fontSize: '38px', fontWeight: 800, color: '#E6ECFF' }).textContent = label;
       const track = el('div', 'abs', sciB, { left: '250px', top: px(y - 6), width: '600px', height: '64px' });
-      const fill = el('div', 'abs', track, { left: 0, top: 0, width: '0', height: '100%', borderRadius: '10px', background: color });
-      return { track, fill };
+      const fill = el('div', 'abs', track, { left: 0, top: 0, width: '0', height: '100%', borderRadius: '10px', background: color, overflow: 'hidden' });
+      const val = el('div', 'abs it', fill, { right: '14px', top: '2px', fontSize: '52px', color: '#1A1020', lineHeight: 1 });
+      return { track, fill, val };
     };
     const bT = bar(96, 'TAHMİN', '#FFC857'), bG = bar(190, 'GERÇEK', '#FF6B5E');
+    bT.val.textContent = '73'; bG.val.textContent = '100';
     const missBox = el('div', 'abs', sciB, { left: px(250 + 600 * 0.73), top: '90px', width: px(600 * 0.27), height: '64px', boxSizing: 'border-box', border: '5px dashed #FF6B5E', borderRadius: '10px', opacity: 0, overflow: 'hidden' });
     [0, 1, 2].forEach((i) => pixEl(missBox, ROCK, ROCK_C, 2, { left: px(8 + i * 52), top: px(12 + (i % 2) * 8) }));
-    const pctB = el('div', 'abs it', sciB, { left: '640px', top: '262px', fontSize: '120px', color: '#FF6B5E', opacity: 0, whiteSpace: 'nowrap' });
-    const stampB = el('div', 'abs', sciB, { left: '600px', top: '372px', padding: '2px 18px 6px', borderRadius: '14px', border: '7px solid #FF6B5E', color: '#FF6B5E', background: 'rgba(7,26,44,.9)', fontSize: '50px', fontWeight: 800, opacity: 0, transformOrigin: '50% 50%', whiteSpace: 'nowrap' });
+    const pctB = el('div', 'abs it', sciB, { left: '640px', top: '232px', fontSize: '120px', color: '#FF6B5E', opacity: 0, whiteSpace: 'nowrap' });
+    const stampB = el('div', 'abs', sciB, { left: '600px', top: '336px', padding: '2px 18px 6px', borderRadius: '14px', border: '7px solid #FF6B5E', color: '#FF6B5E', background: 'rgba(7,26,44,.9)', fontSize: '50px', fontWeight: 800, opacity: 0, transformOrigin: '50% 50%', whiteSpace: 'nowrap' });
     stampB.textContent = 'EKSİK!';
     el('div', 'abs', sciB, { left: '30px', top: '282px', width: '540px', fontSize: '40px', fontWeight: 800, color: '#E6ECFF', lineHeight: 1.18 }).innerHTML = 'Akla sıradan harcamalar gelir, <span style="color:#FF6B5E">meteorlar gelmez.</span>';
-    const srcB = el('div', 'abs', sciB, { left: '30px', bottom: '16px', fontSize: '26px', fontWeight: 700, color: '#8FA6CC', opacity: 0 });
-    srcB.textContent = 'Kaynak: Peetz 2010 · Howard ve ark. 2022';
+    const srcB = el('div', 'abs', sciB, { left: '30px', bottom: '12px', fontSize: '33px', fontWeight: 800, color: '#BFD2F0', opacity: 0 });
+    srcB.textContent = 'Kaynak: %27 Peetz 2010 · neden: Howard ve ark. 2022';
     el('div', 'abs', bscr, { inset: 0, pointerEvents: 'none', background: 'repeating-linear-gradient(rgba(255,255,255,.035) 0 2px, transparent 2px 6px)' });
     // masa, kulaklıklı Bilge, masada CEP DEFTERİ defteri ve kupa
     const bB = new Mascot(camB, { who: 'bilgecom', w: 560 });
@@ -3794,20 +3797,20 @@ function defineValue() {
     const waves = [0, 1, 2].map((i) => el('div', 'abs', camC, { left: 0, top: 0, width: px(80 + i * 60), height: px(80 + i * 60), boxSizing: 'border-box', borderRadius: '50%', border: '10px solid transparent', borderRightColor: '#7FD8FF', borderTopColor: '#7FD8FF', display: 'none', transform: 'translate(-50%,-50%) rotate(-45deg)' }));
     const sweatC = [0, 1].map(() => pixEl(camC, SWEAT, SWEAT_C, 10, { left: 0, top: 0, display: 'none' }));
     // gösterge paneli: yakıt saati (sol), uyarı ekranı (orta), takvim (sağ)
-    el('div', 'abs', camC, { left: '-300px', top: '1416px', width: '1680px', height: '700px', background: 'linear-gradient(#262C3E, #171B28)' });
-    el('div', 'abs', camC, { left: '-300px', top: '1404px', width: '1680px', height: '16px', background: '#4A5268' });
-    const dial = el('div', 'abs', camC, { left: '70px', top: '1424px', width: '300px', height: '150px', overflow: 'hidden' });
+    el('div', 'abs', camC, { left: '-300px', top: '1316px', width: '1680px', height: '800px', background: 'linear-gradient(#262C3E, #171B28)' });
+    el('div', 'abs', camC, { left: '-300px', top: '1304px', width: '1680px', height: '16px', background: '#4A5268' });
+    const dial = el('div', 'abs', camC, { left: '70px', top: '1324px', width: '300px', height: '150px', overflow: 'hidden' });
     dial.innerHTML = '<svg width="300" height="300" viewBox="0 0 300 300"><circle cx="150" cy="150" r="140" fill="#0C0F18" stroke="#8E99AE" stroke-width="10"/>'
       + [...Array(9)].map((_, k) => `<rect x="146" y="18" width="8" height="${k % 4 ? 18 : 30}" fill="${k < 2 ? '#FF5A4E' : '#E6ECFF'}" transform="rotate(${-90 + k * 22.5} 150 150)"/>`).join('')
       + `<text x="44" y="138" fill="#FF5A4E" font-size="44" font-family="Pixel">E</text><text x="236" y="138" fill="#7CF2A0" font-size="44" font-family="Pixel">F</text>`
       + '<line class="needle" x1="150" y1="150" x2="150" y2="40" stroke="#FFE08A" stroke-width="9" stroke-linecap="round"/><circle cx="150" cy="150" r="16" fill="#2A1E1A"/></svg>';
     const needle = dial.querySelector('.needle');
-    const warnC = el('div', 'abs', camC, { left: '400px', top: '1432px', width: '280px', height: '92px', borderRadius: '14px', background: '#2A0C0C', border: '6px solid #4A1A1A', boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center' });
+    const warnC = el('div', 'abs', camC, { left: '400px', top: '1332px', width: '280px', height: '92px', borderRadius: '14px', background: '#2A0C0C', border: '6px solid #4A1A1A', boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center' });
     warnC.innerHTML = `<span style="${PIX};font-size:58px;color:#FF5A4E">YAKIT BİTTİ</span>`;
     const warnT = warnC.querySelector('span');
-    const calC = el('div', 'abs', camC, { left: '730px', top: '1432px', width: '270px', height: '92px', borderRadius: '14px', background: '#0C1A14', border: '6px solid #24342C', boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center' });
+    const calC = el('div', 'abs', camC, { left: '730px', top: '1332px', width: '270px', height: '92px', borderRadius: '14px', background: '#0C1A14', border: '6px solid #24342C', boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center' });
     calC.innerHTML = `<span style="${PIX};font-size:58px;color:#7CF2A0">KASIM 22</span>`;
-    const sparksC = new Burst(camC, { n: 22, t0: DEAD, ox: 860, oy: 1440, colors: ['#FFE08A', '#FFF6C2', '#F28C28'], speed: 700, grav: 1600, life: 0.8, size: [8, 16], upBias: 0.6 });
+    const sparksC = new Burst(camC, { n: 22, t0: DEAD, ox: 860, oy: 1340, colors: ['#FFE08A', '#FFF6C2', '#F28C28'], speed: 700, grav: 1600, life: 0.8, size: [8, 16], upBias: 0.6 });
     const redC = el('div', 'abs', s.root, { inset: 0, zIndex: 16, pointerEvents: 'none', background: '#E8322A', mixBlendMode: 'multiply', opacity: 0 });
 
     // ── D · telefon: Cep Defteri Özet, "Kullanılabilir para" kartı (uygulamadaki satırlar) ──
@@ -3818,22 +3821,23 @@ function defineValue() {
     const sD = el('div', 'abs', phD, { left: '20px', top: '20px', right: '20px', bottom: '20px', borderRadius: '72px', overflow: 'hidden', background: '#F6EEE6' });
     el('div', 'abs', sD, { left: '46px', top: '64px', fontSize: '26px', fontWeight: 700, color: '#8A7D72', letterSpacing: '.1em' }).textContent = 'KASIM 2026';
     el('div', 'abs', sD, { left: '44px', top: '96px', fontSize: '62px', fontWeight: 800, color: '#2A1E1A', letterSpacing: '-.03em' }).textContent = 'Cep Defteri';
-    const card = el('div', 'abs', sD, { left: '26px', right: '26px', top: '206px', height: '600px', borderRadius: '44px', background: '#FFFCF6', boxShadow: '0 14px 40px rgba(60,20,0,.12)', padding: '34px 34px 0', boxSizing: 'border-box' });
+    const card = el('div', 'abs', sD, { left: '26px', right: '26px', top: '206px', height: '650px', borderRadius: '44px', background: '#FFFCF6', boxShadow: '0 14px 40px rgba(60,20,0,.12)', padding: '34px 34px 0', boxSizing: 'border-box' });
     const row = (l, r, extra = '') => `<div style="display:flex;justify-content:space-between;align-items:baseline;font-size:30px;font-weight:600;color:#4A3B33;${extra}"><span>${l}</span><b style="font-weight:800;color:#2A1E1A">${r}</b></div>`;
     card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:33px;font-weight:800;color:#2A1E1A">Kullanılabilir para</span><span style="font-size:27px;font-weight:600;color:#8A7D72">Kasım sonuna kadar</span></div>'
       + '<div style="margin-top:14px;font-size:104px;font-weight:800;letter-spacing:-.04em;color:#2A1E1A;line-height:1">6.000<span style="font-size:44px;letter-spacing:0">,00 TL</span></div>'
       + '<div class="pd" style="display:inline-block;margin-top:14px;padding:4px 10px;margin-left:-10px;border-radius:14px;font-size:31px;font-weight:600;color:#4A3B33">günde yaklaşık <b style="color:#2A1E1A">200,00 TL</b> · 30 gün</div>'
       + '<div style="margin:24px 0 18px;border-top:4px dashed #E2D6C8"></div>'
-      + row('Günlük hesaplarda', '8.000 TL', 'padding:6px 0')
-      + `<div class="rs" style="margin:8px -14px;padding:10px 14px;border-radius:16px">${row('− Kenarda tuttuğun birikim payı', '2.000 TL')}</div>`
+      + row('Günlük hesaplarda', '9.000 TL', 'padding:6px 0')
+      + row('− Yaklaşan ödemeler (2)', '1.200 TL', 'padding:6px 0')
+      + `<div class="rs" style="margin:6px -14px;padding:10px 14px;border-radius:16px">${row('− Kenarda tuttuğun birikim payı', '1.800 TL')}</div>`
       + '<div style="margin:14px 0 14px;border-top:4px dashed #E2D6C8"></div>'
       + row('= Kullanılabilir', '6.000 TL', 'font-weight:800;color:#2A1E1A');
     const pdD = card.querySelector('.pd'), rsD = card.querySelector('.rs');
-    const tagRes = el('div', 'abs it', card, { right: '30px', top: '500px', padding: '2px 16px 6px', borderRadius: '12px', background: '#2A1E1A', color: '#FFE08A', fontSize: '48px', transform: 'rotate(-5deg)', opacity: 0, transformOrigin: '80% 0' });
+    const tagRes = el('div', 'abs it', card, { right: '30px', top: '556px', padding: '2px 16px 6px', borderRadius: '12px', background: '#2A1E1A', color: '#FFE08A', fontSize: '48px', transform: 'rotate(-5deg)', opacity: 0, transformOrigin: '80% 0' });
     tagRes.textContent = '↑ YEDEK YAKIT';
     const tagDay = el('div', 'abs it', sD, { right: '50px', top: '172px', padding: '2px 16px 6px', borderRadius: '12px', background: '#2A1E1A', color: '#7CF2A0', fontSize: '46px', transform: 'rotate(4deg)', opacity: 0, transformOrigin: '80% 100%' });
     tagDay.textContent = 'GÜNLÜK YAKIT ↓';
-    const canD = pixEl(card, ['..oooo..', '.oRRRRo.', 'oRRRRRRo', 'oRWWWWRo', 'oRWRRWRo', 'oRWWWWRo', 'oRRRRRRo', 'oooooooo'], { o: '#2A1E1A', R: '#E8322A', W: '#FFE08A' }, 8, { left: '200px', top: '500px', opacity: 0 });
+    const canD = pixEl(card, ['..oooo..', '.oRRRRo.', 'oRRRRRRo', 'oRWWWWRo', 'oRWRRWRo', 'oRWWWWRo', 'oRRRRRRo', 'oooooooo'], { o: '#2A1E1A', R: '#E8322A', W: '#FFE08A' }, 8, { left: '200px', top: '556px', opacity: 0 });
 
     // ── E · Ay yüzeyi: soru, bayrak, takip ──
     const camE = world();
@@ -3882,7 +3886,7 @@ function defineValue() {
       // ── A ──
       const launchT = lt >= LAUNCH && lt < MC, flight = lt >= SPACE && lt < D22;
       const lift = launchT ? Math.max(0, lt - LIFT) : 0;
-      const pz = launchT ? ramp(KAPTAN - 0.25, 0.4) * (1 - ramp(MOONT - 0.35, 0.45)) : 0;  // rampada lomboza yakınlaşma
+      const pz = launchT ? ramp(KAPTAN - 0.25, 0.35) * (1 - ramp(BACK, 0.4)) : 0;  // rampada lomboza yakınlaşma
       dusk.style.opacity = launchT ? 1 : 0;
       pad.style.display = launchT ? 'block' : 'none';
       pad.style.transform = `translateY(${280 * lift * lift}px)`;
@@ -3895,8 +3899,8 @@ function defineValue() {
         q.e.style.height = px(flight ? q.sz + 22 * q.sp : q.sz);
       });
       // Ay: rampada küçük, kancada orta; yolculukta görünmez (kadrajın üstünde)
-      const moonS = hookish ? 0.78 : 0.5, moonX = hookish ? 790 : 830, moonY = hookish ? 790 : 760;
-      const moonOn = hookish || launchT;
+      const moonS = hookish ? 0.95 : 0.5, moonX = hookish ? 880 : 830, moonY = hookish ? 650 : 760;
+      const moonOn = hookish || (launchT && pz < 0.05);
       [moonA, moonGlow, moonTag].forEach((e) => (e.style.display = moonOn ? 'block' : 'none'));
       if (moonOn) {
         const pulse = 1 + 0.1 * Math.sin(Math.PI * prog(lt, MOONT, 0.4));
@@ -3905,14 +3909,14 @@ function defineValue() {
         moonTag.style.transform = `translate(${moonX}px,${moonY + 160 * moonS + 10}px) translateX(-50%) scale(${pulse})`;
       }
       // roket: kancada yakıtsız, eğik, sürükleniyor; rampada dik (KAPTAN'da Ceviz el sallar), kalkışta yükselir; yolculukta ortada
-      let rx = 540, ry = 1490 - RH, rot = 0, thrust = 0;
-      if (hookish) { rx = 470 + 6 * Math.sin(lt * 1.3); ry = 960 + 10 * Math.sin(lt * 0.9); rot = 16 + 3 * Math.sin(lt * 1.1); }
+      let rx = 540, ry = 1490 - RH, rot = 0, thrust = 0, rs = 1;
+      if (hookish) { const hl = lt >= OFF ? lt - OFF : lt; rs = 0.85; rx = 450 + 14 * Math.sin(hl * 3.1); ry = 860 + 12 * Math.sin(hl * 2.3); rot = 16 + 5 * Math.sin(hl * 2.7); }
       else if (launchT) { ry = 1490 - RH - 420 * lift * lift - 30 * lift; thrust = lt >= IGN ? (lt < LIFT ? 0.45 * prog(lt, IGN, 0.25) : 1) : 0; }
-      else if (flight) { rx = 540 + 14 * Math.sin(lt * 1.6); ry = SY - RH * 0.5 + 8 * Math.sin(lt * 2.3); rot = 2 * Math.sin(lt * 1.2); thrust = 0.85 + 0.15 * Math.sin(lt * 20); }
+      else if (flight) { rx = 540 + 14 * Math.sin(lt * 1.6); ry = SY - RH * 0.5 - 60 + 8 * Math.sin(lt * 2.3); rot = 2 * Math.sin(lt * 1.2); thrust = 0.85 + 0.15 * Math.sin(lt * 20); }
       const hitShake = MET.reduce((a, m) => a + shake(lt, m, 26, 0.45), 0);
-      const padShake = launchT && lt >= IGN ? shake(lt, LIFT, 22, 0.8) + Math.sin(lt * 60) * 3 * prog(lt, IGN, 0.3) : 0;
+      const padShake = launchT ? (lt >= IGN ? shake(lt, LIFT, 22, 0.8) + Math.sin(lt * 60) * 3 * prog(lt, IGN, 0.3) : Math.sin(lt * 47) * 1.5 * pz) : 0;
       rk.style.display = hookish || launchT || flight ? 'block' : 'none';
-      rk.style.transform = `translate(${rx - RW / 2 + hitShake + padShake}px,${ry}px) rotate(${rot + hitShake * 0.2}deg)`;
+      rk.style.transform = `translate(${rx - RW / 2 + hitShake + padShake}px,${ry}px) rotate(${rot + hitShake * 0.2}deg) scale(${rs})`;
       flame.style.display = thrust > 0.02 ? 'block' : 'none';
       if (thrust > 0.02) {
         const fi = Math.floor(lt / 0.05) % 3;
@@ -3926,6 +3930,9 @@ function defineValue() {
       else if (flight) cp = lt >= ALERT ? ['curious', null, 'wide'] : ['happy', null, blink(lt)];
       czP.set(...cp);
       czP.put(64, 154);  // kaskın ortası lombozun ortasında; dış halkası lombozun dışında kalır
+      const gk = prog(lt, KAPTAN + 0.2, 0.5);
+      glint.style.display = launchT && gk > 0 && gk < 1 ? 'block' : 'none';
+      glint.style.left = px(-60 + 200 * gk);
       dents.forEach((d, i) => (d.style.display = (flight && lt >= MET[i] + 0.1) || hookish ? 'block' : 'none'));
       // duman: rampada ateşlemeyle kabarır; kancada lüleden ince duman
       puffs.forEach((p, i) => {
@@ -3935,7 +3942,7 @@ function defineValue() {
           on = true; x = 540 + side * (40 + 260 * k) - 75; y = 1420 - 40 * k + 280 * lift * lift; sc = 0.6 + 1.4 * k; a = 1 - k * 0.7;
         } else if (hookish && i < 5) {
           const k = ((lt * 0.6 + i * 0.2) % 1);
-          on = true; x = rx - 140 * Math.sin((rot * Math.PI) / 180) - 75 + 30 * k; y = ry + RH * 0.55 + 230 * Math.cos((rot * Math.PI) / 180) - 75 + 50 * k; sc = 0.18 + 0.3 * k; a = 0.45 * (1 - k);
+          on = true; x = rx - 140 * rs * Math.sin((rot * Math.PI) / 180) - 75 + 30 * k; y = ry + RH * 0.55 + 230 * rs * Math.cos((rot * Math.PI) / 180) - 75 + 50 * k; sc = 0.18 + 0.3 * k; a = 0.45 * (1 - k);
         }
         p.style.display = on ? 'block' : 'none';
         if (on) { p.style.transform = `translate(${x}px,${y}px) scale(${sc})`; p.style.opacity = a; }
@@ -3945,7 +3952,7 @@ function defineValue() {
       const routeOn = hookish || (launchT && lt < LIFT && pz < 0.05);
       route.style.display = gap.style.display = routeOn ? 'block' : 'none';
       if (routeOn) {
-        const P = RH * 0.55, nx = rx + Math.sin((rot * Math.PI) / 180) * P, ny = ry + P - Math.cos((rot * Math.PI) / 180) * P;  // burnun ucu (dönme noktası %55)
+        const P = RH * 0.55, nx = rx + Math.sin((rot * Math.PI) / 180) * P * rs, ny = ry + P - Math.cos((rot * Math.PI) / 180) * P * rs;  // burnun ucu (dönme noktası %55)
         const mx2 = moonX - 120 * moonS, my2 = moonY + 110 * moonS;
         routeP.setAttribute('d', `M${nx},${ny} Q${(nx + mx2) / 2 - 60},${(ny + my2) / 2 - 40} ${mx2},${my2}`);
         routeP.setAttribute('stroke', hookish ? '#FF5A4E' : 'rgba(127,216,255,.75)');
@@ -3960,7 +3967,7 @@ function defineValue() {
       });
       metEls.forEach((me, i) => {
         const k = prog(lt, me.m - 0.75, 0.75), hit = lt >= me.m;
-        const tx = 540 + (i - 1) * 60, ty = SY + 60 - i * 40;  // çarpma noktası: gövde
+        const tx = 540 + (i - 1) * 60, ty = SY - i * 40;  // çarpma noktası: gövde
         const vis = flight && k > 0 && !hit;
         me.w.style.display = vis ? 'block' : 'none';
         if (vis) {
@@ -3972,7 +3979,8 @@ function defineValue() {
         const tagOn = flight && k > 0 && lt < me.m + 0.9;
         me.tag.style.display = tagOn ? 'block' : 'none';
         if (tagOn) {
-          const x = hit ? tx : lerp(me.from[0], tx, k), y = hit ? ty - 140 - 160 * prog(lt, me.m, 0.9) : lerp(me.from[1], ty, k) - 150;
+          const hq = prog(lt, me.m, 0.9), side = me.from[0] > 540 ? 1 : -1;  // çarpınca etiket geldiği yana kayar, roketin üstünde kalmaz
+          const x = hit ? tx + side * 250 * E.out(hq) : lerp(me.from[0], tx, k), y = Math.max(720, hit ? ty - 200 - 120 * hq : lerp(me.from[1], ty, k) - 150);  // altyazının altında
           me.tag.style.transform = `translate(${clamp(x, 220, 860)}px,${y}px) translateX(-50%) scale(${hit ? 1 + 0.25 * Math.sin(Math.PI * prog(lt, me.m, 0.3)) : 1})`;
           me.tag.style.opacity = hit ? 1 - prog(lt, me.m + 0.6, 0.3) : clamp(k * 4);
         }
@@ -4003,11 +4011,14 @@ function defineValue() {
       tele.style.display = sciOn ? 'none' : 'block';
       sciB.style.display = sciOn ? 'block' : 'none';
       const dB = lt < D14 ? 1 : Math.min(14, 1 + Math.floor((lt - D14) / 0.04));
-      dayBT.textContent = `AYIN ${ekD(dB).toLocaleUpperCase('tr-TR')}`;
+      const showGap = lt >= COUNT && lt < SPACE;
+      dayBL.textContent = showGap ? 'FARK' : 'TAKVİM';
+      dayBT.textContent = showGap ? '+500 TL' : `AYIN ${ekD(dB).toLocaleUpperCase('tr-TR')}`;
+      dayBT.style.color = showGap ? '#7CF2A0' : '#FFFFFF';
       const mk = MP((dB - 1) / 29);
       mark.style.left = px(mk[0]); mark.style.top = px(mk[1]);
-      [[rF, FUEL, 4000], [rP, PLAN, 3500]].forEach(([r, t, v]) => {
-        const q = prog(lt, t - 0.15, 0.3);
+      [[rF, FUELW, FUEL, 4000], [rP, PLANW, PLAN, 3500]].forEach(([r, tw, t, v]) => {
+        const q = prog(lt, Math.min(tw, t) - 0.1, 0.3);
         r.r.style.opacity = clamp(q * 3);
         r.r.style.transform = `scale(${0.9 + 0.1 * E.back(q)})`;
         r.v.textContent = `${fmt(v * E.out(prog(lt, t - 0.15, 0.5)))} TL`;
@@ -4032,7 +4043,7 @@ function defineValue() {
       // Bilge: göstergeleri okur, soruda kameraya döner; sayımda terler
       let bp = ['calm', null, blink(lt)];
       if (lt >= FUEL) bp = ['happy', null, blink(lt)];
-      if (lt >= ASK) bp = ['curious', null, 'wide'];
+      if (lt >= ASK) bp = ['calm', 'up', 'wide'];  // 'curious' pozunun '?' işareti göstergeye biniyordu
       if (counting) bp = ['calm', 'face', Math.floor(lt / 0.375) % 2 ? 'wide' : 'squeeze'];  // düşünce noktası yok: kafanın sağ üstündeki işaret dev ekrandaki rakamı örtüyordu
       if (sciOn) bp = ['happy', 'wave', blink(lt)];
       bB.set(...bp);
@@ -4103,16 +4114,20 @@ function defineValue() {
 
       // ── kamera planları: dünya noktası (fx, fy) ekranda (540, SY)'ye düşer ──
       let W = 'A', z = 1, fx = 540, fy = SY, hudOn = true;
-      if (hookish) { z = 1.0 + 0.03 * prog(lt >= OFF ? lt - OFF : lt, 0, 1); }                                                                // kanca: yakıtı biten roket
+      if (hookish) { z = 1.0 + 0.05 * E.out(prog(lt >= OFF ? lt - OFF : lt, 0, 0.45)); }                                                                // kanca: yakıtı biten roket
       else if (launchT) {                                                                                                                        // rampa: lomboza yaklaşır, geri çekilir, kalkış
         z = lerp(1.0, 2.3, pz); fx = lerp(540, 535, pz); fy = lerp(SY, 1490 - RH + 215, pz); hudOn = pz < 0.08;
-      } else if (lt < ASK) { W = 'B'; z = 1.0 + 0.04 * prog(lt, MC, ASK - MC); }                                                              // görev kontrol
-      else if (lt < COUNT) { W = 'B'; const q = ramp(ASK, 0.45); z = lerp(1.04, 1.7, q); fx = lerp(540, 300, q); fy = lerp(SY, 1310, q); }      // "Sence yakıt yeter mi?"
+      } else if (lt < ASK) { W = 'B'; z = 1.0 + 0.04 * prog(lt, MC, ASK - MC); fy = 1120; }                                                   // görev kontrol (ekran altyazının altında)
+      else if (lt < COUNT) { W = 'B'; const q = ramp(ASK, 0.45); z = lerp(1.04, 1.18, q); fx = lerp(540, 520, q); fy = lerp(1120, 1078, q); }      // "Sence yakıt yeter mi?": Bilge ve göstergeler
       else if (lt < SPACE) { W = 'B'; z = 1.36 + 0.03 * ramp(COUNT, ZERO - COUNT); fx = 706; fy = 990; }                                      // karar: göstergeler
       else if (lt < D22) { z = 1.0 + 0.06 * prog(lt, SPACE, D22 - SPACE); }                                                                     // meteorlar
       else if (lt < SCI) { W = 'C'; z = 1.02 + 0.06 * prog(lt, D22, SCI - D22); fy = 1150; }                                                   // kokpit
       else if (lt < APP) { W = 'B'; z = 1.1 + 0.03 * prog(lt, SCI, APP - SCI); fx = 540; fy = 930; }                                          // araştırma
-      else if (lt < CTA) { W = 'D'; z = 1.1 + 0.02 * prog(lt, APP, CTA - APP); fy = 1110; }                                                    // Cep Defteri
+      else if (lt < CTA) {                                                                                                                        // Cep Defteri: kart → birikim payı → günlük tutar
+        W = 'D';
+        const q1 = ramp(RES - 0.05, 0.4), q2 = ramp(DAY - 0.25, 0.4);
+        z = lerp(lerp(1.1, 1.3, q1), 1.4, q2); fy = lerp(lerp(1130, 1180, q1), 1060, q2);  // birikim payında kartın başlığı yazı kutusunun altında
+      }
       else { W = 'E'; z = 1.0 + 0.04 * prog(lt, CTA, OFF - CTA); }                                                                             // Ay yüzeyi
       let beat = -9;
       beats.forEach((t) => { if (lt >= t) beat = t; });
