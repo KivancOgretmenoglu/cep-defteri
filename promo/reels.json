@@ -5153,5 +5153,285 @@
         "assets/voice/ortak/takip.mp3"
       ]
     ]
+  },
+  "ay-sonuna-inis": {
+    "end": 34.45,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.45,
+    "noMusicVariant": true,
+    "limiter": true,
+    "musicPlan": [
+      [
+        0,
+        0.45,
+        "horror"
+      ],
+      [
+        0.45,
+        13.0,
+        "space"
+      ],
+      [
+        13.0,
+        20.6,
+        "horror",
+        {
+          "beatsEnd": 13.0
+        }
+      ],
+      [
+        20.6,
+        28.2,
+        "lofi"
+      ],
+      [
+        28.2,
+        33.95,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ],
+      [
+        33.95,
+        34.45,
+        "horror"
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          9.9,
+          12.9
+        ]
+      ]
+    },
+    "captionPixel": true,
+    "captionY": 604,
+    "captionMaxWords": 3,
+    "captionUntil": 28.2,
+    "captionCut": [
+      [
+        9.9,
+        12.9
+      ]
+    ],
+    "scenes": [
+      [
+        "inis",
+        0,
+        {
+          "launch": 0.45,
+          "kaptan": 1.32,
+          "moon": 2.7,
+          "ign": 2.85,
+          "lift": 3.24,
+          "mc": 3.85,
+          "d14": 4.27,
+          "fuel": 5.62,
+          "plan": 7.37,
+          "ask": 8.3,
+          "count": 9.9,
+          "zero": 12.9,
+          "space": 13.0,
+          "alert": 14.14,
+          "met": [
+            15.56,
+            16.39,
+            17.17
+          ],
+          "d22": 17.75,
+          "houston": 18.85,
+          "dead": 19.72,
+          "sci": 20.6,
+          "bars": 21.48,
+          "pct": 23.68,
+          "miss": 24.38,
+          "app": 25.5,
+          "res": 25.88,
+          "day": 27.5,
+          "cta": 28.2,
+          "flag": 28.58,
+          "follow": 30.95,
+          "streak": 32.3,
+          "tapf": 33.27,
+          "off": 33.95
+        }
+      ],
+      [
+        "inis",
+        33.95,
+        {
+          "wdur": 0.2
+        }
+      ]
+    ],
+    "voiceTempo": 1.2,
+    "voiceFilter": "brand",
+    "boxes": [
+      [
+        0,
+        3.8,
+        "Paran ayın<br><b>kaçında bitiyor?</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true
+        }
+      ],
+      [
+        3.85,
+        8.25,
+        "Yolun yarısı:<br><b>ayın 14'ü</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        8.3,
+        12.9,
+        "Sence<br><b>yakıt yeter mi?</b>",
+        300,
+        {
+          "size": 96,
+          "pulse": true,
+          "quiet": true,
+          "dim": [
+            9.9,
+            12.9
+          ],
+          "dimTo": 0.7
+        }
+      ],
+      [
+        13.0,
+        17.7,
+        "Planda olmayan<br><b>meteorlar!</b>",
+        300,
+        {
+          "size": 96,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        17.75,
+        20.55,
+        "Ayın 22'si:<br><b>yakıt bitti</b>",
+        300,
+        {
+          "size": 96,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        20.6,
+        25.45,
+        "Harcama tahmini:<br><b>%27 eksik</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        25.5,
+        28.15,
+        "Yedek yakıtı kenara koy,<br><b>kalanını günlere böl</b>",
+        300,
+        {
+          "size": 72,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        28.2,
+        30.9,
+        "Senin paran<br><b>ayın kaçında bitiyor?</b>",
+        300,
+        {
+          "size": 84,
+          "pulse": true
+        }
+      ],
+      [
+        28.3,
+        30.9,
+        "Yoruma yaz: ayın kaçı?",
+        600,
+        {
+          "size": 44,
+          "quiet": true
+        }
+      ],
+      [
+        33.95,
+        34.45,
+        "Paran ayın<br><b>kaçında bitiyor?</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true,
+          "quiet": true
+        }
+      ]
+    ],
+    "voiceFiles": [
+      [
+        0.45,
+        "assets/voice/inis/i1.mp3",
+        "Ayın 1'i. Kaptan Ceviz'in görevi: ay sonuna iniş!"
+      ],
+      [
+        3.85,
+        "assets/voice/inis/i2.mp3",
+        "Ayın 14'ü. Yakıt: 4.000 lira. Kalan plan: 3.500."
+      ],
+      [
+        8.3,
+        "assets/voice/inis/i3m.mp3",
+        "Sence yakıt yeter mi?"
+      ],
+      [
+        13.0,
+        "assets/voice/inis/i4.mp3",
+        "Ama planda olmayan meteorlar geldi: kırık ekran, doğum günü, kitap parası."
+      ],
+      [
+        17.75,
+        "assets/voice/inis/i5a.mp3",
+        "Ayın 22'si."
+      ],
+      [
+        18.85,
+        "assets/voice/inis/i5r.mp3",
+        "Houston, bir sorunumuz var!"
+      ],
+      [
+        20.6,
+        "assets/voice/inis/i6.mp3",
+        "Bir araştırmada insanlar haftalık harcamalarını yaklaşık %27 eksik tahmin etti."
+      ],
+      [
+        25.5,
+        "assets/voice/inis/i8.mp3",
+        "Yedek yakıtı kenara koy, kalanını günlere böl."
+      ],
+      [
+        28.2,
+        "assets/voice/inis/i9.mp3"
+      ],
+      [
+        30.95,
+        "assets/voice/ortak/takip.mp3"
+      ]
+    ]
   }
 }

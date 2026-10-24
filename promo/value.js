@@ -300,6 +300,140 @@ function deriveCevizCap() {
   });
 }
 
+// Ay sonuna iniş: HARÇLIK-1 roketi (önden: kırmızı burun, lombozda Ceviz, sarı şerit, üç kanat), alevi, meteorlar ve
+// üstlerindeki simgeler, Ay ve Dünya, kasklı Ceviz ('cevizastro') ve kulaklıklı Bilge ('bilgecom')
+const gridRows = (W, H, f) => [...Array(H)].map((_, y) => [...Array(W)].map((_, x) => f(x, y)).join(''));
+const ROCKET_C = { o: '#2A1E1A', R: '#E8322A', r: '#B3262A', h: '#FF7A6B', W: '#F4F1EA', w: '#CFC8BC', L: '#FFFFFF', K: '#4A4E5A', k: '#727887', Y: '#F2B63C', y: '#C98A1E', B: '#14203A', G: '#B4BED0', g: '#7C889E' };
+const ROCKET = gridRows(32, 47, (x, y) => {  // 32×47 hücre; lomboz (15,5; 21,5) merkezli
+  const dx = x - 15.5, adx = Math.abs(dx);
+  if (y <= 12) {  // burun
+    const hw = Math.max(1, Math.round(9 * Math.sqrt((y + 0.5) / 12.5)));
+    if (adx > hw) return '.';
+    if (adx > hw - 1 || y === 0) return 'o';
+    return dx < -hw + 3 ? 'h' : dx > hw - 3 ? 'r' : 'R';
+  }
+  if (y <= 14) return adx > 9 ? '.' : adx > 8 ? 'o' : y === 13 ? 'K' : 'k';
+  if (y >= 35 && y <= 43 && adx <= 1.5) return adx > 0.5 || y === 43 ? 'o' : y >= 41 ? 'r' : 'R';  // öndeki kanat
+  const hw = y <= 37 ? 9 : 8;
+  if (y <= 40 && adx <= hw) {  // gövde
+    if (adx > hw - 1 || y === 40) return 'o';
+    const pd = Math.hypot(dx, y - 21.5);
+    if (pd <= 5.0) return 'B';
+    if (pd <= 6.4) return dx + (y - 21.5) < -1 ? 'G' : 'g';
+    if (y >= 29 && y <= 32) return y === 32 ? 'y' : 'Y';
+    if (y === 35 && [9, 12, 19, 22].includes(x)) return 'w';
+    return dx < -6.5 ? 'L' : dx > 5.5 ? 'w' : 'W';
+  }
+  const fw = y >= 30 && y <= 43 ? Math.floor(((y - 30) * 6) / 13) + 1 : 0;  // yan kanatlar aşağı doğru genişler
+  if (fw && ((x <= 6 && x >= 7 - fw) || (x >= 25 && x <= 24 + fw))) return x === 7 - fw || x === 24 + fw || y === 43 ? 'o' : y >= 41 ? 'r' : 'R';
+  if (y >= 41 && y <= 46) {  // lüle
+    const nw = 3.5 + (y - 41) * 0.5;
+    if (adx > nw) return '.';
+    return adx > nw - 1 || y === 46 ? 'o' : dx < -nw + 2 ? 'k' : 'K';
+  }
+  return '.';
+});
+// lombozun çerçevesi ve camdaki parıltı: Ceviz'in üstüne çizilir
+const ROCKET_RIM = gridRows(32, 47, (x, y) => {
+  const dx = x - 15.5, dy = y - 21.5, pd = Math.hypot(dx, dy), a = (Math.atan2(dy, dx) * 180) / Math.PI;
+  if (pd > 5.0 && pd <= 6.4) return dx + dy < -1 ? 'G' : 'g';
+  return pd > 3.6 && pd <= 4.5 && a > -168 && a < -112 ? 'L' : '.';
+});
+const FLAME_C = { Y: '#FFF6C2', O: '#FFD25A', R: '#F28C28', r: '#E8322A' };
+const FLAMES = [0, 1, 2].map((f) => gridRows(14, 18, (x, y) => {
+  const hw = (6.4 - y * 0.32) * (1 + 0.16 * Math.sin(y * 1.7 + f * 2.4));
+  const d = Math.abs(x - 6.5) + 0.3 * Math.sin(y * 2.3 + f * 1.9);
+  if (hw < 0.6 || d > hw) return '.';
+  const k = d / hw;
+  return k < 0.38 && y < 11 ? 'Y' : k < 0.66 ? 'O' : k < 0.88 ? 'R' : 'r';
+}));
+const ROCK_C = { o: '#1A1210', S: '#7A6A5E', s: '#54473E', L: '#A3927F', c: '#3E322A' };
+const ROCK = gridRows(18, 15, (x, y) => {
+  const d = Math.hypot((x - 8.5) / 8.6, (y - 7) / 7.1) + 0.1 * Math.sin(x * 1.9 + y * 1.3);
+  if (d > 1) return '.';
+  if (d > 0.86) return 'o';
+  if (Math.hypot(x - 12, y - 4.5) < 1.7 || Math.hypot(x - 5, y - 10) < 1.3 || Math.hypot(x - 13, y - 10.5) < 1.0) return 'c';
+  return x + y < 10 ? 'L' : x + y > 19 ? 's' : 'S';
+});
+// meteorların üstündeki simgeler: kırık ekranlı telefon, hediye kutusu, kitap
+const MET_ICONS = [
+  [['.oooooo.', 'oSSSSSSo', 'oSSSWSSo', 'oSSWSSSo', 'oSSSWSSo', 'oSWSSWSo', 'oSSSSSWo', 'oSSSSSSo', 'oSSSSSSo', '.oooooo.'], { o: '#1C1C24', S: '#2B3A6B', W: '#FFFFFF' }],
+  [['...Y..Y...', '....YY....', 'oooooooooo', 'oPPPYYPPPo', 'oooooooooo', '.oPPYYPPo.', '.oPPYYPPo.', '.oPPYYPPo.', '.oooooooo.'], { o: '#2A1E1A', P: '#E86A9A', Y: '#F2B63C' }],
+  [['.ooooooooo', 'oGGGGGGGGo', 'oGWWWWWWGo', 'oGGGGGGGGo', 'oGWWWWGGGo', 'oGGGGGGGGo', 'oPPPPPPPPo', '.ooooooooo'], { o: '#1C2A22', G: '#2F8F5A', W: '#DCEFE3', P: '#F4EBD8' }],
+];
+const MOON_C = { o: '#6A667A', M: '#D9D4C7', L: '#F1EDE2', s: '#B4AE9F', c: '#A39D8E' };
+const MOON = gridRows(40, 40, (x, y) => {
+  const d = Math.hypot(x - 19.5, y - 19.5) / 20;
+  if (d > 1) return '.';
+  if (d > 0.94) return 'o';
+  if ([[0.3, 0.35, 0.15], [0.68, 0.55, 0.12], [0.42, 0.74, 0.09], [0.72, 0.24, 0.07], [0.22, 0.62, 0.06]].some(([u, v, r]) => Math.hypot(x / 40 - u, y / 40 - v) < r)) return 'c';
+  return x + y < 26 ? 'L' : x + y > 52 ? 's' : 'M';
+});
+const EARTH_C = { o: '#16264A', B: '#3B7FD0', b: '#2C62A8', G: '#4FA35A', g: '#3A7F45', W: '#F4F7FB' };
+const EARTH = gridRows(24, 24, (x, y) => {
+  const d = Math.hypot(x - 11.5, y - 11.5) / 12;
+  if (d > 1) return '.';
+  if (d > 0.9) return 'o';
+  const land = Math.sin(x * 0.55 + 1.2) + Math.sin(y * 0.7 + x * 0.25) > 0.9;
+  if (Math.abs(Math.sin(y * 0.9 + x * 0.12)) > 0.985) return 'W';
+  return land ? (x + y > 28 ? 'g' : 'G') : x + y > 28 ? 'b' : 'B';
+});
+// Bilge'nin kulaklıklı mikrofonu: kafa bandı (yay), iki yastık, sol yastıktan ağza uzanan mikrofon
+const SET_C = { A: '#1A1C24', B: '#3A3F4E', H: '#7A8296', C: '#262A36', M: '#E8322A' };
+
+/** Izgaradan dikdörtgenlere (aynı renkli yatay komşular tek dikdörtgen) */
+function gridToRects(g) {
+  const rows = {};
+  g.forEach((f, p) => { const [x, y] = p.split(',').map(Number); (rows[y] = rows[y] || []).push([x, f]); });
+  const out = [];
+  Object.entries(rows).forEach(([y, r]) => {
+    r.sort((a, b) => a[0] - b[0]);
+    r.forEach(([x, f]) => { const l = out[out.length - 1]; if (l && l[1] === +y && l[0] + l[2] === x && l[4] === f) l[2]++; else out.push([x, +y, 1, 1, f]); });
+  });
+  return out;
+}
+const spriteGrid = (rs) => { const g = new Map(); rs.forEach(([x, y, w, h, f]) => { for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) g.set(`${x + i},${y + j}`, f); }); return g; };
+
+/** 'cevizastro': cam kask (kafanın çevresinde çember, sol üstte parıltı), gri yaka, beyaz tulum (gövde ve kollar; kuyruk dışarıda)
+ *  'bilgecom': kafa bantlı kulaklık ve mikrofon */
+function deriveSpace() {
+  if (SP['cevizastro|calm|null|mood']) return;
+  const SUIT = { '#A8683A': '#EEF0F4', '#7E4A26': '#B9BFCC', '#F6E3C8': '#D6DCE8' };
+  Object.keys(SP).filter((k) => k.startsWith('ceviz|')).forEach((k) => {
+    const g = spriteGrid(SP[k]);
+    g.forEach((f, p) => {
+      const [x, y] = p.split(',').map(Number);
+      if (((y >= 19 && x <= 19) || ((x <= 7 || x >= 27) && y >= 9)) && SUIT[f]) g.set(p, SUIT[f]);
+    });
+    for (let x = 8; x <= 19; x++) if (g.has(`${x},18`) && g.get(`${x},18`) !== '#2A1E1A') g.set(`${x},18`, '#8E96A8');
+    for (let y = 1; y <= 18; y++) for (let x = 2; x <= 25; x++) {
+      const d = Math.hypot(x - 13.5, y - 11.5), a = (Math.atan2(y - 11.5, x - 13.5) * 180) / Math.PI;
+      if (d > 8.7 && d <= 9.7) g.set(`${x},${y}`, '#2A1E1A');
+      else if (d > 7.8 && d <= 8.7) g.set(`${x},${y}`, '#DDE5F2');
+      else if (d > 6.3 && d <= 7.1 && a > -160 && a < -118) g.set(`${x},${y}`, '#FFFFFF');
+    }
+    SP['cevizastro' + k.slice(5)] = gridToRects(g);
+  });
+  Object.keys(SP).filter((k) => k.startsWith('bilge|')).forEach((k) => {
+    const g = spriteGrid(SP[k]);
+    for (let y = 4; y <= 11; y++) for (let x = 4; x <= 27; x++) {  // kafa bandı
+      const d = Math.hypot(x - 15.5, y - 15);
+      if (d > 9.1 && d <= 10.1) g.set(`${x},${y}`, (x < 13 && y < 8) ? SET_C.H : SET_C.B);
+      else if (d > 10.1 && d <= 10.9) g.set(`${x},${y}`, SET_C.A);
+    }
+    [[4, 1], [24, -1]].forEach(([x0, s]) => {  // yastıklar
+      for (let y = 10; y <= 16; y++) for (let i = 0; i < 4; i++) {
+        const edge = y === 10 || y === 16 || i === 0 || i === 3;
+        g.set(`${x0 + i},${y}`, edge ? SET_C.A : (i === (s > 0 ? 1 : 2) && y === 12 ? SET_C.H : SET_C.C));
+      }
+    });
+    [[6, 17], [7, 17], [8, 18], [9, 18], [10, 18]].forEach(([x, y]) => g.set(`${x},${y}`, SET_C.B));  // mikrofon kolu
+    [[11, 17], [12, 17], [11, 19], [12, 19], [13, 18]].forEach(([x, y]) => g.set(`${x},${y}`, SET_C.A));
+    [[11, 18], [12, 18]].forEach(([x, y]) => g.set(`${x},${y}`, SET_C.M));
+    SP['bilgecom' + k.slice(5)] = gridToRects(g);
+  });
+}
+
 function defineValue() {
   /* ── Bilgi kartları: her kart bir ipucu ── */
   SCENES.cards = (t0, o = {}) => {
@@ -3463,6 +3597,556 @@ function defineValue() {
       fring.style.display = fOn && rk > 0 && rk < 1 ? 'block' : 'none';
       fring.style.transform = `scale(${0.4 + 1.6 * rk})`;
       fring.style.opacity = 1 - rk;
+    };
+  };
+
+  /* Ay sonuna iniş: uzay görevi. Kanca: Ay'a ("AY SONU") 8 gün kala yakıtı biten HARÇLIK-1. Ayın 1'i: Kaptan Ceviz rampada, roket
+   * kalkar. Ayın 14'ü: görev kontrolde kulaklıklı Bilge, dev ekranda yakıt 4.000 TL, kalan plan 3.500 TL; gerçek 3 sn karar anı (YETER mi,
+   * YETMEZ mi?). Planda olmayan meteorlar (kırık ekran, doğum günü, kitap) yakıtı deler; ayın 22'sinde kokpitte alarm ve telsiz:
+   * "Houston, bir sorunumuz var". Dev ekranda araştırma (haftalık harcama tahmini ~%27 eksik; eksik kısım meteorlar), Cep Defteri'nde
+   * "Kenarda tuttuğun birikim payı" (yedek yakıt) ve "günde yaklaşık" (kalan yakıt günlere bölünür); soru Ay yüzeyinde, bayrak dikilir;
+   * takip kartı; yeniden yakıtı biten roket (döngü).
+   * Dünyalar: A uzay (kanca, rampa, meteorlar), B görev kontrol, C kokpit, D telefon, E Ay yüzeyi; kamera aralarında keser. */
+  SCENES.inis = (t0, o = {}) => {
+    deriveSpace();
+    const s = scene(t0, '#03040A', undefined, o.wdur ?? 0.4);
+    const ev = (k) => o[k] ?? 99;
+    const LAUNCH = ev('launch'), KAPTAN = ev('kaptan'), MOONT = ev('moon'), IGN = ev('ign'), LIFT = ev('lift');
+    const MC = ev('mc'), D14 = ev('d14'), FUEL = ev('fuel'), PLAN = ev('plan'), ASK = ev('ask'), COUNT = ev('count'), ZERO = ev('zero');
+    const SPACE = ev('space'), ALERT = ev('alert'), MET = o.met || [99, 99, 99], D22 = ev('d22'), HOUSTON = ev('houston'), DEAD = ev('dead');
+    const SCI = ev('sci'), BARS = ev('bars'), PCT = ev('pct'), MISS = ev('miss'), APP = ev('app'), RES = ev('res'), DAY = ev('day');
+    const CTA = ev('cta'), FLAG = ev('flag'), FOLLOW = ev('follow'), TAPF = ev('tapf'), STREAK = ev('streak'), OFF = ev('off');
+    const SY = 1180;  // odak noktasının ekrandaki yüksekliği: kutu ve altyazının altında, Instagram'ın alt bandının üstünde
+    const world = () => el('div', 'abs', s.root, { left: 0, top: 0, width: '1080px', height: '1920px', transformOrigin: '0 0' });
+    const METF = [1450, 500, 400];  // meteorların yaktığı yakıt (TL)
+    const MET_NAME = ['Kırık ekran', 'Doğum günü', 'Kitap parası'];
+    const PIX = "font-family:Pixel,monospace;font-weight:400;letter-spacing:.02em";
+    // hikâyenin günü ve yakıtı: kancada 22'si ve 0 TL; rampada 1'i ve 8.000 TL; görev kontrolde 14'ü ve 4.000 TL; yolculukta 14 → 22,
+    // günde ~206 TL planlı harcama ve meteorlar; 22'sinde yakıt biter
+    const story = (lt) => {
+      if (lt < LAUNCH || lt >= OFF) return { day: 22, fuel: 0 };
+      if (lt < MC) return { day: 1, fuel: 8000 };
+      if (lt < SPACE) return { day: lt < D14 ? 1 : 14, fuel: 4000 };
+      if (lt < D22) {
+        const day = 14 + 8 * prog(lt, SPACE, D22 - SPACE);
+        let fuel = 4000 - 206 * (day - 14);
+        MET.forEach((m, i) => (fuel -= METF[i] * E.out(prog(lt, m, 0.35))));
+        return { day, fuel: Math.max(0, fuel) };
+      }
+      return { day: 22, fuel: 0 };
+    };
+    const ekD = (d) => `${d}'${{ 1: 'i', 2: 'si', 3: 'ü', 4: 'ü', 5: 'i', 6: 'sı', 7: 'si', 8: 'i', 9: 'u', 0: 'u' }[d % 10]}`;  // 14 → 14'ü, 22 → 22'si
+    const stars = (parent, n, area, seed0) => Array.from({ length: n }, (_, i) => {
+      const r = (k) => (Math.sin((i + 1) * (seed0 + k) * 12.9898) * 43758.5453) % 1;
+      const sz = 3 + Math.floor(Math.abs(r(1)) * 3) * 2;
+      const e = el('div', 'abs', parent, { left: px(area[0] + Math.abs(r(2)) * area[2]), top: px(area[1] + Math.abs(r(3)) * area[3]), width: px(sz), height: px(sz), background: Math.abs(r(4)) > 0.82 ? '#FFE9B0' : '#E6ECFF' });
+      return { e, sz, y0: area[1] + Math.abs(r(3)) * area[3], ph: Math.abs(r(5)) * 6, sp: 0.5 + Math.abs(r(6)) };
+    });
+
+    // ── A · uzay: kanca (yakıtı biten roket, uzakta Ay), rampa ve kalkış, meteorlar ──
+    const camA = world();
+    const skyA = el('div', 'abs', camA, { left: '-300px', top: '-300px', width: '1680px', height: '2520px', background: 'linear-gradient(#02030A, #070B1E 60%, #0B1230)' });
+    const dusk = el('div', 'abs', camA, { left: '-300px', top: '-300px', width: '1680px', height: '2520px', background: 'linear-gradient(#0A1238 0%, #18275E 55%, #3D3F7A 78%, #6A4E7E 86%)', opacity: 0 });
+    const starsA = stars(camA, 90, [-120, 0, 1320, 2000], 1.7);
+    const moonGlow = el('div', 'abs', camA, { left: 0, top: 0, width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(closest-side, rgba(241,237,226,.28), rgba(241,237,226,0))', transformOrigin: '50% 50%' });
+    const moonA = pixEl(camA, MOON, MOON_C, 8, { left: 0, top: 0, transformOrigin: '50% 50%' });
+    const moonTag = el('div', 'abs it', camA, { left: 0, top: 0, padding: '2px 18px 6px', borderRadius: '12px', background: 'rgba(8,10,24,.78)', border: '3px solid #F2B63C', color: '#FFE08A', fontSize: '52px', whiteSpace: 'nowrap', transformOrigin: '50% 0' });
+    moonTag.textContent = 'AY SONU';
+    // rota: roketten Ay'a kesikli çizgi; kancada kırmızı, ortasında "8 GÜN"
+    const route = el('div', 'abs', camA, { left: 0, top: 0, width: '1080px', height: '1920px', pointerEvents: 'none' });
+    route.innerHTML = '<svg width="1080" height="1920" overflow="visible"><path fill="none" stroke-width="9" stroke-linecap="round" stroke-dasharray="2 24"/></svg>';
+    const routeP = route.querySelector('path');
+    const gap = el('div', 'abs it', camA, { left: 0, top: 0, padding: '0 14px 4px', borderRadius: '10px', background: '#C0392B', color: '#FFF4E0', fontSize: '46px', whiteSpace: 'nowrap', transform: 'translate(-50%,-50%) rotate(-28deg)' });
+    gap.textContent = '8 GÜN';
+    // rampa: zemin, kırmızı-beyaz kule ve kolları, beton rampa, duman
+    const pad = el('div', 'abs', camA, { left: 0, top: 0, width: '1080px', height: '1920px' });
+    el('div', 'abs', pad, { left: '-300px', top: '1500px', width: '1680px', height: '700px', background: 'linear-gradient(#232A3A, #161B28)' });
+    el('div', 'abs', pad, { left: '-300px', top: '1492px', width: '1680px', height: '14px', background: '#353D52' });
+    [[60, 1440, 90, 60], [880, 1452, 120, 48], [990, 1420, 70, 80]].forEach(([x, y, w, h]) => {  // uzaktaki hangarlar
+      const b = el('div', 'abs', pad, { left: px(x), top: px(y), width: px(w), height: px(h), background: '#1A2030' });
+      el('div', 'abs', b, { left: '12px', top: '14px', width: '14px', height: '10px', background: '#F2C14E' });
+    });
+    el('div', 'abs', pad, { left: '330px', top: '1478px', width: '420px', height: '30px', background: '#5A6072', boxShadow: 'inset 0 6px 0 #747A8C' });
+    const tower = el('div', 'abs', pad, { left: '196px', top: '930px', width: '86px', height: '560px', boxSizing: 'border-box', borderLeft: '14px solid #C0392B', borderRight: '14px solid #C0392B', background: 'repeating-linear-gradient(-50deg, transparent 0 34px, #E9E4DA 34px 42px), repeating-linear-gradient(transparent 0 62px, #C0392B 62px 70px)' });
+    el('div', 'abs', tower, { left: '-16px', top: '-30px', width: '102px', height: '26px', background: '#C0392B', border: '6px solid #2A1E1A', borderRadius: '6px' });
+    const arms = [1080, 1300].map((y) => el('div', 'abs', pad, { left: '278px', top: px(y), width: '112px', height: '22px', boxSizing: 'border-box', border: '6px solid #2A1E1A', background: '#9AA3B5', transformOrigin: '0 50%' }));
+    const puffs = Array.from({ length: 12 }, (_, i) => el('div', 'abs', camA, { left: 0, top: 0, width: '150px', height: '150px', borderRadius: '50%', background: 'radial-gradient(circle at 40% 35%, #F4F1EA, #B9B4AA 62%, rgba(150,145,138,0) 72%)', display: 'none' }));
+    // roket: gövde, lombozda kasklı Ceviz, çerçeve ve parıltı, şeritte HARÇLIK-1, alev
+    const RC = 10, RW = 32 * RC, RH = 47 * RC;
+    const rk = el('div', 'abs', camA, { left: 0, top: 0, width: px(RW), height: px(RH), transformOrigin: '50% 55%' });
+    const flame = el('div', 'abs', rk, { left: px(9 * RC), top: px(45 * RC), width: px(14 * RC), height: px(18 * RC), transformOrigin: '50% 0' });
+    pixEl(rk, ROCKET, ROCKET_C, RC, { left: 0, top: 0 });
+    const port = el('div', 'abs', rk, { left: px(10.5 * RC), top: px(16.5 * RC), width: px(10 * RC), height: px(10 * RC), borderRadius: '50%', overflow: 'hidden', background: '#14203A' });
+    const czP = new Mascot(port, { who: 'cevizastro', w: 180 });
+    pixEl(rk, ROCKET_RIM, ROCKET_C, RC, { left: 0, top: 0 });
+    el('div', 'abs it', rk, { left: px(8 * RC), top: px(28.4 * RC), width: px(16 * RC), textAlign: 'center', fontSize: '36px', color: '#2A1E1A', lineHeight: 1 }).textContent = 'HARÇLIK-1';
+    const dents = [[11, 33], [19, 26], [13, 37]].map(([x, y]) => el('div', 'abs', rk, { left: px(x * RC), top: px(y * RC), width: '34px', height: '22px', borderRadius: '50%', background: 'radial-gradient(#2A1E1A 30%, #6E6A66 60%, rgba(0,0,0,0) 72%)', display: 'none' }));
+    // meteorlar: taş, üstünde simge, ateşten kuyruk, etiket (ad ve tutar); çarpınca kıvılcım
+    const metEls = MET.map((m, i) => {
+      const w = el('div', 'abs', camA, { left: 0, top: 0, width: '234px', height: '195px', display: 'none', transformOrigin: '50% 50%' });
+      el('div', 'abs', w, { left: '77px', top: '-300px', width: '80px', height: '400px', borderRadius: '40px', background: 'linear-gradient(rgba(242,140,40,0), rgba(242,140,40,.75) 70%, #FFE08A)', transformOrigin: '50% 100%' });
+      pixEl(w, ROCK, ROCK_C, 13, { left: 0, top: 0 });
+      const [rows, cols] = MET_ICONS[i];
+      pixEl(w, rows, cols, 10, { left: px(117 - (rows[0].length * 10) / 2), top: px(97 - (rows.length * 10) / 2) });
+      const tag = el('div', 'abs', camA, { left: 0, top: 0, padding: '4px 18px 6px', borderRadius: '16px', border: '5px solid #2A1E1A', background: '#FFFCF6', whiteSpace: 'nowrap', textAlign: 'center', lineHeight: 1.05, display: 'none', transformOrigin: '50% 100%' });
+      tag.innerHTML = `<div style="font-size:36px;font-weight:800;color:#2A1E1A">${MET_NAME[i]}</div><div style="${PIX};font-size:52px;color:#C0392B">−${fmt(METF[i])} TL</div>`;
+      const boom = new Burst(camA, { n: 26, t0: m, ox: 0, oy: 0, colors: ['#FFE08A', '#F28C28', '#E8322A', '#7A6A5E', '#FFF6C2'], speed: 900, grav: 600, life: 0.9, size: [14, 30], upBias: 0.1 });
+      return { w, tag, boom, m, from: i === 1 ? [-260, 380] : [1340, 380 + i * 60], dir: i === 1 ? 1 : -1 };
+    });
+    const showers = Array.from({ length: 10 }, (_, i) => el('div', 'abs', camA, { left: 0, top: 0, width: '10px', height: '120px', borderRadius: '5px', background: 'linear-gradient(rgba(255,224,138,0), #FFE08A)', transform: 'rotate(35deg)', display: 'none' }));
+
+    // A'nın göstergeleri (ekrana sabit): yakıt (sol alt) ve takvim (sağ alt)
+    const hud = el('div', 'abs', s.root, { inset: 0, zIndex: 18, pointerEvents: 'none', display: 'none' });
+    const fBox = el('div', 'abs', hud, { left: '40px', top: '1372px', width: '330px', height: '150px', boxSizing: 'border-box', borderRadius: '22px', background: 'rgba(6,10,24,.82)', border: '4px solid #3A4466', padding: '10px 20px' });
+    fBox.innerHTML = `<div style="${PIX};font-size:36px;color:#9FB0D8;line-height:36px">YAKIT</div><div class="v" style="${PIX};font-size:64px;color:#7CF2A0;line-height:64px;white-space:nowrap">8.000 TL</div>`
+      + '<div style="position:absolute;left:20px;right:20px;bottom:14px;height:14px;border-radius:7px;background:#1C2440;overflow:hidden"><div class="b" style="height:100%;width:100%;background:#4CD27A"></div></div>';
+    const fVal = fBox.querySelector('.v'), fBar = fBox.querySelector('.b');
+    const fDrop = el('div', 'abs it', hud, { left: '230px', top: '1330px', fontSize: '64px', color: '#FF5A4E', textShadow: '4px 4px 0 #2A1E1A', display: 'none', whiteSpace: 'nowrap' });
+    const cal = el('div', 'abs', hud, { left: '852px', top: '1372px', width: '186px', height: '150px', borderRadius: '18px', overflow: 'hidden', background: '#FFFDF8', boxShadow: '0 12px 26px rgba(0,0,0,.45)' });
+    cal.innerHTML = `<div style="height:42px;background:#D7372B;color:#fff;${PIX};font-size:36px;text-align:center;line-height:42px">KASIM</div><div class="d" style="${PIX};font-size:104px;line-height:104px;text-align:center;color:#2A1E1A">1</div>`;
+    const calD = cal.querySelector('.d');
+
+    // ── B · görev kontrol: dev ekran, masa, kulaklıklı Bilge ──
+    const camB = world();
+    el('div', 'abs', camB, { left: '-300px', top: '-300px', width: '1680px', height: '2520px', background: 'linear-gradient(#0B1029, #141C40 55%, #0E132C)' });
+    el('div', 'abs', camB, { left: '-300px', top: '-300px', width: '1680px', height: '2520px', background: 'repeating-linear-gradient(90deg, rgba(255,255,255,.03) 0 6px, transparent 6px 180px)' });
+    [[-40, 760], [1010, 760]].forEach(([x, y], i) => {  // yan duvarlarda küçük ekranlar
+      const m = el('div', 'abs', camB, { left: px(x), top: px(y), width: '110px', height: '300px', boxSizing: 'border-box', border: '8px solid #232A44', background: '#061423' });
+      for (let k = 0; k < 6; k++) el('div', 'abs', m, { left: '14px', top: px(18 + k * 44), width: px(30 + ((k * 23 + i * 17) % 50)), height: '10px', background: k % 3 ? '#2E8F6A' : '#C9A040' });
+    });
+    const SCX = 90, SCY = 690, SCW = 900, SCH = 480;
+    el('div', 'abs', camB, { left: px(SCX - 18), top: px(SCY - 18), width: px(SCW + 36), height: px(SCH + 36), borderRadius: '20px', background: '#232A44', boxShadow: '0 0 90px 10px rgba(80,180,255,.18)' });
+    const bscr = el('div', 'abs', camB, { left: px(SCX), top: px(SCY), width: px(SCW), height: px(SCH), background: '#05121F', overflow: 'hidden', borderRadius: '6px' });
+    // ekran 1: telemetri. Solda rota haritası (Dünya → Ay, gün çentikleri, roket imleci), sağda göstergeler
+    const tele = el('div', 'abs', bscr, { inset: 0 });
+    el('div', 'abs', tele, { left: '24px', top: '16px', fontSize: '26px', fontWeight: 800, color: '#7FD8FF', letterSpacing: '.12em' }).textContent = 'GÖREV KONTROL · HARÇLIK-1';
+    const map = el('div', 'abs', tele, { left: '24px', top: '62px', width: '300px', height: '396px', borderRadius: '14px', border: '3px solid rgba(127,216,255,.35)', background: 'rgba(127,216,255,.05)' });
+    const MP = (k) => [150 + 70 * Math.sin(Math.PI * 2 * k), 350 - 290 * k];  // haritada rota: k=0 Dünya, k=1 Ay
+    const pts = Array.from({ length: 31 }, (_, j) => MP(j / 30));
+    map.innerHTML = `<svg width="300" height="396" overflow="visible"><path d="M${pts.map((p) => p.join(',')).join('L')}" fill="none" stroke="#7FD8FF" stroke-width="5" stroke-dasharray="2 12" stroke-linecap="round"/>`
+      + [1, 14, 22, 30].map((d) => { const [x, y] = MP((d - 1) / 29); return `<circle cx="${x}" cy="${y}" r="7" fill="#7FD8FF"/><text x="${x + (d === 22 ? -22 : 18)}" y="${y + 9}" fill="#BFEFFF" font-size="26" font-family="Pixel" text-anchor="${d === 22 ? 'end' : 'start'}">${d}</text>`; }).join('')
+      + '</svg>';
+    pixEl(map, EARTH, EARTH_C, 3, { left: px(MP(0)[0] - 36), top: px(MP(0)[1] + 4) });
+    pixEl(map, MOON, MOON_C, 2, { left: px(MP(1)[0] - 40), top: px(MP(1)[1] - 70) });
+    const mark = el('div', 'abs', map, { left: 0, top: 0, width: '34px', height: '34px', transform: 'translate(-50%,-50%)' });
+    mark.innerHTML = '<svg width="34" height="34"><path d="M17 2 L30 30 L17 23 L4 30 Z" fill="#FFE08A" stroke="#2A1E1A" stroke-width="3"/></svg>';
+    const dayB = el('div', 'abs', tele, { left: '356px', top: '62px', width: '520px', height: '84px', borderRadius: '12px', background: 'rgba(127,216,255,.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 22px', boxSizing: 'border-box' });
+    dayB.innerHTML = `<span style="font-size:30px;font-weight:800;color:#9FB0D8;letter-spacing:.1em">TAKVİM</span><span class="d" style="${PIX};font-size:66px;color:#FFFFFF">AYIN 1'İ</span>`;
+    const dayBT = dayB.querySelector('.d');
+    const readout = (y, label, color) => {
+      const r = el('div', 'abs', tele, { left: '356px', top: px(y), width: '520px', height: '138px', borderRadius: '12px', background: 'rgba(127,216,255,.06)', border: `4px solid ${color}55`, boxSizing: 'border-box', padding: '10px 22px', opacity: 0 });
+      r.innerHTML = `<div style="font-size:30px;font-weight:800;color:${color};letter-spacing:.1em">${label}</div><div class="v" style="${PIX};font-size:84px;line-height:.95;color:${color}">0 TL</div>`;
+      return { r, v: r.querySelector('.v'), color };
+    };
+    const rF = readout(160, 'YAKIT', '#7CF2A0'), rP = readout(310, 'KALAN PLAN', '#FFC857');
+    const cdg = el('div', 'abs it', tele, { right: '26px', top: '8px', fontSize: '60px', color: '#FF5A4E', display: 'none' });
+    // ekran 2: araştırma. Haftalık harcama: tahmin ve gerçek çubukları; tahmindeki eksik kısım meteorlarla dolu; %27 EKSİK damgası
+    const sciB = el('div', 'abs', bscr, { inset: 0, display: 'none', background: '#071A2C' });
+    el('div', 'abs', sciB, { left: '30px', top: '20px', fontSize: '30px', fontWeight: 800, color: '#7FD8FF', letterSpacing: '.12em' }).textContent = 'ARAŞTIRMA · HAFTALIK HARCAMA';
+    const bar = (y, label, color) => {
+      el('div', 'abs', sciB, { left: '30px', top: px(y), fontSize: '38px', fontWeight: 800, color: '#E6ECFF' }).textContent = label;
+      const track = el('div', 'abs', sciB, { left: '250px', top: px(y - 6), width: '600px', height: '64px' });
+      const fill = el('div', 'abs', track, { left: 0, top: 0, width: '0', height: '100%', borderRadius: '10px', background: color });
+      return { track, fill };
+    };
+    const bT = bar(96, 'TAHMİN', '#FFC857'), bG = bar(190, 'GERÇEK', '#FF6B5E');
+    const missBox = el('div', 'abs', sciB, { left: px(250 + 600 * 0.73), top: '90px', width: px(600 * 0.27), height: '64px', boxSizing: 'border-box', border: '5px dashed #FF6B5E', borderRadius: '10px', opacity: 0, overflow: 'hidden' });
+    [0, 1, 2].forEach((i) => pixEl(missBox, ROCK, ROCK_C, 2, { left: px(8 + i * 52), top: px(12 + (i % 2) * 8) }));
+    const pctB = el('div', 'abs it', sciB, { left: '640px', top: '262px', fontSize: '120px', color: '#FF6B5E', opacity: 0, whiteSpace: 'nowrap' });
+    const stampB = el('div', 'abs', sciB, { left: '600px', top: '372px', padding: '2px 18px 6px', borderRadius: '14px', border: '7px solid #FF6B5E', color: '#FF6B5E', background: 'rgba(7,26,44,.9)', fontSize: '50px', fontWeight: 800, opacity: 0, transformOrigin: '50% 50%', whiteSpace: 'nowrap' });
+    stampB.textContent = 'EKSİK!';
+    el('div', 'abs', sciB, { left: '30px', top: '282px', width: '540px', fontSize: '40px', fontWeight: 800, color: '#E6ECFF', lineHeight: 1.18 }).innerHTML = 'Akla sıradan harcamalar gelir, <span style="color:#FF6B5E">meteorlar gelmez.</span>';
+    const srcB = el('div', 'abs', sciB, { left: '30px', bottom: '16px', fontSize: '26px', fontWeight: 700, color: '#8FA6CC', opacity: 0 });
+    srcB.textContent = 'Kaynak: Peetz 2010 · Howard ve ark. 2022';
+    el('div', 'abs', bscr, { inset: 0, pointerEvents: 'none', background: 'repeating-linear-gradient(rgba(255,255,255,.035) 0 2px, transparent 2px 6px)' });
+    // masa, kulaklıklı Bilge, masada CEP DEFTERİ defteri ve kupa
+    const bB = new Mascot(camB, { who: 'bilgecom', w: 560 });
+    el('div', 'abs', camB, { left: '-300px', top: '1430px', width: '1680px', height: '700px', background: 'linear-gradient(#2A3150, #1A2036 22%, #121729)' });
+    el('div', 'abs', camB, { left: '-300px', top: '1430px', width: '1680px', height: '12px', background: '#4A5478' });
+    [[40, '#2E8F6A'], [150, '#C9A040'], [650, '#C0392B'], [960, '#2E8F6A']].forEach(([x, c], i) => {
+      el('div', 'abs', camB, { left: px(x), top: '1478px', width: '60px', height: '26px', borderRadius: '6px', background: c, boxShadow: 'inset 0 -6px 0 rgba(0,0,0,.3)' });
+    });
+    const bBook = el('div', 'abs', camB, { left: '700px', top: '1384px', width: '230px', height: '64px', boxSizing: 'border-box', border: '5px solid #2A1E1A', borderRadius: '8px 14px 14px 8px', background: 'linear-gradient(90deg, #7A2F0E 0 20px, #AE4716 20px 196px, #5C2209 196px 206px, #AE4716 206px)', transform: 'rotate(-4deg)', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingLeft: '10px', fontSize: '28px', fontWeight: 800, color: '#FFFCF6', letterSpacing: '.04em' });
+    bBook.textContent = 'CEP DEFTERİ';
+    pixEl(camB, CUP, CUP_C, 12, { left: '560px', top: '1370px' });
+    const sweatB = pixEl(camB, SWEAT, SWEAT_C, 9, { left: '420px', top: '1250px', display: 'none' });
+
+    // ── C · kokpit: arkada Ay'ı gösteren yuvarlak pencere, kasklı Ceviz, gösterge paneli, alarm ──
+    const camC = world();
+    el('div', 'abs', camC, { left: '-300px', top: '-300px', width: '1680px', height: '2520px', background: 'linear-gradient(#323B58, #232A42 60%, #1A2034)' });
+    el('div', 'abs', camC, { left: '-300px', top: '-300px', width: '1680px', height: '2520px', background: 'repeating-linear-gradient(90deg, rgba(0,0,0,.18) 0 4px, transparent 4px 240px), repeating-linear-gradient(rgba(0,0,0,.14) 0 4px, transparent 4px 300px)' });
+    const WIN = [540, 860, 300];
+    const winC = el('div', 'abs', camC, { left: px(WIN[0] - WIN[2]), top: px(WIN[1] - WIN[2]), width: px(2 * WIN[2]), height: px(2 * WIN[2]), borderRadius: '50%', overflow: 'hidden', background: '#03050C' });
+    stars(winC, 40, [0, 0, 600, 600], 3.3);
+    pixEl(winC, MOON, MOON_C, 3.5, { left: '380px', top: '110px' });
+    el('div', 'abs it', winC, { left: '360px', top: '262px', fontSize: '40px', color: '#FFE08A' }).textContent = 'AY SONU';
+    const winSmoke = Array.from({ length: 5 }, (_, i) => el('div', 'abs', winC, { left: px(60 + i * 90), top: '470px', width: '120px', height: '120px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(200,196,190,.85), rgba(200,196,190,0) 70%)', display: 'none' }));
+    el('div', 'abs', camC, { left: px(WIN[0] - WIN[2] - 26), top: px(WIN[1] - WIN[2] - 26), width: px(2 * WIN[2] + 52), height: px(2 * WIN[2] + 52), boxSizing: 'border-box', borderRadius: '50%', border: '30px solid #8E99AE', boxShadow: 'inset 0 0 0 6px #2A1E1A, 0 0 0 6px #2A1E1A' });
+    for (let k = 0; k < 12; k++) {
+      const a = (k / 12) * Math.PI * 2;
+      el('div', 'abs', camC, { left: px(WIN[0] + Math.cos(a) * (WIN[2] + 15) - 7), top: px(WIN[1] + Math.sin(a) * (WIN[2] + 15) - 7), width: '14px', height: '14px', borderRadius: '50%', background: '#4A5268' });
+    }
+    // alarm lambası (sol duvar): döner ışık
+    el('div', 'abs', camC, { left: '96px', top: '930px', width: '92px', height: '30px', background: '#2A1E1A', borderRadius: '6px' });
+    const alarmL = el('div', 'abs', camC, { left: '104px', top: '868px', width: '76px', height: '66px', borderRadius: '38px 38px 6px 6px', background: '#6E1E1A', border: '6px solid #2A1E1A', boxSizing: 'border-box' });
+    const beam = el('div', 'abs', camC, { left: '-460px', top: '340px', width: '1200px', height: '1200px', borderRadius: '50%', background: 'conic-gradient(from 0deg, rgba(255,60,50,.0) 0deg, rgba(255,60,50,.32) 18deg, rgba(255,60,50,0) 40deg, rgba(255,60,50,0) 180deg, rgba(255,60,50,.32) 198deg, rgba(255,60,50,0) 220deg)', mixBlendMode: 'screen', display: 'none' });
+    const czC = new Mascot(camC, { who: 'cevizastro', w: 640 });
+    const waves = [0, 1, 2].map((i) => el('div', 'abs', camC, { left: 0, top: 0, width: px(80 + i * 60), height: px(80 + i * 60), boxSizing: 'border-box', borderRadius: '50%', border: '10px solid transparent', borderRightColor: '#7FD8FF', borderTopColor: '#7FD8FF', display: 'none', transform: 'translate(-50%,-50%) rotate(-45deg)' }));
+    const sweatC = [0, 1].map(() => pixEl(camC, SWEAT, SWEAT_C, 10, { left: 0, top: 0, display: 'none' }));
+    // gösterge paneli: yakıt saati (sol), uyarı ekranı (orta), takvim (sağ)
+    el('div', 'abs', camC, { left: '-300px', top: '1416px', width: '1680px', height: '700px', background: 'linear-gradient(#262C3E, #171B28)' });
+    el('div', 'abs', camC, { left: '-300px', top: '1404px', width: '1680px', height: '16px', background: '#4A5268' });
+    const dial = el('div', 'abs', camC, { left: '70px', top: '1424px', width: '300px', height: '150px', overflow: 'hidden' });
+    dial.innerHTML = '<svg width="300" height="300" viewBox="0 0 300 300"><circle cx="150" cy="150" r="140" fill="#0C0F18" stroke="#8E99AE" stroke-width="10"/>'
+      + [...Array(9)].map((_, k) => `<rect x="146" y="18" width="8" height="${k % 4 ? 18 : 30}" fill="${k < 2 ? '#FF5A4E' : '#E6ECFF'}" transform="rotate(${-90 + k * 22.5} 150 150)"/>`).join('')
+      + `<text x="44" y="138" fill="#FF5A4E" font-size="44" font-family="Pixel">E</text><text x="236" y="138" fill="#7CF2A0" font-size="44" font-family="Pixel">F</text>`
+      + '<line class="needle" x1="150" y1="150" x2="150" y2="40" stroke="#FFE08A" stroke-width="9" stroke-linecap="round"/><circle cx="150" cy="150" r="16" fill="#2A1E1A"/></svg>';
+    const needle = dial.querySelector('.needle');
+    const warnC = el('div', 'abs', camC, { left: '400px', top: '1432px', width: '280px', height: '92px', borderRadius: '14px', background: '#2A0C0C', border: '6px solid #4A1A1A', boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center' });
+    warnC.innerHTML = `<span style="${PIX};font-size:58px;color:#FF5A4E">YAKIT BİTTİ</span>`;
+    const warnT = warnC.querySelector('span');
+    const calC = el('div', 'abs', camC, { left: '730px', top: '1432px', width: '270px', height: '92px', borderRadius: '14px', background: '#0C1A14', border: '6px solid #24342C', boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center' });
+    calC.innerHTML = `<span style="${PIX};font-size:58px;color:#7CF2A0">KASIM 22</span>`;
+    const sparksC = new Burst(camC, { n: 22, t0: DEAD, ox: 860, oy: 1440, colors: ['#FFE08A', '#FFF6C2', '#F28C28'], speed: 700, grav: 1600, life: 0.8, size: [8, 16], upBias: 0.6 });
+    const redC = el('div', 'abs', s.root, { inset: 0, zIndex: 16, pointerEvents: 'none', background: '#E8322A', mixBlendMode: 'multiply', opacity: 0 });
+
+    // ── D · telefon: Cep Defteri Özet, "Kullanılabilir para" kartı (uygulamadaki satırlar) ──
+    const camD = world();
+    el('div', 'abs', camD, { left: '-300px', top: '-300px', width: '1680px', height: '2520px', background: 'radial-gradient(ellipse 800px 1000px at 540px 1200px, #1B2550, #05070F 70%)' });
+    stars(camD, 50, [-100, 300, 1280, 1700], 5.1);
+    const phD = el('div', 'abs', camD, { left: '160px', top: '600px', width: '760px', height: '1520px', borderRadius: '90px', background: '#15161C', boxShadow: '0 0 0 6px #2B2D36, 0 40px 120px rgba(0,0,0,.6)' });
+    const sD = el('div', 'abs', phD, { left: '20px', top: '20px', right: '20px', bottom: '20px', borderRadius: '72px', overflow: 'hidden', background: '#F6EEE6' });
+    el('div', 'abs', sD, { left: '46px', top: '64px', fontSize: '26px', fontWeight: 700, color: '#8A7D72', letterSpacing: '.1em' }).textContent = 'KASIM 2026';
+    el('div', 'abs', sD, { left: '44px', top: '96px', fontSize: '62px', fontWeight: 800, color: '#2A1E1A', letterSpacing: '-.03em' }).textContent = 'Cep Defteri';
+    const card = el('div', 'abs', sD, { left: '26px', right: '26px', top: '206px', height: '600px', borderRadius: '44px', background: '#FFFCF6', boxShadow: '0 14px 40px rgba(60,20,0,.12)', padding: '34px 34px 0', boxSizing: 'border-box' });
+    const row = (l, r, extra = '') => `<div style="display:flex;justify-content:space-between;align-items:baseline;font-size:30px;font-weight:600;color:#4A3B33;${extra}"><span>${l}</span><b style="font-weight:800;color:#2A1E1A">${r}</b></div>`;
+    card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:33px;font-weight:800;color:#2A1E1A">Kullanılabilir para</span><span style="font-size:27px;font-weight:600;color:#8A7D72">Kasım sonuna kadar</span></div>'
+      + '<div style="margin-top:14px;font-size:104px;font-weight:800;letter-spacing:-.04em;color:#2A1E1A;line-height:1">6.000<span style="font-size:44px;letter-spacing:0">,00 TL</span></div>'
+      + '<div class="pd" style="display:inline-block;margin-top:14px;padding:4px 10px;margin-left:-10px;border-radius:14px;font-size:31px;font-weight:600;color:#4A3B33">günde yaklaşık <b style="color:#2A1E1A">200,00 TL</b> · 30 gün</div>'
+      + '<div style="margin:24px 0 18px;border-top:4px dashed #E2D6C8"></div>'
+      + row('Günlük hesaplarda', '8.000 TL', 'padding:6px 0')
+      + `<div class="rs" style="margin:8px -14px;padding:10px 14px;border-radius:16px">${row('− Kenarda tuttuğun birikim payı', '2.000 TL')}</div>`
+      + '<div style="margin:14px 0 14px;border-top:4px dashed #E2D6C8"></div>'
+      + row('= Kullanılabilir', '6.000 TL', 'font-weight:800;color:#2A1E1A');
+    const pdD = card.querySelector('.pd'), rsD = card.querySelector('.rs');
+    const tagRes = el('div', 'abs it', card, { right: '30px', top: '500px', padding: '2px 16px 6px', borderRadius: '12px', background: '#2A1E1A', color: '#FFE08A', fontSize: '48px', transform: 'rotate(-5deg)', opacity: 0, transformOrigin: '80% 0' });
+    tagRes.textContent = '↑ YEDEK YAKIT';
+    const tagDay = el('div', 'abs it', sD, { right: '50px', top: '172px', padding: '2px 16px 6px', borderRadius: '12px', background: '#2A1E1A', color: '#7CF2A0', fontSize: '46px', transform: 'rotate(4deg)', opacity: 0, transformOrigin: '80% 100%' });
+    tagDay.textContent = 'GÜNLÜK YAKIT ↓';
+    const canD = pixEl(card, ['..oooo..', '.oRRRRo.', 'oRRRRRRo', 'oRWWWWRo', 'oRWRRWRo', 'oRWWWWRo', 'oRRRRRRo', 'oooooooo'], { o: '#2A1E1A', R: '#E8322A', W: '#FFE08A' }, 8, { left: '200px', top: '500px', opacity: 0 });
+
+    // ── E · Ay yüzeyi: soru, bayrak, takip ──
+    const camE = world();
+    el('div', 'abs', camE, { left: '-300px', top: '-300px', width: '1680px', height: '2520px', background: 'linear-gradient(#02030A, #080C1E)' });
+    stars(camE, 70, [-100, 0, 1280, 1400], 7.7);
+    const earthE = pixEl(camE, EARTH, EARTH_C, 8, { left: '120px', top: '720px' });
+    const streak = el('div', 'abs', camE, { left: 0, top: 0, width: '12px', height: '170px', borderRadius: '6px', background: 'linear-gradient(rgba(255,224,138,0), #FFE08A)', transform: 'rotate(-58deg)', display: 'none' });
+    el('div', 'abs', camE, { left: '-400px', top: '1330px', width: '1880px', height: '900px', borderRadius: '50% 50% 0 0 / 120px 120px 0 0', background: 'linear-gradient(#B9B4A6, #8E897C 30%, #6E6A60)' });
+    [[180, 1470, 160, 44], [700, 1560, 220, 56], [90, 1680, 120, 34], [880, 1430, 110, 30]].forEach(([x, y, w, h]) => el('div', 'abs', camE, { left: px(x), top: px(y), width: px(w), height: px(h), borderRadius: '50%', background: '#7C776B', boxShadow: 'inset 0 8px 0 #66625A' }));
+    const rkE = el('div', 'abs', camE, { left: '720px', top: '1112px', width: px(RW * 0.62), height: px(RH * 0.62) });
+    pixEl(rkE, ROCKET, ROCKET_C, RC * 0.62, { left: 0, top: 0 });
+    pixEl(rkE, ROCKET_RIM, ROCKET_C, RC * 0.62, { left: 0, top: 0 });
+    const pole = el('div', 'abs', camE, { left: '610px', top: '1010px', width: '12px', height: '440px', background: '#C9CCD2', boxShadow: 'inset -4px 0 0 #8E96A8', display: 'none' });
+    const flag = el('div', 'abs', pole, { left: '12px', top: '6px', width: '230px', height: '128px', background: '#AE4716', border: '5px solid #2A1E1A', boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', fontSize: '34px', fontWeight: 800, color: '#FFFCF6', lineHeight: 1.0, transformOrigin: '0 50%' });
+    flag.innerHTML = 'CEP<br>DEFTERİ';
+    const czE = new Mascot(camE, { who: 'cevizastro', w: 420 });
+    const dustE = new Burst(camE, { n: 16, t0: FLAG + 0.18, ox: 616, oy: 1446, colors: ['#D9D4C7', '#B9B4A6', '#8E897C'], speed: 420, grav: 300, life: 0.9, size: [10, 20], upBias: 0.5 });
+
+    // ── üst katmanlar: kenar karartma, flaş, karar çağrısı, takip kartı ──
+    el('div', 'abs', s.root, { inset: 0, zIndex: 17, pointerEvents: 'none', background: 'radial-gradient(ellipse 100% 72% at 50% 56%, transparent 58%, rgba(0,0,0,.5) 100%)' });
+    el('div', 'abs', s.root, { left: 0, right: 0, top: 0, height: '260px', zIndex: 17, pointerEvents: 'none', background: 'linear-gradient(rgba(3,4,10,.5), rgba(3,4,10,0))' });
+    el('div', 'abs', s.root, { left: 0, right: 0, bottom: 0, height: '300px', zIndex: 17, pointerEvents: 'none', background: 'linear-gradient(rgba(3,4,10,0), rgba(3,4,10,.45))' });
+    const flash = el('div', 'abs', s.root, { inset: 0, zIndex: 21, opacity: 0, pointerEvents: 'none', background: '#FFFFFF' });
+    const pill = el('div', 'abs it', s.root, { left: 0, right: 0, top: '608px', display: 'none', justifyContent: 'center', zIndex: 24 });
+    const pin = el('div', '', pill, { padding: '4px 28px 10px', borderRadius: '16px', border: '4px solid #F2B63C', background: 'rgba(10,10,16,.9)', fontSize: '62px', color: '#fff', lineHeight: 1 });
+    pin.innerHTML = 'YETER mi, YETMEZ mi? <span style="color:#F2B63C">Yoruma yaz</span>';
+    const FW = 620, FT = 300;
+    const fcard = el('div', 'abs', s.root, { left: px((1080 - FW) / 2), top: px(FT), width: px(FW), height: '410px', borderRadius: '44px', background: '#FFFFFF', boxShadow: '0 24px 60px rgba(0,0,0,.45)', display: 'none', zIndex: 26, transformOrigin: '50% 50%', textAlign: 'center' });
+    const ficon = el('img', 'abs', fcard, { left: px(FW / 2 - 68), top: '34px', width: '136px', height: '136px', borderRadius: '50%', boxShadow: '0 0 0 4px #FFFFFF, 0 0 0 8px #E9E2D8' });
+    ficon.src = 'assets/icon.png';
+    el('div', 'abs', fcard, { left: 0, right: 0, top: '186px', fontSize: '50px', fontWeight: 800, color: '#141414', letterSpacing: '-.01em' }).textContent = 'cep_defteri';
+    el('div', 'abs', fcard, { left: 0, right: 0, top: '252px', fontSize: '32px', fontWeight: 600, color: '#5E5650' }).textContent = 'Her hafta bir para tuzağı';
+    const fbtn = el('div', 'abs', fcard, { left: '44px', right: '44px', top: '310px', height: '72px', borderRadius: '18px', background: '#0095F6', color: '#FFFFFF', fontSize: '38px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', transformOrigin: '50% 50%' });
+    const FBX = 740, FBY = FT + 310 + 36;  // pençenin bastığı yer: düğmenin sağ ucu (yazıyı kapatmasın)
+    const fpaw = pixEl(s.root, PAWP, { o: '#2A1E1A', B: '#EEF0F4' }, 16, { left: 0, top: 0, display: 'none', zIndex: 27, transformOrigin: '50% 30%' });
+    const fring = el('div', 'abs', s.root, { left: px(FBX - 60), top: px(FBY - 60), width: '120px', height: '120px', boxSizing: 'border-box', borderRadius: '50%', border: '8px solid rgba(0,149,246,.75)', display: 'none', zIndex: 27 });
+
+    // kalp atışları (audio.py ile aynı takvim): soru sorulunca başlar, sayımda hızlanır
+    const beats = [];
+    for (let t = ASK + 0.3, k = 0; t < ZERO - 0.1; t += Math.max(0.42, 0.62 - 0.03 * k), k++) beats.push(t);
+
+    s.update = (lt) => {
+      const ramp = (a, d) => E.inOut(prog(lt, a, d));
+      const st = story(lt);
+      const hookish = lt < LAUNCH || lt >= OFF;
+      // ── A ──
+      const launchT = lt >= LAUNCH && lt < MC, flight = lt >= SPACE && lt < D22;
+      const lift = launchT ? Math.max(0, lt - LIFT) : 0;
+      const pz = launchT ? ramp(KAPTAN - 0.25, 0.4) * (1 - ramp(MOONT - 0.35, 0.45)) : 0;  // rampada lomboza yakınlaşma
+      dusk.style.opacity = launchT ? 1 : 0;
+      pad.style.display = launchT ? 'block' : 'none';
+      pad.style.transform = `translateY(${280 * lift * lift}px)`;
+      // yıldızlar: yolculukta aşağı akar (hız)
+      const speed = flight ? 900 : launchT ? 300 * lift : 0;
+      starsA.forEach((q, i) => {
+        const y = flight ? (((q.y0 + (lt - SPACE) * speed * q.sp) % 2000) + 2000) % 2000 : q.y0 + (launchT ? 200 * lift * lift * q.sp : 0);
+        q.e.style.transform = `translateY(${y - q.y0}px)`;
+        q.e.style.opacity = (launchT ? 0.55 : 1) * (0.55 + 0.45 * Math.sin(lt * 3 + q.ph));
+        q.e.style.height = px(flight ? q.sz + 22 * q.sp : q.sz);
+      });
+      // Ay: rampada küçük, kancada orta; yolculukta görünmez (kadrajın üstünde)
+      const moonS = hookish ? 0.78 : 0.5, moonX = hookish ? 790 : 830, moonY = hookish ? 790 : 760;
+      const moonOn = hookish || launchT;
+      [moonA, moonGlow, moonTag].forEach((e) => (e.style.display = moonOn ? 'block' : 'none'));
+      if (moonOn) {
+        const pulse = 1 + 0.1 * Math.sin(Math.PI * prog(lt, MOONT, 0.4));
+        moonA.style.transform = `translate(${moonX - 160}px,${moonY - 160}px) scale(${moonS * pulse})`;
+        moonGlow.style.transform = `translate(${moonX - 300}px,${moonY - 300}px) scale(${moonS * pulse})`;
+        moonTag.style.transform = `translate(${moonX}px,${moonY + 160 * moonS + 10}px) translateX(-50%) scale(${pulse})`;
+      }
+      // roket: kancada yakıtsız, eğik, sürükleniyor; rampada dik (KAPTAN'da Ceviz el sallar), kalkışta yükselir; yolculukta ortada
+      let rx = 540, ry = 1490 - RH, rot = 0, thrust = 0;
+      if (hookish) { rx = 470 + 6 * Math.sin(lt * 1.3); ry = 960 + 10 * Math.sin(lt * 0.9); rot = 16 + 3 * Math.sin(lt * 1.1); }
+      else if (launchT) { ry = 1490 - RH - 420 * lift * lift - 30 * lift; thrust = lt >= IGN ? (lt < LIFT ? 0.45 * prog(lt, IGN, 0.25) : 1) : 0; }
+      else if (flight) { rx = 540 + 14 * Math.sin(lt * 1.6); ry = SY - RH * 0.5 + 8 * Math.sin(lt * 2.3); rot = 2 * Math.sin(lt * 1.2); thrust = 0.85 + 0.15 * Math.sin(lt * 20); }
+      const hitShake = MET.reduce((a, m) => a + shake(lt, m, 26, 0.45), 0);
+      const padShake = launchT && lt >= IGN ? shake(lt, LIFT, 22, 0.8) + Math.sin(lt * 60) * 3 * prog(lt, IGN, 0.3) : 0;
+      rk.style.display = hookish || launchT || flight ? 'block' : 'none';
+      rk.style.transform = `translate(${rx - RW / 2 + hitShake + padShake}px,${ry}px) rotate(${rot + hitShake * 0.2}deg)`;
+      flame.style.display = thrust > 0.02 ? 'block' : 'none';
+      if (thrust > 0.02) {
+        const fi = Math.floor(lt / 0.05) % 3;
+        if (flame.dataset.f !== String(fi)) { flame.dataset.f = fi; flame.innerHTML = pix(FLAMES[fi], FLAME_C, RC); }
+        flame.style.transform = `scaleY(${0.4 + 1.1 * thrust}) scaleX(${0.8 + 0.25 * thrust})`;
+      }
+      // lombozda Ceviz: kancada endişeli, rampada el sallar, yolculukta meteorlarda gözleri büyür
+      let cp = ['calm', null, blink(lt)];
+      if (hookish) cp = ['thoughtful', null, 'half'];
+      else if (launchT) cp = lt >= KAPTAN ? ['celebrate', Math.floor(lt / 0.2) % 2 ? 'wave' : 'wave2', 'happy'] : ['happy', null, blink(lt)];
+      else if (flight) cp = lt >= ALERT ? ['curious', null, 'wide'] : ['happy', null, blink(lt)];
+      czP.set(...cp);
+      czP.put(64, 154);  // kaskın ortası lombozun ortasında; dış halkası lombozun dışında kalır
+      dents.forEach((d, i) => (d.style.display = (flight && lt >= MET[i] + 0.1) || hookish ? 'block' : 'none'));
+      // duman: rampada ateşlemeyle kabarır; kancada lüleden ince duman
+      puffs.forEach((p, i) => {
+        let on = false, x = 0, y = 0, sc = 1, a = 1;
+        if (launchT && lt >= IGN) {
+          const k = (lt - IGN + i * 0.13) % 1.1, side = i % 2 ? 1 : -1;
+          on = true; x = 540 + side * (40 + 260 * k) - 75; y = 1420 - 40 * k + 280 * lift * lift; sc = 0.6 + 1.4 * k; a = 1 - k * 0.7;
+        } else if (hookish && i < 5) {
+          const k = ((lt * 0.6 + i * 0.2) % 1);
+          on = true; x = rx - 140 * Math.sin((rot * Math.PI) / 180) - 75 + 30 * k; y = ry + RH * 0.55 + 230 * Math.cos((rot * Math.PI) / 180) - 75 + 50 * k; sc = 0.18 + 0.3 * k; a = 0.45 * (1 - k);
+        }
+        p.style.display = on ? 'block' : 'none';
+        if (on) { p.style.transform = `translate(${x}px,${y}px) scale(${sc})`; p.style.opacity = a; }
+      });
+      arms.forEach((a, i) => (a.style.transform = `rotate(${-70 * ramp(IGN - 0.2 + i * 0.08, 0.35)}deg)`));
+      // rota: kancada kırmızı ve "8 GÜN"; rampada soluk mavi
+      const routeOn = hookish || (launchT && lt < LIFT && pz < 0.05);
+      route.style.display = gap.style.display = routeOn ? 'block' : 'none';
+      if (routeOn) {
+        const P = RH * 0.55, nx = rx + Math.sin((rot * Math.PI) / 180) * P, ny = ry + P - Math.cos((rot * Math.PI) / 180) * P;  // burnun ucu (dönme noktası %55)
+        const mx2 = moonX - 120 * moonS, my2 = moonY + 110 * moonS;
+        routeP.setAttribute('d', `M${nx},${ny} Q${(nx + mx2) / 2 - 60},${(ny + my2) / 2 - 40} ${mx2},${my2}`);
+        routeP.setAttribute('stroke', hookish ? '#FF5A4E' : 'rgba(127,216,255,.75)');
+        gap.style.display = hookish ? 'block' : 'none';
+        gap.style.left = px((nx + mx2) / 2 - 30); gap.style.top = px((ny + my2) / 2 - 20);
+      }
+      // meteorlar: sağdan/soldan gelir, etiketleri yanlarında; çarpınca kıvılcım, etiket tutarıyla yükselir
+      const showerOn = flight && lt >= ALERT;
+      showers.forEach((e, i) => {
+        e.style.display = showerOn ? 'block' : 'none';
+        if (showerOn) { const k = ((lt - ALERT) * 1.4 + i * 0.137) % 1; e.style.transform = `translate(${1150 - 1400 * k + ((i * 97) % 300)}px,${-200 + 1700 * k + ((i * 53) % 200)}px) rotate(35deg)`; e.style.opacity = 0.5; }
+      });
+      metEls.forEach((me, i) => {
+        const k = prog(lt, me.m - 0.75, 0.75), hit = lt >= me.m;
+        const tx = 540 + (i - 1) * 60, ty = SY + 60 - i * 40;  // çarpma noktası: gövde
+        const vis = flight && k > 0 && !hit;
+        me.w.style.display = vis ? 'block' : 'none';
+        if (vis) {
+          const x = lerp(me.from[0], tx, k), y = lerp(me.from[1], ty, k);
+          const ang = (Math.atan2(ty - me.from[1], tx - me.from[0]) * 180) / Math.PI - 90;
+          me.w.style.transform = `translate(${x - 117}px,${y - 97}px) rotate(${lt * 90 * me.dir}deg)`;
+          me.w.firstChild.style.transform = `rotate(${ang - lt * 90 * me.dir}deg)`;
+        }
+        const tagOn = flight && k > 0 && lt < me.m + 0.9;
+        me.tag.style.display = tagOn ? 'block' : 'none';
+        if (tagOn) {
+          const x = hit ? tx : lerp(me.from[0], tx, k), y = hit ? ty - 140 - 160 * prog(lt, me.m, 0.9) : lerp(me.from[1], ty, k) - 150;
+          me.tag.style.transform = `translate(${clamp(x, 220, 860)}px,${y}px) translateX(-50%) scale(${hit ? 1 + 0.25 * Math.sin(Math.PI * prog(lt, me.m, 0.3)) : 1})`;
+          me.tag.style.opacity = hit ? 1 - prog(lt, me.m + 0.6, 0.3) : clamp(k * 4);
+        }
+        me.boom.ox = tx; me.boom.oy = ty;
+        me.boom.update(lt);
+      });
+      // göstergeler
+      const fr = st.fuel / 8000;
+      fVal.textContent = `${fmt(st.fuel)} TL`;
+      const low = st.fuel < 600;
+      fVal.style.color = low ? '#FF5A4E' : fr < 0.45 ? '#FFC857' : '#7CF2A0';
+      fVal.style.opacity = low && Math.floor(lt / 0.25) % 2 ? 0.35 : 1;
+      fBar.style.width = `${(fr * 100).toFixed(1)}%`;
+      fBar.style.background = low ? '#FF5A4E' : fr < 0.45 ? '#FFC857' : '#4CD27A';
+      const lastHit = MET.filter((m) => lt >= m && lt < m + 0.8).pop();
+      fDrop.style.display = flight && lastHit !== undefined ? 'block' : 'none';
+      if (lastHit !== undefined) {
+        const i = MET.indexOf(lastHit), q = prog(lt, lastHit, 0.8);
+        fDrop.textContent = `−${fmt(METF[i])}`;
+        fDrop.style.transform = `translateY(${-60 * q}px) scale(${1 + 0.3 * Math.sin(Math.PI * Math.min(1, q * 3))})`;
+        fDrop.style.opacity = 1 - q * q;
+      }
+      calD.textContent = String(Math.floor(st.day));
+      calD.style.color = st.day >= 21 ? '#C0392B' : '#2A1E1A';
+
+      // ── B ──
+      const sciOn = lt >= SCI && lt < APP;
+      tele.style.display = sciOn ? 'none' : 'block';
+      sciB.style.display = sciOn ? 'block' : 'none';
+      const dB = lt < D14 ? 1 : Math.min(14, 1 + Math.floor((lt - D14) / 0.04));
+      dayBT.textContent = `AYIN ${ekD(dB).toLocaleUpperCase('tr-TR')}`;
+      const mk = MP((dB - 1) / 29);
+      mark.style.left = px(mk[0]); mark.style.top = px(mk[1]);
+      [[rF, FUEL, 4000], [rP, PLAN, 3500]].forEach(([r, t, v]) => {
+        const q = prog(lt, t - 0.15, 0.3);
+        r.r.style.opacity = clamp(q * 3);
+        r.r.style.transform = `scale(${0.9 + 0.1 * E.back(q)})`;
+        r.v.textContent = `${fmt(v * E.out(prog(lt, t - 0.15, 0.5)))} TL`;
+      });
+      // karar anı: göstergeler sırayla parlar, köşede 3-2-1
+      const counting = lt >= COUNT && lt < ZERO;
+      cdg.style.display = counting ? 'block' : 'none';
+      if (counting) cdg.textContent = String(3 - Math.floor(lt - COUNT));
+      const alt = Math.floor((lt - COUNT) / 0.375) % 2;
+      rF.r.style.boxShadow = counting && !alt ? '0 0 40px 8px rgba(124,242,160,.55)' : 'none';
+      rP.r.style.boxShadow = counting && alt ? '0 0 40px 8px rgba(255,200,87,.55)' : 'none';
+      // araştırma: çubuklar dolar, eksik kısım kesikli kutu (içinde meteorlar), %27, EKSİK! damgası, kaynak
+      const gq = E.out(prog(lt, BARS, 0.8));
+      bG.fill.style.width = `${(100 * gq).toFixed(1)}%`;
+      bT.fill.style.width = `${(73 * E.out(prog(lt, BARS + 0.25, 0.8))).toFixed(1)}%`;
+      missBox.style.opacity = prog(lt, PCT - 0.1, 0.3);
+      pctB.style.opacity = lt >= PCT ? 1 : 0;
+      pctB.textContent = `%${Math.round(27 * E.out(prog(lt, PCT, 0.5)))}`;
+      stampB.style.opacity = lt >= MISS ? 1 : 0;
+      stampB.style.transform = `rotate(-8deg) scale(${lerp(2.2, 1, E.out(prog(lt, MISS, 0.2)))})`;
+      srcB.style.opacity = prog(lt, SCI + 0.6, 0.4);
+      // Bilge: göstergeleri okur, soruda kameraya döner; sayımda terler
+      let bp = ['calm', null, blink(lt)];
+      if (lt >= FUEL) bp = ['happy', null, blink(lt)];
+      if (lt >= ASK) bp = ['curious', null, 'wide'];
+      if (counting) bp = ['calm', 'face', Math.floor(lt / 0.375) % 2 ? 'wide' : 'squeeze'];  // düşünce noktası yok: kafanın sağ üstündeki işaret dev ekrandaki rakamı örtüyordu
+      if (sciOn) bp = ['happy', 'wave', blink(lt)];
+      bB.set(...bp);
+      bB.put(300, 1600, { rot: counting ? Math.sin(lt * 30) * 0.8 : 0 });
+      sweatB.style.display = counting ? 'block' : 'none';
+      sweatB.style.transform = `translateY(${((lt - COUNT) % 0.7) * 120}px)`;
+
+      // ── C ──
+      const cOn = lt >= D22 && lt < SCI;
+      const dead = lt >= DEAD;
+      let cc = ['curious', null, 'wide'];
+      if (lt >= HOUSTON) cc = ['curious', 'up', 'wide'];
+      if (dead) cc = ['thoughtful', 'face', 'squeeze'];
+      czC.set(...cc);
+      czC.put(540, 1560 + (dead ? 10 : 0), { rot: Math.sin(lt * 40) * (cOn ? 0.8 : 0) });
+      beam.style.display = cOn ? 'block' : 'none';
+      beam.style.transform = `rotate(${lt * 260}deg)`;
+      alarmL.style.background = cOn && Math.floor(lt / 0.2) % 2 ? '#FF3A2E' : '#6E1E1A';
+      warnT.style.opacity = Math.floor(lt / 0.25) % 2 ? 0.25 : 1;
+      needle.setAttribute('transform', `rotate(${-82 + 6 * Math.sin(lt * 14) * (dead ? 0 : 1)} 150 150)`);
+      waves.forEach((w, i) => {
+        const on = cOn && lt >= HOUSTON && lt < DEAD + 0.3 && (lt - HOUSTON - i * 0.12) % 0.5 < 0.32;
+        w.style.display = on ? 'block' : 'none';
+        w.style.left = px(720 + i * 30); w.style.top = px(990 - i * 30);
+      });
+      sweatC.forEach((e, i) => {
+        e.style.display = cOn ? 'block' : 'none';
+        const k = ((lt + i * 0.35) % 0.7) / 0.7;
+        e.style.transform = `translate(${i ? 640 : 410}px,${1140 + k * 90}px)`;
+        e.style.opacity = 1 - k * 0.7;
+      });
+      winSmoke.forEach((e, i) => {
+        const k = prog(lt, DEAD + i * 0.08, 0.8);
+        e.style.display = cOn && k > 0 && k < 1 ? 'block' : 'none';
+        e.style.transform = `translate(${-40 * k}px,${-260 * k}px) scale(${0.6 + k})`;
+        e.style.opacity = 1 - k;
+      });
+      sparksC.update(lt);
+      redC.style.opacity = (cOn ? 0.18 + 0.14 * (Math.floor(lt / 0.2) % 2) : 0) + (flight && lt >= ALERT ? 0.12 * (Math.floor(lt / 0.25) % 2) : 0);
+
+      // ── D ──
+      const rq = prog(lt, RES - 0.05, 0.3), dq = prog(lt, DAY - 0.05, 0.3);
+      rsD.style.background = lt >= RES ? `rgba(242,182,60,${0.28 + 0.1 * Math.sin(lt * 8)})` : 'transparent';
+      rsD.style.boxShadow = lt >= RES ? '0 0 0 5px #F2B63C' : 'none';
+      tagRes.style.opacity = clamp(rq * 3);
+      tagRes.style.transform = `rotate(-5deg) scale(${0.6 + 0.4 * E.back(rq)})`;
+      canD.style.opacity = clamp(rq * 3);
+      canD.style.transform = `scale(${0.4 + 0.6 * E.back(rq)})`;
+      pdD.style.background = lt >= DAY ? `rgba(124,242,160,${0.3 + 0.1 * Math.sin(lt * 8)})` : 'transparent';
+      pdD.style.boxShadow = lt >= DAY ? '0 0 0 5px #2F8F5A' : 'none';
+      tagDay.style.opacity = clamp(dq * 3);
+      tagDay.style.transform = `rotate(4deg) scale(${0.6 + 0.4 * E.back(dq)})`;
+      phD.style.transform = `translateY(${(1 - E.out(prog(lt, APP, 0.35))) * 700}px)`;
+
+      // ── E ──
+      const planted = lt >= FLAG;
+      pole.style.display = planted || lt >= FOLLOW ? 'block' : 'none';
+      pole.style.transform = `translateY(${(1 - E.out(prog(lt, FLAG, 0.18))) * -500}px)`;
+      flag.style.transform = `skewY(${Math.sin(lt * 5) * 3 * prog(lt, FLAG + 0.18, 0.4)}deg) scaleX(${0.94 + 0.06 * Math.sin(lt * 4)})`;
+      const hopE = hop(lt - CTA, 1.1, 60);  // az yerçekimi: yavaş, yüksek zıplama
+      const wave = lt >= FLAG + 0.3;
+      czE.set(wave ? 'celebrate' : 'happy', wave ? (Math.floor(lt / 0.25) % 2 ? 'wave' : 'wave2') : null, wave ? 'happy' : blink(lt));
+      czE.put(430, 1450 - (lt >= CTA ? hopE.y : 0), { sy: hopE.sy, sx: hopE.sx });
+      dustE.update(lt);
+      const sk = prog(lt, STREAK, 0.6);
+      streak.style.display = sk > 0 && sk < 1 ? 'block' : 'none';
+      streak.style.transform = `translate(${1000 - 700 * sk}px,${700 + 300 * sk}px) rotate(-58deg)`;
+
+      // ── kamera planları: dünya noktası (fx, fy) ekranda (540, SY)'ye düşer ──
+      let W = 'A', z = 1, fx = 540, fy = SY, hudOn = true;
+      if (hookish) { z = 1.0 + 0.03 * prog(lt >= OFF ? lt - OFF : lt, 0, 1); }                                                                // kanca: yakıtı biten roket
+      else if (launchT) {                                                                                                                        // rampa: lomboza yaklaşır, geri çekilir, kalkış
+        z = lerp(1.0, 2.3, pz); fx = lerp(540, 535, pz); fy = lerp(SY, 1490 - RH + 215, pz); hudOn = pz < 0.08;
+      } else if (lt < ASK) { W = 'B'; z = 1.0 + 0.04 * prog(lt, MC, ASK - MC); }                                                              // görev kontrol
+      else if (lt < COUNT) { W = 'B'; const q = ramp(ASK, 0.45); z = lerp(1.04, 1.7, q); fx = lerp(540, 300, q); fy = lerp(SY, 1310, q); }      // "Sence yakıt yeter mi?"
+      else if (lt < SPACE) { W = 'B'; z = 1.36 + 0.03 * ramp(COUNT, ZERO - COUNT); fx = 706; fy = 990; }                                      // karar: göstergeler
+      else if (lt < D22) { z = 1.0 + 0.06 * prog(lt, SPACE, D22 - SPACE); }                                                                     // meteorlar
+      else if (lt < SCI) { W = 'C'; z = 1.02 + 0.06 * prog(lt, D22, SCI - D22); fy = 1150; }                                                   // kokpit
+      else if (lt < APP) { W = 'B'; z = 1.1 + 0.03 * prog(lt, SCI, APP - SCI); fx = 540; fy = 930; }                                          // araştırma
+      else if (lt < CTA) { W = 'D'; z = 1.1 + 0.02 * prog(lt, APP, CTA - APP); fy = 1110; }                                                    // Cep Defteri
+      else { W = 'E'; z = 1.0 + 0.04 * prog(lt, CTA, OFF - CTA); }                                                                             // Ay yüzeyi
+      let beat = -9;
+      beats.forEach((t) => { if (lt >= t) beat = t; });
+      z *= 1 + 0.012 * Math.exp(-(lt - beat) * 10);
+      const sx = shake(lt, LIFT, 14, 0.6) + shake(lt, D22, 10, 0.3) + shake(lt, DEAD, 12, 0.4) + shake(lt, FLAG + 0.18, 8, 0.3);
+      [camA, camB, camC, camD, camE].forEach((c, i) => (c.style.display = 'ABCDE'[i] === W ? 'block' : 'none'));
+      ({ A: camA, B: camB, C: camC, D: camD, E: camE })[W].style.transform = `translate(${540 - fx * z + sx}px,${SY - fy * z}px) scale(${z})`;
+      hud.style.display = W === 'A' && hudOn ? 'block' : 'none';
+      flash.style.opacity = Math.max(lt >= LIFT ? 0.55 * Math.exp(-(lt - LIFT) * 6) : 0, ...MET.map((m) => (lt >= m ? 0.45 * Math.exp(-(lt - m) * 9) : 0)), lt >= DEAD ? 0.35 * Math.exp(-(lt - DEAD) * 8) : 0);
+      pill.style.display = counting ? 'flex' : 'none';
+      pill.style.opacity = Math.min(1, (lt - COUNT) * 8);
+      pin.style.transform = `scale(${1 + 0.04 * Math.exp(-((lt - COUNT) % 1) * 10)})`;
+      // takip kartı: FOLLOW'da açılır; TAPF'de pençe "Takip et"e basar, düğme "Takip ediliyor" olur
+      const fOn = lt >= FOLLOW && lt < OFF;
+      fcard.style.display = fOn ? 'block' : 'none';
+      if (fOn) popIn(fcard, prog(lt, FOLLOW, 0.35), { fromY: -60 });
+      const followed = lt >= TAPF + 0.02;
+      fbtn.textContent = followed ? 'Takip ediliyor' : 'Takip et';
+      fbtn.style.background = followed ? '#EFEFEF' : '#0095F6';
+      fbtn.style.color = followed ? '#141414' : '#FFFFFF';
+      const fd = lt - TAPF + 0.45;
+      fbtn.style.transform = `scale(${fd >= 0.42 && fd < 0.55 ? 0.94 : followed ? 1 + 0.08 * Math.sin(Math.PI * prog(fd, 0.55, 0.25)) : 1 + 0.03 * Math.sin(lt * 8)})`;
+      const ftap = fOn && fd >= 0.1 && fd < 0.95;  // eldivenli pati sağ alttan gelir, basar, geri çekilir; dokunuşta halka açılır
+      fpaw.style.display = ftap ? 'block' : 'none';
+      if (ftap) {
+        const k1 = E.out(prog(fd, 0.1, 0.3)), k2 = E.inOut(prog(fd, 0.62, 0.33));
+        const fx2 = lerp(FBX + 320, FBX + 8, k1) + 320 * k2, fy2 = lerp(FBY + 480, FBY + 16, k1) + 480 * k2 + (fd >= 0.42 && fd < 0.55 ? 8 : 0);
+        fpaw.style.transform = `translate(${fx2 - 56}px,${fy2 - 34}px) rotate(${-20 * (1 - k1) - 20 * k2}deg)`;
+        fpaw.style.opacity = 1 - k2;
+      }
+      const rk2 = prog(lt, TAPF, 0.4);
+      fring.style.display = fOn && rk2 > 0 && rk2 < 1 ? 'block' : 'none';
+      fring.style.transform = `scale(${0.4 + 1.6 * rk2})`;
+      fring.style.opacity = 1 - rk2;
     };
   };
 }

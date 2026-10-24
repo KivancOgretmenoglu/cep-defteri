@@ -2134,6 +2134,197 @@ def cue_vampir(t0, skip=0, o=None):
         put(SFX, key_click(0.8), T(Of)); put(SFX, sub(0.9), T(Of), 0.6)
 
 
+def cue_inis(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    g = lambda k: o.get(k, 99)
+
+    def thump(v):  # kalp: alt vuruş + üst katman
+        x = np.sin(2 * np.pi * phase(glide(70, 40, 0.18))) * expd(0.18, 16)
+        h = np.sin(2 * np.pi * phase(glide(170, 95, 0.1))) * expd(0.1, 30) * 0.45
+        x[: len(h)] += h
+        return x * v
+
+    sub = lambda d=1.0: np.tanh(np.sin(2 * np.pi * phase(glide(65, 30, d))) * expd(d, 3) * 1.4)
+
+    def roar(d, rise=0.4):  # roket motoru: alçak uğultu ve hışırtı, yavaşça kabarır
+        t = tt(d)
+        x = lp(noise(d), 240) * 2.4 + bp(noise(d), 400, 1800) * 0.3 + np.sin(2 * np.pi * 41 * t) * 0.25
+        env = np.clip(t / rise, 0, 1) * np.clip((d - t) / 0.25, 0, 1)
+        return np.tanh(x * 1.2) * env * 0.55
+
+    def beep(f, d=0.1, v=0.2):  # bilgisayar bip'i
+        x = wave_(phase(np.full(int(d * SR), float(f))), 'square', 0.5)
+        return lp(x, 3200) * adsr(len(x), 0.003, 0.03, 0.8, 0.02) * v
+
+    def quindar(f):  # NASA telsiz bip'i: konuşmanın başında 2525 Hz, sonunda 2475 Hz, 250 ms
+        d = 0.25
+        return np.sin(2 * np.pi * f * tt(d)) * adsr(int(d * SR), 0.005, 0.02, 0.9, 0.01) * 0.14
+
+    def static(d):  # telsiz cızırtısı
+        t = tt(d)
+        return bp(noise(d), 1200, 5000) * (0.4 + 0.6 * np.abs(np.sin(2 * np.pi * 6.5 * t))) * np.sin(np.pi * t / d) ** 0.4 * 0.22
+
+    def alarm2(d, v=0.18):  # uzay alarmı: iki tonlu, yarım saniyelik döngü
+        t = tt(d)
+        f = np.where((t * 4) % 1 < 0.5, 880.0, 660.0)
+        return lp(wave_(phase(f), 'square', 0.5), 3000) * adsr(len(t), 0.01, 0.05, 0.9, 0.05) * v
+
+    def impact():  # meteor çarpması: patlama, ezilen sac, metal tını
+        d = 1.0
+        x = boom(0.7)[: int(d * SR)].copy()
+        c = crunch()
+        x[: len(c)] += c * 1.2
+        b = fm_bell(196, 0.9, 0.22, ratio=2.41)
+        x[: len(b)] += b[: len(x)]
+        return x
+
+    def sputter():  # motor öksürür ve susar
+        out = np.zeros(int(1.3 * SR))
+        for off, v in ((0, 0.9), (0.24, 0.7), (0.52, 0.5), (0.86, 0.32)):
+            x = lp(noise(0.13), 700) * expd(0.13, 16) * v * 2.2
+            i = int(off * SR)
+            out[i : i + len(x)] += x
+        out[: int(1.2 * SR)] += np.sin(2 * np.pi * phase(glide(180, 40, 1.2))) * expd(1.2, 2.5) * 0.25
+        return out
+
+    cut = lambda t, a=0.2, b=-0.2: put(SFX, stereo_move(whoosh(0.28, 2400, 500, 0.5), a, b), T(t - 0.08), 0.16)  # plan kesmesi
+
+    # kanca (ve döngüde yeniden): yakıtı biten roket, düşük yakıt alarmı, telsiz cızırtısı
+    hk = min(g('launch'), DUR - t0)
+    if hk > 0.1:
+        put(SFX, alarm2(hk, 0.14), T(0), pan=0.3)
+        put(SFX, static(hk), T(0), 0.6, pan=-0.3)
+        put(SFX, beep(1320, 0.08, 0.16), T(0.02), pan=0.4)
+    if 'launch' in o:  # rampa: gece rüzgârı, uzaktan geri sayım bip'leri
+        L = o['launch']
+        cut(L)
+        put(AMB, wind(g('mc') - L) * 0.5, T(L))
+        for k in range(3):
+            put(SFX, beep(988, 0.07, 0.12), T(L + 0.25 + k * 0.5), pan=-0.5)
+    if 'kaptan' in o:  # Ceviz lomboza yaklaşan kameraya el sallar
+        K = o['kaptan']
+        put(SFX, stereo_move(whoosh(0.3, 500, 2200, 0.4), -0.3, 0.2), T(K - 0.3), 0.14)
+        put(SFX, bloop(520, 1240, 0.07, 0.25), T(K + 0.05))
+        put(SFX, chitter(), T(K + 0.12), 0.35)
+    if 'moon' in o:  # Ay parlar
+        M = o['moon']
+        for k, f in enumerate((1568, 2093, 2637)):
+            put(SFX, pling(f, 0.1, 0.6), T(M + k * 0.07), pan=0.5)
+    if 'ign' in o:  # ateşleme: hışırtı, gürleme kabarır
+        I, Lf = o['ign'], g('lift')
+        put(SFX, riser(Lf - I + 0.05) * 0.5, T(I))
+        put(SFX, roar(g('mc') - I + 0.3, 0.3), T(I), 0.7)
+    if 'lift' in o:  # kalkış: patlama, roket gürler
+        put(SFX, boom(1.0), T(o['lift']), 0.75)
+        put(SFX, crash(0.4), T(o['lift']), pan=0.2)
+    if 'mc' in o:  # görev kontrol: fan uğultusu, bilgisayar bip'leri
+        Mc, Sp = o['mc'], g('space')
+        cut(Mc)
+        put(AMB, lp(noise(Sp - Mc), 300) * 0.06, T(Mc))
+        tm, k = Mc + 0.2, 0
+        while tm < g('count') - 0.1:
+            put(SFX, beep([1760, 1318, 2093, 1568][k % 4], 0.05, 0.05), T(tm), pan=-0.6 + 0.4 * (k % 4))
+            tm += 0.43 + 0.17 * (k % 3); k += 1
+    if 'd14' in o:  # takvim 1'den 14'e akar
+        D = o['d14']
+        for k in range(13):
+            put(SFX, tick(k % 2 == 0, 0.22), T(D + k * 0.04), pan=0.3)
+        put(SFX, pling(1568, 0.12, 0.4), T(D + 0.55), pan=0.3)
+    for k in ('fuel', 'plan'):  # göstergeler: sayaç ve bip
+        if k in o:
+            put(SFX, slot_roll(0.45), T(o[k] - 0.12), 0.16, pan=0.4)
+            put(SFX, bloop(500, 1300, 0.08, 0.25), T(o[k] + 0.35), pan=0.4)
+    if 'ask' in o:  # "Sence yakıt yeter mi?": kalp atışı başlar ve hızlanır (value.js ile aynı takvim)
+        A, Z = o['ask'], g('zero')
+        cut(A)
+        t, k = A + 0.3, 0
+        while t < Z - 0.1:
+            put(SFX, thump(0.9), T(t)); put(SFX, thump(0.6), T(t + 0.16))
+            t += max(0.42, 0.62 - 0.03 * k); k += 1
+    if 'count' in o:  # gerçek 3 saniye: her saniye bip, göstergeler sırayla parlar, son anda nefes
+        Cn, Z = o['count'], g('zero')
+        cut(Cn)
+        for j in range(3):
+            put(SFX, pluck(81 if j < 2 else 86, 0.14, 'square', 0.5, cut=4000, v=0.3), T(Cn + j))
+        for j in range(8):
+            put(SFX, key_click(0.3), T(Cn + j * 0.375), pan=0.4 if j % 2 else -0.4)
+        put(SFX, inhale(0.3), T(Z - 0.32), 0.6)
+    if 'space' in o:  # uzay: roket gürler, yıldızlar akar
+        Sp, D2 = o['space'], g('d22')
+        cut(Sp)
+        put(SFX, roar(D2 - Sp + 0.1, 0.2), T(Sp), 0.45)
+    if 'alert' in o:  # "meteorlar": alarm
+        Al = o['alert']
+        put(SFX, alarm2(1.6, 0.2), T(Al), pan=-0.2)
+        put(SFX, sub(1.0), T(Al), 0.4)
+    for i, m in enumerate(o.get('met', [])):  # meteor yaklaşır (vınlama), çarpar, yakıt düşer
+        pan = -0.5 if i == 1 else 0.5
+        put(SFX, stereo_move(whoosh(0.7, 3000, 300, 0.7), pan, 0.0), T(m - 0.7), 0.4)
+        put(SFX, impact(), T(m), 0.75, pan=pan * 0.4)
+        put(SFX, bloop(1100, 300, 0.25, 0.2), T(m + 0.3), pan=-0.5)
+    if 'd22' in o:  # kokpit: alarm sürer, yakıt boş uyarısı
+        D2, Sc = o['d22'], g('sci')
+        cut(D2)
+        put(SFX, alarm2(Sc - D2, 0.12), T(D2), pan=-0.4)
+        put(SFX, buzzer(0.4), T(D2 + 0.05), 0.5)
+    if 'houston' in o:  # telsiz: konuşmanın başında ve sonunda NASA bip'i, altında cızırtı
+        H = o['houston']
+        put(SFX, quindar(2525), T(H - 0.3))
+        put(SFX, static(1.75), T(H - 0.05), 0.55)
+        put(SFX, quindar(2475), T(H + 1.68))
+    if 'dead' in o:  # motor öksürür, ışıklar titrer, kıvılcım
+        Dd = o['dead']
+        put(SFX, sputter(), T(Dd - 0.05), 0.7)
+        put(SFX, crunch(), T(Dd), 0.5, pan=0.4)
+        put(SFX, sub(1.0), T(Dd + 0.1), 0.5)
+    if 'sci' in o:  # dev ekran araştırmaya geçer
+        S = o['sci']
+        cut(S)
+        put(SFX, beep(1320, 0.06, 0.2), T(S + 0.05)); put(SFX, beep(1760, 0.06, 0.2), T(S + 0.13))
+    if 'bars' in o:
+        put(SFX, slot_roll(0.8), T(o['bars']), 0.14)
+    if 'pct' in o:  # %27: sayaç ve tını
+        Pc = o['pct']
+        for j in range(10):
+            put(SFX, tick(j % 2 == 0, 0.14), T(Pc + 0.5 * (1 - (1 - j / 10) ** 2)), pan=0.3)
+        put(SFX, pling(1568, 0.12, 0.5), T(Pc + 0.52), pan=0.3)
+    if 'miss' in o:
+        put(SFX, stamp(), T(o['miss']), 0.45, pan=0.3)
+    if 'app' in o:  # Cep Defteri: kart; yedek yakıt ve günlük yakıt vurgulanır
+        Ap = o['app']
+        put(SFX, stereo_move(whoosh(0.3, 600, 2600, 0.5), 0.4, -0.2), T(Ap - 0.05), 0.16)
+        put(SFX, fm_bell(1318, 0.5, 0.14), T(Ap + 0.1))
+        for k, f0 in (('res', 500), ('day', 620)):
+            if k in o:
+                put(SFX, ui_tap(0.5), T(o[k]))
+                put(SFX, bloop(f0, f0 * 2.4, 0.08, 0.24), T(o[k] + 0.05))
+        if 'day' in o:
+            put(SFX, fm_bell(1568, 0.7, 0.16), T(o['day'] + 0.3))
+    if 'cta' in o:  # Ay yüzeyi: az yerçekiminde yavaş zıplamalar, bayrak dikilir
+        C = o['cta']
+        cut(C)
+        tm = C + 0.06
+        while tm < g('off') - 0.3:
+            put(SFX, boing(0.3, 0.07), T(tm + 1.08), pan=-0.2)
+            tm += 1.1
+        if 'flag' in o:
+            Fl = o['flag']
+            put(SFX, stereo_move(whoosh(0.2, 1800, 500, 0.4), 0.2, 0.0), T(Fl - 0.05), 0.14)
+            put(SFX, kick(0.8), T(Fl + 0.18), 0.6); put(SFX, crunch(), T(Fl + 0.18), 0.3)
+            put(SFX, flutter(0.4), T(Fl + 0.35), 0.16, pan=0.3)
+    if 'follow' in o:  # takip kartı açılır
+        F = o['follow']
+        put(SFX, stereo_move(whoosh(0.3, 500, 2400, 0.5), -0.3, 0.2), T(F - 0.05), 0.18)
+        put(SFX, bloop(520, 1300, 0.07, 0.28), T(F + 0.05))
+    if 'streak' in o:  # gökte küçük bir meteor kayar
+        put(SFX, stereo_move(whoosh(0.6, 3000, 600, 0.4), 0.6, -0.4), T(o['streak']), 0.18)
+    if 'tapf' in o:  # eldivenli pati "Takip et"e basar
+        Tf = o['tapf']
+        put(SFX, ui_tap(0.6), T(Tf))
+        put(SFX, fm_bell(1568, 0.7, 0.18), T(Tf + 0.06))
+        put(SFX, pling(2093, 0.1, 0.5), T(Tf + 0.12), pan=0.3)
+
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
 # ═════════ ANA MÜZİK ═════════
@@ -2208,7 +2399,7 @@ def music_main(start, end, fill_before=()):
 
 
 # ═════════ MÜZİK TÜRLERİ ═════════
-# reels.json → "musicPlan": [[başla, bitir, tür], ...]. Türler: chip (varsayılan), lofi, horror, quiz.
+# reels.json → "musicPlan": [[başla, bitir, tür], ...]. Türler: chip (varsayılan), lofi, horror, quiz, pop, space.
 def seg_bus(a, b):
     return np.zeros((int((b - a) * SR) + 2 * SR, 2))
 
@@ -2400,7 +2591,44 @@ def pop(a, b, last=True, **kw):
     put(MUS, bus[: int(L * SR)] * 1.05, a)
 
 
-STYLES = {'lofi': lofi, 'horror': horror, 'quiz': quiz, 'chip': chip, 'pop': pop}
+def space(a, b, last=True, **kw):
+    """uzay görevi: 112 BPM kare dalga arpej (filtresi yavaşça açılıp kapanır), yavaş pad, sekizlik bas, hafif davul; ilk yarım ölçü yalnız pad"""
+    BPM = kw.get('bpm', 112)
+    bt = 60 / BPM
+    L = b - a
+    bus = seg_bus(a, b)
+    prog_ = [(45, [57, 60, 64, 69]), (41, [57, 60, 65, 69]), (43, [55, 59, 62, 67]), (40, [55, 59, 64, 67])]  # Am F G Em
+    arp = [0, 1, 2, 3, 2, 1, 2, 3]
+    end = L - (1.0 if last else 0)
+    nbar = int(np.ceil(end / (4 * bt)))
+    for bi in range(nbar):
+        t0 = bi * 4 * bt
+        root, ch = prog_[bi % 4]
+        put(bus, pad(ch, 4 * bt, 0.07), t0)
+        for k in range(16):
+            tk = t0 + k * bt / 4
+            if tk >= end:
+                break
+            if bi == 0 and k < 8:
+                continue
+            cut = 1400 + 1800 * (0.5 + 0.5 * np.sin(2 * np.pi * (bi * 16 + k) / 32))
+            put(bus, pluck(ch[arp[k % 8]] + 12, bt * 0.24, 'square', 0.25, cut=cut, v=0.045), tk, pan=0.35 if k % 2 else -0.35)
+        for beat in range(4):
+            tb = t0 + beat * bt
+            if tb >= end:
+                break
+            for e8 in range(2):
+                put(bus, bass(root - 12, bt * 0.42, 0.26), tb + e8 * bt / 2)
+            if bi > 0 and beat in (0, 2):
+                put(bus, kick(0.5) * 0.8, tb)
+            if bi > 0:
+                put(bus, hat(0.07), tb + bt / 2, pan=0.3)
+    if last:
+        put(bus, pad(prog_[0][1], 1.2, 0.08), end)
+    put(MUS, bus[: int(L * SR)] * 1.1, a)
+
+
+STYLES = {'lofi': lofi, 'horror': horror, 'quiz': quiz, 'chip': chip, 'pop': pop, 'space': space}
 
 
 # ═════════ REELS'İ KUR ═════════
