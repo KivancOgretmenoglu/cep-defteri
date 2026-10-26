@@ -434,6 +434,16 @@ function deriveSpace() {
   });
 }
 
+// Ödeme odası: asma kilit (üstte halka), servis zili, işaretli kalkan (bilet güvencesi), e-bilet karekodu
+const LOCKP = ['..oooo..', '.oSSSSo.', '.oS..So.', '.oS..So.', 'oooooooo', 'oYYYYYYo', 'oYYooYYo', 'oYYooYYo', 'oYYYYYYo', 'oooooooo'];
+const LOCKP_C = { o: '#2A1E1A', S: '#B9C0CC', Y: '#F2B63C' };
+const BELLP = ['.....oo.....', '....oYYo....', '..ooYYYYoo..', '.oYYYYYYYYo.', 'oYWYYYYYYYYo', 'oYWYYYYYYYYo', 'oooooooooooo', 'oSSSSSSSSSSo', 'oooooooooooo'];
+const BELLP_C = { o: '#2A1E1A', Y: '#F2C14E', W: '#FFF1C9', S: '#9AA3B5' };
+const SHIELDP = ['oooooooooo', 'oBBBBBBBBo', 'oBBBBBBWBo', 'oBBBBBWWBo', 'oBWBBWWBBo', 'oBWWWWBBBo', '.oBWWBBBo.', '.oBBBBBBo.', '..oBBBBo..', '...oooo...'];
+const SHIELDP_C = { o: '#2A1E1A', B: '#3FBF8A', W: '#FFFFFF' };
+const QRP = ['ooooooooooo', 'okkkWkWkkko', 'okWkWWWkWko', 'okkkWkWkkko', 'oWWWkWkWWWo', 'okWkkWWkWko', 'oWkWWkkWkWo', 'okkkWWkkWko', 'okWkWkWWkWo', 'okkkWkkWkko', 'ooooooooooo'];
+const QRP_C = { o: '#2A1E1A', k: '#2A1E1A', W: '#FFFFFF' };
+
 function defineValue() {
   /* ── Bilgi kartları: her kart bir ipucu ── */
   SCENES.cards = (t0, o = {}) => {
@@ -4157,6 +4167,601 @@ function defineValue() {
         const fx2 = lerp(FBX + 320, FBX + 8, k1) + 320 * k2, fy2 = lerp(FBY + 480, FBY + 16, k1) + 480 * k2 + (fd >= 0.42 && fd < 0.55 ? 8 : 0);
         fpaw.style.transform = `translate(${fx2 - 56}px,${fy2 - 34}px) rotate(${-20 * (1 - k1) - 20 * k2}deg)`;
         fpaw.style.opacity = 1 - k2;
+      }
+      const rk2 = prog(lt, TAPF, 0.4);
+      fring.style.display = fOn && rk2 > 0 && rk2 < 1 ? 'block' : 'none';
+      fring.style.transform = `scale(${0.4 + 1.6 * rk2})`;
+      fring.style.opacity = 1 - rk2;
+    };
+  };
+
+  /* Ödeme odası: kaçış odası gerilimi (gizli ek ücret). Kanca: son odada kilitli Karamel; ödeme kioskunda üstü çizili "BİLET 1.000 TL"
+   * ve ÖDE 1.320 TL, süre 00:03. Lobide konser afişi (1.000 TL) ve yeşil SEPETE EKLE kapısı: Karamel bileti alıp girer, kapı arkasından
+   * kilitlenir. Her odada yeni bir ücret (hizmet bedeli, bilet güvencesi, işlem ücreti, e-bilet ücreti): neon tabela yanar, tabeladaki
+   * sepet toplamı yükselir, kilit düşer, kepenk kalkar, Karamel sonraki odaya geçer. Son oda: kasa kapısı ve kiosk; bilet tepsiye konur,
+   * ekranda 1.320 TL; gerçek 3 sn karar anı (ÖDE mi, VAZGEÇ mi?), pati iki düğme arasında gidip gelir. Karamel öder, kasa kapısı açılır;
+   * çıkışta herkes aynı şeyi söyler: "Buraya kadar geldim zaten". Duvardaki skor tablosunda deney (ücretleri ödemede görenler +%21
+   * harcama, +%14 satın alma), Cep Defteri'nde "Plan ekle" (tutar: ödeme ekranındaki toplam), konserde soru ve takip kartı; yeniden son
+   * oda (döngü).
+   * Dünyalar: A odalar, B çıkış ve skor tablosu, D telefon, E konser; kamera aralarında keser. */
+  SCENES.oda = (t0, o = {}) => {
+    const s = scene(t0, '#07060B', undefined, o.wdur ?? 0.4);
+    const ev = (k) => o[k] ?? 99;
+    const LOBBY = ev('lobby'), TICK = ev('ticket'), CART = ev('cart'), LOCK = ev('lock'), WARN = ev('warn'), FEES = o.fees || [99, 99, 99, 99];
+    const LAST = ev('last'), INS = ev('ins'), TOTAL = ev('total'), ASK = ev('ask'), COUNT = ev('count'), ZERO = ev('zero');
+    const EXIT = ev('exit'), BUB = o.bub || [99, 99, 99, 99], SCI = ev('sci'), BARS = o.bars || [99, 99], PCT = ev('pct'), BUY = ev('buy');
+    const APP = ev('app'), TAPD = ev('tapd'), STRIKE = ev('strike'), TAG = ev('tag'), FIX = ev('fix'), SAVE = ev('save');
+    const CTA = ev('cta'), FOLLOW = ev('follow'), TAPF = ev('tapf'), OFF = ev('off');
+    const SY = 1180;  // odak noktasının ekrandaki yüksekliği: kutu ve altyazının altında, Instagram'ın alt bandının üstünde
+    const PIX = "font-family:Pixel,monospace;font-weight:400;letter-spacing:.02em";
+    const world = () => el('div', 'abs', s.root, { left: 0, top: 0, width: '1080px', height: '1920px', transformOrigin: '0 0' });
+    const FEE = [150, 90, 50, 30];
+    const FEE_NAME = ['HİZMET BEDELİ', 'BİLET GÜVENCESİ', 'İŞLEM ÜCRETİ', 'E-BİLET ÜCRETİ'];
+    const FEE_ICON = [[BELLP, BELLP_C], [SHIELDP, SHIELDP_C], [POSP, POSP_C], [QRP, QRP_C]];
+    const NEON = ['#FFC857', '#6CF2B4', '#B996FF', '#FF7A93'];
+    const hookAt = (lt) => lt < LOBBY || lt >= OFF;
+    // sepet toplamı: lobide 1.000 TL, her ücrette artar; kancada (son oda) 1.320 TL
+    const sum = (lt) => (hookAt(lt) ? 1320 : 1000 + FEE.reduce((a, f, i) => a + f * E.out(prog(lt, FEES[i], 0.4)), 0));
+    // sepet süresi (sn): kapı kilitlenince 10:00'dan karar anına kadar tek hızla (hızlandırılmış) 0:03'e iner; karar anında gerçek 3 sn
+    const timer = (lt) => {
+      if (hookAt(lt)) return 3;
+      if (lt < LOCK) return 600;
+      if (lt < COUNT) return 600 - 597 * prog(lt, LOCK, COUNT - LOCK);
+      return Math.max(0, 3 - (lt - COUNT));
+    };
+    const mmss = (v) => { const c = Math.ceil(v - 1e-6); return `${String(Math.floor(c / 60)).padStart(2, '0')}:${String(c % 60).padStart(2, '0')}`; };
+    // konser bileti: altın kâğıt, kesik çizgi, KONSER ve tutar
+    const ticketEl = (parent, c, txt, css = {}, wc = 12.8) => {
+      const e = el('div', 'abs', parent, { width: px(wc * c), height: px(5.6 * c), boxSizing: 'border-box', border: `${Math.max(3, c * 0.42)}px solid #2A1E1A`, borderRadius: px(c), overflow: 'hidden', ...css });
+      const L = (wc - 12.8) / 2 + 0.8;  // geniş bilette yazı ortaya yakın, patilerin arasında
+      e.innerHTML = `<div style="position:absolute;inset:0;background:#F2B63C;box-shadow:inset 0 -${c * 0.6}px 0 #D9962B"></div>`
+        + `<div style="position:absolute;top:${c * 0.5}px;bottom:${c * 0.5}px;right:${c * 2.2}px;border-left:${Math.max(2, c * 0.28)}px dashed #8A5A1A"></div>`
+        + `<div style="position:absolute;left:${c * L}px;top:${c * 0.45}px;${PIX};font-size:${c * 1.75}px;line-height:1;color:#7A3A1E">KONSER</div>`
+        + `<div class="tt" style="position:absolute;left:${c * (L - 0.1)}px;top:${c * 2.2}px;${PIX};font-size:${c * 2.6}px;line-height:1;color:#2A1E1A;white-space:nowrap">${txt}</div>`;
+      return e;
+    };
+    // bileti iki patisiyle göğsünde tutan katman: maskotla aynı kutu, sync() ile aynı dönüşüm
+    const holder = (parent, w, txt, paws) => {
+      const c = w / 32;
+      const h = el('div', 'abs', parent, { width: px(w), height: px((w * 30) / 32), transformOrigin: '50% 100%', pointerEvents: 'none' });
+      const tk = ticketEl(h, c, txt, { left: px(8.4 * c), top: px(15.6 * c), transform: 'rotate(-4deg)' }, 15.2);  // patiler biletin alt kenarını tutar, tutar görünür
+      pixEl(h, HOLD_PAWS, paws, c, { left: px(9 * c), top: px(21 * c) });
+      return { h, tk, c };
+    };
+    const sync = (hd, m, on = true) => {
+      const a = m.root.style, b = hd.h.style;
+      b.display = on ? 'block' : 'none';
+      b.left = a.left; b.top = a.top; b.transform = a.transform; b.opacity = a.opacity;
+    };
+    const KPAW = { A: '#2A1E1A', D: '#E2A75A', B: '#B97C37' };
+
+    // ── A · odalar: lobi (0), dört ücret odası (1–4), son oda (5); bölmelerde kepenkli kapılar ──
+    const RW = 760, FX = 5 * RW, FW = 1080, CEIL = 760, FLOOR = 1480, DTOP = 1060;
+    const AW = FX + FW + 1400;
+    const camA = world();
+    el('div', 'abs', camA, { left: '-700px', top: '-700px', width: px(AW), height: px(CEIL + 700), background: 'linear-gradient(#050408, #110F17 75%, #1B1822)' });
+    el('div', 'abs', camA, { left: '-700px', top: px(CEIL - 104), width: px(AW), height: '30px', borderRadius: '15px', background: 'linear-gradient(#6A6470, #3A3640 60%, #24212A)' });  // tavan borusu
+    for (let x = -640; x < AW - 700; x += 380) el('div', 'abs', camA, { left: px(x), top: px(CEIL - 116), width: '22px', height: '54px', background: '#4A4552' });
+    el('div', 'abs', camA, { left: '-700px', top: px(CEIL - 36), width: px(AW), height: '36px', background: 'linear-gradient(#2E2A34, #1E1B24)' });
+    el('div', 'abs', camA, { left: '-700px', top: px(FLOOR), width: px(AW), height: '900px', background: 'linear-gradient(#2B2631, #17141C 16%, #0B0A0F 60%)' });
+    el('div', 'abs', camA, { left: '-700px', top: px(FLOOR), width: px(AW), height: '10px', background: '#4A4352' });
+    const WALL = [['#4F2D66', '#2A1838'], ['#283A54', '#141D2C'], ['#244638', '#12251D'], ['#422C58', '#22152F'], ['#5A2C2C', '#2E1313']];
+    WALL.forEach(([a, b], k) => {
+      const r = el('div', 'abs', camA, { left: px(k * RW), top: px(CEIL), width: px(RW), height: px(FLOOR - CEIL), overflow: 'hidden', background: `linear-gradient(${a}, ${b})` });
+      el('div', 'abs', r, { inset: 0, background: 'repeating-linear-gradient(90deg, rgba(0,0,0,.16) 0 4px, transparent 4px 152px)' });
+      el('div', 'abs', r, { left: 0, right: 0, top: '500px', height: '8px', background: 'rgba(0,0,0,.25)' });
+      el('div', 'abs', r, { left: 0, right: 0, bottom: 0, height: '36px', background: 'rgba(0,0,0,.3)' });
+    });
+    const fin = el('div', 'abs', camA, { left: px(FX), top: px(CEIL), width: px(FW), height: px(FLOOR - CEIL), overflow: 'hidden', background: 'linear-gradient(#4E151A, #22070A)' });
+    el('div', 'abs', fin, { inset: 0, background: 'repeating-linear-gradient(90deg, rgba(0,0,0,.22) 0 5px, transparent 5px 216px), repeating-linear-gradient(rgba(0,0,0,.2) 0 5px, transparent 5px 240px)' });
+    for (let i = 0; i < 5; i++) for (let j = 0; j < 3; j++) el('div', 'abs', fin, { left: px(14 + i * 216), top: px(16 + j * 240), width: '10px', height: '10px', borderRadius: '50%', background: '#7A3A3E' });
+    // lobi: konser afişi (bilet 1.000 TL) ve yeşil "SEPETE EKLE" tabelası
+    const poster = el('div', 'abs', camA, { left: '64px', top: '806px', width: '290px', height: '430px', boxSizing: 'border-box', border: '8px solid #140C18', borderRadius: '12px', overflow: 'hidden', background: 'linear-gradient(165deg, #FF5FA2, #7B3FE4 58%, #24165E)', transformOrigin: '50% 50%' });
+    el('div', 'abs', poster, { left: '-60px', top: '60px', width: '400px', height: '300px', background: 'radial-gradient(closest-side, rgba(255,240,200,.55), rgba(255,240,200,0))' });
+    el('div', 'abs it', poster, { left: 0, right: 0, top: '20px', textAlign: 'center', fontSize: '74px', lineHeight: 1, color: '#FFFFFF', textShadow: '4px 4px 0 #2A1E1A' }).textContent = 'KONSER';
+    [[30, 120], [210, 104], [120, 176], [236, 214]].forEach(([x, y]) => pixEl(poster, STAR, STAR_ON, 5, { left: px(x), top: px(y) }));
+    for (let i = 0; i < 7; i++) el('div', 'abs', poster, { left: px(-6 + i * 44), top: px(262 + (i % 2) * 12), width: '50px', height: '90px', borderRadius: '25px 25px 0 0', background: '#1A0C2A' });  // seyirci silueti
+    el('div', 'abs it', poster, { left: 0, right: 0, top: '300px', textAlign: 'center', fontSize: '36px', lineHeight: 1, color: '#FFE9F3' }).textContent = 'BİLET';
+    const pPrice = el('div', 'abs it', poster, { left: 0, right: 0, top: '334px', textAlign: 'center', fontSize: '76px', lineHeight: 1, color: '#FFE08A', textShadow: '4px 4px 0 #2A1E1A', transformOrigin: '50% 50%' });
+    pPrice.textContent = '1.000 TL';
+    const addSign = el('div', 'abs it', camA, { left: '396px', top: '846px', width: '330px', height: '92px', boxSizing: 'border-box', borderRadius: '16px', border: '6px solid #4CFF8A', background: 'rgba(6,20,12,.82)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', fontSize: '56px', color: '#C8FFDA', textShadow: '0 0 16px #4CFF8A', boxShadow: '0 0 30px rgba(76,255,138,.35)' });
+    addSign.innerHTML = 'SEPETE EKLE<svg width="34" height="40" viewBox="0 0 34 40"><path d="M4 4 L30 20 L4 36 Z" fill="#C8FFDA"/></svg>';
+    const tkPop = ticketEl(camA, 9, '1.000 TL', { left: 0, top: 0, display: 'none', zIndex: 5 });  // afişten Karamel'in patilerine uçan bilet
+    // ücret odalarının neon tabelaları: ad, simge, tutar; altta sepet toplamı ve süre
+    const signs = FEE.map((f, i) => {
+      const x0 = (i + 1) * RW;
+      const b = el('div', 'abs', camA, { left: px(x0 + 110), top: '846px', width: px(RW - 200), height: '262px', boxSizing: 'border-box', borderRadius: '24px', border: '7px solid #3A3446', background: 'rgba(8,6,12,.8)' });
+      const nm = el('div', 'abs it', b, { left: 0, right: 0, top: '12px', textAlign: 'center', fontSize: '60px', lineHeight: 1, color: 'rgba(70,64,82,.12)', whiteSpace: 'nowrap' });
+      nm.textContent = FEE_NAME[i];
+      const [rows, cols] = FEE_ICON[i];
+      const ic = pixEl(b, rows, cols, 9, { left: px(70 - rows[0].length * 4.5), top: px(130 - rows.length * 4.5), opacity: 0.12 });
+      const am = el('div', 'abs it', b, { left: '132px', right: '8px', top: '78px', textAlign: 'center', fontSize: '116px', lineHeight: 1, color: 'rgba(70,64,82,.12)', whiteSpace: 'nowrap', transformOrigin: '50% 50%' });
+      am.textContent = `+${f} TL`;
+      const st = el('div', 'abs it', b, { left: 0, right: 0, top: '196px', textAlign: 'center', fontSize: '48px', lineHeight: 1, color: '#B0A6BA', whiteSpace: 'nowrap' });
+      return { b, nm, ic, am, st, x0 };
+    });
+    // son oda: kasa kapısı (arkasında ışık), sol duvarda süre, sağda ödeme kiosku, döner alarm lambası
+    const VX = FX + 380, VY = 1000, VR = 220;
+    const vLight = el('div', 'abs', camA, { left: px(VX - VR + 26), top: px(VY - VR + 26), width: px(2 * VR - 52), height: px(2 * VR - 52), borderRadius: '50%', background: 'radial-gradient(circle, #FFFFFF, #FFF3C4 55%, #F2B63C)', boxShadow: '0 0 80px 30px rgba(255,236,170,.6)' });
+    const vault = el('div', 'abs', camA, { left: px(VX - VR), top: px(VY - VR), width: px(2 * VR), height: px(2 * VR), borderRadius: '50%', boxSizing: 'border-box', border: '26px solid #8E99AE', boxShadow: '0 0 0 8px #2A1E1A, inset 0 0 0 8px #2A1E1A', background: 'radial-gradient(circle at 38% 32%, #9AA3B5, #5E6678 72%)', transformOrigin: '0 50%' });
+    for (let k = 0; k < 12; k++) {
+      const a = (k / 12) * Math.PI * 2;
+      el('div', 'abs', vault, { left: px(VR - 26 + Math.cos(a) * (VR - 64) - 9), top: px(VR - 26 + Math.sin(a) * (VR - 64) - 9), width: '18px', height: '18px', borderRadius: '50%', background: '#3E4452', boxShadow: 'inset -3px -3px 0 #2A2E38' });
+    }
+    const wheel = el('div', 'abs', vault, { left: px(VR - 26 - 84), top: px(VR - 26 - 50), width: '168px', height: '168px' });
+    wheel.innerHTML = '<svg width="168" height="168" viewBox="0 0 168 168"><circle cx="84" cy="84" r="70" fill="none" stroke="#2A1E1A" stroke-width="18"/><circle cx="84" cy="84" r="70" fill="none" stroke="#C9CED8" stroke-width="10"/>'
+      + [0, 60, 120].map((r) => `<rect x="78" y="10" width="12" height="148" rx="6" fill="#C9CED8" stroke="#2A1E1A" stroke-width="5" transform="rotate(${r} 84 84)"/>`).join('')
+      + '<circle cx="84" cy="84" r="22" fill="#8E99AE" stroke="#2A1E1A" stroke-width="6"/></svg>';
+    const vLamp = el('div', 'abs', vault, { left: px(VR - 26 - 162), top: px(VR - 26 - 18), width: '36px', height: '36px', borderRadius: '50%', border: '6px solid #2A1E1A', boxSizing: 'border-box', background: '#C0392B' });
+    const tBox = el('div', 'abs', vault, { left: px(VR - 26 - 120), top: '36px', width: '240px', height: '118px', boxSizing: 'border-box', borderRadius: '16px', background: '#120608', border: '6px solid #2A1E1A', textAlign: 'center', boxShadow: '0 0 30px rgba(255,60,50,.35)' });
+    tBox.innerHTML = `<div style="${PIX};font-size:30px;line-height:1;color:#C98A8E;margin-top:8px">SEPET SÜRESİ</div><div class="v" style="${PIX};font-size:76px;line-height:1;color:#FF4A3E">00:03</div>`;
+    const tVal = tBox.querySelector('.v');
+    const KX = FX + 580, KY = 850, KWD = 310;
+    const kiosk = el('div', 'abs', camA, { left: px(KX), top: px(KY), width: px(KWD), height: px(FLOOR - KY), boxSizing: 'border-box', borderRadius: '28px 28px 6px 6px', border: '7px solid #17121A', background: 'linear-gradient(90deg, #3A3440, #5C5464 45%, #3A3440)', zIndex: 3 });
+    const kScr = el('div', 'abs', kiosk, { left: '12px', right: '12px', top: '12px', height: '300px', boxSizing: 'border-box', borderRadius: '14px', border: '5px solid #221C24', background: '#0A080C', overflow: 'hidden' });
+    // fiş: bilet ve dört ücret alt alta, çizgi, ÖDE toplamı; en altta "tutarlar örnek"
+    const RECEIPT = [['BİLET', '1.000'], ...FEE_NAME.map((n, i) => [n, `+${FEE[i]}`])];
+    const kRows = RECEIPT.map(([n, a], i) => {
+      const r = el('div', 'abs it', kScr, { left: '12px', right: '12px', top: px(10 + i * 34), height: '32px', display: 'flex', justifyContent: 'space-between', fontSize: '28px', lineHeight: 1, color: i ? '#FFC8A8' : '#E6E0EA', whiteSpace: 'nowrap' });
+      r.innerHTML = `<span>${n}</span><span>${a}</span>`;
+      return r;
+    });
+    el('div', 'abs', kScr, { left: '12px', right: '12px', top: '182px', height: '0', borderTop: '3px dashed #5A5060' });
+    const kLbl = el('div', 'abs it', kScr, { left: '12px', top: '196px', fontSize: '46px', lineHeight: 1, color: '#FF6B5E' });
+    const kVal = el('div', 'abs it', kScr, { right: '12px', top: '190px', fontSize: '62px', lineHeight: 1, color: '#FFE08A', whiteSpace: 'nowrap', transformOrigin: '100% 50%' });
+    el('div', 'abs it', kScr, { left: 0, right: 0, top: '258px', textAlign: 'center', fontSize: '24px', lineHeight: 1, color: '#8A8090' }).textContent = '* tutarlar örnek';
+    const kStamp = el('div', 'abs it', kScr, { left: '50%', top: '44px', padding: '2px 14px 6px', border: '5px solid #7CF2A0', borderRadius: '10px', background: 'rgba(6,22,12,.9)', fontSize: '54px', lineHeight: 1, color: '#7CF2A0', whiteSpace: 'nowrap', opacity: 0, transformOrigin: '50% 50%', boxShadow: '0 0 20px rgba(124,242,160,.45)' });
+    kStamp.textContent = 'ÖDENDİ';  // ödeyince fişin üstüne basılır; toplam satırında ÖDE yerine onay işareti
+    const CHECK = '<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#7CF2A0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>';
+    const kBtn = (y, txt, bg, sh, fs) => {
+      const b = el('div', 'abs it', kiosk, { left: '22px', right: '22px', top: px(y), height: '66px', borderRadius: '33px', boxSizing: 'border-box', border: '5px solid #17121A', background: bg, boxShadow: `inset 0 -8px 0 ${sh}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: px(fs), color: '#FFFFFF', transformOrigin: '50% 50%' });
+      b.textContent = txt;
+      return b;
+    };
+    const bPay = kBtn(330, 'ÖDE', '#2FA35E', '#1E7040', 50), bQuit = kBtn(410, 'VAZGEÇ', '#C0392B', '#8A2219', 44);
+    el('div', 'abs', kiosk, { left: '30px', right: '30px', top: '560px', height: '16px', borderRadius: '8px', background: '#0A080C' });  // bilet tepsisi
+    const kBook = el('div', 'abs', camA, { left: px(KX + 40), top: px(KY - 58), width: '230px', height: '62px', boxSizing: 'border-box', border: '5px solid #2A1E1A', borderRadius: '8px 14px 14px 8px', background: 'linear-gradient(90deg, #7A2F0E 0 20px, #AE4716 20px 196px, #5C2209 196px 206px, #AE4716 206px)', transform: 'rotate(-4deg)', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingLeft: '10px', fontSize: '28px', fontWeight: 800, color: '#FFFCF6', letterSpacing: '.04em', zIndex: 3 });
+    kBook.textContent = 'CEP DEFTERİ';  // kasanın üstünde defter (son oda planlarında hep görünür)
+    const tkTray = ticketEl(camA, 10, '1.000 TL', { left: px(KX + 90), top: px(KY + 506), display: 'none', zIndex: 4, transform: 'rotate(-3deg)', transformOrigin: '50% 100%' });
+    const tkTrayT = tkTray.querySelector('.tt');
+    const alarmA = el('div', 'abs', camA, { left: px(FX + 940), top: '800px', width: '84px', height: '70px', borderRadius: '42px 42px 8px 8px', boxSizing: 'border-box', border: '6px solid #2A1E1A', background: '#6E1E1A' });
+    const beamA = el('div', 'abs', camA, { left: px(FX + 382), top: '235px', width: '1200px', height: '1200px', borderRadius: '50%', pointerEvents: 'none', mixBlendMode: 'screen', background: 'conic-gradient(from 0deg, rgba(255,60,50,0) 0deg, rgba(255,60,50,.3) 16deg, rgba(255,60,50,0) 36deg, rgba(255,60,50,0) 180deg, rgba(255,60,50,.3) 196deg, rgba(255,60,50,0) 216deg)' });
+    // tavan lambaları ve ışık konileri (lobi ve ücret odaları)
+    const bulbs = [0, 1, 2, 3, 4].map((k) => {
+      const cx = k * RW + RW / 2;
+      el('div', 'abs', camA, { left: px(cx - 2), top: px(CEIL), width: '4px', height: '34px', background: '#0E0D12' });
+      const b = el('div', 'abs', camA, { left: px(cx - 15), top: px(CEIL + 32), width: '30px', height: '38px', borderRadius: '45% 45% 50% 50%', background: '#FFE7A0', boxShadow: '0 0 36px 14px rgba(255,214,140,.45)' });
+      el('div', 'abs', camA, { left: px(k * RW), top: px(CEIL + 64), width: px(RW), height: px(FLOOR - CEIL - 64), pointerEvents: 'none', clipPath: 'polygon(47% 0, 53% 0, 94% 100%, 6% 100%)', background: 'linear-gradient(rgba(255,226,160,.14), rgba(255,226,160,.02))' });
+      return b;
+    });
+    // Karamel: bileti patilerinde; karar anında kolu kioska uzanır
+    const KW = 460, KC = KW / 32;
+    const kA = new Mascot(camA, { who: 'karamel', w: KW });
+    kA.root.style.zIndex = 2;
+    const kHA = holder(camA, KW, '1.000 TL', KPAW);
+    kHA.h.style.zIndex = 2;
+    const sweatA = [0, 1].map(() => pixEl(camA, SWEAT, SWEAT_C, 9, { left: 0, top: 0, display: 'none', zIndex: 2 }));
+    const bangA = el('div', 'abs', camA, { left: 0, top: 0, fontSize: '150px', fontWeight: 800, lineHeight: 1, color: '#FFE08A', display: 'none', zIndex: 6, transformOrigin: '50% 100%', textShadow: '6px 0 0 #2A1E1A, -6px 0 0 #2A1E1A, 0 6px 0 #2A1E1A, 0 -6px 0 #2A1E1A, 4px 4px 0 #2A1E1A, -4px 4px 0 #2A1E1A, 4px -4px 0 #2A1E1A, -4px -4px 0 #2A1E1A' });
+    bangA.textContent = '!';
+    const arm = el('div', 'abs', camA, { left: 0, top: 0, height: '48px', borderRadius: '24px', boxSizing: 'border-box', border: '6px solid #2A1E1A', background: '#E2A75A', transformOrigin: '24px 24px', display: 'none', zIndex: 5 });
+    const paw = pixEl(camA, PAWP, { o: '#2A1E1A', B: '#E2A75A' }, 11, { left: 0, top: 0, display: 'none', zIndex: 6, transformOrigin: '50% 50%' });
+    // bölmeler: 0 sokak kapısı, 1 SEPETE EKLE kapısı, 2–4 ücret kapıları, 5 son odanın kapısı. Üstte sütun, altta kepenk, kilit ve kapı lambası
+    const SHH = FLOOR - DTOP;
+    const divs = [0, 1, 2, 3, 4, 5].map((k) => {
+      const x = k * RW;
+      const d = el('div', 'abs', camA, { left: px(x - 54), top: px(CEIL), width: '108px', height: px(FLOOR - CEIL), zIndex: 3, pointerEvents: 'none' });
+      el('div', 'abs', d, { left: 0, right: 0, top: 0, height: px(DTOP - CEIL), background: 'linear-gradient(90deg, #26232C, #48444F 45%, #26232C)', boxShadow: 'inset 0 -12px 0 #18161D' });
+      el('div', 'abs', d, { left: 0, width: '16px', top: px(DTOP - CEIL), bottom: 0, background: 'linear-gradient(90deg, #1C1A22, #36323E)' });
+      el('div', 'abs', d, { right: 0, width: '16px', top: px(DTOP - CEIL), bottom: 0, background: 'linear-gradient(90deg, #36323E, #1C1A22)' });
+      const hole = el('div', 'abs', d, { left: '16px', right: '16px', top: px(DTOP - CEIL), bottom: 0, overflow: 'hidden', background: k === 1 ? 'rgba(76,255,138,.18)' : 'rgba(0,0,0,.28)' });
+      const sh = el('div', 'abs', hole, { left: 0, right: 0, top: 0, height: px(SHH), background: 'repeating-linear-gradient(#8A90A0 0 24px, #5E6474 24px 30px)' });
+      el('div', 'abs', sh, { left: 0, right: 0, bottom: 0, height: '34px', background: 'repeating-linear-gradient(45deg, #F2B63C 0 12px, #2A1E1A 12px 24px)' });
+      const lamp = el('div', 'abs', d, { left: '36px', top: px(DTOP - CEIL - 58), width: '36px', height: '36px', borderRadius: '50%', border: '6px solid #18161D', boxSizing: 'border-box', background: '#7A1E1A' });
+      const lock = pixEl(camA, LOCKP, LOCKP_C, 8, { left: px(x - 32), top: '1200px', zIndex: 4, transformOrigin: '50% 30%' });
+      return { d, sh, lamp, lock, x };
+    });
+
+    // ── B · çıkış: gece sokağı, yeşil ÇIKIŞ; dördü sırayla çıkar ve aynı cümleyi söyler; duvarda skor tablosu ──
+    const camB = world();
+    el('div', 'abs', camB, { left: '-400px', top: '-400px', width: '3000px', height: '1100px', background: 'linear-gradient(#04050C, #0E1226)' });
+    for (let i = 0; i < 26; i++) el('div', 'abs', camB, { left: px(-300 + ((i * 397) % 2700)), top: px(120 + ((i * 271) % 480)), width: '5px', height: '5px', background: '#C9D4F0', opacity: 0.6 });
+    const BRICK = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='60'><rect width='120' height='60' fill='%234A2B28'/><path d='M0 1H120M0 31H120M1 0V30M61 30V60' stroke='%232E1816' stroke-width='5'/></svg>\")";
+    el('div', 'abs', camB, { left: '-400px', top: '620px', width: '3000px', height: '890px', backgroundImage: BRICK, backgroundSize: '120px 60px' });
+    el('div', 'abs', camB, { left: '-400px', top: '620px', width: '3000px', height: '890px', background: 'linear-gradient(rgba(4,5,12,.55), rgba(4,5,12,0) 40%, rgba(4,5,12,.35))' });
+    el('div', 'abs', camB, { left: '-400px', top: '1500px', width: '3000px', height: '700px', background: 'linear-gradient(#1E1C26, #0C0B10)' });
+    el('div', 'abs', camB, { left: '372px', top: '1050px', width: '336px', height: '458px', borderRadius: '10px 10px 0 0', background: '#1A1210' });
+    el('div', 'abs', camB, { left: '388px', top: '1066px', width: '304px', height: '434px', background: 'linear-gradient(#FFF9E6, #FFE3A0)' });
+    el('div', 'abs', camB, { left: '200px', top: '1500px', width: '680px', height: '300px', background: 'radial-gradient(ellipse at 50% 0, rgba(255,231,168,.42), rgba(255,231,168,0) 70%)' });
+    const exitSign = el('div', 'abs it', camB, { left: '384px', top: '900px', width: '312px', height: '110px', boxSizing: 'border-box', borderRadius: '16px', border: '7px solid #4CFF8A', background: 'rgba(6,20,12,.86)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '86px', color: '#C8FFDA', textShadow: '0 0 18px #4CFF8A', boxShadow: '0 0 34px rgba(76,255,138,.4)' });
+    exitSign.textContent = 'ÇIKIŞ';
+    const CREW = [['karamel', 250], ['ceviz', 815], ['diken', 435], ['pamuk', 625]];  // çıkış sırası ve durdukları yer
+    const crew = CREW.map(([who, x]) => ({ who, x, m: new Mascot(camB, { who, w: 330 }) }));
+    const kHB = holder(camB, 330, '1.320 TL', KPAW);  // Karamel'in biletinde artık ödediği tutar
+    kHB.h.style.display = 'none';
+    const bub = el('div', 'abs', camB, { left: 0, top: 0, width: '400px', height: '170px', display: 'none', zIndex: 5, transformOrigin: '50% 100%' });
+    bub.innerHTML = '<svg width="400" height="170" viewBox="0 0 400 170" style="position:absolute;left:0;top:0;overflow:visible"><path class="p" d="" fill="#FFFFFF" stroke="#2A1E1A" stroke-width="6" stroke-linejoin="round"/></svg>'
+      + '<div style="position:absolute;left:0;right:0;top:12px;text-align:center;font-size:52px;font-weight:800;line-height:1.06;color:#2A1E1A;letter-spacing:-.02em">Buraya kadar<br>geldim zaten</div>';
+    const bubP = bub.querySelector('.p');
+    // skor tablosu (kaçış odalarının çıkışındaki gibi): deney, iki grup, harcama çubukları, satın alma, kaynak
+    const BX = 1214, BW = 752, BT = 700;
+    const board = el('div', 'abs', camB, { left: px(BX), top: px(BT), width: px(BW), height: '760px', boxSizing: 'border-box', borderRadius: '22px', border: '10px solid #2A1E1A', background: '#0E1216', boxShadow: '0 0 0 6px #F2B63C, 0 0 50px rgba(242,182,60,.25)' });
+    el('div', 'abs it', board, { left: 0, right: 0, top: '24px', textAlign: 'center', fontSize: '64px', lineHeight: 1, color: '#FFE08A' }).textContent = "ABD'DE BİR DENEY";
+    const bRow = (y, label, color) => {
+      el('div', 'abs', board, { left: '36px', top: px(y), fontSize: '46px', fontWeight: 800, color: '#E6ECFF' }).innerHTML = label;
+      const track = el('div', 'abs', board, { left: '36px', right: '36px', top: px(y + 54), height: '68px', borderRadius: '12px', background: 'rgba(255,255,255,.06)' });
+      const fill = el('div', 'abs', track, { left: 0, top: 0, bottom: 0, width: '0', borderRadius: '12px', background: color });
+      return { track, fill };
+    };
+    const rUp = bRow(120, 'Ücret <span style="color:#9FD3E8">baştan</span>', '#5A8FB8');
+    const rLate = bRow(276, 'Ücret <span style="color:#FF8A7E">ödemede</span>', '#FF6B5E');
+    const pctB = el('div', 'abs it', board, { right: '54px', top: '322px', fontSize: '96px', lineHeight: 1, color: '#FFFFFF', textShadow: '4px 4px 0 #8A2219', opacity: 0, whiteSpace: 'nowrap' });
+    const spendL = el('div', 'abs', board, { left: '36px', top: '414px', fontSize: '40px', fontWeight: 800, color: '#FF8A7E', opacity: 0 });
+    spendL.textContent = '↑ harcama';
+    const buyB = el('div', 'abs', board, { left: '36px', right: '36px', top: '490px', height: '120px', boxSizing: 'border-box', borderRadius: '16px', border: '5px dashed #FFE08A', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '18px', fontSize: '52px', fontWeight: 800, color: '#FFE08A', opacity: 0, transformOrigin: '50% 50%' });
+    buyB.innerHTML = `<span style="${PIX};font-size:92px;color:#FFFFFF">+%14</span> satın alma`;
+    const srcB = el('div', 'abs', board, { left: 0, right: 0, bottom: '26px', textAlign: 'center', fontSize: '36px', fontWeight: 800, color: '#BFD2F0' });
+    srcB.textContent = 'Kaynak: Blake ve ark. 2021';
+    el('div', 'abs', board, { inset: 0, pointerEvents: 'none', borderRadius: '12px', background: 'repeating-linear-gradient(rgba(255,255,255,.03) 0 2px, transparent 2px 6px)' });
+
+    // ── D · telefon: Cep Defteri, Bütçe ve planlar → "Plan ekle" (uygulamadaki alanlar ve sıra) ──
+    const camD = world();
+    el('div', 'abs', camD, { left: '-300px', top: '-300px', width: '1680px', height: '2520px', background: 'radial-gradient(ellipse 820px 1000px at 540px 1260px, #3A1830, #0B070D 70%)' });
+    const phD = el('div', 'abs', camD, { left: '170px', top: '690px', width: '740px', height: '1520px', borderRadius: '90px', background: '#15161C', boxShadow: '0 0 0 6px #2B2D36, 0 40px 120px rgba(0,0,0,.6)' });
+    const sD = el('div', 'abs', phD, { left: '20px', top: '20px', right: '20px', bottom: '20px', borderRadius: '72px', overflow: 'hidden', background: '#F6EEE6' });
+    const headD = el('div', 'abs', sD, { left: 0, right: 0, top: 0, height: '250px', background: '#AE4716' });
+    el('div', 'abs', headD, { left: '40px', top: '92px', fontSize: '28px', fontWeight: 700, color: '#FFD9C4' }).textContent = 'Cep Defteri';
+    el('div', 'abs', headD, { left: '40px', top: '130px', fontSize: '56px', fontWeight: 800, color: '#FFFCF6', letterSpacing: '-.02em' }).textContent = 'Bütçe ve planlar';
+    el('div', 'abs', sD, { inset: 0, background: 'rgba(20,8,4,.32)' });
+    const sheet = el('div', 'abs', sD, { left: 0, right: 0, top: '206px', bottom: 0, borderRadius: '44px 44px 0 0', background: '#FFFCF6', boxShadow: '0 -10px 30px rgba(0,0,0,.18)' });
+    el('div', 'abs', sheet, { left: '320px', top: '14px', width: '60px', height: '8px', borderRadius: '4px', background: '#D9CFC4' });
+    el('div', 'abs', sheet, { left: '36px', top: '38px', fontSize: '50px', fontWeight: 800, color: '#2A1E1A', letterSpacing: '-.02em' }).textContent = 'Plan ekle';
+    const lbl = (y, txt) => { el('div', 'abs', sheet, { left: '36px', top: px(y), fontSize: '26px', fontWeight: 700, color: '#8A7D72' }).textContent = txt; };
+    const seg = (y, items, on) => {
+      const r = el('div', 'abs', sheet, { left: '36px', right: '36px', top: px(y), height: '64px', borderRadius: '20px', background: '#EFE6DA', display: 'flex', padding: '6px', boxSizing: 'border-box', gap: '6px' });
+      items.forEach((t, i) => { el('div', '', r, { flex: 1, borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '25px', fontWeight: 800, color: i === on ? '#FFFCF6' : '#6B5A4E', background: i === on ? '#2A1E1A' : 'transparent', whiteSpace: 'nowrap' }).textContent = t; });
+    };
+    const chips = (y, items, on, col) => {
+      const r = el('div', 'abs', sheet, { left: '36px', right: '36px', top: px(y), height: '62px', display: 'flex', gap: '12px' });
+      items.forEach((t, i) => { el('div', '', r, { padding: '0 24px', borderRadius: '31px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '26px', fontWeight: 800, color: i === on ? '#FFFCF6' : '#6B5A4E', background: i === on ? col : '#EFE6DA', whiteSpace: 'nowrap' }).innerHTML = t; });
+    };
+    const TICKET_ICON = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2M13 17v2M13 11v2"/></svg>';
+    lbl(124, 'Plan türü'); seg(160, ['Ödeme', 'Beklenen gelir', 'Aktarım'], 0);
+    lbl(250, 'Ad');
+    el('div', 'abs', sheet, { left: '36px', right: '36px', top: '286px', height: '78px', borderRadius: '20px', border: '3px solid #E2D6C8', boxSizing: 'border-box', padding: '0 24px', display: 'flex', alignItems: 'center', fontSize: '34px', fontWeight: 700, color: '#2A1E1A' }).textContent = 'Konser bileti';
+    lbl(392, 'Tutar');
+    const inAmt = el('div', 'abs', sheet, { left: '36px', right: '36px', top: '428px', height: '120px', borderRadius: '24px', border: '4px solid #E2D6C8', boxSizing: 'border-box', padding: '0 28px', display: 'flex', alignItems: 'center', gap: '24px', fontSize: '66px', fontWeight: 800, color: '#2A1E1A', letterSpacing: '-.03em' });
+    inAmt.innerHTML = '<span class="old" style="position:relative">1.000<span class="st" style="position:absolute;left:-8px;right:-8px;top:50%;height:9px;margin-top:-3px;background:#C0392B;border-radius:5px;transform-origin:0 50%;transform:scaleX(0)"></span></span>'
+      + '<span class="nw" style="color:#AE4716"></span><span class="cur" style="width:5px;height:64px;background:#AE4716;display:none"></span><span style="margin-left:auto;font-size:40px;color:#8A7D72">TL</span>';
+    const amtOld = inAmt.querySelector('.old'), amtSt = inAmt.querySelector('.st'), amtNew = inAmt.querySelector('.nw'), amtCur = inAmt.querySelector('.cur');
+    const tagD = el('div', 'abs it', sheet, { right: '36px', top: '370px', padding: '2px 16px 6px', borderRadius: '12px', background: '#2A1E1A', color: '#FFE08A', fontSize: '40px', opacity: 0, transformOrigin: '100% 100%', whiteSpace: 'nowrap' });
+    tagD.textContent = 'ÖDEME EKRANINDAKİ TOPLAM';
+    lbl(574, 'Kategori'); chips(610, [`${TICKET_ICON} Eğlence`, 'Yemek', 'Ulaşım'], 0, '#E2594B');
+    // (sayfanın devamı: Hangi hesaptan?, Sıklık, Kaydet; Instagram'ın alt bandına düşeceği için gösterilmez)
+    const okD = el('div', 'abs', sheet, { right: '-14px', top: '410px', width: '70px', height: '70px', borderRadius: '50%', background: '#2F8F5A', border: '6px solid #FFFCF6', boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0 });
+    okD.innerHTML = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>';
+    const pawD = pixEl(camD, PAWP, { o: '#2A1E1A', B: '#E2A75A' }, 14, { left: 0, top: 0, display: 'none', zIndex: 5 });
+    const armD = el('div', 'abs', camD, { left: 0, top: 0, width: '74px', height: '900px', boxSizing: 'border-box', border: '6px solid #2A1E1A', borderRadius: '37px', background: '#E2A75A', display: 'none', transformOrigin: '50% 0', zIndex: 4 });
+
+    // ── E · konser: sahne, ışıklar, LED ekran, seyirci; önde biletiyle Karamel ──
+    const camE = world();
+    el('div', 'abs', camE, { left: '-300px', top: '-300px', width: '1680px', height: '2520px', background: 'linear-gradient(#12081E, #2A0F3A 48%, #140818)' });
+    const led = el('div', 'abs', camE, { left: '130px', top: '760px', width: '820px', height: '380px', borderRadius: '18px', boxSizing: 'border-box', border: '10px solid #241A2E', background: '#07040C', overflow: 'hidden', boxShadow: '0 0 80px rgba(255,95,162,.3)' });
+    el('div', 'abs it', led, { left: 0, right: 0, top: '30px', textAlign: 'center', fontSize: '150px', lineHeight: 1, color: '#FFE9F3', textShadow: '0 0 30px #FF5FA2, 0 0 8px #FF5FA2' }).textContent = 'KONSER';
+    const eq = Array.from({ length: 16 }, (_, i) => el('div', 'abs', led, { left: px(40 + i * 46), bottom: '20px', width: '30px', height: '60px', background: ['#FF5FA2', '#FFE08A', '#7CF2C0', '#9FB0FF'][i % 4], transformOrigin: '50% 100%' }));
+    el('div', 'abs', camE, { left: '-300px', top: '1240px', width: '1680px', height: '260px', background: 'linear-gradient(#3A2A4A, #1A1224)' });
+    const beams = [190, 540, 890].map((x, i) => el('div', 'abs', camE, { left: px(x - 260), top: '640px', width: '520px', height: '1300px', transformOrigin: '50% 0', pointerEvents: 'none', mixBlendMode: 'screen', clipPath: 'polygon(46% 0, 54% 0, 100% 100%, 0 100%)', background: `linear-gradient(${['rgba(255,95,162,.42)', 'rgba(255,224,138,.36)', 'rgba(124,242,192,.38)'][i]}, rgba(255,255,255,0))` }));
+    const crowd = Array.from({ length: 10 }, (_, i) => el('div', 'abs', camE, { left: px(-60 + i * 124), top: px(1420 + (i % 2) * 40), width: '150px', height: '520px', borderRadius: '75px 75px 0 0', background: i % 2 ? '#0B0612' : '#120A1C' }));
+    const hands = [1, 4, 7, 8].map((i) => el('div', 'abs', camE, { left: px(-6 + i * 124), top: '1330px', width: '30px', height: '130px', borderRadius: '15px', background: '#0B0612', transformOrigin: '50% 100%' }));
+    const kE = new Mascot(camE, { who: 'karamel', w: 520 });
+    const kHE = holder(camE, 520, '1.320 TL', KPAW);
+    const confE = new Burst(camE, { n: 44, t0: CTA + 0.12, ox: 540, oy: 760, colors: ['#FF5FA2', '#FFE08A', '#7CF2C0', '#FFFFFF', '#9FB0FF'], speed: 1150, grav: 1300, life: 2.6, size: [16, 26], upBias: 0.3 });
+
+    // ── üst katmanlar: kenar karartma, kırmızı alarm, flaş, karar çağrısı, takip kartı ──
+    el('div', 'abs', s.root, { inset: 0, zIndex: 17, pointerEvents: 'none', background: 'radial-gradient(ellipse 100% 72% at 50% 56%, transparent 58%, rgba(0,0,0,.5) 100%)' });
+    el('div', 'abs', s.root, { left: 0, right: 0, top: 0, height: '260px', zIndex: 17, pointerEvents: 'none', background: 'linear-gradient(rgba(4,3,8,.5), rgba(4,3,8,0))' });
+    el('div', 'abs', s.root, { left: 0, right: 0, bottom: 0, height: '300px', zIndex: 17, pointerEvents: 'none', background: 'linear-gradient(rgba(4,3,8,0), rgba(4,3,8,.45))' });
+    const redO = el('div', 'abs', s.root, { inset: 0, zIndex: 16, pointerEvents: 'none', background: '#E8322A', mixBlendMode: 'multiply', opacity: 0 });
+    const flash = el('div', 'abs', s.root, { inset: 0, zIndex: 21, opacity: 0, pointerEvents: 'none', background: '#FFFFFF' });
+    const pill = el('div', 'abs it', s.root, { left: 0, right: 0, top: '608px', display: 'none', justifyContent: 'center', zIndex: 24 });
+    const pin = el('div', '', pill, { padding: '4px 28px 10px', borderRadius: '16px', border: '4px solid #F2B63C', background: 'rgba(10,10,16,.9)', fontSize: '62px', color: '#fff', lineHeight: 1 });
+    pin.innerHTML = 'ÖDE mi, VAZGEÇ mi? <span style="color:#F2B63C">Yoruma yaz</span>';
+    const FW2 = 620, FT = 312;
+    const fcard = el('div', 'abs', s.root, { left: px((1080 - FW2) / 2), top: px(FT), width: px(FW2), height: '410px', borderRadius: '44px', background: '#FFFFFF', boxShadow: '0 24px 60px rgba(0,0,0,.45)', display: 'none', zIndex: 26, transformOrigin: '50% 50%', textAlign: 'center' });
+    const ficon = el('img', 'abs', fcard, { left: px(FW2 / 2 - 68), top: '34px', width: '136px', height: '136px', borderRadius: '50%', boxShadow: '0 0 0 4px #FFFFFF, 0 0 0 8px #E9E2D8' });
+    ficon.src = 'assets/icon.png';
+    el('div', 'abs', fcard, { left: 0, right: 0, top: '186px', fontSize: '50px', fontWeight: 800, color: '#141414', letterSpacing: '-.01em' }).textContent = 'cep_defteri';
+    el('div', 'abs', fcard, { left: 0, right: 0, top: '252px', fontSize: '32px', fontWeight: 600, color: '#5E5650' }).textContent = 'Her hafta bir para tuzağı';
+    const fbtn = el('div', 'abs', fcard, { left: '44px', right: '44px', top: '310px', height: '72px', borderRadius: '18px', background: '#0095F6', color: '#FFFFFF', fontSize: '38px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', transformOrigin: '50% 50%' });
+    const FBX = 740, FBY = FT + 310 + 36;  // pençenin bastığı yer: düğmenin sağ ucu (yazıyı kapatmasın)
+    const farm = el('div', 'abs', s.root, { left: 0, top: 0, width: '74px', height: '900px', boxSizing: 'border-box', border: '6px solid #2A1E1A', borderRadius: '37px', background: '#E9893C', display: 'none', zIndex: 27, transformOrigin: '50% 0' });  // kadraj dışındaki Fıstık'ın kolu (Karamel'in patileri biletinde)
+    const fpaw = pixEl(s.root, PAWP, { o: '#2A1E1A', B: '#E9893C' }, 16, { left: 0, top: 0, display: 'none', zIndex: 27, transformOrigin: '50% 30%' });
+    const fring = el('div', 'abs', s.root, { left: px(FBX - 60), top: px(FBY - 60), width: '120px', height: '120px', boxSizing: 'border-box', borderRadius: '50%', border: '8px solid rgba(0,149,246,.75)', display: 'none', zIndex: 27 });
+
+    // kalp atışları (audio.py ile aynı takvim): soru sorulunca başlar, sayımda hızlanır
+    const beats = [];
+    for (let t = ASK + 0.3, k = 0; t < ZERO - 0.1; t += Math.max(0.42, 0.62 - 0.03 * k), k++) beats.push(t);
+    // Karamel'in odalardaki yeri: lobide afişin yanında, SEPETE EKLE'de 1. odaya, her ücrette bir sonrakine, son odada kioskun yanında
+    const roomC = (k) => k * RW + RW / 2;
+    const FINP = FX + 370;
+    const KR = (k) => roomC(k) - 60;  // odada Karamel'in yeri: tabelanın altında, kapının solunda
+    const FINQ = FX + 430;  // bileti tepsiye bırakırken kioska bir adım yaklaşır
+    const walks = [[CART + 0.45, 0.6, 560, KR(1)], ...FEES.map((f, i) => [f + 0.5, 0.45, KR(i + 1), i < 3 ? KR(i + 2) : FINP]), [INS - 0.05, 0.3, FINP, FINQ]];
+    const kX = (lt) => {
+      if (hookAt(lt)) return FINQ;
+      let x = 560;
+      walks.forEach(([a, d, from, to]) => { if (lt >= a) x = lerp(from, to, E.inOut(prog(lt, a, d))); });
+      return x;
+    };
+    const walking = (lt) => walks.some(([a, d]) => lt >= a && lt < a + d);
+
+    s.update = (lt) => {
+      const ramp = (a, d) => E.inOut(prog(lt, a, d));
+      const hk = hookAt(lt);
+      const tot = sum(lt), tm = timer(lt);
+      // ── A ──
+      // lobi: afiş fiyatı "bin lira"da büyür; SEPETE EKLE'de bilet afişten patilere uçar
+      const pp = prog(lt, TICK, 0.35);
+      pPrice.style.transform = `scale(${1 + 0.35 * Math.sin(Math.PI * pp)})`;
+      addSign.style.opacity = lt >= LOCK && !hk ? (Math.floor(lt / 0.12) % 2 ? 0.25 : 0.6) * (1 - prog(lt, LOCK + 0.5, 0.2)) : 1;
+      const tf = prog(lt, CART - 0.05, 0.4), holding = !hk && lt >= CART + 0.35 && lt < INS;
+      tkPop.style.display = !hk && tf > 0 && tf < 1 ? 'block' : 'none';
+      if (tf > 0 && tf < 1) {
+        const x = lerp(150, kX(lt) - KW / 2 + 8.4 * KC, E.inOut(tf)), y = lerp(1140, FLOOR - KW * 30 / 32 + 15.6 * KC, E.inOut(tf)) - 160 * Math.sin(Math.PI * tf);
+        tkPop.style.transform = `translate(${x}px,${y}px) rotate(${-360 * (1 - E.out(tf))}deg)`;
+      }
+      // tabelalar: ücretin adı söylenince titreyerek yanar, tutar büyür, sepet toplamı akar
+      signs.forEach((sg, i) => {
+        const on = !hk && lt >= FEES[i];
+        const fl = on && lt < FEES[i] + 0.22 && Math.floor((lt - FEES[i]) / 0.045) % 2;
+        const lit = on && !fl;
+        const c = NEON[i];
+        sg.b.style.borderColor = lit ? c : '#3A3446';
+        sg.b.style.boxShadow = lit ? `0 0 34px ${c}88, inset 0 0 26px ${c}44` : 'none';
+        sg.nm.style.color = lit ? c : 'rgba(70,64,82,.12)';
+        sg.nm.style.textShadow = lit ? `0 0 14px ${c}` : 'none';
+        sg.am.style.color = lit ? '#FFFFFF' : 'rgba(70,64,82,.12)';
+        sg.am.style.textShadow = lit ? `0 0 18px ${c}, 4px 4px 0 #2A1E1A` : 'none';
+        sg.am.style.transform = `scale(${on ? 1 + 0.3 * Math.sin(Math.PI * prog(lt, FEES[i] + 0.1, 0.35)) : 1})`;
+        sg.ic.style.opacity = lit ? 1 : 0.12;
+        sg.st.textContent = `SEPET ${fmt(tot)} TL · ${mmss(tm)}`;
+        sg.st.style.color = lit ? '#FFE08A' : '#B0A6BA';
+      });
+      // kepenkler: 1. kapı açık başlar, kilitlenince iner; ücret kapıları ücret yazılınca açılır; son odanın kapısı arkasından yeniden iner
+      divs.forEach((dv, k) => {
+        let open = 0, locked = false;
+        if (!hk) {
+          if (k === 1) { open = 1 - clamp((lt - LOCK) / 0.12); locked = lt >= LOCK; }
+          else if (k >= 2) {
+            const tO = FEES[k - 2] + 0.3;
+            open = E.inOut(prog(lt, tO, 0.3));
+            locked = lt < tO;
+            if (k === 5 && lt >= LAST + 0.25) { open *= 1 - clamp((lt - LAST - 0.25) / 0.12); locked = lt >= LAST + 0.37; }
+          }
+        } else locked = k >= 2;
+        dv.sh.style.transform = `translateY(${-open * SHH}px)`;
+        dv.lamp.style.background = locked ? '#E8322A' : open > 0.5 ? '#4CFF8A' : '#7A1E1A';
+        dv.lamp.style.boxShadow = locked ? '0 0 18px 4px rgba(232,50,42,.6)' : open > 0.5 ? '0 0 18px 4px rgba(76,255,138,.6)' : 'none';
+        // kilit: ücret yazılınca halkası açılır ve düşer; 1. kapıda ve son odada kilitlenince belirir
+        let lv = locked && k >= 1, ly = 0, lr = 0, ls = 1, lo = 1;
+        if (k >= 2 && k <= 5 && !hk) {
+          const tO = FEES[k - 2] + 0.3, q = prog(lt, tO - 0.05, 0.55);
+          if (lt >= tO - 0.05 && q < 1) { lv = true; ly = 300 * q * q; lr = 140 * q; lo = 1 - q; }
+        }
+        if ((k === 1 && !hk) || (k === 5 && !hk && lt >= LAST + 0.25)) ls = 1 + 0.6 * Math.exp(-((lt - (k === 1 ? LOCK : LAST + 0.37)) * 9));
+        dv.lock.style.display = lv ? 'block' : 'none';
+        dv.lock.style.transform = `translateY(${ly}px) rotate(${lr}deg) scale(${ls})`;
+        dv.lock.style.opacity = lo;
+      });
+      bulbs.forEach((b, k) => { b.style.opacity = !hk && lt >= LOCK && k > 0 && Math.floor(lt / 0.09 + k) % 23 === 0 ? 0.3 : 1; });
+      // son oda: süre, kiosk, alarm
+      tVal.textContent = mmss(tm);
+      tVal.style.opacity = tm <= 3.01 && Math.floor(lt / 0.25) % 2 ? 0.4 : 1;
+      const paid = !hk && lt >= ZERO;
+      kRows.forEach((r, i) => { r.style.opacity = hk || lt >= LAST + 0.3 + i * 0.16 ? 1 : 0; });
+      const totOn = hk || lt >= TOTAL - 0.05;
+      kLbl.innerHTML = paid ? CHECK : 'ÖDE';
+      const stq = prog(lt, ZERO + 0.05, 0.25);
+      kStamp.style.opacity = paid ? clamp(stq * 4) : 0;
+      kStamp.style.transform = `translateX(-50%) rotate(-10deg) scale(${1 + 0.6 * (1 - E.out(stq))})`;
+      kLbl.style.color = paid ? '#7CF2A0' : '#FF6B5E';
+      kLbl.style.opacity = kVal.style.opacity = totOn ? 1 : 0;
+      kVal.textContent = '1.320 TL';
+      kVal.style.color = paid ? '#7CF2A0' : '#FFE08A';
+      kVal.style.transform = `scale(${1 + 0.28 * Math.sin(Math.PI * prog(lt, TOTAL, 0.3))})`;
+      const press = paid && lt < ZERO + 0.14;
+      bPay.style.transform = `scale(${press ? 0.92 : 1})`;
+      bPay.style.boxShadow = paid ? 'inset 0 -8px 0 #1E7040, 0 0 30px 6px rgba(124,242,160,.65)' : 'inset 0 -8px 0 #1E7040';
+      const counting = !hk && lt >= COUNT && lt < ZERO;
+      const alt = Math.floor((lt - COUNT) / 0.375) % 2;
+      bQuit.style.boxShadow = counting && alt ? 'inset 0 -8px 0 #8A2219, 0 0 28px 6px rgba(255,107,94,.6)' : 'inset 0 -8px 0 #8A2219';
+      if (counting && !alt) bPay.style.boxShadow = 'inset 0 -8px 0 #1E7040, 0 0 28px 6px rgba(124,242,160,.55)';
+      // bilet tepside (kancada da); ödeyince üstündeki tutar 1.320 olur
+      const onTray = hk || lt >= INS + 0.3;
+      tkTray.style.display = onTray ? 'block' : 'none';
+      tkTrayT.textContent = paid ? '1.320 TL' : '1.000 TL';
+      tkTray.style.transform = `rotate(-3deg) scale(${paid ? 1 + 0.25 * Math.sin(Math.PI * prog(lt, ZERO + 0.05, 0.3)) : 1})`;
+      const fly = prog(lt, INS, 0.3);
+      if (!hk && fly > 0 && fly < 1) {  // patilerden tepsiye
+        tkPop.style.display = 'block';
+        const x0 = kX(lt) - KW / 2 + 8.4 * KC, y0 = FLOOR - KW * 30 / 32 + 15.6 * KC;
+        tkPop.style.transform = `translate(${lerp(x0, KX + 90, E.inOut(fly))}px,${lerp(y0, KY + 506, E.inOut(fly)) - 70 * Math.sin(Math.PI * fly)}px) rotate(${-8 * fly}deg)`;
+      }
+      // vault: ödeyince çark döner, kapı menteşesinden açılır, arkasında ışık
+      const spin = paid ? E.inOut(prog(lt, ZERO + 0.1, 0.4)) : 0, swing = paid ? E.inOut(prog(lt, ZERO + 0.35, 0.4)) : 0;
+      wheel.style.transform = `rotate(${spin * 540}deg)`;
+      vault.style.transform = `perspective(1400px) rotateY(${-78 * swing}deg)`;
+      vLamp.style.background = paid ? '#4CFF8A' : Math.floor(lt / 0.3) % 2 ? '#E8322A' : '#7A1E1A';
+      vLight.style.opacity = swing > 0 ? 1 : 0;
+      alarmA.style.background = (hk || (lt >= LAST && !paid)) && Math.floor(lt / 0.2) % 2 ? '#FF3A2E' : '#6E1E1A';
+      beamA.style.display = hk || (lt >= LAST && !paid) ? 'block' : 'none';
+      beamA.style.transform = `rotate(${lt * 240}deg)`;
+      // Karamel: lobide sevinçli; kilitlenince sıçrar; odalarda giderek gerilir, terler; son odada kioskun yanında
+      const x = kX(lt), wk = walking(lt);
+      const hp = wk ? hop(lt, 0.3, 46) : { y: 0, sy: 1, sx: 1 };
+      let kp = ['happy', null, blink(lt)];
+      if (hk) kp = ['calm', null, 'wide'];
+      else if (lt < CART) kp = lt >= TICK ? ['celebrate', null, 'happy'] : ['happy', null, blink(lt)];
+      else if (lt < LOCK) kp = ['happy', null, 'happy'];
+      else if (lt < FEES[0]) kp = ['calm', null, lt < LOCK + 0.9 ? 'wide' : 'half'];
+      else if (lt < LAST) { const i = FEES.filter((f) => lt >= f).length - 1; kp = [['calm', 'calm', 'calm', 'calm'][i], null, ['wide', 'squeeze', 'wide', 'squeeze'][i] || 'wide']; }
+      else if (lt < ZERO) kp = lt >= TOTAL ? ['calm', null, counting ? (alt ? 'wide' : 'squeeze') : 'wide'] : ['calm', null, 'half'];
+      else kp = ['happy', null, 'happy'];
+      kA.set(...kp);
+      const jump = !hk && lt >= LOCK && lt < LOCK + 0.45 ? 70 * Math.sin(Math.PI * prog(lt, LOCK, 0.45)) : 0;
+      kA.put(x, FLOOR - hp.y - jump, { sx: hp.sx, sy: hp.sy, rot: counting ? Math.sin(lt * 30) * 0.8 : 0 });
+      kA.root.style.opacity = 1;
+      sync(kHA, kA, holding);
+      const sw = hk || (lt >= FEES[1] && lt < ZERO);
+      sweatA.forEach((e, i) => {
+        e.style.display = sw ? 'block' : 'none';
+        const k = ((lt + i * 0.35) % 0.7) / 0.7;
+        e.style.transform = `translate(${x - KW / 2 + (i ? 26 : 5) * KC}px,${FLOOR - KW * 30 / 32 + (9 + k * 5) * KC}px)`;
+        e.style.opacity = 1 - k * 0.7;
+      });
+      const bq = prog(lt, LOCK, 0.6);
+      bangA.style.display = !hk && bq > 0 && bq < 1 ? 'block' : 'none';
+      bangA.style.left = px(x + KW * 0.36); bangA.style.top = px(FLOOR - KW * 30 / 32 + 50);  // başın yanında, sıçramayla yükselmez: tabeladaki sepet satırını örtmesin
+      bangA.style.transform = `scale(${E.back(Math.min(1, bq * 3))}) rotate(8deg)`;
+      // karar anı: kol omuzdan kioska uzanır, pati ÖDE ile VAZGEÇ arasında gidip gelir, sıfırda ÖDE'ye basar
+      const reach = !hk && lt >= ASK + 0.6 && lt < ZERO + 0.35;
+      arm.style.display = paw.style.display = reach ? 'block' : 'none';
+      if (reach) {
+        const sx0 = x + 5.5 * KC, sy0 = FLOOR - KW * 30 / 32 + 20.5 * KC;
+        const tPay = [KX + 46, KY + 363], tQuit = [KX + 46, KY + 443];  // düğmenin sol ucu: yazıyı örtmesin
+        const k1 = E.out(prog(lt, ASK + 0.6, 0.4));
+        let tx = lerp(tPay[0], tQuit[0], 0.5), ty = lerp(tPay[1], tQuit[1], 0.5);
+        if (counting) { const w = 0.5 - 0.5 * Math.cos(Math.PI * ((lt - COUNT) / 0.375)); ty = lerp(tPay[1], tQuit[1], w); }
+        if (lt >= ZERO) { ty = tPay[1] + (lt < ZERO + 0.14 ? 8 : 0); }
+        // kol omuzdan aşağı sarkık başlar ve kalkarak düğmeye döner: boyu hemen hemen aynı kalır
+        const aT = Math.atan2(ty - sy0, tx - sx0), lT = Math.hypot(tx - sx0, ty - sy0);
+        const a = lerp(1.25, aT, k1), l = lerp(Math.min(lT, 150), lT, k1);
+        tx = sx0 + Math.cos(a) * l; ty = sy0 + Math.sin(a) * l;
+        const dx = tx - sx0, dy = ty - sy0, len = Math.hypot(dx, dy);
+        arm.style.width = px(len + 24);
+        arm.style.transform = `translate(${sx0 - 24}px,${sy0 - 24}px) rotate(${(Math.atan2(dy, dx) * 180) / Math.PI}deg)`;
+        paw.style.transform = `translate(${tx - 38}px,${ty - 38}px) rotate(${(Math.atan2(dy, dx) * 180) / Math.PI - 90}deg)`;
+      }
+
+      // ── B ──
+      const bOn = lt >= EXIT && lt < APP;
+      crew.forEach((c, i) => {
+        const a = EXIT + 0.05 + i * 0.36, q = prog(lt, a, 0.5);
+        const vis = bOn && lt >= a;
+        c.m.root.style.display = vis ? 'block' : 'none';
+        if (!vis) { if (c.who === 'karamel') kHB.h.style.display = 'none'; return; }
+        const wx = lerp(540, c.x, E.inOut(q)), sc = lerp(0.7, 1, E.out(q));
+        const h = q < 1 ? hop(lt - a, 0.25, 34) : { y: 0, sy: 1, sx: 1 };
+        const talk = lt >= BUB[i] && lt < BUB[i] + 0.4;
+        c.m.set(talk ? 'happy' : 'thoughtful', null, talk ? 'happy' : 'half');
+        c.m.put(wx, 1520 - h.y - (talk ? 16 * Math.sin(Math.PI * prog(lt, BUB[i], 0.3)) : 0), { sx: sc * h.sx, sy: sc * h.sy });
+        if (c.who === 'karamel') sync(kHB, c.m, true);
+      });
+      if (!bOn) kHB.h.style.display = 'none';
+      // konuşma balonu: sırayla her birinin başının üstünde
+      const sp = BUB.filter((b) => lt >= b).length - 1;
+      const bubOn = bOn && sp >= 0 && lt < SCI + 0.4;
+      bub.style.display = bubOn ? 'block' : 'none';
+      if (bubOn) {
+        const cx = clamp(crew[sp].x, 300, 660), hx = clamp(crew[sp].x - (cx - 200), 60, 340);  // balon kadrajda kalır, kuyruk konuşana döner
+        bubP.setAttribute('d', `M30 0 H370 Q400 0 400 30 V110 Q400 140 370 140 H${Math.min(352, hx + 34)} L${hx} 200 L${Math.max(48, hx - 30)} 140 H30 Q0 140 0 110 V30 Q0 0 30 0 Z`);
+        bub.style.left = px(cx - 200); bub.style.top = px(1520 - 309 - 190);
+        bub.style.transform = `scale(${0.75 + 0.25 * E.back(prog(lt, BUB[sp], 0.22))})`;
+      }
+      // skor tablosu
+      rUp.fill.style.width = `${(100 / 121) * 100 * E.out(prog(lt, BARS[0], 0.7))}%`;
+      rLate.fill.style.width = `${100 * E.out(prog(lt, BARS[1], 0.7))}%`;
+      pctB.style.opacity = lt >= PCT ? 1 : 0;
+      pctB.textContent = `+%${Math.round(21 * E.out(prog(lt, PCT, 0.45)))}`;
+      pctB.style.transform = `scale(${1 + 0.25 * Math.sin(Math.PI * prog(lt, PCT + 0.4, 0.3))})`;
+      spendL.style.opacity = prog(lt, PCT + 0.2, 0.3);
+      buyB.style.opacity = prog(lt, BUY - 0.1, 0.25);
+      buyB.style.transform = `scale(${0.85 + 0.15 * E.back(prog(lt, BUY - 0.1, 0.35))})`;
+      srcB.style.opacity = 0.4 + 0.6 * prog(lt, SCI + 0.5, 0.4);
+
+      // ── D ──
+      amtSt.style.transform = `scaleX(${E.out(prog(lt, STRIKE, 0.3))})`;
+      amtOld.style.color = lt >= STRIKE + 0.2 ? '#B9AEA4' : '#2A1E1A';
+      amtOld.style.fontSize = lt >= FIX ? '44px' : '66px';
+      const typed = '1.320'.slice(0, Math.max(0, Math.min(5, Math.floor((lt - FIX) / 0.07) + 1)));
+      amtNew.textContent = lt >= FIX ? typed : '';
+      amtCur.style.display = lt >= TAPD && lt < SAVE && Math.floor(lt / 0.3) % 2 ? 'block' : 'none';
+      inAmt.style.borderColor = lt >= SAVE ? '#2F8F5A' : lt >= TAPD ? '#AE4716' : '#E2D6C8';
+      inAmt.style.boxShadow = lt >= FIX ? `0 0 0 ${6 + 2 * Math.sin(lt * 8)}px ${lt >= SAVE ? 'rgba(47,143,90,.35)' : 'rgba(242,182,60,.45)'}` : 'none';
+      tagD.style.opacity = clamp(prog(lt, TAG, 0.2) * 3);
+      tagD.style.transform = `rotate(-3deg) scale(${0.6 + 0.4 * E.back(prog(lt, TAG, 0.3))})`;
+      okD.style.opacity = clamp(prog(lt, SAVE, 0.15) * 3);
+      okD.style.transform = `scale(${0.4 + 0.6 * E.back(prog(lt, SAVE, 0.3))})`;
+      phD.style.transform = `translateY(${(1 - E.out(prog(lt, APP, 0.35))) * 700}px)`;
+      const pd = lt - TAPD + 0.45, ptap = pd >= 0 && pd < 0.95;  // pati alttan gelir, Tutar alanına dokunur, geri çekilir
+      pawD.style.display = armD.style.display = ptap ? 'block' : 'none';
+      if (ptap) {
+        const k1 = E.out(prog(pd, 0, 0.35)), k2 = E.inOut(prog(pd, 0.62, 0.33));
+        const SXD = 790, SYD = 690 + 20 + 206 + 428 + 64;  // Tutar alanının sağ yanı (telefonun dünyadaki yeri + ekran + sayfa + alan)
+        const py = lerp(SYD + 760, SYD, k1) + 760 * k2 + (pd >= 0.45 && pd < 0.58 ? 10 : 0);
+        pawD.style.transform = `translate(${SXD - 49}px,${py - 30}px)`;
+        armD.style.transform = `translate(${SXD - 37}px,${py + 30}px)`;
+      }
+
+      // ── E ──
+      eq.forEach((b, i) => { b.style.transform = `scaleY(${0.4 + 2.2 * Math.abs(Math.sin(lt * (5 + (i % 5)) + i))})`; });
+      beams.forEach((b, i) => { b.style.transform = `rotate(${Math.sin(lt * 1.3 + i * 2.1) * 22}deg)`; });
+      crowd.forEach((c, i) => { c.style.transform = `translateY(${Math.abs(Math.sin(lt * 4.2 + i)) * -26}px)`; });
+      hands.forEach((h, i) => { h.style.transform = `rotate(${Math.sin(lt * 5 + i * 1.7) * 18}deg) translateY(${Math.abs(Math.sin(lt * 4.2 + i)) * -26}px)`; });
+      const hE = hop(lt - CTA, 0.46, 46);
+      kE.set('celebrate', null, 'happy');
+      kE.put(540, 1610 - (lt >= CTA ? hE.y : 0), { sy: hE.sy, sx: hE.sx });
+      sync(kHE, kE, true);
+      confE.update(lt);
+
+      // ── kamera planları: dünya noktası (fx, fy) ekranda (540, SY)'ye düşer ──
+      let W = 'A', z = 1, fx = FX + 540, fy = SY;
+      const RZ = 1.15, RF = 1185, FC = FX + 560;  // oda planı: oda kareyi doldurur; kamera odanın sağına kayık, kapı Instagram düğmelerinden uzak
+      if (hk) { z = RZ + 0.06 * prog(lt >= OFF ? lt - OFF : lt, 0, 1.55); fx = FC; fy = RF; }                                // kanca: son oda
+      else if (lt < CART + 0.45) { const q = ramp(TICK - 0.1, 0.5); fx = lerp(430, 380, q); z = lerp(1.05, 1.12, q); fy = lerp(SY, 1150, q); }  // lobi: afiş
+      else if (lt < LOCK) { const q = ramp(CART + 0.45, 0.6); fx = lerp(380, roomC(1) + 150, q); z = lerp(1.12, RZ, q); fy = lerp(1150, RF, q); }  // 1. odaya geçiş
+      else if (lt < FEES[0]) {                                                                                                          // kilit: kapıdaki asma kilide yaklaşır, geri çekilir
+        const q = ramp(WARN, 0.6) * (1 - ramp(FEES[0] - 0.35, 0.3));
+        fx = lerp(roomC(1) + 150, roomC(1) + 100, q); fy = lerp(RF, 1160, q); z = lerp(RZ, 1.22, q);
+      } else if (lt < LAST) {                                                                                                           // ücret odaları: her ücretten sonra bir sonrakine
+        fx = roomC(1) + 150; z = RZ; fy = RF;
+        FEES.forEach((f, i) => { if (lt >= f + 0.55) fx = lerp(roomC(i + 1) + 150, i < 3 ? roomC(i + 2) + 150 : FC, ramp(f + 0.55, 0.4)); });
+      } else if (lt < ASK) { const q = ramp(TOTAL - 0.15, 0.4); fx = lerp(FC, FX + 620, q); fy = lerp(RF, 1130, q); z = lerp(RZ, 1.25, q); }  // son oda → kiosk ekranı
+      else if (lt < COUNT) { const q = ramp(ASK, 0.5); fx = lerp(FX + 620, FX + 600, q); fy = lerp(1130, 1160, q); z = lerp(1.25, 1.24, q); }       // soru: Karamel ve kiosk
+      else if (lt < ZERO) { fx = FX + 600; fy = 1165; z = 1.3 + 0.03 * ramp(COUNT, ZERO - COUNT); }                                  // karar
+      else if (lt < EXIT) { const q = ramp(ZERO + 0.15, 0.35), q2 = ramp(ZERO + 0.55, EXIT - ZERO - 0.55); fx = lerp(lerp(FX + 600, FC, q), VX, q2); fy = lerp(lerp(1165, RF, q), VY, q2); z = lerp(lerp(1.33, RZ, q), 2.6, q2 * q2); }  // ödendi: geri çekilir, kasa kapısı açılır, ışığa dalar
+      else if (lt < SCI) { W = 'B'; z = 1.1 + 0.03 * prog(lt, EXIT, SCI - EXIT); fx = 532; fy = 1262; }                              // çıkış
+      else if (lt < APP) { W = 'B'; const q = ramp(SCI, 0.5); fx = lerp(532, BX + BW / 2, q); fy = lerp(1262, 1120, q); z = lerp(1.13, 1.0, q); }     // skor tablosu
+      else if (lt < CTA) { W = 'D'; const q = ramp(STRIKE - 0.3, 0.5); fx = 540; z = lerp(1.1, 1.18, q); fy = lerp(1260, 1290, q); }           // Cep Defteri: Plan ekle → Tutar
+      else { W = 'E'; fx = 540; z = 1.0 + 0.04 * prog(lt, CTA, OFF - CTA); }                                                                     // konser
+      let beat = -9;
+      beats.forEach((t) => { if (lt >= t) beat = t; });
+      z *= 1 + 0.012 * Math.exp(-(lt - beat) * 10);
+      const sx = shake(lt, LOCK, 18, 0.45) + shake(lt, LAST + 0.37, 12, 0.35) + shake(lt, TOTAL, 8, 0.3) + shake(lt, ZERO, 10, 0.3);
+      [camA, camB, camD, camE].forEach((c, i) => (c.style.display = 'ABDE'[i] === W ? 'block' : 'none'));
+      ({ A: camA, B: camB, D: camD, E: camE })[W].style.transform = `translate(${540 - fx * z + sx}px,${SY - fy * z}px) scale(${z})`;
+      redO.style.opacity = W === 'A' && (hk || (lt >= LAST && lt < ZERO)) ? 0.1 + 0.1 * (Math.floor(lt / 0.2) % 2) : W === 'A' && lt >= LOCK && lt < LOCK + 0.4 ? 0.3 * (1 - prog(lt, LOCK, 0.4)) : 0;
+      flash.style.opacity = Math.max(lt >= LOCK && !hk ? 0.4 * Math.exp(-(lt - LOCK) * 9) : 0, !hk && lt >= ZERO ? 0.35 * Math.exp(-(lt - ZERO) * 9) : 0, !hk && lt >= EXIT - 0.14 && lt < EXIT + 0.16 ? 0.9 * (1 - Math.abs(lt - EXIT + 0.01) / 0.15) : 0);
+      pill.style.display = counting ? 'flex' : 'none';
+      pill.style.opacity = Math.min(1, (lt - COUNT) * 8);
+      pin.style.transform = `scale(${1 + 0.04 * Math.exp(-((lt - COUNT) % 1) * 10)})`;
+      // takip kartı: FOLLOW'da açılır; TAPF'de pati "Takip et"e basar, düğme "Takip ediliyor" olur
+      const fOn = lt >= FOLLOW && lt < OFF;
+      fcard.style.display = fOn ? 'block' : 'none';
+      if (fOn) popIn(fcard, prog(lt, FOLLOW, 0.35), { fromY: -60 });
+      const followed = lt >= TAPF + 0.02;
+      fbtn.textContent = followed ? 'Takip ediliyor' : 'Takip et';
+      fbtn.style.background = followed ? '#EFEFEF' : '#0095F6';
+      fbtn.style.color = followed ? '#141414' : '#FFFFFF';
+      const fd = lt - TAPF + 0.45;
+      fbtn.style.transform = `scale(${fd >= 0.42 && fd < 0.55 ? 0.94 : followed ? 1 + 0.08 * Math.sin(Math.PI * prog(fd, 0.55, 0.25)) : 1 + 0.03 * Math.sin(lt * 8)})`;
+      const ftap = fOn && fd >= 0.1 && fd < 0.95;
+      fpaw.style.display = farm.style.display = ftap ? 'block' : 'none';
+      if (ftap) {
+        const k1 = E.out(prog(fd, 0.1, 0.3)), k2 = E.inOut(prog(fd, 0.62, 0.33));
+        const fx2 = lerp(FBX + 320, FBX + 8, k1) + 320 * k2, fy2 = lerp(FBY + 480, FBY + 16, k1) + 480 * k2 + (fd >= 0.42 && fd < 0.55 ? 8 : 0);
+        const fr = -20 * (1 - k1) - 20 * k2 - 18;
+        fpaw.style.transform = `translate(${fx2 - 56}px,${fy2 - 34}px) rotate(${fr}deg)`;
+        farm.style.transform = `translate(${fx2 - 37}px,${fy2 + 40}px) rotate(${fr}deg)`;  // kol patinin altından aşağı, kadraj dışına
       }
       const rk2 = prog(lt, TAPF, 0.4);
       fring.style.display = fOn && rk2 > 0 && rk2 < 1 ? 'block' : 'none';

@@ -5441,5 +5441,279 @@
         "assets/voice/ortak/takip.mp3"
       ]
     ]
+  },
+  "odeme-odasi": {
+    "end": 36.35,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.45,
+    "noMusicVariant": true,
+    "limiter": true,
+    "musicPlan": [
+      [
+        0,
+        1.55,
+        "horror"
+      ],
+      [
+        1.55,
+        4.32,
+        "pop",
+        {
+          "bpm": 104
+        }
+      ],
+      [
+        4.32,
+        18.15,
+        "thriller"
+      ],
+      [
+        18.15,
+        29.84,
+        "lofi"
+      ],
+      [
+        29.84,
+        35.85,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ],
+      [
+        35.85,
+        36.35,
+        "horror"
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          15.15,
+          18.15
+        ]
+      ]
+    },
+    "captionPixel": true,
+    "captionY": 604,
+    "captionMaxWords": 3,
+    "captionUntil": 29.84,
+    "captionCut": [
+      [
+        15.15,
+        18.15
+      ],
+      [
+        26.33,
+        29.84
+      ]
+    ],
+    "scenes": [
+      [
+        "oda",
+        0,
+        {
+          "lobby": 1.55,
+          "ticket": 1.6,
+          "cart": 2.8,
+          "lock": 4.32,
+          "warn": 5.17,
+          "fees": [
+            6.74,
+            7.71,
+            8.76,
+            9.76
+          ],
+          "last": 10.72,
+          "ins": 11.3,
+          "total": 12.13,
+          "ask": 13.37,
+          "count": 15.15,
+          "zero": 18.15,
+          "exit": 19.05,
+          "bub": [
+            20.42,
+            20.77,
+            21.1,
+            21.42
+          ],
+          "sci": 21.79,
+          "bars": [
+            22.79,
+            23.71
+          ],
+          "pct": 24.61,
+          "buy": 25.0,
+          "app": 26.33,
+          "tapd": 26.93,
+          "strike": 27.41,
+          "tag": 27.9,
+          "fix": 28.05,
+          "save": 28.83,
+          "cta": 29.84,
+          "follow": 32.84,
+          "tapf": 34.85,
+          "off": 35.85
+        }
+      ],
+      [
+        "oda",
+        35.85,
+        {
+          "wdur": 0.2
+        }
+      ]
+    ],
+    "voiceTempo": 1.2,
+    "voiceFilter": "brand",
+    "boxes": [
+      [
+        0,
+        4.27,
+        "Bilet 1.000 TL'ydi.<br><b>Ödemede?</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true
+        }
+      ],
+      [
+        4.32,
+        10.67,
+        "Her kapıda<br><b>yeni bir ücret</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        10.72,
+        18.1,
+        "Son kapı:<br><b>1.320 TL</b>",
+        300,
+        {
+          "size": 96,
+          "pulse": true,
+          "quiet": true,
+          "dim": [
+            15.15,
+            18.15
+          ],
+          "dimTo": 0.7
+        }
+      ],
+      [
+        18.15,
+        21.74,
+        "Karamel ödedi:<br><b>buraya kadar gelmişti</b>",
+        300,
+        {
+          "size": 76,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        21.79,
+        26.28,
+        "Deneyde ücret sonda çıkınca:<br><b>yaklaşık %21 fazla harcama</b>",
+        300,
+        {
+          "size": 64,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        26.33,
+        29.79,
+        "İlk fiyatı değil,<br><b>toplamı yaz</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        29.84,
+        32.79,
+        "En çok sinir olduğun<br><b>ek ücret hangisi?</b>",
+        300,
+        {
+          "size": 80,
+          "pulse": true
+        }
+      ],
+      [
+        29.94,
+        32.79,
+        "Yoruma yaz: adı ve tutarı",
+        600,
+        {
+          "size": 54,
+          "quiet": true
+        }
+      ],
+      [
+        35.85,
+        36.35,
+        "Bilet 1.000 TL'ydi.<br><b>Ödemede?</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true,
+          "quiet": true
+        }
+      ]
+    ],
+    "voiceFiles": [
+      [
+        0.45,
+        "assets/voice/oda/o1.mp3",
+        "Konser bileti: 1.000 lira. Karamel sepete ekledi... ve kapı kilitlendi!"
+      ],
+      [
+        5.12,
+        "assets/voice/oda/o2.mp3",
+        "Her kapıda yeni bir ücret: hizmet bedeli, bilet güvencesi, işlem ücreti, e-bilet ücreti."
+      ],
+      [
+        10.72,
+        "assets/voice/oda/o3c.mp3",
+        "Ve son kapı: tam 1.320 lira!"
+      ],
+      [
+        13.37,
+        "assets/voice/oda/o4.mp3",
+        "Öder misin, vazgeçer misin?"
+      ],
+      [
+        18.25,
+        "assets/voice/oda/o5.mp3",
+        "Karamel ödedi. Çünkü... buraya kadar gelmişti."
+      ],
+      [
+        21.79,
+        "assets/voice/oda/o6.mp3",
+        "Bir deneyde, ücretleri ancak ödemede görenler %21 daha çok harcadı."
+      ],
+      [
+        26.33,
+        "assets/voice/oda/o7.mp3",
+        "Bütçene ilk fiyatı değil, ödeme ekranındaki toplamı yaz."
+      ],
+      [
+        29.84,
+        "assets/voice/oda/o8.mp3"
+      ],
+      [
+        32.84,
+        "assets/voice/ortak/takip.mp3"
+      ]
+    ]
   }
 }

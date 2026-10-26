@@ -520,3 +520,23 @@ Cep Defteri'nde Bütçe → Birikim payı: günlük hesapta dokunmadan tuttuğun
 ```
 
 **Yayın notu:** Kapak karesi olarak 0,2 sn'yi seç (yakıtı biten HARÇLIK-1, sağ üstte "AY SONU", kırmızı rotada "AY SONUNA 8 GÜN", altta "YAKIT 0 TL" ve "KASIM 22" + "Paran ayın kaçında bitiyor?"). Ayın 20'si civarında yayınla. İlk yorumu sabitle: "Ceviz'in yakıtı ayın 22'sinde bitti. Seninki ayın kaçında bitiyor? (Tutarlar örnek.)" Karar anında soru "YETER mi, YETMEZ mi?": rakamlar ekranda (FARK +500 TL), izleyici cevaplayabilir; çoğu "yeter" der, meteorlar bunu boşa çıkarır. Çağrılar sonda: önce seslendirmeyle aynı soru + "Yoruma yaz: ayın kaçı?", sonra ortak takip satırı ve takip kartı. "Arkadaşına gönder" ve "kaydet" açıklamada. %27 Peetz'in 2010 doktora tezinin özetinden; 2009 makalesini aktaranlar "~%30" diyor, videoda tezdeki rakam ve "Peetz 2010" kaynak satırı var. Uygulama kartındaki rakamlar (9.000 / 1.200 / 1.800 / 6.000) hikâyedeki rakamlardan bilerek farklı: kart yeni ayın ilk günü. Ayın katili ile konu komşu (istisnai harcamalar); aralarına en az bir hafta koy. Yorumlarda en sık söylenen günü bir sonraki reelsin açılışında kullan ("En çok ayın 2X'i dediniz").
+
+## 25 · odeme-odasi (kavram: gizli ek ücret / ücretlerin ödeme adımında çıkması, seslendirme: Buğra, döngülü, 36,35 sn)
+
+**Açıklama:**
+```
+Bilet 1.000 TL'ydi. Ödemede kaç oldu? 🎟️
+En çok sinir olduğun ek ücret hangisi? Adını ve kaç TL tuttuğunu yoruma yaz 👇
+📌 Kaydet; bir dahaki bilet alışverişinde ödeme ekranındaki toplama bak. Android erken erişim yakında.
+
+Karamel konser biletini 1.000 TL'ye sepete ekledi, kapı arkasından kilitlendi. Her kapıda yeni bir ücret: hizmet bedeli (+150), bilet güvencesi (+90), işlem ücreti (+50), e-bilet ücreti (+30). Son kapı: 1.320 TL. Karamel ödedi, çünkü buraya kadar gelmişti. Tutarlar örnek.
+Araştırma: ABD'de büyük bir bilet sitesinde yapılan deneyde, ücretleri ancak ödeme adımında görenler toplam fiyatı baştan görenlerden yaklaşık %21 daha çok harcadı; satın alma ihtimalleri de %14 daha yüksekti (Blake, Moshary, Sweeney ve Tadelis, 2021, Marketing Science).
+Çözüm: karar verirken ilk fiyata değil, ödeme ekranındaki toplama bak; bütçene de o toplamı yaz.
+
+Her bilette "bu sefer ek ücret yoktur herhalde" diyen arkadaşına gönder.
+Cep Defteri'nde Bütçe ve planlar → Plan ekle → Ödeme, Bir kez: tutara ödeme ekranındaki toplamı yaz; vadesi bu dönemdeyse kullanılabilir paradan önceden düşülür.
+
+#konserbileti #ekücret #hizmetbedeli #öğrencibütçesi #paraipuçları #bütçe #cepdefteri
+```
+
+**Yayın notu:** Kapak karesi olarak 0,2 sn'yi seç (son oda: kasa kapısında "SEPET SÜRESİ 00:03", kioskta kalem kalem fiş ve "ÖDE 1.320 TL", tepside 1.000 TL'lik bilet + "Bilet 1.000 TL'ydi. Ödemede?"). Konser ya da festival biletlerinin satışa çıktığı bir hafta yayınla. İlk yorumu sabitle: "Karamel'in 1.000 TL'lik bileti ödemede 1.320 TL oldu. Seninkinde hangi ücret çıktı? (Tutarlar örnek.)" Karar anında soru "ÖDE mi, VAZGEÇ mi?": izleyicinin kendi seçimi; dönemeç Karamel'in ödemesi ve çıkıştaki "Buraya kadar geldim zaten" korosu. Çağrılar sonda: önce seslendirmeyle aynı soru + "Yoruma yaz: adı ve tutarı", sonra ortak takip satırı ve takip kartı. "Arkadaşına gönder" ve "kaydet" açıklamada. Araştırma rakamları makalenin yazarlarının üniversitesinin (Berkeley Haas) duyurusundan; StubHub adı videoda geçmiyor, ekranda "ABD'DE BİR DENEY" ve kaynak satırı var. Sepet bombası (sahte geri sayım) ile aynı aileden (çevrim içi alışverişin karanlık desenleri); aralarına en az bir hafta koy. Yorumlarda en çok anılan ücreti bir sonraki reelsin açılışında kullan ("En çok hizmet bedeline kızdınız").

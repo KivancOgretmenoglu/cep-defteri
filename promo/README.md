@@ -52,8 +52,10 @@ Her sahne: `[tür, başlangıç saniyesi, seçenekler]`.
 Reels düzeyinde `"musicPlan": [[başla, bitir, tür], ...]`. Türler: `chip` (8-bit, 120 BPM), `lofi` (84 BPM,
 elektrik piyano, plak cızırtısı, bant titremesi), `horror` (uğultu, uyumsuz yaylı, hızlanan kalp atışı),
 `quiz` (yarışma programı: 132 BPM swing, bakır nefesliler, yürüyen bas), `pop` (hafif tropik pop: 104 BPM,
-el çırpma, marimba), `space` (uzay görevi: 112 BPM kare dalga arpej, yavaş pad, sekizlik bas). Bölümler
-arasında boşluk bırakılabilir (ör. korku vuruşundan sonra sessizlik). Plan yoksa eski chiptune düzeni kullanılır.
+el çırpma, marimba), `space` (uzay görevi: 112 BPM kare dalga arpej, yavaş pad, sekizlik bas), `thriller`
+(kaçış odası gerilimi: 120 BPM, Dm–B♭–Gm–A sekizlik nabız bası, her vuruşta saat tiki, ölçü başında boğuk davul; ikinci
+yarıda birbirine sürtünen yüksek yaylılar). Bölümler arasında boşluk bırakılabilir (ör. korku vuruşundan sonra
+sessizlik). Plan yoksa eski chiptune düzeni kullanılır.
 
 ### Yaratıcı hook sahneleri (`hooks.js`)
 | Tür | İçerik |
