@@ -2497,9 +2497,6 @@ def cue_oda(t0, skip=0, o=None):
         for j in range(10):
             put(SFX, tick(j % 2 == 0, 0.14), T(Pc + 0.45 * (1 - (1 - j / 10) ** 2)), pan=0.3)
         put(SFX, pling(1568, 0.12, 0.5), T(Pc + 0.48), pan=0.3)
-    if 'buy' in o:  # +%14 satın alma
-        put(SFX, bloop(500, 1200, 0.08, 0.25), T(o['buy'] - 0.1))
-        put(SFX, pling(1760, 0.1, 0.5), T(o['buy']), pan=-0.2)
     if 'app' in o:  # Cep Defteri: Plan ekle
         Ap = o['app']
         put(SFX, stereo_move(whoosh(0.3, 600, 2600, 0.5), 0.4, -0.2), T(Ap - 0.05), 0.16)
@@ -2527,7 +2524,7 @@ def cue_oda(t0, skip=0, o=None):
         F = o['follow']
         put(SFX, stereo_move(whoosh(0.3, 500, 2400, 0.5), -0.3, 0.2), T(F - 0.05), 0.18)
         put(SFX, bloop(520, 1300, 0.07, 0.28), T(F + 0.05))
-    if 'tapf' in o:  # pati "Takip et"e basar
+    if 'tapf' in o:  # dokunuş "Takip et"e basar
         Tf = o['tapf']
         put(SFX, ui_tap(0.6), T(Tf))
         put(SFX, fm_bell(1568, 0.7, 0.18), T(Tf + 0.06))
