@@ -56,8 +56,15 @@ el çırpma, marimba), `space` (uzay görevi: 112 BPM kare dalga arpej, yavaş p
 (kaçış odası gerilimi: 120 BPM, Dm–B♭–Gm–A sekizlik nabız bası, her vuruşta saat tiki, ölçü başında boğuk davul; ikinci
 yarıda birbirine sürtünen yüksek yaylılar), `ragtime` (sessiz film piyanosu: honky-tonk akortlu piyano, sol elde
 bas–akor, sağ elde senkoplu ezgi, eski kayıt gibi dar bant; seçenekler `bpm`, `minor` (Am–Dm–E7–Am, yoksa
-C–A7–D7–G7), `soft` (seyrek ezgi, kısık bas)). Bölümler arasında boşluk bırakılabilir (ör. korku vuruşundan sonra
-sessizlik). Plan yoksa eski chiptune düzeni kullanılır.
+C–A7–D7–G7), `soft` (seyrek ezgi, kısık bas), `gain` (bölümün yüksekliği)), `melodrama` (sessiz film gerilimi: piyanoda
+alçak tremolo; `stab`: bölüm başından saniye, o anda vurucu akor; akor `ACC` kanalına gider, konuşmanın kısmasına uğramaz, o
+yüzden iki satırın arasına konur; `stabGain`, `gain`, `cresc`). Bölümler arasında boşluk bırakılabilir (ör. korku vuruşundan
+sonra sessizlik). Plan yoksa eski chiptune düzeni kullanılır.
+
+Reels düzeyinde `"voiceDuck": {"release": 0.25, "music": 0.3, "amb": 0.7}`: konuşma altında müzik `music` tabanına kısılır
+(varsayılan 0,3), kısma kelime aralarında hemen kalkmaz (`release` sn), `amb` verilirse yağmur gibi ortam sesi de kısılır.
+Konuşma girişte zor duyuluyorsa önce o bölümün müziğini seyreltin (`soft`, `gain`); ölçmek için: konuşma sırasında müzik
+konuşmanın ~18–24 dB altında olmalı.
 
 ### Yaratıcı hook sahneleri (`hooks.js`)
 | Tür | İçerik |

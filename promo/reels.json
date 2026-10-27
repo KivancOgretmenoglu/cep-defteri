@@ -5716,7 +5716,7 @@
     ]
   },
   "bot-teorisi": {
-    "end": 39.95,
+    "end": 42.5,
     "loop": true,
     "musicGain": 0.45,
     "noMusicVariant": true,
@@ -5724,24 +5724,38 @@
     "musicPlan": [
       [
         0,
-        3.6,
+        2.95,
+        "melodrama",
+        {
+          "stab": 2.58,
+          "gain": 0.8,
+          "stabGain": 0.4
+        }
+      ],
+      [
+        2.95,
+        6.15,
         "ragtime",
         {
           "bpm": 100,
-          "minor": true
+          "minor": true,
+          "soft": true,
+          "gain": 0.8
         }
       ],
       [
-        3.6,
-        9.2,
+        6.15,
+        11.75,
         "ragtime",
         {
-          "bpm": 104
+          "bpm": 104,
+          "soft": true,
+          "gain": 0.85
         }
       ],
       [
-        12.2,
-        15.45,
+        14.75,
+        18.0,
         "ragtime",
         {
           "bpm": 84,
@@ -5750,16 +5764,16 @@
         }
       ],
       [
-        15.45,
-        17.7,
+        18.0,
+        20.25,
         "ragtime",
         {
           "bpm": 150
         }
       ],
       [
-        17.7,
-        23.95,
+        20.25,
+        26.5,
         "ragtime",
         {
           "bpm": 88,
@@ -5768,8 +5782,8 @@
         }
       ],
       [
-        23.95,
-        30.9,
+        26.5,
+        33.45,
         "ragtime",
         {
           "bpm": 96,
@@ -5777,43 +5791,47 @@
         }
       ],
       [
-        30.9,
-        39.45,
+        33.45,
+        42.0,
         "pop",
         {
           "bpm": 108
         }
       ],
       [
-        39.45,
-        39.95,
-        "ragtime",
+        42.0,
+        42.5,
+        "melodrama",
         {
-          "bpm": 100,
-          "minor": true
+          "gain": 0.8,
+          "cresc": 2.58
         }
       ]
     ],
     "music": {
       "gaps": [
         [
-          9.2,
-          12.2
+          11.75,
+          14.75
         ]
       ]
     },
     "captionPixel": true,
     "captionY": 604,
     "captionMaxWords": 3,
-    "captionUntil": 33.2,
+    "captionUntil": 35.75,
     "captionCut": [
       [
-        9.2,
-        12.2
+        5.97,
+        6.43
       ],
       [
-        31.7,
-        33.2
+        11.75,
+        14.75
+      ],
+      [
+        34.25,
+        35.75
       ]
     ],
     "scenes": [
@@ -5821,65 +5839,79 @@
         "bot",
         0,
         {
-          "shop": 3.6,
+          "jabs": [
+            0.45,
+            1.12,
+            1.45
+          ],
+          "yank": 2.26,
+          "pull": 3.0,
+          "dkin": 3.15,
+          "az": 4.09,
+          "hcards": [
+            4.7,
+            5.37,
+            5.67
+          ],
+          "shop": 6.15,
           "tags": [
-            3.93,
-            4.91,
-            5.91,
-            7.05
+            6.48,
+            7.46,
+            8.46,
+            9.6
           ],
-          "ask": 7.5,
-          "count": 9.2,
-          "zero": 12.2,
-          "pocket": 13.17,
-          "din": 13.55,
-          "wallet": 14.11,
-          "no": 14.45,
-          "dbuy": 14.8,
-          "fbuy": 15.15,
-          "mont": 15.45,
+          "ask": 10.05,
+          "count": 11.75,
+          "zero": 14.75,
+          "pocket": 15.72,
+          "din": 16.1,
+          "wallet": 16.66,
+          "no": 17.0,
+          "dbuy": 17.35,
+          "fbuy": 17.7,
+          "mont": 18.0,
           "winters": [
-            15.6,
-            16.1,
-            16.6,
-            17.1
+            18.15,
+            18.65,
+            19.15,
+            19.65
           ],
-          "last": 17.55,
+          "last": 20.1,
           "sum": [
-            18.91,
-            20.51
+            21.46,
+            23.06
           ],
-          "wet": 20.95,
-          "feet": 21.67,
-          "sneeze": 23.4,
-          "paper": 23.75,
-          "news": 23.95,
+          "wet": 23.5,
+          "feet": 24.22,
+          "sneeze": 25.95,
+          "paper": 26.3,
+          "news": 26.5,
           "bars": [
-            25.05,
-            25.33
+            27.6,
+            27.88
           ],
-          "rolls": 26.15,
-          "pct": 27.13,
-          "cash": 27.9,
-          "lesson": 28.6,
-          "head": 29.24,
-          "phone": 30.09,
-          "color": 30.9,
-          "app": 31.7,
+          "rolls": 28.7,
+          "pct": 29.68,
+          "cash": 30.45,
+          "lesson": 31.15,
+          "head": 31.79,
+          "phone": 32.64,
+          "color": 33.45,
+          "app": 34.25,
           "steps": [
-            31.8,
-            31.9,
-            32.0,
-            32.1,
-            32.2,
-            32.3
+            34.35,
+            34.45,
+            34.55,
+            34.65,
+            34.75,
+            34.85
           ],
-          "reach": 32.45,
-          "cta": 33.2,
-          "splash": 33.8,
-          "follow": 36.4,
-          "tapf": 38.45,
-          "off": 39.45
+          "reach": 35.0,
+          "cta": 35.75,
+          "splash": 36.35,
+          "follow": 38.95,
+          "tapf": 41.0,
+          "off": 42.0
         }
       ]
     ],
@@ -5888,8 +5920,8 @@
     "boxes": [
       [
         0,
-        3.45,
-        "Az kazanan neden<br><b>fazla öder?</b>",
+        2.9,
+        "Paran yetmiyorsa<br><b>suç sende değil</b>",
         300,
         {
           "size": 90,
@@ -5897,8 +5929,19 @@
         }
       ],
       [
-        3.6,
-        12.15,
+        2.95,
+        6.0,
+        "Az kazanan neden<br><b>fazla öder?</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        6.15,
+        14.7,
         "1.000 TL · 1 kış<br><b>3.000 TL · 5 kış</b>",
         300,
         {
@@ -5906,15 +5949,15 @@
           "pulse": true,
           "quiet": true,
           "dim": [
-            9.2,
-            12.2
+            11.75,
+            14.75
           ],
           "dimTo": 0.7
         }
       ],
       [
-        12.3,
-        15.4,
+        14.85,
+        17.95,
         "Ama cebinde:<br><b>1.200 TL</b>",
         300,
         {
@@ -5924,8 +5967,8 @@
         }
       ],
       [
-        15.45,
-        17.65,
+        18.0,
+        20.2,
         "Her kış<br><b>yeni bir bot</b>",
         300,
         {
@@ -5935,8 +5978,8 @@
         }
       ],
       [
-        17.7,
-        20.9,
+        20.25,
+        23.45,
         "Fıstık: 5.000 TL<br><b>Diken: 3.000 TL</b>",
         300,
         {
@@ -5946,8 +5989,8 @@
         }
       ],
       [
-        20.95,
-        23.9,
+        23.5,
+        26.45,
         "Bot teorisi:<br><b>az kazanan, fazla öder</b>",
         300,
         {
@@ -5957,8 +6000,8 @@
         }
       ],
       [
-        23.95,
-        28.55,
+        26.5,
+        31.1,
         "Tuvalet kâğıdında bile<br><b>yaklaşık %6 fazla</b>",
         300,
         {
@@ -5968,8 +6011,8 @@
         }
       ],
       [
-        28.6,
-        30.85,
+        31.15,
+        33.4,
         "Sorun akılda değil,<br><b>cepte</b>",
         300,
         {
@@ -5979,8 +6022,8 @@
         }
       ],
       [
-        30.9,
-        33.15,
+        33.45,
+        35.7,
         "Kış gelmeden<br><b>azar azar biriktir</b>",
         300,
         {
@@ -5990,8 +6033,8 @@
         }
       ],
       [
-        33.2,
-        36.35,
+        35.75,
+        38.9,
         "Ucuz diye alıp<br><b>iki kere ödediğin şey ne?</b>",
         300,
         {
@@ -6000,8 +6043,8 @@
         }
       ],
       [
-        33.3,
-        36.35,
+        35.85,
+        38.9,
         "Yoruma yaz",
         600,
         {
@@ -6010,9 +6053,9 @@
         }
       ],
       [
-        39.45,
-        39.95,
-        "Az kazanan neden<br><b>fazla öder?</b>",
+        42.0,
+        42.5,
+        "Paran yetmiyorsa<br><b>suç sende değil</b>",
         300,
         {
           "size": 90,
@@ -6023,53 +6066,62 @@
     ],
     "voiceFiles": [
       [
-        0.4,
+        0.15,
+        "assets/voice/bot/b0.mp3",
+        "Paran yetmiyorsa, suç sende değil."
+      ],
+      [
+        2.95,
         "assets/voice/bot/b1.mp3",
         "Bot teorisi: az kazanan neden hep daha fazla öder?"
       ],
       [
-        3.8,
+        6.35,
         "assets/voice/bot/b2.mp3",
         "1.000 liralık bot bir kış gider. 3.000 liralık, beş kış."
       ],
       [
-        7.5,
+        10.05,
         "assets/voice/bot/b3.mp3",
         "Sen olsan hangisini alırdın?"
       ],
       [
-        12.35,
+        14.9,
         "assets/voice/bot/b4.mp3",
         "Ama Fıstık'ın cebinde sadece 1.200 lira var."
       ],
       [
-        17.7,
+        20.25,
         "assets/voice/bot/b5b.mp3",
         "Beş kışta Fıstık 5.000 lira ödedi, Diken 3.000."
       ],
       [
-        21.0,
+        23.55,
         "assets/voice/bot/b6.mp3",
         "Ve Fıstık'ın ayakları hâlâ ıslak."
       ],
       [
-        24.1,
+        26.65,
         "assets/voice/bot/b7.mp3",
         "Bir araştırmada en az kazananlar, tuvalet kâğıdına bile %6 fazla ödedi."
       ],
       [
-        28.7,
+        31.25,
         "assets/voice/bot/b8.mp3",
         "Sorun akılda değil, cepte. Kış gelmeden azar azar biriktir."
       ],
       [
-        33.25,
+        35.8,
         "assets/voice/bot/b9.mp3"
       ],
       [
-        36.4,
+        38.95,
         "assets/voice/ortak/takip.mp3"
       ]
-    ]
+    ],
+    "voiceDuck": {
+      "release": 0.25,
+      "amb": 0.7
+    }
   }
 }

@@ -4783,9 +4783,13 @@ function defineValue() {
     const BARS = o.bars || [99, 99], ROLLS = ev('rolls'), PCT = ev('pct'), CASH = ev('cash');
     const LESSON = ev('lesson'), HEAD = ev('head'), PHONE = ev('phone'), COLOR = ev('color'), APP = ev('app'), STEPS = o.steps || [], REACH = ev('reach');
     const CTA = ev('cta'), SPLASH = ev('splash'), FOLLOW = ev('follow'), TAPF = ev('tapf'), OFF = ev('off');
+    // kanca: el Fıstık'ı dürter (jabs), "değil"de çekilir (yank); "Bot teorisi"nde kamera geri açılır (pull), Diken gelir (dkin);
+    // "az kazanan"da kamera Fıstık'a kayar (az); kartlar: Diken'in, Fıstık'ın, "öder"de Fıstık'ınki büyür (hcards)
+    const JABS = o.jabs || [], YANK = ev('yank'), PULL = ev('pull'), DKIN = ev('dkin'), AZ = ev('az'), HCARD = o.hcards || [99, 99, 99];
     const SY = 1180, GY = 1480;  // odak noktasının ekrandaki yüksekliği; kaldırımın üstü (botların tabanı)
     const world = () => el('div', 'abs', s.root, { left: 0, top: 0, width: '1080px', height: '1920px', transformOrigin: '0 0' });
     const hookAt = (lt) => lt < SHOP || lt >= OFF;
+    const hl = (lt) => (lt >= OFF ? 0 : lt);  // kancanın kendi zamanı: döngünün sonunda ilk kareye döner
     const colorK = (lt) => (lt >= OFF ? 0 : lt >= CTA ? 1 : E.inOut(prog(lt, COLOR, 0.7)));  // 0 sepya film, 1 renkli
     const sepia = (k) => (k >= 1 ? 'none' : `sepia(${0.92 * (1 - k)}) saturate(${0.8 + 0.2 * k}) contrast(${1.12 - 0.12 * k}) brightness(${0.95 + 0.05 * k})`);
     const hz = (k) => { const x = Math.sin(k * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };  // kareye bağlı sabit rastgele
@@ -4881,10 +4885,10 @@ function defineValue() {
     pixEl(showB[0], CHEAP_SOLE, CHEAP_C, 12, { left: 0, top: '60px' });
     pixEl(showB[1], STURDY_SOLE, STURDY_C, 12, { left: 0, top: '60px' });
     const tags = PED.map((cx, i) => {
-      el('div', 'abs', win, { left: px(cx - 2), top: 0, width: '4px', height: '40px', background: '#3A2414', zIndex: 4 });
+      const str = el('div', 'abs', win, { left: px(cx - 2), top: 0, width: '4px', height: '40px', background: '#3A2414', zIndex: 4 });
       const t = el('div', 'abs', win, { left: px(cx - 100), top: '40px', width: '200px', height: '150px', boxSizing: 'border-box', borderRadius: '12px', border: '5px solid #3A2414', background: '#FFF6E0', zIndex: 4, textAlign: 'center', transformOrigin: '50% 0' });
       t.innerHTML = `<div class="p it" style="font-size:58px;line-height:1;margin-top:14px;color:#2A1E1A">${i ? '3.000 TL' : '1.000 TL'}</div><div class="d it" style="font-size:50px;line-height:1;margin-top:8px;color:${i ? '#2F6B3A' : '#A8321E'}">${i ? '5 KIŞ' : '1 KIŞ'}</div>`;
-      return { t, p: t.querySelector('.p'), d: t.querySelector('.d') };
+      return { t, str, p: t.querySelector('.p'), d: t.querySelector('.d') };
     });
     const noStamp = el('div', 'abs it', win, { left: '245px', top: '52px', width: '180px', padding: '2px 0 6px', textAlign: 'center', border: '6px solid #C0392B', borderRadius: '10px', background: 'rgba(255,246,224,.85)', color: '#C0392B', fontSize: '50px', lineHeight: 1, zIndex: 6, opacity: 0, transformOrigin: '50% 50%' });
     noStamp.textContent = 'YETMEZ';
@@ -4945,6 +4949,27 @@ function defineValue() {
     const dHold = el('div', 'abs', dR.h, { left: 0, top: 0, width: '100%', height: '100%', display: 'none' });  // tombul cüzdan
     pixEl(dHold, ['..WW.WW..', '.bWWbWWb.', 'bBBBBBByb', 'bbbbbbbyb', 'bBBBBBBBb', 'bBBBBBBBb', 'bbbbbbbbb'], { ...WALLET_COL, W: '#CFE3B8' }, dR.c, { left: px(11.5 * dR.c), top: px(14.5 * dR.c) });
     pixEl(dHold, HOLD_PAWS, { A: '#2A1E1A', D: '#8C6A4F', B: '#5E4636' }, dR.c, { left: px(9 * dR.c), top: px(20.5 * dR.c) });
+    // kancada suçlayan el: kadraj dışından gelen eldivenli işaret parmağı; kolu kadrajın dışına uzanır
+    const HAND = [
+      '...........oooo...........',
+      '..........oWWWWo..........',
+      '..........oWWWWWo.........',
+      '.ooooooooooWWWWWWoooo.....',
+      'oWWWWWWWWWWWWWWWWWWGoCCo..',
+      'oWWWWWWWWWWWWWWWWWWGoCCoKK',
+      '.oooooooooGWWWWWWWWGoCCoKK',
+      '.........oWWWWWWWWWGoCCoKK',
+      '.........oGGGWWWWWWGoCCoKK',
+      '.........oWWWWWWWWWGoCCoKK',
+      '.........oGGGWWWWWWGoCCoKK',
+      '..........oWWWWWWWGGoCCo..',
+      '...........oooooooo.oooo..',
+    ];
+    const HAND_C = { o: '#16110F', W: '#F4EEE2', G: '#B8B0A0', C: '#DCD4C4', K: '#2A2630' };
+    const HCELL = 13;
+    const hand = el('div', 'abs', camA, { left: 0, top: 0, width: '1700px', height: px(13 * HCELL), display: 'none', zIndex: 6, transformOrigin: `0 ${5 * HCELL}px` });
+    pixEl(hand, HAND, HAND_C, HCELL, { left: 0, top: 0 });
+    el('div', 'abs', hand, { left: px(26 * HCELL), top: px(5 * HCELL), width: '1300px', height: px(6 * HCELL), background: '#2A2630', boxShadow: `inset 0 ${HCELL / 2}px 0 #4A4452, inset 0 -${HCELL / 2}px 0 #16110F` });
     // ödediği tutar kartları (başların üstünde): sessiz film ara yazısı gibi siyah kart, çift beyaz çerçeve
     const paidCard = (cls) => {
       const e = el('div', 'abs it', camAx, { left: 0, top: 0, width: '300px', height: '128px', boxSizing: 'border-box', borderRadius: '14px', background: '#0E0B0A', border: '5px solid #F4EEE2', boxShadow: '0 0 0 4px #0E0B0A, 0 0 0 8px rgba(244,238,226,.6)', textAlign: 'center', zIndex: 6, transformOrigin: '50% 100%' });
@@ -5086,8 +5111,8 @@ function defineValue() {
     const paidF = (lt) => (hookAt(lt) ? 5000 : lt < FBUY ? 0 : 1000 * buys.filter((b) => lt >= b).length);
     const pileN = (lt) => (hookAt(lt) ? 4 : lt >= CTA ? 0 : WIN.filter((w) => lt >= w + 0.3).length);
     const fX = (lt) => (hookAt(lt) ? PX - 20 : lt < MONT ? 470 : PX);
-    const dOn = (lt) => hookAt(lt) || (lt >= DIN && lt < LESSON) || lt >= CTA;
-    const dX = (lt) => (hookAt(lt) || lt >= MONT ? 800 : lerp(1320, 860, E.out(prog(lt, DIN, 0.55))));
+    const dOn = (lt) => (hookAt(lt) ? hl(lt) >= DKIN : (lt >= DIN && lt < LESSON) || lt >= CTA);  // kancada kamera açılırken gelir
+    const dX = (lt) => (hookAt(lt) ? lerp(1320, 800, E.out(prog(hl(lt), DKIN, 0.6))) : lt >= MONT ? 800 : lerp(1320, 860, E.out(prog(lt, DIN, 0.55))));
     const dBoots = (lt) => hookAt(lt) || lt >= DBUY;
     const winter = (lt) => (hookAt(lt) ? 5 : lt < SHOP ? 5 : lt < WIN[0] ? 1 : WIN.filter((w) => lt >= w).length + 1);
     const snowing = (lt) => lt >= CTA ? !hookAt(lt) : lt >= MONT && lt < NEWS && winter(lt) % 2 === 0;
@@ -5104,6 +5129,7 @@ function defineValue() {
       const alt = Math.floor((lt - COUNT) / 0.375) % 2;  // karar anında spot sırayla iki botta
       spots.forEach((sp, i) => { sp.style.opacity = counting ? (alt === i ? 1 : 0.15) : lit[i] ? 0.8 : 0.1; });
       tags.forEach((tg, i) => {
+        tg.t.style.display = tg.str.style.display = hk ? 'none' : 'block';  // kancada fiyat kartı yok: yakın planda Fıstık'ın ve elin arkasında kalabalık yapıyordu
         const pOn = hk || lt >= MONT || lt >= TAGS[i * 2], dOn2 = hk || lt >= MONT || lt >= TAGS[i * 2 + 1];
         tg.p.style.opacity = pOn ? 1 : 0.12;
         tg.d.style.opacity = dOn2 ? 1 : 0.12;
@@ -5145,7 +5171,12 @@ function defineValue() {
       const wet = !hk && lt >= WET && lt < NEWS;
       const lesson = !hk && lt >= LESSON && lt < APP;
       let mood = ['calm', null, 'half'], rot = 0, jy = 0;  // 'thoughtful' pozunun düşünce noktaları vitrinin üstüne biniyor: yalnız "akılda"da
-      if (hk) { mood = ['calm', null, Math.floor(lt / 0.9) % 3 ? 'half' : 'closed']; rot = Math.sin(lt * 40) * 1.2; }
+      if (hk) {  // dürtüldükçe irkilir, "suç sende"de yüzünü kapar, "değil"de başını kaldırır
+        const h = hl(lt), jb = JABS.some((t) => h >= t && h < t + 0.28);
+        mood = h < YANK ? (JABS.length && h >= JABS[JABS.length - 1] ? ['calm', 'face', 'squeeze'] : ['calm', null, jb ? 'squeeze' : 'half'])
+          : h < YANK + 0.9 ? ['calm', null, 'wide'] : ['calm', null, Math.floor(lt / 0.9) % 3 ? 'half' : 'closed'];
+        rot = Math.sin(lt * 40) * 1.2 + (jb ? -4 : 0);
+      }
       else if (lt < ASK) mood = ['calm', null, blink(lt)];
       else if (lt < COUNT) mood = ['curious', null, 'wide'];
       else if (lt < ZERO) { mood = ['curious', null, alt ? 'wide' : 'squeeze']; rot = alt ? 5 : -3; }
@@ -5166,6 +5197,16 @@ function defineValue() {
       const flap = st.open ? (hk || wet ? flapOf(lt, 26, 0.62) : montage ? flapOf(lt, 30, 0.3) : lesson ? flapOf(lt, 14, 0.9) : flapOf(lt, 22, 0.7)) : 0;
       fCheap.set(!showSturdyF, flap, st.worn);
       fSturdy.set(showSturdyF, 0);
+      // suçlayan el: parmak ucu Fıstık'ın yüzünün yanında; son dürtüşte üstüne gider ve kalır, "değil"de kadrajdan çekilir
+      const hh = hl(lt), yk = prog(hh, YANK, 0.3);
+      hand.style.display = hk && yk < 1 ? 'block' : 'none';
+      if (hk && yk < 1) {
+        const jab = JABS.reduce((a, t, i) => {
+          const k = prog(hh, t, 0.26);
+          return a + (i === JABS.length - 1 ? (k <= 0 ? 0 : k < 0.5 ? Math.sin(Math.PI * k) : 1) * 60 : k > 0 && k < 1 ? Math.sin(Math.PI * k) * 34 : 0);
+        }, 0);
+        hand.style.transform = `translate(${x + 150 - jab + 1300 * yk * yk}px,${GY - 235 - 5 * HCELL - 40 * yk}px) rotate(${-10 * yk}deg)`;
+      }
       pockets.forEach((p, i) => {
         const k = prog(lt, POCKET + i * 0.08, 0.2);
         p.style.display = !hk && lt >= POCKET && lt < FBUY ? 'block' : 'none';
@@ -5200,35 +5241,37 @@ function defineValue() {
       wTag.style.transform = `scale(${0.5 + 0.5 * E.back(wq)})`;
       // ödediği tutar kartları
       const pf = paidF(lt);
-      const fCardOn = hk || (lt >= FBUY && lt < WET);
+      const hpop = (t) => (hk ? E.back(prog(hl(lt), t, 0.3)) : 1);  // kancada kartlar söylendiği anda açılır
+      const fCardOn = hk ? hl(lt) >= HCARD[1] : lt >= FBUY && lt < WET;
       fCard.e.style.display = fCardOn ? 'block' : 'none';
       fCard.e.style.left = px(x - 150); fCard.e.style.top = px(GY - 540);
       fCard.v.textContent = `${fmt(pf)} TL`;
       const over = pf > 3000, same = pf === 3000 && !hk;
       fCard.v.style.color = over ? '#FF6B5E' : same ? '#FFE08A' : '#FFFFFF';
       const lastBuy = [...buys].reverse().find((b) => lt >= b) ?? -9;
-      fCard.e.style.transform = `scale(${1 + 0.22 * Math.sin(Math.PI * prog(lt, lastBuy, 0.3)) + (hk ? 0.04 * Math.sin(lt * 7) : 0) + 0.2 * Math.sin(Math.PI * prog(lt, SUM[0], 0.35))})`;
+      fCard.e.style.transform = `scale(${hpop(HCARD[1]) * (1 + 0.22 * Math.sin(Math.PI * prog(lt, lastBuy, 0.3)) + (hk ? 0.04 * Math.sin(lt * 7) + 0.2 * Math.sin(Math.PI * prog(hl(lt), HCARD[2], 0.35)) : 0) + 0.2 * Math.sin(Math.PI * prog(lt, SUM[0], 0.35)))})`;
       // ── A: Diken ──
       const dx = dX(lt), don = dOn(lt);
       dA.root.style.display = don ? 'block' : 'none';
       if (don) {
-        const walkingD = !hk && lt >= DIN && lt < DIN + 0.55;
+        const walkingD = hk ? hl(lt) >= DKIN && hl(lt) < DKIN + 0.6 : lt >= DIN && lt < DIN + 0.55;
         const hD = walkingD ? hop(lt, 0.26, 30) : { y: 0, sy: 1, sx: 1 };
         let dm = ['calm', null, blink(lt + 0.4)];
         if (lt >= CTA && !hk) dm = lt >= SPLASH ? ['celebrate', Math.floor(lt / 0.2) % 2 ? 'wave' : 'wave2', 'happy'] : ['happy', null, blink(lt)];
         else if (!hk && lt >= DIN && lt < DBUY + 0.4) dm = ['happy', null, 'happy'];
+        else if (hk && hl(lt) < DKIN + 0.9) dm = ['happy', null, 'happy'];
         dA.set(...dm);
         dA.put(dx, GY + dR.c - hD.y, { sx: hD.sx, sy: hD.sy });
       }
       sync(dR, dA, don);
       dSturdy.set(don && dBoots(lt), 0);
       dHold.style.display = !hk && lt >= DIN && lt < DBUY - 0.25 ? 'block' : 'none';
-      const dCardOn = hk || (lt >= FBUY && lt < WET);
+      const dCardOn = hk ? hl(lt) >= HCARD[0] : lt >= FBUY && lt < WET;
       dCard.e.style.display = dCardOn ? 'block' : 'none';
       dCard.e.style.left = px(dx - 150); dCard.e.style.top = px(GY - 540);
       dCard.v.textContent = '3.000 TL';
       dCard.v.style.color = same ? '#FFE08A' : '#FFFFFF';
-      dCard.e.style.transform = `scale(${1 + 0.22 * Math.sin(Math.PI * prog(lt, FBUY, 0.3)) + 0.2 * Math.sin(Math.PI * prog(lt, SUM[1], 0.35))})`;
+      dCard.e.style.transform = `scale(${hpop(HCARD[0]) * (1 + 0.22 * Math.sin(Math.PI * prog(lt, FBUY, 0.3)) + 0.2 * Math.sin(Math.PI * prog(lt, SUM[1], 0.35)))})`;
       // eşitlik ve geçme işaretleri
       const eqOn = !hk && lt >= WIN[1] && lt < WIN[1] + 0.45;
       eq.style.display = eqOn ? 'block' : 'none';
@@ -5347,7 +5390,10 @@ function defineValue() {
 
       // ── kamera planları: dünya noktası (fx, fy) ekranda (540, SY)'ye düşer ──
       let W = 'A', z = 1, fx = 560, fy = SY;
-      if (hk) { const q = lt >= OFF ? 0 : ramp(1.4, 1.6); z = 1.02 + 0.06 * q; fx = lerp(560, 500, q); }                 // kanca: 5. kış (döngüde başa bağlanır)
+      if (hk) {                                                                                                           // kanca: suçlanan Fıstık'a yakın plan → geri açılır: 5. kış (döngüde başa bağlanır)
+        const q = ramp(AZ, 1.6), qp = E.inOut(prog(hl(lt), PULL, 0.8));
+        z = lerp(1.6, 1.02 + 0.06 * q, qp); fx = lerp(470, lerp(560, 500, q), qp); fy = lerp(1280, SY, qp);
+      }
       else if (lt < ASK) { z = 1.1; fx = 700; fy = 1170; }                                                                // vitrin
       else if (lt < COUNT) { const q = ramp(ASK, 0.5); z = lerp(1.1, 1.24, q); fx = lerp(700, 760, q); fy = lerp(1170, 1160, q); }  // soru
       else if (lt < ZERO) { z = 1.26 + 0.03 * ramp(COUNT, 3); fx = 760 + (alt ? 18 : -18) * Math.min(1, (lt - COUNT) * 6); fy = 1160; }  // karar
@@ -5367,7 +5413,7 @@ function defineValue() {
       beats.forEach((t) => { if (lt >= t) beat = t; });
       z *= 1 + 0.012 * Math.exp(-(lt - beat) * 10);
       const weave = ck < 1 && W !== 'C' ? (hz(fr) - 0.5) * 5 : 0;  // eski film: kare titrer
-      const sx = shake(lt, NO, 10, 0.3) + shake(lt, DBUY, 8, 0.25) + shake(lt, SNEEZE, 16, 0.35) + WIN.reduce((a, w) => a + shake(lt, w, 9, 0.25), 0) + shake(lt, SPLASH, 12, 0.3);
+      const sx = shake(hl(lt), YANK, 8, 0.25) + shake(lt, NO, 10, 0.3) + shake(lt, DBUY, 8, 0.25) + shake(lt, SNEEZE, 16, 0.35) + WIN.reduce((a, w) => a + shake(lt, w, 9, 0.25), 0) + shake(lt, SPLASH, 12, 0.3);
       [camA, camB, camC].forEach((c, i) => (c.style.display = 'ABC'[i] === W ? 'block' : 'none'));
       camAx.style.display = W === 'A' ? 'block' : 'none';
       camBx.style.display = W === 'B' ? 'block' : 'none';
@@ -5377,11 +5423,11 @@ function defineValue() {
       camAx.style.transform = tf;
 
       // ── ara yazı kartı ve kredi ──
-      const plateOn = (hk || (lt >= SHOP && lt < COUNT) || (lt >= ZERO && lt < WET) || lt >= CTA) && W === 'A';
+      const plateOn = (hk ? hl(lt) >= PULL + 0.55 : (lt >= SHOP && lt < COUNT) || (lt >= ZERO && lt < WET) || lt >= CTA) && W === 'A';  // kancada geniş planda gelir
       plate.style.display = plateOn ? 'flex' : 'none';
       const wn = lt >= CTA && !hk ? 6 : winter(lt);
       plate.textContent = `${wn}. KIŞ`;
-      const pT = lt >= CTA && !hk ? CTA : [SHOP, ...WIN].filter((t) => lt >= t).pop() ?? -9;
+      const pT = hk ? PULL + 0.55 : lt >= CTA ? CTA : [SHOP, ...WIN].filter((t) => lt >= t).pop() ?? -9;
       plate.style.transform = `scale(${1 + 0.2 * Math.sin(Math.PI * prog(lt, pT, 0.3))})`;
       plate.style.borderColor = lt >= CTA && !hk ? '#F2B63C' : '#F4EEE2';
       plate.style.color = lt >= CTA && !hk ? '#FFE08A' : '#F4EEE2';

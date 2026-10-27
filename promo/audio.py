@@ -25,6 +25,7 @@ rng = np.random.default_rng(11)
 MUS = np.zeros((N, 2))
 SFX = np.zeros((N, 2))
 AMB = np.zeros((N, 2))
+ACC = np.zeros((N, 2))  # müzik vurguları (ör. vurucu akor): konuşma kısmasına uğramaz, iki satırın arasına konur
 
 
 # ───────── temel yardımcılar ─────────
@@ -2626,12 +2627,27 @@ def cue_bot(t0, skip=0, o=None):
     if g('cta') < 99:
         put(AMB, wind(g('off') - g('cta')) * 0.35, T(g('cta')))
 
-    # kanca (ve döngüde yeniden): delik botun tabanı her açılışta şapırdar
+    # kanca (ve döngüde yeniden): delik botun tabanı her açılışta şapırdar (konuşmanın altında kalsın: kısık)
     for a, b in ((0, min(g('shop'), DUR - t0)), (g('off'), DUR - t0)):
         tm = a + 0.31 - (a % 0.62)
         while tm < b - 0.05:
-            put(SFX, squelch(0.42), T(tm), pan=-0.25)
+            put(SFX, squelch(0.3), T(tm), pan=-0.25)
             tm += 0.62
+    # kanca: suçlayan el dürter (kumaş tıkı), "değil"de kadrajdan çekilir; kamera geri açılır, Diken gelir, kartlar açılır
+    for j in o.get('jabs', []):
+        put(SFX, lp(noise(0.05), 900) * expd(0.05, 50) * 0.5, T(j + 0.06), pan=0.3)
+    if 'yank' in o:
+        put(SFX, stereo_move(whoosh(0.3, 700, 2600, 0.5), 0.2, 0.9), T(o['yank']), 0.18)
+    if 'pull' in o:
+        put(SFX, whoosh(0.7, 1800, 400, 0.4), T(o['pull']), 0.1)
+    if 'dkin' in o:
+        for k in range(3):
+            put(SFX, lp(noise(0.06), 700) * expd(0.06, 40) * 0.6, T(o['dkin'] + k * 0.2), pan=0.5)
+    hc = o.get('hcards', [])
+    if len(hc) >= 2:
+        put(SFX, pling(1318, 0.14, 0.4), T(hc[0]), pan=0.4)
+        put(SFX, woodblock(False), T(hc[1]), 0.7, pan=-0.2)
+        put(SFX, pling(1760, 0.14, 0.45), T(hc[1] + 0.03), pan=-0.2)
     if 'shop' in o:  # 1. kış: iris, dükkân zili; eski bot hafifçe şapırdar
         Sh = o['shop']
         iris(Sh)
@@ -3136,7 +3152,7 @@ def piano(m, d, v=0.12, bright=1.0, tack=True):
 
 def ragtime(a, b, last=True, **kw):
     """sessiz film (ragtime) piyanosu: sol el bas–akor (oom-pah), sağ el senkoplu ezgi; eski kayıt rengi.
-    bpm, minor (Am–Dm–E7–Am; yoksa C–A7–D7–G7), soft (seyrek ezgi, kısık bas)."""
+    bpm, minor (Am–Dm–E7–Am; yoksa C–A7–D7–G7), soft (seyrek ezgi, kısık bas), gain (bölümün yüksekliği, 1 = olduğu gibi)."""
     BPM = kw.get('bpm', 104)
     bt = 60 / BPM
     L = b - a
@@ -3184,9 +3200,42 @@ def ragtime(a, b, last=True, **kw):
         for m in prog_[0][2] + [prog_[0][0]]:
             put(bus, piano(m, 1.2, 0.14), end)
     bus = np.stack([lp(hp(bus[:, c], 140), 5500) for c in range(2)], 1)  # eski kayıt: dar bant
-    put(MUS, bus[: int(L * SR)] * 3.5, a)  # piyano tek başına kısık kalır: pop ve lofi ile aynı yüksekliğe (≈ −11,5 dB)
+    put(MUS, bus[: int(L * SR)] * 3.5 * kw.get('gain', 1.0), a)  # piyano tek başına kısık kalır: pop ve lofi ile aynı yüksekliğe (≈ −11,5 dB)
 
-STYLES = {'lofi': lofi, 'horror': horror, 'quiz': quiz, 'chip': chip, 'pop': pop, 'space': space, 'thriller': thriller, 'ragtime': ragtime}
+
+def melodrama(a, b, last=True, **kw):
+    """sessiz film gerilimi: piyanoda alçak tremolo (Adim7, giderek yükselir); stab anında vurucu akor (Am, oktav bas).
+    stab: bölüm başından saniye (yoksa akor yok). Akor ACC kanalına gider: konuşmanın kısmasına uğramaz, iki satırın
+    arasına konur ve bölüm bitse de söner gibi çalar. gain: tremolonun yüksekliği; cresc: tremolonun kaç saniyede
+    yükseldiği (döngünün sonundaki kısa bölümde baştakiyle aynı alçak yerden başlasın diye)."""
+    L = b - a
+    st = kw.get('stab')
+    end = min(L, st) if st is not None else L
+    cresc = kw.get('cresc', end)
+    bus = seg_bus(a, b)
+    pairs = [(45, 51), (48, 54)]  # A–E♭ ve C–G♭: ikişer nota sırayla, saniyede 12 vuruş
+    t, k = 0.0, 0
+    while t < end - 0.02:
+        v = 0.05 + 0.07 * min(1.0, t / max(cresc, 0.1)) ** 1.5
+        for m in pairs[k % 2]:
+            put(bus, piano(m, 0.11, v, bright=0.5, tack=False), t)
+        if k % 6 == 0:  # derinde kök
+            put(bus, piano(33, 0.6, v * 0.8, bright=0.4, tack=False), t)
+        t += 1 / 12
+        k += 1
+    bus = np.stack([lp(hp(bus[:, c], 60), 4000) for c in range(2)], 1)
+    put(MUS, bus[: int(L * SR)] * 3.5 * kw.get('gain', 1.0), a)
+    if st is not None:
+        hit = np.zeros((int(1.0 * SR), 2))
+        for m, v in ((33, 0.3), (45, 0.26), (57, 0.2), (60, 0.18), (64, 0.18), (69, 0.16)):
+            put(hit, piano(m, 1.0, v, bright=1.1), 0.0)
+        tl = np.arange(len(hit)) / SR  # kısa vuruş: 0,15 sn'den sonra hızla söner, sonraki satırın altında kalmaz
+        hit *= np.where(tl < 0.15, 1.0, np.exp(-(tl - 0.15) / 0.09))[:, None]
+        hit = np.stack([lp(hp(hit[:, c], 50), 6000) for c in range(2)], 1)
+        put(ACC, hit * 3.5 * kw.get('stabGain', 1.0), a + st)
+
+STYLES = {'lofi': lofi, 'horror': horror, 'quiz': quiz, 'chip': chip, 'pop': pop, 'space': space, 'thriller': thriller, 'ragtime': ragtime,
+          'melodrama': melodrama}
 
 
 # ═════════ REELS'İ KUR ═════════
@@ -3330,12 +3379,27 @@ if os.path.exists(VOICE_PATH):  # voice.py make <reels> ile üretilmiş seslendi
     venv = np.abs(VO).max(1)
     venv = lp(np.convolve(venv, np.ones(int(0.05 * SR)) / int(0.05 * SR), 'same'), 6, 1).clip(0, None)
     duck_v = 1 - np.clip(venv / 0.04, 0, 1)  # konuşurken 0, sessizken 1
-    mus = mus * (0.30 + 0.70 * duck_v)[:, None]       # müzik −10 dB civarı kısılır
+    # reels düzeyinde "voiceDuck": {"music": taban, "release": sn, "amb": taban}: konuşma altında müzik daha derin kısılır,
+    # kısma anında iner ama release süresiyle yavaşça kalkar (kelime aralarında müzik kabarmaz); amb: yağmur vb. ortam da kısılır
+    DK = REEL.get('voiceDuck') or {}
+    if DK.get('release'):
+        step = SR // 1000  # 1 kHz zarf
+        e, k = duck_v[::step], np.exp(-1 / (DK['release'] * 1000))
+        out, cur = np.empty_like(e), 1.0
+        for i, x in enumerate(e):
+            cur = x if x < cur else x + (cur - x) * k
+            out[i] = cur
+        duck_v = np.interp(np.arange(N), np.arange(len(out)) * step, out)
+    mf = DK.get('music', 0.30)
+    mus = mus * (mf + (1 - mf) * duck_v)[:, None]       # müzik −10 dB civarı kısılır
     sfx = sfx * (0.40 + 0.60 * duck_v)[:, None]       # efektler konuşmayı bastırmasın
-    mus_wet = mus_wet * (0.30 + 0.70 * duck_v)[:, None]
+    mus_wet = mus_wet * (mf + (1 - mf) * duck_v)[:, None]
+    if 'amb' in DK:
+        AMB = AMB * (DK['amb'] + (1 - DK['amb']) * duck_v)[:, None]
     print('seslendirme karışıma eklendi:', VOICE_PATH)
 VOMIX = VO * 1.5 if VO is not None else 0
-write(master(mus * 0.55 + mus_wet * 0.05 + sfx * 0.9 + AMB + VOMIX), REEL_NAME)
+acc = ACC * REEL.get('musicGain', 1.0)
+write(master((mus + acc) * 0.55 + mus_wet * 0.05 + sfx * 0.9 + AMB + VOMIX), REEL_NAME)
 if REEL.get('noMusicVariant'):
     # Instagram'da trend ses eklemek için: yalnız efektler ve konuşma
     write(master(sfx * 0.9 + AMB + VOMIX, -17.0), f'{REEL_NAME}-muziksiz')

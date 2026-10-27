@@ -543,11 +543,11 @@ Cep Defteri'nde Bütçe ve planlar → Plan ekle → Ödeme, Bir kez: tutara öd
 
 ---
 
-## 26 · bot-teorisi (kavram: bot teorisi / yoksulluk primi, seslendirme: Buğra, döngülü, 39,95 sn)
+## 26 · bot-teorisi (kavram: bot teorisi / yoksulluk primi, seslendirme: Buğra, döngülü, 42,5 sn)
 
 **Açıklama:**
 ```
-Az kazanan neden hep daha fazla öder? 👢
+Paran yetmiyorsa suç sende değil: az kazanan neden hep daha fazla öder? 👢
 Ucuz diye alıp iki kere ödediğin şey ne? Yoruma yaz 👇
 📌 Kaydet; bir dahaki "ucuzu alayım, idare eder" anında aklına gelsin. Android erken erişim yakında.
 
@@ -562,4 +562,4 @@ Cep Defteri'nde Yatırım → Birikim hedefleri → + Hedef: "Sağlam bot" gibi 
 #bütçe #birikim #öğrencibütçesi #paraipuçları #yoksullukprimi #botteorisi #cepdefteri
 ```
 
-**Yayın notu:** Kapak karesi olarak 0,2 sn'yi seç (sepya, yağmur, delik botuyla su birikintisinde melon şapkalı Fıstık, eski bot yığını, sağlam botlu Diken, "ÖDEDİĞİ 5.000 TL" kırmızı ve "3.000 TL" kartları, "5. KIŞ" + "Az kazanan neden fazla öder?"). Kışın ilk soğuk ve yağmurlu haftasında yayınla (bot alışverişi zamanı). İlk yorumu sabitle: "Fıstık 5 kışta 5.000 TL ödedi, Diken 3.000. Senin ucuz diye alıp iki kere ödediğin şey ne? (Tutarlar örnek.)" Karar anında soru "UCUZ mu, SAĞLAM mı?": izleyicinin kendi seçimi; dönemeç Fıstık'ın cebindeki 1.200 TL (seçmek için önce paranın olması gerekiyor). Çağrılar sonda: önce seslendirmeyle aynı soru + "Yoruma yaz", sonra ortak takip satırı ve takip kartı. "Arkadaşına gönder" ve "kaydet" açıklamada. Araştırma rakamları Washington Post haberinden ve yazarların üniversitesinin yazısından (yaprak başına %5,9; videoda yuvarlanıp "yaklaşık %6"). Pratchett'in adı ekranda kaynak olarak geçer; romandan uzun alıntı yapılmaz, fikir anlatılır ("ayakları hâlâ ıslak" romandaki sonun kısa bir yankısı). Yorumlarda en çok anılan ürünü (şarj kablosu, kulaklık, ayakkabı…) bir sonraki reelsin açılışında kullan.
+**Yayın notu:** Kapak karesi olarak 0,1 sn'yi seç (sepya, yağmur, yakın planda delik botuyla su birikintisinde melon şapkalı Fıstık, eski bot yığını, kadraj dışından onu suçlarcasına gösteren eldivenli el + "Paran yetmiyorsa suç sende değil"). İlk sürümün kancası "Az kazanan neden fazla öder?" idi (5. kışın geniş planı; commit 95670f9 ile yeniden üretilebilir); istenirse ikisi deneme reelsi olarak karşılaştırılır. Kışın ilk soğuk ve yağmurlu haftasında yayınla (bot alışverişi zamanı). İlk yorumu sabitle: "Fıstık 5 kışta 5.000 TL ödedi, Diken 3.000. Senin ucuz diye alıp iki kere ödediğin şey ne? (Tutarlar örnek.)" Karar anında soru "UCUZ mu, SAĞLAM mı?": izleyicinin kendi seçimi; dönemeç Fıstık'ın cebindeki 1.200 TL (seçmek için önce paranın olması gerekiyor). Çağrılar sonda: önce seslendirmeyle aynı soru + "Yoruma yaz", sonra ortak takip satırı ve takip kartı. "Arkadaşına gönder" ve "kaydet" açıklamada. Araştırma rakamları Washington Post haberinden ve yazarların üniversitesinin yazısından (yaprak başına %5,9; videoda yuvarlanıp "yaklaşık %6"). Pratchett'in adı ekranda kaynak olarak geçer; romandan uzun alıntı yapılmaz, fikir anlatılır ("ayakları hâlâ ıslak" romandaki sonun kısa bir yankısı). Yorumlarda en çok anılan ürünü (şarj kablosu, kulaklık, ayakkabı…) bir sonraki reelsin açılışında kullan.
