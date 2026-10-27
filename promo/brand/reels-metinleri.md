@@ -540,3 +540,26 @@ Cep Defteri'nde Bütçe ve planlar → Plan ekle → Ödeme, Bir kez: tutara öd
 ```
 
 **Yayın notu:** Kapak karesi olarak 0,2 sn'yi seç (son oda: pati ÖDE ile VAZGEÇ arasında, kasa kapısında "SEPET SÜRESİ 00:03", kioskta kalem kalem fiş ve "ÖDE 1.320 TL", tepside 1.000 TL'lik bilet + "Bilet 1.000 TL'ydi. Ödemede?"). Konser ya da festival biletlerinin satışa çıktığı bir hafta yayınla. İlk yorumu sabitle: "Karamel'in 1.000 TL'lik bileti ödemede 1.320 TL oldu. Seninkinde hangi ücret çıktı? (Tutarlar örnek.)" Karar anında soru "ÖDE mi, VAZGEÇ mi?": izleyicinin kendi seçimi; dönemeç Karamel'in ödemesi ve çıkıştaki "Buraya kadar geldim zaten" korosu. Çağrılar sonda: önce seslendirmeyle aynı soru + "Yoruma yaz", sonra ortak takip satırı ve takip kartı. "Arkadaşına gönder" ve "kaydet" açıklamada. Araştırma rakamları makalenin yazarlarının üniversitesinin (Berkeley Haas) duyurusundan; StubHub adı videoda geçmiyor, ekranda "ABD'DE BİR DENEY" ve kaynak satırı var. Sepet bombası (sahte geri sayım) ile aynı aileden (çevrim içi alışverişin karanlık desenleri); aralarına en az bir hafta koy. Yorumlarda en çok anılan ücreti bir sonraki reelsin açılışında kullan ("En çok hizmet bedeline kızdınız").
+
+---
+
+## 26 · bot-teorisi (kavram: bot teorisi / yoksulluk primi, seslendirme: Buğra, döngülü, 39,95 sn)
+
+**Açıklama:**
+```
+Az kazanan neden hep daha fazla öder? 👢
+Ucuz diye alıp iki kere ödediğin şey ne? Yoruma yaz 👇
+📌 Kaydet; bir dahaki "ucuzu alayım, idare eder" anında aklına gelsin. Android erken erişim yakında.
+
+Bin liralık bot bir kış gidiyor, üç bin liralık beş kış. Fıstık'ın cebinde 1.200 TL var, her kış ucuzunu alıyor: beş kışta 5.000 TL. Diken bir kez 3.000 TL verdi. Ve Fıstık'ın ayakları hâlâ ıslak. Tutarlar örnek.
+Bu fikir Terry Pratchett'in Men at Arms (1993) romanından: "bot teorisi".
+Araştırma: ABD'de 100 binden fazla hanenin 7 yıllık tuvalet kâğıdı alışverişinde, en az kazananlar yaprak başına en çok kazananlardan yaklaşık %6 fazla ödedi; büyük paketi ve indirimi alacak nakitleri yoktu (Orhun ve Palazzolo, 2019, Journal of Marketing Research).
+Çözüm: kaçınılmaz alımları (kışlık bot, telefon ekranı, kitap) ihtiyaç gelmeden azar azar biriktir; o gün geldiğinde ucuzuna mecbur kalmazsın.
+
+Her kış yeni bot alan arkadaşına gönder.
+Cep Defteri'nde Yatırım → Birikim hedefleri → + Hedef: "Sağlam bot" gibi bir hedef aç; ilerlemesi koyduğun net parayla ölçülür.
+
+#bütçe #birikim #öğrencibütçesi #paraipuçları #yoksullukprimi #botteorisi #cepdefteri
+```
+
+**Yayın notu:** Kapak karesi olarak 0,2 sn'yi seç (sepya, yağmur, delik botuyla su birikintisinde melon şapkalı Fıstık, eski bot yığını, sağlam botlu Diken, "ÖDEDİĞİ 5.000 TL" kırmızı ve "3.000 TL" kartları, "5. KIŞ" + "Az kazanan neden fazla öder?"). Kışın ilk soğuk ve yağmurlu haftasında yayınla (bot alışverişi zamanı). İlk yorumu sabitle: "Fıstık 5 kışta 5.000 TL ödedi, Diken 3.000. Senin ucuz diye alıp iki kere ödediğin şey ne? (Tutarlar örnek.)" Karar anında soru "UCUZ mu, SAĞLAM mı?": izleyicinin kendi seçimi; dönemeç Fıstık'ın cebindeki 1.200 TL (seçmek için önce paranın olması gerekiyor). Çağrılar sonda: önce seslendirmeyle aynı soru + "Yoruma yaz", sonra ortak takip satırı ve takip kartı. "Arkadaşına gönder" ve "kaydet" açıklamada. Araştırma rakamları Washington Post haberinden ve yazarların üniversitesinin yazısından (yaprak başına %5,9; videoda yuvarlanıp "yaklaşık %6"). Pratchett'in adı ekranda kaynak olarak geçer; romandan alıntı yapılmaz, yalnız fikir anlatılır. Yorumlarda en çok anılan ürünü (şarj kablosu, kulaklık, ayakkabı…) bir sonraki reelsin açılışında kullan.

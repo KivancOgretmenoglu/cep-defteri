@@ -54,7 +54,9 @@ elektrik piyano, plak cızırtısı, bant titremesi), `horror` (uğultu, uyumsuz
 `quiz` (yarışma programı: 132 BPM swing, bakır nefesliler, yürüyen bas), `pop` (hafif tropik pop: 104 BPM,
 el çırpma, marimba), `space` (uzay görevi: 112 BPM kare dalga arpej, yavaş pad, sekizlik bas), `thriller`
 (kaçış odası gerilimi: 120 BPM, Dm–B♭–Gm–A sekizlik nabız bası, her vuruşta saat tiki, ölçü başında boğuk davul; ikinci
-yarıda birbirine sürtünen yüksek yaylılar). Bölümler arasında boşluk bırakılabilir (ör. korku vuruşundan sonra
+yarıda birbirine sürtünen yüksek yaylılar), `ragtime` (sessiz film piyanosu: honky-tonk akortlu piyano, sol elde
+bas–akor, sağ elde senkoplu ezgi, eski kayıt gibi dar bant; seçenekler `bpm`, `minor` (Am–Dm–E7–Am, yoksa
+C–A7–D7–G7), `soft` (seyrek ezgi, kısık bas)). Bölümler arasında boşluk bırakılabilir (ör. korku vuruşundan sonra
 sessizlik). Plan yoksa eski chiptune düzeni kullanılır.
 
 ### Yaratıcı hook sahneleri (`hooks.js`)

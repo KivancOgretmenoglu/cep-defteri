@@ -2530,6 +2530,255 @@ def cue_oda(t0, skip=0, o=None):
         put(SFX, fm_bell(1568, 0.7, 0.18), T(Tf + 0.06))
         put(SFX, pling(2093, 0.1, 0.5), T(Tf + 0.12), pan=0.3)
 
+def cue_bot(t0, skip=0, o=None):
+    o = o or {}
+    T = at(t0, skip)
+    g = lambda k: o.get(k, 99)
+
+    def thump(v):  # kalp: alt vuruş + üst katman
+        x = np.sin(2 * np.pi * phase(glide(70, 40, 0.18))) * expd(0.18, 16)
+        h = np.sin(2 * np.pi * phase(glide(170, 95, 0.1))) * expd(0.1, 30) * 0.45
+        x[: len(h)] += h
+        return x * v
+
+    def beep(f, d=0.1, v=0.2):  # film geri sayımı biplemesi
+        x = np.sin(2 * np.pi * f * tt(d))
+        return x * adsr(len(x), 0.003, 0.03, 0.8, 0.02) * v
+
+    def squelch(v=0.5):  # delik bottan su: ıslak şapırtı
+        d = 0.16
+        x = sweep_bp(noise(d), np.linspace(1500, 450, int(d * SR)), q=2.5) * 1.8
+        b = np.sin(2 * np.pi * phase(glide(420, 150, 0.09))) * expd(0.09, 26) * 0.6
+        x[: len(b)] += b
+        return x * np.sin(np.pi * np.linspace(0, 1, len(x))) ** 0.5 * v
+
+    def plop(v=0.3):  # damla
+        return np.sin(2 * np.pi * phase(glide(900, 1700, 0.05))) * expd(0.05, 50) * v
+
+    def projector(d):  # film makinesi: saniyede 18 tık ve motor uğultusu
+        n = int(d * SR)
+        out = lp(noise(d), 240) * 0.3
+        c = hp(noise(0.004), 2500) * np.exp(-np.arange(int(0.004 * SR)) / (0.0008 * SR))
+        for k in range(int(d * 18)):
+            i = int(k / 18 * SR)
+            out[i : i + len(c)] += c[: n - i] * (0.45 if k % 2 else 0.3)
+        return out
+
+    def rustle(d=0.22):  # kumaş hışırtısı (cep)
+        t = tt(d)
+        return bp(noise(d), 1200, 5000) * (0.5 + 0.5 * (np.sin(2 * np.pi * 23 * t) > 0)) * np.sin(np.pi * t / d) * 0.5
+
+    def thud(v=0.6):  # kutu kaldırıma düşer
+        x = lp(noise(0.12), 400) * expd(0.12, 22) * 2.2
+        k = kick(0.8)
+        x[: min(len(x), len(k))] += k[: len(x)] * 0.6
+        return x * v
+
+    def poof(v=0.5):  # duman bulutu: yumuşak hava
+        x = bp(noise(0.35), 300, 2500) * expd(0.35, 7) * 1.4
+        b = bloop(300, 900, 0.08, 0.3)
+        x[: len(b)] += b
+        return x * v
+
+    def sneeze():  # "ha… hap-ŞU!" (patlama 0,36 sn'de)
+        out = np.zeros(int(0.9 * SR))
+        a = inhale(0.34)
+        out[: len(a)] += a * 1.2
+        b = voice([360, 520, 280], [(750, 1250), (700, 1300), (360, 900)], 0.3, kind='saw', breath=0.7, v=0.45)
+        n = bp(noise(0.24), 1500, 7000) * expd(0.24, 9) * 0.9
+        i = int(0.36 * SR)
+        out[i : i + len(b)] += b
+        out[i : i + len(n)] += n
+        return out
+
+    def shimmer(d=0.9):  # renk gelir: yükselen çan arpeji ve parıltı
+        out = np.zeros(int((d + 1.0) * SR))
+        for k, m in enumerate([72, 76, 79, 84, 88, 91, 96]):
+            b = fm_bell(freq(m), 0.9, 0.12, ratio=2.0)
+            i = int(k * d / 7 * SR)
+            out[i : i + len(b)] += b[: len(out) - i]
+        r = riser(d)
+        out[: len(r)] += r * 0.4
+        return out
+
+    def splash_snd():  # su birikintisine zıplama
+        x = bp(noise(0.45), 500, 6000) * expd(0.45, 8) * 1.6
+        for k in range(5):
+            p_ = plop(0.25)
+            i = int((0.05 + k * 0.06) * SR)
+            x[i : i + len(p_)] += p_
+        return x
+
+    cut = lambda t, a=0.2, b=-0.2: put(SFX, stereo_move(whoosh(0.28, 2400, 500, 0.5), a, b), T(t - 0.08), 0.16)  # plan kesmesi
+    iris = lambda t: put(SFX, stereo_move(whoosh(0.4, 500, 1800, 0.45), -0.3, 0.3), T(t - 0.22), 0.18)  # iris kapanıp açılır
+
+    # sepya bölümler: film makinesi tıkırtısı; yağmur (kanca, vitrin, ıslak ayaklar, ders) ve montajda rüzgâr
+    film_end = min(g('color') + 0.4, DUR - t0)
+    put(AMB, projector(film_end), T(0), 0.35)
+    if g('off') < DUR - t0:
+        put(AMB, projector(DUR - t0 - g('off')), T(g('off')), 0.35)
+    for a, b in ((0, g('mont')), (g('last'), g('news')), (g('lesson'), g('app')), (g('off'), DUR - t0)):
+        b = min(b, DUR - t0)
+        if b - a > 0.1:
+            put(AMB, rain(b - a) * 0.6, T(a))
+    if g('mont') < 99:
+        put(AMB, wind(g('last') - g('mont')) * 0.5, T(g('mont')))
+    if g('cta') < 99:
+        put(AMB, wind(g('off') - g('cta')) * 0.35, T(g('cta')))
+
+    # kanca (ve döngüde yeniden): delik botun tabanı her açılışta şapırdar
+    for a, b in ((0, min(g('shop'), DUR - t0)), (g('off'), DUR - t0)):
+        tm = a + 0.31 - (a % 0.62)
+        while tm < b - 0.05:
+            put(SFX, squelch(0.42), T(tm), pan=-0.25)
+            tm += 0.62
+    if 'shop' in o:  # 1. kış: iris, dükkân zili; eski bot hafifçe şapırdar
+        Sh = o['shop']
+        iris(Sh)
+        for k, f in enumerate((1568, 2093)):
+            put(SFX, fm_bell(f, 0.6, 0.12, ratio=3.1), T(Sh + 0.12 + k * 0.1), pan=0.4)
+        tm = Sh + 0.35
+        while tm < g('ask') - 0.1:
+            put(SFX, squelch(0.18), T(tm), pan=-0.3)
+            tm += 0.7
+    tg = o.get('tags', [])
+    for i, t in enumerate(tg):  # fiyat ve dayanma süresi söylendiği anda: kartlar
+        if i == 1:
+            put(SFX, woodblock(False), T(t), 0.8, pan=-0.2)
+        elif i == 3:
+            for k in range(2):
+                put(SFX, fm_bell(2093, 0.5, 0.12), T(t + k * 0.11), pan=0.3)
+        else:
+            put(SFX, pling(1318 if i == 0 else 1760, 0.16, 0.5), T(t), pan=-0.2 if i == 0 else 0.3)
+    if 'ask' in o:  # soru: kalp atışı başlar ve hızlanır (value.js ile aynı takvim)
+        A, Z = o['ask'], g('zero')
+        t, k = A + 0.3, 0
+        while t < Z - 0.1:
+            put(SFX, thump(0.72), T(t)); put(SFX, thump(0.48), T(t + 0.16))
+            t += max(0.42, 0.62 - 0.03 * k); k += 1
+    if 'count' in o:  # gerçek 3 saniye: film geri sayımı biplemeleri, spot iki bot arasında, son anda nefes
+        Cn, Z = o['count'], g('zero')
+        cut(Cn)
+        for j in range(3):
+            put(SFX, beep(1000 if j < 2 else 1320, 0.12, 0.22), T(Cn + j))
+        for j in range(8):
+            put(SFX, key_click(0.28), T(Cn + j * 0.375), pan=0.4 if j % 2 else -0.4)
+        put(SFX, inhale(0.3), T(Z - 0.32), 0.6)
+    if 'pocket' in o:  # cepler dışarı, güve uçar
+        P = o['pocket']
+        put(SFX, rustle(0.2), T(P), pan=-0.3); put(SFX, rustle(0.2), T(P + 0.08), pan=0.3)
+        put(SFX, flutter(1.1), T(P + 0.12), 0.7, pan=-0.4)
+    if 'din' in o:  # Diken gelir: adımlar ve ıslık
+        D = o['din']
+        for k in range(3):
+            put(SFX, lp(noise(0.06), 700) * expd(0.06, 40) * 0.6, T(D + k * 0.18), pan=0.5)
+        whistle(T(D + 0.1), SFX, [(0, 79, 0.1), (0.12, 84, 0.22)])
+    if 'wallet' in o:  # cüzdan açılır: 1.200 TL
+        W_ = o['wallet']
+        put(SFX, rustle(0.12), T(W_ - 0.05))
+        put(SFX, bloop(500, 300, 0.12, 0.3), T(W_ + 0.02))
+    if 'no' in o:  # YETMEZ damgası
+        put(SFX, stamp(), T(o['no']), 0.55, pan=0.3)
+        put(SFX, buzzer(0.25), T(o['no'] + 0.05), 0.3, pan=0.3)
+    for key, v, pan in (('dbuy', 0.5, 0.4), ('fbuy', 0.35, -0.2)):  # vitrinden ayaklara uçan bot, kasa, duman
+        if key in o:
+            B = o[key]
+            put(SFX, stereo_move(whoosh(0.32, 900, 2600, 0.5), 0.4, pan), T(B - 0.32), 0.18)
+            put(SFX, cash_register(), T(B), v, pan=pan)
+            put(SFX, poof(0.45), T(B), pan=pan)
+    if 'mont' in o:  # montaj: film hızlanır
+        put(SFX, riser(0.35), T(o['mont'] - 0.1), 0.25)
+    wins = o.get('winters', [])
+    breaks = [w - 0.24 for w in wins] + ([g('last')] if 'last' in o else [])
+    for b in breaks:  # bot patlar: yırtılma ve şapırtı
+        put(SFX, paper_tear(0.12), T(b), 0.35, pan=-0.2)
+        put(SFX, squelch(0.5), T(b + 0.06), pan=-0.2)
+    for i, w in enumerate(wins):  # kutu düşer, kaldırıma çarpar, duman, kasa; eski çift yığına uçar; kış kartı
+        put(SFX, stereo_move(whoosh(0.2, 2400, 600, 0.5), 0, -0.1), T(w - 0.2), 0.14)
+        put(SFX, thud(0.55), T(w))
+        put(SFX, poof(0.35), T(w + 0.02))
+        put(SFX, cash_register(), T(w + 0.04), 0.22)
+        put(SFX, stereo_move(whoosh(0.3, 700, 1800, 0.4), -0.1, -0.7), T(w + 0.05), 0.12)
+        put(SFX, fm_bell(1318, 0.35, 0.08), T(w + 0.01), pan=-0.5)
+        if i == 1:  # 3.000 = 3.000
+            put(SFX, fm_bell(1568, 0.6, 0.14, ratio=2.0), T(w + 0.12)); put(SFX, fm_bell(1568, 0.6, 0.14, ratio=2.0), T(w + 0.12), pan=0.5)
+        if i == 2:  # Fıstık geçer
+            put(SFX, boing(0.4, 0.35), T(w + 0.1), pan=-0.3)
+    if 'last' in o:
+        put(SFX, woodblock(False), T(g('last') + 0.12), 0.6)
+    s5 = o.get('sum', [])
+    if len(s5) == 2:  # "5.000" kasa, "3.000" çan
+        put(SFX, cash_register(), T(s5[0]), 0.3, pan=-0.3)
+        put(SFX, fm_bell(1568, 0.5, 0.1), T(s5[1]), pan=0.4)
+    if 'wet' in o:  # ıslak ayaklar: şapırtılar ve damlalar
+        Wt, Sn = o['wet'], g('sneeze')
+        tm = Wt + 0.31 - (Wt % 0.62)
+        while tm < Sn - 0.4:
+            put(SFX, squelch(0.5), T(tm), pan=-0.1)
+            put(SFX, plop(0.18), T(tm + 0.12), pan=rng.uniform(-0.4, 0.4))
+            tm += 0.62
+    if 'sneeze' in o:
+        put(SFX, sneeze(), T(o['sneeze'] - 0.36), 0.8)
+    if 'paper' in o:  # rüzgârla gelen gazete yüzüne yapışır
+        Pp = o['paper']
+        put(SFX, flutter(0.45), T(Pp - 0.4), 0.6, pan=0.5)
+        put(SFX, lp(noise(0.08), 2500) * expd(0.08, 30) * 1.4, T(Pp))
+    if 'news' in o:  # gazete dönerek gelir
+        Nw = o['news']
+        put(SFX, stereo_move(whoosh(0.5, 300, 2200, 0.6), -0.6, 0.6), T(Nw), 0.3)
+        for m in (57, 64, 69, 73, 76):
+            put(SFX, piano(m, 0.9, 0.22), T(Nw + 0.48))
+    for b in o.get('bars', []):
+        put(SFX, slot_roll(0.5), T(b), 0.12)
+    if 'rolls' in o:
+        put(SFX, bloop(400, 900, 0.07, 0.25), T(o['rolls'])); put(SFX, bloop(500, 1100, 0.07, 0.25), T(o['rolls'] + 0.15))
+    if 'pct' in o:  # +%6 damgası
+        put(SFX, stamp(), T(o['pct']), 0.5, pan=0.3)
+        put(SFX, pling(1568, 0.12, 0.5), T(o['pct'] + 0.08), pan=0.3)
+    if 'cash' in o:
+        put(SFX, piano(45, 1.0, 0.25), T(o['cash']))
+    if 'lesson' in o:  # ders: iris, gazete düşer
+        iris(o['lesson'])
+        put(SFX, flutter(0.4), T(o['lesson'] + 0.05), 0.5, pan=-0.4)
+    if 'head' in o:  # "akılda": düşünme
+        put(SFX, woodblock(True), T(o['head'])); put(SFX, woodblock(True), T(o['head'] + 0.14))
+    if 'phone' in o:  # "cepte": cepten telefon
+        put(SFX, rustle(0.15), T(o['phone'] - 0.05))
+        put(SFX, notif_ding(), T(o['phone'] + 0.12), 0.5)
+    if 'color' in o:  # film renklenir
+        put(SFX, shimmer(0.8), T(o['color'] - 0.25), 0.7)
+    if 'app' in o:
+        put(SFX, stereo_move(whoosh(0.3, 600, 2600, 0.5), 0.4, -0.2), T(o['app'] - 0.05), 0.16)
+    for i, st in enumerate(o.get('steps', [])):  # azar azar: her 500 TL'de bir para
+        put(SFX, pling(freq(84 + [0, 2, 4, 5, 7, 9][i % 6]), 0.13, 0.4), T(st), pan=-0.3 + 0.12 * i)
+        put(SFX, clink(), T(st - 0.02), 0.5)
+    if 'reach' in o:  # hedef tamam
+        R = o['reach']
+        for m in (79, 83, 86, 91):
+            put(SFX, fm_bell(freq(m), 0.9, 0.1, ratio=2.0), T(R))
+        put(SFX, popper(), T(R + 0.05), 0.4)
+    if 'cta' in o:  # renkli 6. kış: iris, zıplama, sıçrama, miyav
+        C = o['cta']
+        iris(C)
+        whistle(T(C + 0.15), SFX, [(0, 76, 0.1), (0.12, 79, 0.1), (0.24, 84, 0.25)])
+    if 'splash' in o:
+        Sp = o['splash']
+        put(SFX, slide_whistle(400, 1200, 0.35), T(Sp - 0.42), 0.5)
+        put(SFX, splash_snd(), T(Sp), 0.7)
+        put(SFX, mascot_voice('fistik'), T(Sp + 0.15), 0.45, pan=-0.2)
+        put(SFX, applause(1.4), T(Sp + 0.1), 0.35)
+    if 'follow' in o:  # takip kartı açılır
+        F = o['follow']
+        put(SFX, stereo_move(whoosh(0.3, 500, 2400, 0.5), -0.3, 0.2), T(F - 0.05), 0.18)
+        put(SFX, bloop(520, 1300, 0.07, 0.28), T(F + 0.05))
+    if 'tapf' in o:  # dokunuş "Takip et"e basar
+        Tf = o['tapf']
+        put(SFX, ui_tap(0.6), T(Tf))
+        put(SFX, fm_bell(1568, 0.7, 0.18), T(Tf + 0.06))
+        put(SFX, pling(2093, 0.1, 0.5), T(Tf + 0.12), pan=0.3)
+    if 'off' in o:  # döngü: iris, yeniden kanca
+        iris(o['off'])
+
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
 # ═════════ ANA MÜZİK ═════════
@@ -2604,7 +2853,7 @@ def music_main(start, end, fill_before=()):
 
 
 # ═════════ MÜZİK TÜRLERİ ═════════
-# reels.json → "musicPlan": [[başla, bitir, tür], ...]. Türler: chip (varsayılan), lofi, horror, quiz, pop, space, thriller.
+# reels.json → "musicPlan": [[başla, bitir, tür], ...]. Türler: chip (varsayılan), lofi, horror, quiz, pop, space, thriller, ragtime.
 def seg_bus(a, b):
     return np.zeros((int((b - a) * SR) + 2 * SR, 2))
 
@@ -2871,7 +3120,73 @@ def thriller(a, b, last=True, **kw):
     put(MUS, bus[: int(L * SR)] * 1.05, a)
 
 
-STYLES = {'lofi': lofi, 'horror': horror, 'quiz': quiz, 'chip': chip, 'pop': pop, 'space': space, 'thriller': thriller}
+def piano(m, d, v=0.12, bright=1.0, tack=True):
+    """sessiz film piyanosu: iki hafif akortsuz tel (honky-tonk), çabuk sönen üst harmonikler, raptiyeli çekiç tıkı"""
+    t = tt(d)
+    f = freq(m)
+    x = np.zeros(len(t))
+    for det in (0.9965, 1.0035):
+        for k, a in ((1, 1.0), (2, 0.55 * bright), (3, 0.3 * bright), (4, 0.18 * bright), (6, 0.08 * bright)):
+            x += a * np.sin(2 * np.pi * f * k * det * t) * np.exp(-t * (1.6 + 1.3 * k + f / 900))
+    if tack:
+        n = min(len(t), int(0.012 * SR))
+        x[:n] += bp(noise(0.012), 1800, 7000)[:n] * np.exp(-np.arange(n) / (0.003 * SR)) * 0.8
+    return x * adsr(len(t), 0.002, 0.05, 1.0, 0.05) * v * 0.45
+
+
+def ragtime(a, b, last=True, **kw):
+    """sessiz film (ragtime) piyanosu: sol el bas–akor (oom-pah), sağ el senkoplu ezgi; eski kayıt rengi.
+    bpm, minor (Am–Dm–E7–Am; yoksa C–A7–D7–G7), soft (seyrek ezgi, kısık bas)."""
+    BPM = kw.get('bpm', 104)
+    bt = 60 / BPM
+    L = b - a
+    bus = seg_bus(a, b)
+    soft = kw.get('soft', False)
+    if kw.get('minor'):
+        prog_ = [  # (kök, beşli, akor, ezgi [(vuruş, nota)])
+            (33, 40, [57, 60, 64], [(0, 76), (0.5, 72), (1, 69), (1.5, 72), (2, 76), (2.75, 77), (3, 76), (3.5, 72)]),
+            (38, 45, [57, 62, 65], [(0, 77), (0.5, 74), (1, 69), (1.5, 74), (2, 77), (2.75, 79), (3, 77), (3.5, 74)]),
+            (28, 35, [56, 62, 64], [(0, 76), (0.5, 80), (1, 83), (1.5, 80), (2, 76), (2.5, 74), (3, 71), (3.5, 68)]),
+            (33, 40, [57, 60, 64], [(0, 69), (0.5, 72), (1, 76), (2, 81), (3, 76)]),
+        ]
+    else:
+        prog_ = [
+            (36, 43, [55, 60, 64], [(0, 72), (0.5, 76), (0.75, 79), (1.25, 76), (1.5, 84), (2.5, 79), (3, 76), (3.5, 74)]),
+            (33, 40, [55, 61, 64], [(0, 73), (0.5, 76), (0.75, 81), (1.25, 79), (1.5, 76), (2.5, 73), (3, 76), (3.5, 79)]),
+            (38, 45, [54, 57, 60], [(0, 74), (0.5, 78), (0.75, 81), (1.25, 78), (1.5, 84), (2.5, 81), (3, 78), (3.5, 74)]),
+            (31, 38, [53, 59, 62], [(0, 79), (0.5, 77), (0.75, 74), (1.25, 71), (1.5, 74), (2, 79), (3, 83), (3.5, 86)]),
+        ]
+    end = L - (0.6 if last else 0)
+    nbar = int(np.ceil(end / (4 * bt)))
+    vb, vc, vm = (0.16, 0.06, 0.1) if soft else (0.26, 0.1, 0.16)
+    for bi in range(nbar):
+        t0 = bi * 4 * bt
+        root, fifth, ch, mel = prog_[bi % 4]
+        for beat in range(4):
+            tb = t0 + beat * bt
+            if tb >= end:
+                break
+            if beat % 2 == 0:  # bas: kök ve beşli, oktavla
+                m = root if beat == 0 else fifth
+                put(bus, piano(m, bt * 0.9, vb, bright=0.6), tb)
+                put(bus, piano(m + 12, bt * 0.9, vb * 0.45, bright=0.6), tb)
+            else:  # akor
+                for k, m in enumerate(ch):
+                    put(bus, piano(m, bt * 0.6, vc, bright=0.9), tb + k * 0.004, pan=0.1)
+        for off, m in mel:
+            if soft and off % 1 not in (0, 0.5):
+                continue
+            tm = t0 + off * bt
+            if tm >= end:
+                break
+            put(bus, piano(m, bt * 0.8, vm, bright=1.2), tm, pan=0.2)
+    if last:
+        for m in prog_[0][2] + [prog_[0][0]]:
+            put(bus, piano(m, 1.2, 0.14), end)
+    bus = np.stack([lp(hp(bus[:, c], 140), 5500) for c in range(2)], 1)  # eski kayıt: dar bant
+    put(MUS, bus[: int(L * SR)] * 3.5, a)  # piyano tek başına kısık kalır: pop ve lofi ile aynı yüksekliğe (≈ −11,5 dB)
+
+STYLES = {'lofi': lofi, 'horror': horror, 'quiz': quiz, 'chip': chip, 'pop': pop, 'space': space, 'thriller': thriller, 'ragtime': ragtime}
 
 
 # ═════════ REELS'İ KUR ═════════
