@@ -4800,8 +4800,10 @@ function defineValue() {
     const TOPHAT = ['...ooooooooo...', '...oKKKKKKKo...', '...oKHKKKKKo...', '...oKHKKKKKo...', '...oKKKKKKKo...', '...orrrrrrro...', '...oKKKKKKKo...', 'oKKKKKKKKKKKKKo', '.ooooooooooooo.'];
     const TOPHAT_C = { o: '#16110F', K: '#2E2A34', H: '#5E5868', r: '#8A2A2A' };
     const CHEAP = ['......oooo', '......oHBo', '...oooBBBo', '.ooBBBBBBo', 'oBHBBBBBBo'];
-    const CHEAP_SOLE = ['oooooooooo'];
-    const CHEAP_C = { o: '#16110F', B: '#4A4652', H: '#A49EB0' };
+    const CHEAP_SOLE = ['oSSSSSSSSo'];  // açık renk deri taban: açılınca botun altından sarkan dil gibi seçilsin
+    const CHEAP_C = { o: '#16110F', B: '#4A4652', H: '#A49EB0', S: '#7A6250' };
+    const TOES = ['..oo.', '.oTTo', 'oTTTo', '.ooo.'];  // eski botun burnundaki delikten çıkan parmaklar
+    const TOES_C = { o: '#2A1E1A', T: '#E9893C' };
     const CHEAP_OLD = ['......oooo', '......oPBo', '...oooBBBo', '.ooBBoBBBo', 'oBBBBBoBBo'];  // yamalı, çatlak
     const CHEAP_OLD_C = { o: '#16110F', B: '#4A4652', P: '#8A6A44' };
     const STURDY = ['......oooo', '......oLLo', '...oooBLBo', '.ooBBBBBBo', 'oBHBBBBBBo'];
@@ -4828,14 +4830,17 @@ function defineValue() {
       const c = r.c, sturdy = kind === 'sturdy';
       const mk = (mirror) => {
         const w = el('div', 'abs', r.h, { left: px((mirror ? 17 : 5) * c), top: px((sturdy ? 22 : 23) * c), width: px(10 * c), height: px(7 * c), transform: mirror ? 'scaleX(-1)' : 'none' });
-        const mouth = el('div', 'abs', w, { left: 0, top: px(5 * c), width: px(10 * c), height: px(3 * c), background: '#0C0809', display: 'none' });
+        // taban açılınca aradan çıplak ayak görünür: önde parmaklar, arkada ayak tabanı
+        const foot = `linear-gradient(90deg, #E9893C 0 ${1.1 * c}px, #8A4A1E ${1.1 * c}px ${1.35 * c}px, #E9893C ${1.35 * c}px ${2.4 * c}px, #8A4A1E ${2.4 * c}px ${2.65 * c}px, #E9893C ${2.65 * c}px ${3.7 * c}px, #8A4A1E ${3.7 * c}px ${3.95 * c}px, #D47A34 ${3.95 * c}px)`;
+        const mouth = el('div', 'abs', w, { left: 0, top: px(5 * c), width: px(10 * c), height: px(3 * c), background: sturdy ? '#0C0809' : foot, display: 'none' });
         const up = pixEl(w, sturdy ? STURDY : CHEAP, sturdy ? STURDY_C : CHEAP_C, c, { left: 0, top: 0 });
+        const toes = sturdy ? null : pixEl(w, TOES, TOES_C, c, { left: px(-3 * c), top: px(2 * c), display: 'none' });
         const sole = pixEl(w, sturdy ? STURDY_SOLE : CHEAP_SOLE, sturdy ? STURDY_C : CHEAP_C, c, { left: 0, top: px(5 * c), transformOrigin: `${9.5 * c}px ${0.5 * c}px` });
         const nails = [1.5, 4, 6.5].map((x) => el('div', 'abs', sole, { left: px(x * c), top: px(-0.15 * c), width: px(0.6 * c), height: px(0.45 * c), background: '#E8E0D0', display: 'none' }));
-        return { w, mouth, up, sole, nails };
+        return { w, mouth, up, toes, sole, nails };
       };
       const L = mk(false), R = mk(true);
-      const old = sturdy ? null : [L, R].map((b) => pixEl(b.w, CHEAP_OLD, CHEAP_OLD_C, c, { left: 0, top: 0, display: 'none' }));
+      const old = sturdy ? null : [L, R].map((b) => pixEl(b.w, CHEAP_OLD, CHEAP_OLD_C, c, { left: 0, top: 0, display: 'none' }));  // parmakların üstünde: parmaklar botun içinden çıkıyor gibi
       // açılma açısı (derece): sol bot daha çok açılır
       const set = (on, flap = 0, worn = false) => {
         [L, R].forEach((b, i) => {
@@ -4846,7 +4851,7 @@ function defineValue() {
           b.nails.forEach((n) => (n.style.display = th > 4 ? 'block' : 'none'));
           b.mouth.style.display = th > 1 ? 'block' : 'none';
           if (th > 1) { const d = Math.sin((th * Math.PI) / 180) * 9.5; b.mouth.style.clipPath = `polygon(${9.5 * c}px 0, 0 0, 0 ${d * c}px)`; }
-          if (old) { old[i].style.display = worn ? 'block' : 'none'; b.up.style.display = worn ? 'none' : 'block'; }
+          if (old) { old[i].style.display = worn ? 'block' : 'none'; b.up.style.display = worn ? 'none' : 'block'; b.toes.style.display = worn ? 'block' : 'none'; }
         });
       };
       // burnun ucu (rig kutusunda): su fışkırması için
@@ -4858,16 +4863,18 @@ function defineValue() {
     // ── A · sokak: gece, yağmur; solda gaz lambası ve eski botlar, ortada su birikintisi, sağda KUNDURACI vitrini ──
     const camA = world();   // sepya süzgeçli dünya
     const camAx = world();  // süzgeçsiz katman (renkli telefon), camA ile aynı kamera
+    const WB = GY - 100;  // duvarların dibi: karakterler duvarın önündeki kaldırımın ortasında durur
     el('div', 'abs', camA, { left: '-900px', top: '-900px', width: '3400px', height: px(900 + GY), background: 'linear-gradient(#0E1424, #1C2236 40%, #2A2A36 75%, #3A3238)' });
     // karşı binalar: siluet, sarı pencereler
     [[-760, 520, 360], [-380, 430, 300], [1180, 470, 340], [1540, 560, 400]].forEach(([x, y, w]) => {
-      const b = el('div', 'abs', camA, { left: px(x), top: px(y), width: px(w), height: px(GY - y), background: '#151520', boxShadow: 'inset -10px 0 0 #1C1C2A' });
+      const b = el('div', 'abs', camA, { left: px(x), top: px(y), width: px(w), height: px(WB - y), background: '#151520', boxShadow: 'inset -10px 0 0 #1C1C2A' });
       for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) if (hz(x + i * 7 + j) > 0.45) el('div', 'abs', b, { left: px(30 + j * ((w - 60) / 3)), top: px(40 + i * 120), width: '54px', height: '74px', background: hz(i + j + x) > 0.7 ? '#E8C27A' : '#3A3A4A' });
     });
     // dükkânın cephesi (sıva, tuğla dokusu)
     const BRICK = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='96' height='48'><rect width='96' height='48' fill='%235A4034'/><path d='M0 1H96M0 25H96M1 0V24M49 24V48' stroke='%233E2A22' stroke-width='4'/></svg>\")";
-    el('div', 'abs', camA, { left: '300px', top: '640px', width: '1100px', height: px(GY - 640), backgroundImage: BRICK, backgroundSize: '96px 48px' });
-    el('div', 'abs', camA, { left: '300px', top: '640px', width: '1100px', height: px(GY - 640), background: 'linear-gradient(rgba(10,8,12,.35), rgba(10,8,12,0) 30%, rgba(10,8,12,.25))' });
+    el('div', 'abs', camA, { left: '300px', top: '640px', width: '1100px', height: px(WB - 640), backgroundImage: BRICK, backgroundSize: '96px 48px' });
+    el('div', 'abs', camA, { left: '300px', top: '640px', width: '1100px', height: px(WB - 640), background: 'linear-gradient(rgba(10,8,12,.35), rgba(10,8,12,0) 30%, rgba(10,8,12,.25))' });
+    el('div', 'abs', camA, { left: '300px', top: px(WB - 22), width: '1100px', height: '22px', background: '#3A2A22', boxShadow: 'inset 0 4px 0 #4E3A2E' });  // duvarın taş eteği
     el('div', 'abs', camA, { left: '300px', top: '628px', width: '1100px', height: '24px', background: '#2A1E1A' });  // saçak
     // tabela
     const sign = el('div', 'abs it', camA, { left: '630px', top: '772px', width: '450px', height: '92px', boxSizing: 'border-box', borderRadius: '10px', border: '7px solid #2A1A10', background: 'linear-gradient(#7A4E2A, #5A3418)', boxShadow: 'inset 0 0 0 4px #A8783E', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '70px', color: '#F6E3B8', textShadow: '4px 4px 0 #2A1A10', letterSpacing: '.06em' });
@@ -4892,25 +4899,57 @@ function defineValue() {
     });
     const noStamp = el('div', 'abs it', win, { left: '245px', top: '52px', width: '180px', padding: '2px 0 6px', textAlign: 'center', border: '6px solid #C0392B', borderRadius: '10px', background: 'rgba(255,246,224,.85)', color: '#C0392B', fontSize: '50px', lineHeight: 1, zIndex: 6, opacity: 0, transformOrigin: '50% 50%' });
     noStamp.textContent = 'YETMEZ';
-    const door = el('div', 'abs', camA, { left: '1120px', top: '884px', width: '230px', height: px(GY - 880), boxSizing: 'border-box', border: '12px solid #2A1A10', borderBottom: 'none', background: 'linear-gradient(#4A2E1A, #3A2414)' });
+    const door = el('div', 'abs', camA, { left: '1120px', top: '884px', width: '230px', height: px(WB - 884), boxSizing: 'border-box', border: '12px solid #2A1A10', borderBottom: 'none', background: 'linear-gradient(#4A2E1A, #3A2414)' });
     el('div', 'abs', door, { left: '30px', top: '30px', width: '146px', height: '200px', background: 'linear-gradient(#E8B868, #B8783A)' });
     el('div', 'abs', door, { left: '170px', top: '300px', width: '18px', height: '18px', borderRadius: '50%', background: '#E8C060' });
-    // gaz lambası
+    // ── zemin: duvar dibinden bordüre perspektifli ıslak kaldırım (karakterler ortasında durur), bordür, parke taşlı yol ──
+    const CURB = GY + 50, HZ = 900, VPX = 560;  // bordürün üstü, ufuk çizgisi, kaçış noktası
+    const yAt = (s) => HZ + (WB - HZ) / s, xAt = (X, s) => VPX + (X - VPX) / s;  // s: derinlik (1 = duvar dibi; küçüldükçe izleyiciye yaklaşır)
+    const SL = [1, 0.95, 0.9, 0.85, 0.8, (WB - HZ) / (CURB - HZ)];  // kaldırım plaka sıraları (sonuncusu bordür)
+    let gs = '';
+    for (let r = 0; r < SL.length - 1; r++) {
+      const s0 = SL[r], s1 = SL[r + 1], y0 = yAt(s0), y1 = yAt(s1);
+      for (let X = -1200 + (r % 2) * 90; X < 2600; X += 180) {
+        const f = ['#5C554E', '#555049', '#625A52'][Math.floor(hz(X * 0.13 + r * 7.7) * 3)];
+        gs += `<polygon points="${xAt(X, s0)},${y0} ${xAt(X + 180, s0)},${y0} ${xAt(X + 180, s1)},${y1} ${xAt(X, s1)},${y1}" fill="${f}" stroke="#2A2522" stroke-width="4"/>`;
+      }
+    }
+    gs += `<rect x="-900" y="${WB}" width="3400" height="30" fill="url(#botAO)"/>`;  // duvar dibinde gölge
+    gs += `<rect x="-900" y="${CURB - 4}" width="3400" height="10" fill="#7E746A"/><rect x="-900" y="${CURB + 6}" width="3400" height="26" fill="#4A433D"/><rect x="-900" y="${CURB + 32}" width="3400" height="6" fill="#141110"/>`;  // bordür
+    gs += `<rect x="-900" y="${CURB + 38}" width="3400" height="1500" fill="#1C1816"/>`;
+    for (let ry = CURB + 38, rh = 22, rr = 0; ry < 2500; ry += rh, rh *= 1.13, rr++) {  // parke taşları: izleyiciye yaklaştıkça büyür
+      const k = rh / 22, cw = 50 * k;
+      for (let X = VPX - Math.ceil((VPX + 1000) / cw) * cw + (rr % 2) * cw / 2; X < 2600; X += cw) {
+        const f = ['#3E3632', '#38302C', '#443A35'][Math.floor(hz(X * 0.07 + rr * 3.3) * 3)];
+        gs += `<rect x="${X + 3 * k}" y="${ry + 2 * k}" width="${cw - 6 * k}" height="${rh - 4 * k}" rx="${7 * k}" fill="${f}"/>`;
+      }
+    }
+    el('div', 'abs', camA, { left: '-900px', top: 0, width: '3400px', height: '2600px' }).innerHTML =
+      `<svg width="3400" height="2600" viewBox="-900 0 3400 2600"><defs><linearGradient id="botAO" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient></defs>${gs}</svg>`;
+    // ıslak zeminde ışık yansımaları (vitrin, kapı camı, lamba): izleyiciye doğru uzar ve genişler, su dalgasıyla kesik kesik
+    const RIP = 'repeating-linear-gradient(rgba(0,0,0,.6) 0 4px, #000 4px 11px)';
     const LX = 200;
-    el('div', 'abs', camA, { left: px(LX - 12), top: '700px', width: '24px', height: px(GY - 700), background: 'linear-gradient(90deg, #1A1418, #3A3440, #1A1418)' });
-    el('div', 'abs', camA, { left: px(LX - 30), top: px(GY - 40), width: '60px', height: '40px', background: '#1A1418' });
+    [[WX + 40, WW - 80, WB, 560, 'rgba(255,220,150,.36)'], [1150, 170, WB, 400, 'rgba(232,184,104,.24)'], [LX - 50, 100, GY - 40, 480, 'rgba(255,226,160,.32)']].forEach(([x, w, y, h, col]) =>
+      el('div', 'abs', camA, { left: px(x - 40), top: px(y), width: px(w + 80), height: px(h), background: `radial-gradient(ellipse 50% 100% at 50% 0, ${col}, transparent)`, maskImage: RIP, WebkitMaskImage: RIP }));
+    // karda zemin beyazlaşır
+    const snowCover = el('div', 'abs', camA, { left: '-900px', top: px(WB - 6), width: '3400px', height: '1300px', background: 'linear-gradient(rgba(236,240,246,.6), rgba(236,240,246,.3) 14%, rgba(236,240,246,.22))', display: 'none' });
+    // gaz lambası (kaldırımın üstünde, eski bot yığınının arkasında)
+    el('div', 'abs', camA, { left: px(LX - 12), top: '700px', width: '24px', height: px(GY - 40 - 700), background: 'linear-gradient(90deg, #1A1418, #3A3440, #1A1418)' });
+    el('div', 'abs', camA, { left: px(LX - 50), top: px(GY - 56), width: '100px', height: '26px', borderRadius: '50%', background: 'radial-gradient(closest-side, rgba(10,6,4,.6), rgba(10,6,4,0))' });
+    el('div', 'abs', camA, { left: px(LX - 30), top: px(GY - 80), width: '60px', height: '40px', background: '#1A1418' });
     const lampGlow = el('div', 'abs', camA, { left: px(LX - 260), top: '400px', width: '520px', height: '520px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,214,140,.55), rgba(255,214,140,0) 65%)' });
     el('div', 'abs', camA, { left: px(LX - 46), top: '590px', width: '92px', height: '120px', boxSizing: 'border-box', border: '8px solid #1A1418', borderRadius: '16px 16px 6px 6px', background: 'linear-gradient(#FFF2C8, #F2C060)' });
     el('div', 'abs', camA, { left: px(LX - 56), top: '570px', width: '112px', height: '28px', borderRadius: '20px 20px 4px 4px', background: '#1A1418' });
-    // kaldırım ve parke taşları
-    el('div', 'abs', camA, { left: '-900px', top: px(GY), width: '3400px', height: '70px', background: 'linear-gradient(#6A6058, #4A423C)' });
-    el('div', 'abs', camA, { left: '-900px', top: px(GY + 70), width: '3400px', height: '18px', background: '#2A2420' });
-    const COBBLE = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='70'><rect width='120' height='70' fill='%23221E1C'/><rect x='4' y='4' width='52' height='28' rx='12' fill='%23403834'/><rect x='64' y='4' width='52' height='28' rx='12' fill='%23383230'/><rect x='-26' y='38' width='52' height='28' rx='12' fill='%23383230'/><rect x='34' y='38' width='52' height='28' rx='12' fill='%23403834'/><rect x='94' y='38' width='52' height='28' rx='12' fill='%23403834'/></svg>\")";
-    el('div', 'abs', camA, { left: '-900px', top: px(GY + 88), width: '3400px', height: '900px', backgroundImage: COBBLE, backgroundSize: '120px 70px' });
     // su birikintisi (Fıstık'ın durduğu yer) ve halkalar
     const PX = 420;
     const puddle = el('div', 'abs', camA, { left: px(PX - 210), top: px(GY - 20), width: '420px', height: '64px', borderRadius: '50%', background: 'radial-gradient(ellipse at 50% 40%, #6A7488, #2E3442 70%)', boxShadow: '0 0 0 5px rgba(160,170,190,.35)' });
     const rings = Array.from({ length: 5 }, () => el('div', 'abs', puddle, { left: 0, top: 0, width: '60px', height: '14px', borderRadius: '50%', border: '3px solid rgba(220,230,245,.7)', boxSizing: 'border-box' }));
+    // temas gölgeleri (ayakların altında; zıplarken küçülür) ve eski bot yığınının gölgesi
+    const shade = (w) => el('div', 'abs', camA, { left: 0, top: 0, width: px(w), height: '46px', borderRadius: '50%', background: 'radial-gradient(closest-side, rgba(10,6,4,.72), rgba(10,6,4,.42) 55%, rgba(10,6,4,0))', display: 'none' });
+    const fShade = shade(400), dShade = shade(380), pileShade = shade(360);
+    pileShade.style.transform = `translate(16px,${GY - 22}px)`;
+    // yere düşen yağmur damlalarının sıçrantıları
+    const drips = Array.from({ length: 22 }, () => el('div', 'abs', camA, { left: 0, top: 0, width: '20px', height: '10px', boxSizing: 'border-box', borderTop: '3px solid rgba(220,230,245,.8)', borderRadius: '50% 50% 0 0', display: 'none' }));
     // eski botlar yığını (lambanın dibinde): en çok dört çift
     // dört çift: alt sırada üç, ortada üç, üstte iki bot; tabanları ağız gibi açık
     const PILE = [[96, 0, -4], [196, 0, 6], [296, 0, -3], [146, -62, 9], [246, -60, -8], [86, -60, -14], [196, -122, 4], [126, -118, -10]];
@@ -5164,6 +5203,7 @@ function defineValue() {
       // eski botlar yığını
       const pn = pileN(lt);
       pile.forEach((p, i) => { p.style.display = Math.floor(i / 2) < pn ? 'block' : 'none'; });
+      pileShade.style.display = pn > 0 ? 'block' : 'none';
 
       // ── A: Fıstık ──
       const st = fState(lt), x = fX(lt);
@@ -5193,6 +5233,10 @@ function defineValue() {
       fA.set(...mood);
       fA.put(x, GY + fR.c + jy - jump, { rot, flip: !hk && lt >= ASK && lt < ZERO });  // soru işareti vitrinin değil lambanın yanına düşsün
       sync(fR, fA);
+      const lift = jump - jy;  // yerden yükseklik: gölge küçülür ve açılır
+      fShade.style.display = 'block';
+      fShade.style.transform = `translate(${x - 200}px,${GY - 22}px) scale(${1 - Math.min(0.55, lift / 400)})`;
+      fShade.style.opacity = 1 - Math.min(0.6, lift / 300);
       const showSturdyF = st.kind === 'sturdy';
       const flap = st.open ? (hk || wet ? flapOf(lt, 26, 0.62) : montage ? flapOf(lt, 30, 0.3) : lesson ? flapOf(lt, 14, 0.9) : flapOf(lt, 22, 0.7)) : 0;
       fCheap.set(!showSturdyF, flap, st.worn);
@@ -5262,7 +5306,9 @@ function defineValue() {
         else if (hk && hl(lt) < DKIN + 0.9) dm = ['happy', null, 'happy'];
         dA.set(...dm);
         dA.put(dx, GY + dR.c - hD.y, { sx: hD.sx, sy: hD.sy });
+        dShade.style.transform = `translate(${dx - 190}px,${GY - 22}px) scale(${1 - Math.min(0.5, hD.y / 200)})`;
       }
+      dShade.style.display = don ? 'block' : 'none';
       sync(dR, dA, don);
       dSturdy.set(don && dBoots(lt), 0);
       dHold.style.display = !hk && lt >= DIN && lt < DBUY - 0.25 ? 'block' : 'none';
@@ -5386,6 +5432,18 @@ function defineValue() {
         if (!showSnow) return;
         const y = ((lt * (160 + (i % 4) * 40) + hz(i) * 2000) % 2000) - 60, x2 = hz(i + 9) * 1100 + Math.sin(lt * 1.5 + i) * 40;
         f.style.transform = `translate(${x2}px,${y}px)`;
+      });
+      snowCover.style.display = showSnow ? 'block' : 'none';
+      // yerdeki sıçrantılar: her biri kısa bir an görünür; uzaktakiler (duvar dibine yakın) küçük
+      drips.forEach((d, i) => {
+        const T = 0.3, u = lt + hz(i) * T, ph = u % T, cyc = Math.floor(u / T);
+        const on = showRain && ph < 0.12;
+        d.style.display = on ? 'block' : 'none';
+        if (!on) return;
+        const gy = WB + 10 + hz(i * 3 + cyc * 17) ** 0.7 * 560, gx = -300 + hz(i * 7 + cyc * 13) * 1900;
+        const k = ph / 0.12, sc = ((gy - HZ) / (WB - HZ)) * 0.9;
+        d.style.transform = `translate(${gx}px,${gy}px) scale(${sc * (0.6 + 0.8 * k)})`;
+        d.style.opacity = 1 - k;
       });
 
       // ── kamera planları: dünya noktası (fx, fy) ekranda (540, SY)'ye düşer ──
