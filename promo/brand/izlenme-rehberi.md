@@ -21,6 +21,11 @@ Kaynaklı araştırmanın özeti (Ekim 2026). [RESMİ] = Instagram/Mosseri açı
 9. **Tahmin anı:** cevabı vermeden önce 1–2 sn beklet (geri sayım, "yazıyor…"). İzleyici tahmin eder, kalır, yorumda skorunu yazar. Yalnız izleyicinin gerçekten cevaplayabileceği bir soruda: kendi seçimi ("Al mı, bırak mı?", "Kaçını ayırırsın?") ya da ekranda gördüğü seçeneklerden biri ("Katil kaç numara?"). Bilmediği bir rakamı tahmin ettirme (Abonelik vampirleri'ndeki "Ayda kaç TL?" anı bu yüzden çıkarıldı).
 10. Ses her zaman açık. Müziksiz sürümle sessiz bir trend ses A/B test edilebilir.
 
+## Kendi verimiz (28 Ekim 2026, Instagram istatistikleri)
+- **Ültimatom** (20 Ekim, 28,25 sn) açık ara en iyisi: 9.172 görüntüleme, 5.665 görüntüleyen (kişi başı ~1,6 izleme: döngü tekrar izletiyor), ortalama izlenme 19 sn (~%67), geçme oranı %31,4 (tipik reelslerimizden düşük), yorum oranı %0,2 (tipikten yüksek; en çok beğenilen yorum bir eşik söylüyor: "400 falan gene okey de yani daha da inmem"). Beğeni %0,4, paylaşım %0,1, kaydetme %0,1 tipikten düşük; takip 0. Görüntülemelerin %89,5'i Reels sekmesinden (takip etmeyenler); büyüme ilk iki günde geldi.
+- Sonraki sahne serisi reelsleri (çok mekânlı sinematik anlatım, 26–42 sn, sonda takip satırı) 1,4–1,6 B'de kaldı; "Paran ayın kaçında bitiyor?" 190'da.
+- Çalışma hipotezi (tek örnek, kesin değil): **Karar odası** kalıbı (iki kişilik para oyunu, tek mekân, kendiliğinden cevaplanan şaşırtan soru: "Bedava 100 TL'yi reddeder misin?", izleyicinin kendi verdiği gerçek 3 sn karar, sonda sayıyla cevaplanan soru, ~28–32 sn, başa dönen döngü) geçme oranını ve izlenme süresini taşıyor. Aynı kalıbın yeni oyunları: `acik-artirma`. Takip dönüşümü sıfır: seriyi vaat eden bir kapanış ayrıca denenmeli.
+
 ## Yayınlarken
 - Önce **Deneme reelsi** (Trial Reels: yalnız takip etmeyenlere gösterilir) olarak paylaş; skip rate'i sadece diğer deneme reelsleriyle karşılaştır. ([Fanpage Karma](https://www.fanpagekarma.com/insights/?p=9293))
 - Skip rate %30–40 altı iyi, %50 üstü hook zayıf demek. ([Metricool](https://metricool.com/instagram-reel-analytics/))

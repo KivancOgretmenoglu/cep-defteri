@@ -301,6 +301,9 @@ def cmd_place(name):
         cu = r['captionUntil']
         caps = [c for c in caps if c[0] < cu - 0.2]
         for c in caps: c[1] = min(c[1], cu)
+    for a, b, y in r.get('captionYPlan', []):  # plan bazında altyazı yüksekliği: [başla, bitir, y] (öbeğin başladığı an)
+        for c in caps:
+            if a <= c[0] < b: c[3] = y
     if caps:
         for k in range(len(caps) - 1):
             caps[k][1] = round(min(caps[k][1], caps[k + 1][0] - 0.01), 2)

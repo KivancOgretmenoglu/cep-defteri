@@ -6123,5 +6123,335 @@
       "release": 0.25,
       "amb": 0.7
     }
+  },
+  "acik-artirma": {
+    "title": "Dolar açık artırması: 100 TL'ye 200 TL verir misin? (mezat salonu, Fıstık / Karamel, mezatçı Bilge)",
+    "end": 32.55,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.45,
+    "noMusicVariant": true,
+    "limiter": true,
+    "musicPlan": [
+      [
+        0,
+        14.8,
+        "thriller",
+        {
+          "bpm": 116
+        }
+      ],
+      [
+        14.8,
+        20.5,
+        "thriller",
+        {
+          "bpm": 144
+        }
+      ],
+      [
+        20.5,
+        29.65,
+        "lofi"
+      ],
+      [
+        29.65,
+        32.25,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ],
+      [
+        32.25,
+        32.55,
+        "thriller",
+        {
+          "bpm": 116
+        }
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          11.8,
+          14.8
+        ]
+      ]
+    },
+    "captionPixel": true,
+    "captionY": 740,
+    "captionMaxWords": 3,
+    "captionUntil": 29.65,
+    "captionCut": [
+      [
+        11.8,
+        14.8
+      ],
+      [
+        27.15,
+        29.65
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        2.45,
+        "100 TL'ye 200<br><b>verir misin?</b>",
+        308,
+        {
+          "size": 90,
+          "pulse": true
+        }
+      ],
+      [
+        2.5,
+        6.9,
+        "En yüksek teklif alır,<br><b>ikinci de öder: eli boş!</b>",
+        308,
+        {
+          "size": 70,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        6.95,
+        9.2,
+        "Fıstık bırakırsa<br><b>90 TL'si yanar</b>",
+        308,
+        {
+          "size": 84,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        9.25,
+        14.78,
+        "Sen Fıstık olsan?<br><b>ARTIR mı, BIRAK mı?</b>",
+        308,
+        {
+          "size": 84,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        11.8,
+        14.78,
+        "Yoruma yaz: A mı, B mi?",
+        575,
+        {
+          "size": 44,
+          "quiet": true
+        }
+      ],
+      [
+        14.82,
+        17.28,
+        "ARTIRDI…<br><b>ve durmadılar!</b>",
+        308,
+        {
+          "size": 88,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        17.32,
+        20.45,
+        "100 TL'ye toplam<br><b>390 TL ödendi</b>",
+        308,
+        {
+          "size": 84,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        20.5,
+        24.42,
+        "Abartı mı? Deneylerde 1 dolar<br><b>sık sık 3–5 dolar topluyor</b>",
+        308,
+        {
+          "size": 62,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        24.47,
+        27.1,
+        "Ekonomistler buna<br><b>dolar açık artırması diyor</b>",
+        308,
+        {
+          "size": 70,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        27.15,
+        29.6,
+        "Zararın neresinden<br><b>dönülse kârdır</b>",
+        308,
+        {
+          "size": 88,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        29.65,
+        32.2,
+        "Sen kaç TL'de<br><b>dururdun?</b>",
+        308,
+        {
+          "size": 92,
+          "pulse": true
+        }
+      ],
+      [
+        29.75,
+        32.2,
+        "Yoruma yaz: sınırın kaç TL?",
+        596,
+        {
+          "size": 44,
+          "quiet": true
+        }
+      ],
+      [
+        29.85,
+        32.2,
+        "Cep Defteri'nde sınırını önceden koy",
+        670,
+        {
+          "size": 34,
+          "quiet": true
+        }
+      ],
+      [
+        32.25,
+        32.55,
+        "100 TL'ye 200<br><b>verir misin?</b>",
+        308,
+        {
+          "size": 90,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "mezat",
+        0,
+        {
+          "reveal": 1.6,
+          "rules": 2.5,
+          "alir": 3.47,
+          "dp": 3.95,
+          "oder": 4.47,
+          "bos": 4.97,
+          "bid": 5.8,
+          "fire": 8.6,
+          "ask": 9.25,
+          "count": 11.8,
+          "dec": 14.8,
+          "drop": 17.0,
+          "sold": 17.3,
+          "total": 19.04,
+          "kaching": 19.57,
+          "sci": 20.5,
+          "n3": 22.95,
+          "n5": 23.63,
+          "name": 24.47,
+          "ult": 25.68,
+          "lesson": 27.15,
+          "write": 27.75,
+          "ok": 28.98,
+          "cta": 29.65,
+          "dim": 31.95
+        }
+      ],
+      [
+        "mezat",
+        32.25,
+        {
+          "wdur": 0.3
+        }
+      ]
+    ],
+    "voiceTempo": 1.2,
+    "voiceFilter": "brand",
+    "voiceFiles": [
+      [
+        0.1,
+        "assets/voice/artirma/b1.mp3",
+        "Bu 100 lira satılık. Kuralı basit."
+      ],
+      [
+        2.55,
+        "assets/voice/artirma/a2.mp3",
+        "En yüksek teklif alır. İkinci de öder, eli boş kalır!"
+      ],
+      [
+        6.95,
+        "assets/voice/artirma/b3.mp3",
+        "Fıstık bırakırsa, 90'ı yanar!"
+      ],
+      [
+        9.25,
+        "assets/voice/artirma/b4.mp3",
+        "Sen Fıstık olsan? Artır mı, bırak mı?"
+      ],
+      [
+        14.95,
+        "assets/voice/artirma/b5.mp3",
+        "Fıstık artırdı. Ve durmadılar!"
+      ],
+      [
+        17.4,
+        "assets/voice/artirma/a6.mp3",
+        "Satıldı! 100 liraya, toplam 390 lira!"
+      ],
+      [
+        20.6,
+        "assets/voice/artirma/b7.mp3",
+        "Abartı mı? Deneylerde 1 dolar, 3 hatta 5 dolar topluyor."
+      ],
+      [
+        24.55,
+        "assets/voice/artirma/b8.mp3",
+        "Ekonomistler buna dolar açık artırması diyor."
+      ],
+      [
+        27.15,
+        "assets/voice/artirma/a9.mp3",
+        "Zararın neresinden dönülse kârdır."
+      ],
+      [
+        29.7,
+        "assets/voice/artirma/a10.mp3"
+      ]
+    ],
+    "captionYPlan": [
+      [
+        0,
+        1.6,
+        1290
+      ],
+      [
+        1.6,
+        2.5,
+        600
+      ],
+      [
+        14.8,
+        18.94,
+        600
+      ]
+    ]
   }
 }

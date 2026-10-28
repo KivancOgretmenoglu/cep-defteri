@@ -2795,6 +2795,167 @@ def cue_bot(t0, skip=0, o=None):
     if 'off' in o:  # döngü: iris, yeniden kanca
         iris(o['off'])
 
+
+def cue_mezat(t0, skip=0, o=None):
+    """Mezat salonu: spot şalterleri, kürek savuruşu, LED pano tıkları, tokmak. Teklif takvimi value.js'teki SCENES.mezat ile aynı."""
+    o = o or {}
+    T = at(t0, skip)
+    g = lambda k: o.get(k, 99)
+
+    def thump(v):  # kalp: alt vuruş + üst katman
+        x = np.sin(2 * np.pi * phase(glide(70, 40, 0.18))) * expd(0.18, 16)
+        h = np.sin(2 * np.pi * phase(glide(170, 95, 0.1))) * expd(0.1, 30) * 0.45
+        x[: len(h)] += h
+        return x * v
+
+    def clunk(v=0.5):  # spot yanar/söner: ağır şalter + metal tık
+        x = np.sin(2 * np.pi * phase(glide(90, 45, 0.16))) * expd(0.16, 18) * 0.9
+        c = bp(noise(0.03), 1800, 6000) * expd(0.03, 120) * 0.6
+        x[: len(c)] += c
+        return x * v
+
+    def knock(v=0.7):  # tokmak takoza: tahta gövde + çıt
+        d = 0.22
+        x = np.sin(2 * np.pi * phase(glide(240, 150, d))) * expd(d, 22) * 0.9 + bp(noise(d), 700, 2600) * expd(d, 45) * 0.7
+        x[: int(0.004 * SR)] += 0.6
+        return np.tanh(x * 1.6) * v
+
+    def led(v=0.16):  # panoda rakam döner
+        return wave_(phase(np.full(int(0.03 * SR), 2400.0)), 'square') * expd(0.03, 90) * v
+
+    def paddle(v=0.3):  # kürek havayı yarar
+        return whoosh(0.14, 600, 2800, 0.6) * v
+
+    def crackle(d=0.9):  # alev: hışırtı + çıtırtı
+        n = int(d * SR)
+        x = lp(noise(d), 2500)[:n] * 0.25 * np.sin(np.pi * np.linspace(0, 1, n))
+        for _ in range(int(d * 40)):
+            i = int(rng.integers(0, n - 400))
+            x[i : i + 300] += bp(noise(0.01), 1500, 7000)[:300] * np.exp(-np.arange(300) / 40) * rng.uniform(0.2, 0.7)
+        return x
+
+    def marker(d=0.4):  # kartta yazı
+        n = int(d * SR)
+        x = bp(noise(d), 2000, 6000)[:n] * (0.5 + 0.5 * np.sin(2 * np.pi * 9 * np.arange(n) / SR)) * 0.25
+        return x * np.sin(np.pi * np.linspace(0, 1, n))
+
+    def bid(t, w, v, hot=0.0):  # teklif: kürek kalkar, sayı (tutarla tizleşen) ve pano tıkı
+        pan = -0.5 if w == 0 else 0.5
+        put(SFX, paddle(0.28 + 0.1 * hot), T(t - 0.06), pan=pan)
+        f = 380 + 2.6 * v
+        put(SFX, bloop(f, f * 1.5, 0.06, 0.2 + 0.06 * hot), T(t), pan=pan * 0.6)
+        put(SFX, led(0.14), T(t + 0.02))
+
+    # açılış: karanlıkta orta spot, fanusta parıltı
+    put(SFX, clunk(0.55), T(0.02))
+    put(SFX, np.sin(2 * np.pi * phase(glide(65, 32, 1.1))) * expd(1.1, 3) * 0.5, T(0.03))
+    put(SFX, pling(2093, 0.12, 0.4), T(0.45), pan=0.1)
+    if 'reveal' in o:  # yan spotlar yanar, salon açılır, pano yanar, kürekler kalkar
+        R = o['reveal']
+        put(SFX, clunk(0.5), T(R), pan=-0.5); put(SFX, clunk(0.5), T(R + 0.08), pan=0.5)
+        put(SFX, whoosh(0.35, 3000, 300, 0.7), T(R - 0.05), 0.3)
+        for k in range(3):
+            put(SFX, led(0.12), T(R + 0.05 + 0.05 * k))
+        put(SFX, paddle(0.3), T(R + 0.2), pan=-0.4); put(SFX, paddle(0.3), T(R + 0.27), pan=0.4)
+        put(SFX, bloop(500, 900, 0.06, 0.16), T(R + 0.42), pan=-0.4); put(SFX, bloop(520, 940, 0.06, 0.16), T(R + 0.48), pan=0.4)
+    if 'rules' in o:
+        put(SFX, stereo_move(whoosh(0.22, 500, 2500, 0.6), 0.1, 0.4), T(o['rules'] - 0.05), 0.18)
+    if 'alir' in o:  # Karamel: ALIR
+        put(SFX, fm_bell(1047, 0.7, 0.2), T(o['alir']), pan=0.4)
+        put(SFX, bloop(600, 1200, 0.06, 0.18), T(o['alir'] + 0.02), pan=0.4)
+    if 'dp' in o:
+        put(SFX, stereo_move(whoosh(0.25, 2400, 500, 0.6), 0.4, -0.4), T(o['dp'] - 0.05), 0.18)
+    if 'oder' in o:  # Fıstık: ÖDER damgası
+        put(SFX, stamp(), T(o['oder']), 0.4, pan=-0.4)
+        put(SFX, buzzer(0.1), T(o['oder'] + 0.03), 0.18, pan=-0.4)
+    if 'bos' in o:  # eli boş
+        for k in range(2):
+            put(SFX, buzzer(0.07), T(o['bos'] + 0.02 + 0.2 * k), 0.2, pan=-0.4)
+    if 'bid' in o:  # teklif yağmuru: 10 → 100
+        B = o['bid']
+        for d, w, v in ((0, 1, 10), (0.15, 0, 20), (0.3, 1, 40), (0.45, 0, 60), (0.6, 1, 80), (0.75, 0, 90), (0.93, 1, 100)):
+            bid(B + d, w, v)
+    if 'fire' in o:  # Fıstık'ın 90'ı yanar
+        Fi = o['fire']
+        put(SFX, whoosh(0.4, 300, 1800, 0.8), T(Fi - 0.05), 0.4, pan=-0.3)
+        put(SFX, crackle(1.0), T(Fi), 0.5, pan=-0.3)
+    if 'ask' in o:  # "Sen Fıstık olsan?": alt vuruş, kalp atışı (sayımda hızlanır)
+        A, D = o['ask'], g('dec')
+        put(SFX, np.sin(2 * np.pi * phase(glide(65, 30, 1.0))) * expd(1.0, 3) * 0.5, T(A - 0.03))
+        t, k = A + 0.2, 0
+        while t < D - 0.1:
+            put(SFX, thump(0.75), T(t)); put(SFX, thump(0.5), T(t + 0.16))
+            t += max(0.42, 0.66 - 0.03 * k); k += 1
+    if 'count' in o:  # SATIYORUM 3·2·1: tokmak kalkar; her saniye pano biplemesi, arada saat tıkı; sonda nefes
+        C, D = o['count'], g('dec')
+        put(SFX, whoosh(0.3, 400, 2000, 0.5), T(C - 0.35), 0.22, pan=0.2)
+        for j in range(int(round(D - C))):
+            put(SFX, pluck(81 if j < 2 else 86, 0.14, 'square', 0.5, cut=4000, v=0.28), T(C + j))
+            put(SFX, led(0.14), T(C + j + 0.01))
+            put(SFX, tick(j % 2 == 0, 0.22), T(C + j + 0.5), pan=0.2)
+        put(SFX, inhale(0.3), T(D - 0.32), 0.6)
+    if 'dec' in o:  # ARTIR! ve tırmanma: teklifler sıklaşır, kalp hızlanır, yükselen gerilim
+        D = o['dec']
+        put(SFX, fm_bell(1568, 0.6, 0.22), T(D + 0.02), pan=-0.4)
+        put(SFX, riser(2.2), T(D + 0.2), 0.45)
+        for d, w, v in ((0, 0, 110), (0.4, 1, 120), (0.75, 0, 140), (1.05, 1, 160), (1.3, 0, 180), (1.53, 1, 190), (1.75, 0, 200)):
+            bid(D + d, w, v, hot=d / 1.75)
+        t = D + 0.1
+        while t < g('sold') - 0.3:
+            put(SFX, thump(0.8), T(t)); put(SFX, thump(0.55), T(t + 0.14))
+            t += 0.36
+    if 'drop' in o:  # Karamel pes eder: kürek iner
+        Dr = o['drop']
+        put(SFX, slide_whistle(900, 220, 0.45), T(Dr), 0.6, pan=0.5)
+        put(SFX, paddle(0.25), T(Dr + 0.05), pan=0.5)
+    if 'sold' in o:  # SATILDI: tokmak kalkar ve takoza iner; damga; salon alkışlar
+        S = o['sold']
+        put(SFX, whoosh(0.3, 500, 2200, 0.5), T(S - 0.38), 0.25, pan=0.2)
+        put(SFX, knock(1.0), T(S), 0.9, pan=0.15)
+        put(SFX, boom(0.7), T(S), 0.5)
+        put(SFX, stamp(), T(S + 0.03), 0.45)
+        put(SFX, applause(1.6), T(S + 0.12), 0.3)
+    if 'total' in o:  # pano: TOPLAM ÖDENEN
+        put(SFX, stereo_move(whoosh(0.25, 2400, 500, 0.6), -0.2, 0.2), T(o['total'] - 0.12), 0.16)
+        for k in range(3):
+            put(SFX, led(0.13), T(o['total'] + 0.04 * k))
+    if 'kaching' in o:  # 390 TL: yazar kasa
+        put(SFX, cash_register(), T(o['kaching']), 0.5)
+    if 'sci' in o:  # salon ışıkları titreyerek yanar; pano deneye döner
+        Sc = o['sci']
+        put(SFX, clunk(0.45), T(Sc - 0.02))
+        for k, v in ((0.1, 0.25), (0.25, 0.3)):
+            put(SFX, clunk(v), T(Sc + k))
+        for k in range(3):
+            put(SFX, led(0.12), T(Sc + 0.45 + 0.05 * k))
+    for key, f0 in (('n3', 620), ('n5', 760)):  # 3 $ ve 5 $
+        if key in o:
+            put(SFX, led(0.14), T(o[key] - 0.08))
+            put(SFX, bloop(f0, f0 * 1.6, 0.07, 0.2), T(o[key] - 0.06))
+    if 'n5' in o:
+        put(SFX, pling(1568, 0.12, 0.5), T(o['n5']))
+    if 'ult' in o:  # "dolar açık artırması": pano parlar
+        U = o['ult']
+        put(SFX, fm_bell(659, 1.0, 0.2), T(U - 0.3))
+        for k in range(4):
+            put(SFX, led(0.1), T(U - 0.35 + 0.06 * k))
+    if 'lesson' in o:  # kürek iner, defter kartı çıkar
+        Le = o['lesson']
+        put(SFX, paddle(0.22), T(Le), pan=-0.4)
+        put(SFX, flutter(0.3), T(Le + 0.2), 0.2, pan=-0.4)
+    if 'write' in o:  # SINIRIM / 50 TL
+        put(SFX, marker(0.4), T(o['write']), 0.5, pan=-0.3)
+        put(SFX, marker(0.3), T(o['write'] + 0.45), 0.5, pan=-0.3)
+    if 'ok' in o:  # TAMAM damgası
+        put(SFX, stamp(), T(o['ok']), 0.4, pan=-0.3)
+        put(SFX, fm_bell(1568, 0.6, 0.16), T(o['ok'] + 0.05), pan=-0.3)
+    if 'cta' in o:  # soru: iki kürek "?" ile kalkar
+        C = o['cta']
+        put(SFX, paddle(0.25), T(C + 0.05), pan=-0.4); put(SFX, paddle(0.25), T(C + 0.15), pan=0.4)
+        put(SFX, bloop(500, 1100, 0.1, 0.18), T(C + 0.3), pan=-0.3); put(SFX, bloop(520, 1150, 0.1, 0.18), T(C + 0.38), pan=0.3)
+    if 'dim' in o:  # ışıklar söner; döngü karanlık salona döner
+        put(SFX, clunk(0.4), T(o['dim'])); put(SFX, clunk(0.35), T(o['dim'] + 0.3), pan=0.3)
+
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
 # ═════════ ANA MÜZİK ═════════

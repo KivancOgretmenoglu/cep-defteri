@@ -563,3 +563,26 @@ Cep Defteri'nde Yatırım → Birikim hedefleri → + Hedef: "Sağlam bot" gibi 
 ```
 
 **Yayın notu:** Kapak karesi olarak 0,1 sn'yi seç (sepya, yağmur, yakın planda delik botuyla su birikintisinde melon şapkalı Fıstık, eski bot yığını, kadraj dışından onu suçlarcasına gösteren eldivenli el + "Paran yetmiyorsa suç sende değil"). İlk sürümün kancası "Az kazanan neden fazla öder?" idi (5. kışın geniş planı; commit 95670f9 ile yeniden üretilebilir); istenirse ikisi deneme reelsi olarak karşılaştırılır. Kışın ilk soğuk ve yağmurlu haftasında yayınla (bot alışverişi zamanı). İlk yorumu sabitle: "Fıstık 5 kışta 5.000 TL ödedi, Diken 3.000. Senin ucuz diye alıp iki kere ödediğin şey ne? (Tutarlar örnek.)" Karar anında soru "UCUZ mu, SAĞLAM mı?": izleyicinin kendi seçimi; dönemeç Fıstık'ın cebindeki 1.200 TL (seçmek için önce paranın olması gerekiyor). Çağrılar sonda: önce seslendirmeyle aynı soru + "Yoruma yaz", sonra ortak takip satırı ve takip kartı. "Arkadaşına gönder" ve "kaydet" açıklamada. Araştırma rakamları Washington Post haberinden ve yazarların üniversitesinin yazısından (yaprak başına %5,9; videoda yuvarlanıp "yaklaşık %6"). Pratchett'in adı ekranda kaynak olarak geçer; romandan uzun alıntı yapılmaz, fikir anlatılır ("ayakları hâlâ ıslak" romandaki sonun kısa bir yankısı). Yorumlarda en çok anılan ürünü (şarj kablosu, kulaklık, ayakkabı…) bir sonraki reelsin açılışında kullan.
+
+---
+
+## 27 · acik-artirma (kavram: dolar açık artırması / tırmanma tuzağı, Karar odası serisi, seslendirme: Buğra, döngülü, 32,5 sn)
+
+**Açıklama:**
+```
+100 TL'ye 200 TL verir misin? 🔨
+Sen kaçta dururdun? Sınırını yoruma yaz 👇
+📌 Kaydet; bir dahaki "buraya kadar gelmişken" anında aklına gelsin. Android erken erişim yakında.
+
+Mezatta 100 TL satılık. Kural basit: en yüksek teklif parayı alır; ikinci en yüksek teklif veren de teklifini öder ama eli boş kalır.
+Karamel 100 dedi, Fıstık 90'da kaldı. Bıraksa 90 TL'si yanacaktı; artırdı. Karamel de artırdı… Fıstık 100 TL'yi 200'e aldı, Karamel 190 TL'sini yaktı: masadaki 100 TL için toplam 390 TL ödendi. Tutarlar örnek.
+Bu oyunu 1971'de ekonomist Martin Shubik tasarladı: "dolar açık artırması". Shubik'e göre 1 dolarlık banknota toplam 3–5 dolar ödenmesi nadir değil (Shubik, 1971, Journal of Conflict Resolution).
+Her yeni teklif o an mantıklı görünüyor, toplamı ise kayıp. Zararın neresinden dönülse kârdır.
+
+İnatlaşınca geri adım atmayan arkadaşına gönder.
+Cep Defteri'nde kategorilere aylık sınır koy: sınır baştan yazılıysa nerede duracağını o an tartışmazsın.
+
+#açıkartırma #oyunteorisi #davranışsalekonomi #öğrencibütçesi #paraipuçları #cepdefteri
+```
+
+**Yayın notu:** Kapak karesi olarak 2,0 sn'yi seç (perde, LED panoda "SATILIK 100 TL", kürsüde tokmaklı Bilge, iki yanda "?" kürekli Fıstık ve Karamel + "100 TL'ye 200 verir misin?"). İlk yorumu sabitle: "Fıstık 100 TL'yi 200'e aldı, Karamel 190'ını yaktı. Sen kaçta dururdun? (Tutarlar örnek.)" Karar anında soru "ARTIR mı, BIRAK mı?" + "Yoruma yaz: A mı, B mi?" (izleyicinin kendi seçimi; Bilge tokmağı kaldırır, panoda gerçek 3 sn "SATIYORUM 3·2·1"); sonda seslendirmeyle aynı soru "Sen kaçta dururdun?" + "Yoruma yaz: sınırın kaç TL?" + "Cep Defteri'nde sınırını önceden koy". Ortak takip satırı ve takip kartı bilerek yok: 9.172 izlenen ültimatomda da yoktu, video kancaya dönerek bitiyor (gerekirse eklenir, ~3 sn). Ültimatomla aynı seri (Karar odası: iki kişilik para oyunu, tek mekân, şaşırtan soru, gerçek karar anı, sayıyla cevaplanan soru) ama kopyası gibi durmasın diye mekân (mezat salonu), kadro (Fıstık, Karamel, mezatçı Bilge), karar düzeneği (kürek + tokmak + LED pano), müzik (`thriller`) ve seslendirme kalıpları farklı. Araştırma: Shubik'in 1971 makalesindeki "toplam 3–5 dolar nadir değil" cümlesi (s. 110); Bazerman'ın 20 dolarlık sınıf açık artırmalarına dair rakamlar ikincil kaynaklarda farklı okullara atfedildiği için kullanılmadı. Deneme reelsi olarak paylaşıp geçme oranını ültimatomun %31,4'üyle karşılaştır. Instagram'da "Yapay zekâ bilgisi" etiketini aç. Yorumlara gelen sayılara "neden orada?" diye, "hiç girmezdim" diyenlere "10 TL'ye 100 TL alma şansını da mı?" diye yanıt ver. Test için alternatif kanca (yalnız ilk kutu): "100 TL'yi 200'e alır mısın?"
