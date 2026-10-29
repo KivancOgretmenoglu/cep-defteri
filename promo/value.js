@@ -89,6 +89,43 @@ const PAWP_C = { o: '#2A1E1A', B: '#A07C5C' };
 /* Mezat: yanan kürekteki alev */
 const FIREP = ['....Y....', '...YY....', '...YRY...', '..YRRY...', '..YRRRY..', '.YRROORY.', '.YROOORY.', 'YRROOORRY', 'YRROOOORY', '.YRROORY.', '..YYYYY..'];
 const FIRE_C = { Y: '#FFD25A', R: '#F2662F', O: '#FFF1C9' };
+/* Mezat: takip kartındaki "Takip et"e vuran tokmak; baş solda (uçları altın halkalı), sap sağa uzanır */
+const GAVELP = ['.oooo..........', 'oGGGGo.........', 'oHHHHo.........', 'oHhHHoooooooooo', 'oHhHHKKKKKKKKKo', 'oHhHHoooooooooo', 'oHHHHo.........', 'oGGGGo.........', '.oooo..........'];
+const GAVEL_C = { o: '#2A1E1A', G: '#E0AE4C', H: '#6B4428', h: '#8B5A2B', K: '#8B5A2B' };
+/* Piksel uzuvlar (kol, kanat) ve tuttukları nesneler (kürek, tokmak): maskotun 32 × 30 ızgarasında, sprite'la aynı piksel
+ * boyunda çizilir. Her katman kendi siyah konturunu alır, sonraki katman öncekinin üstüne biner: pati sapın üstünde kalır,
+ * sapı kavrar. Koordinatlar sprite birimi; ızgaranın dışı (baş üstü) serbest. */
+function limbBox(cells, x, y, s, col) {  // s × s kare fırça (merkezi içeride kalan hücreler)
+  for (let i = Math.floor(x - s / 2); i <= Math.ceil(x + s / 2); i++)
+    for (let j = Math.floor(y - s / 2); j <= Math.ceil(y + s / 2); j++)
+      if (Math.abs(i + 0.5 - x) < s / 2 && Math.abs(j + 0.5 - y) < s / 2) cells.set(i + ',' + j, typeof col === 'function' ? col(i, j) : col);
+}
+function limbCurve(cells, a, c, b, s, col) {  // a → b, c denetim noktası (dirsek)
+  for (let t = 0; t <= 1.0001; t += 0.03) {
+    const u = 1 - t;
+    limbBox(cells, u * u * a[0] + 2 * u * t * c[0] + t * t * b[0], u * u * a[1] + 2 * u * t * c[1] + t * t * b[1], s, col);
+  }
+}
+function limbDisk(cells, cx, cy, r, col) {
+  for (let i = Math.floor(cx - r); i <= Math.ceil(cx + r); i++)
+    for (let j = Math.floor(cy - r); j <= Math.ceil(cy + r); j++)
+      if ((i + 0.5 - cx) ** 2 + (j + 0.5 - cy) ** 2 <= r * r) cells.set(i + ',' + j, typeof col === 'function' ? col(i, j) : col);
+}
+/** Katmanlar alttan üste: [{ cells, after }]; after: katmanın üstüne yazılan SVG (ör. kürekteki sayı) */
+function limbSVG(layers) {
+  let out = '';
+  layers.forEach(({ cells, after }) => {
+    const edge = new Set();
+    cells.forEach((_, k) => {
+      const [x, y] = k.split(',').map(Number);
+      for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) { const n = (x + dx) + ',' + (y + dy); if (!cells.has(n)) edge.add(n); }
+    });
+    edge.forEach((k) => { const [x, y] = k.split(','); out += `<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="#2A1E1A"/>`; });
+    cells.forEach((col, k) => { const [x, y] = k.split(','); out += `<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${col}"/>`; });
+    if (after) out += after;
+  });
+  return `<svg viewBox="0 0 32 30" width="100%" height="100%" overflow="visible" shape-rendering="crispEdges" style="position:absolute;left:0;top:0">${out}</svg>`;
+}
 const PERSONP = ['..ooo..', '.oSSSo.', '.oSSSo.', '..ooo..', '.ooooo.', 'oCCCCCo', 'oCCCCCo', 'oCCCCCo', '.oo.oo.', '.oo.oo.'];
 const HEARTP = ['.oo.oo.', 'oRRoRRo', 'oRRRRRo', '.oRRRo.', '..oRo..', '...o...'];
 const HEARTP_C = { o: '#2A1E1A', R: '#E8507A' };
@@ -5561,7 +5598,7 @@ function defineValue() {
     const REVEAL = ev('reveal'), RULES = ev('rules'), ALIR = ev('alir'), DP = ev('dp'), ODER = ev('oder'), BOS = ev('bos');
     const BID = ev('bid'), FIRE = ev('fire'), ASK = ev('ask'), COUNT = ev('count'), DEC = ev('dec'), DROP = ev('drop'), SOLD = ev('sold');
     const TOTAL = ev('total'), KACHING = ev('kaching'), SCI = ev('sci'), N3 = ev('n3'), N5 = ev('n5'), NAME = ev('name'), ULT = ev('ult');
-    const LESSON = ev('lesson'), WRITE = ev('write'), OK = ev('ok'), CTA = ev('cta'), DIM = ev('dim');
+    const LESSON = ev('lesson'), WRITE = ev('write'), OK = ev('ok'), CTA = ev('cta'), FOLLOW = ev('follow'), TAPF = ev('tapf'), DIM = ev('dim');
     // teklifler: [an, kim (0 Fıstık, 1 Karamel), tutar]
     const BIDS = [];
     if (o.bid) [[0, 1, 10], [0.15, 0, 20], [0.3, 1, 40], [0.45, 0, 60], [0.6, 1, 80], [0.75, 0, 90], [0.93, 1, 100]].forEach(([d, w, v]) => BIDS.push([BID + d, w, v]));
@@ -5590,7 +5627,7 @@ function defineValue() {
       const p = el('div', 'abs', cam, { left: px(x1 - w1 * 1.3), top: px(y1 - 60), width: px(w1 * 2.6), height: '120px', borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(255,232,180,.42), transparent 70%)', pointerEvents: 'none' });
       return (a) => { c.style.opacity = a; p.style.opacity = a; };
     };
-    const spC = spot(540, 540, 46, 250, 1560), spL = spot(60, 175, 30, 200, 1560), spR = spot(1020, 905, 30, 200, 1560);
+    const spC = spot(540, 540, 46, 250, 1560), spL = spot(60, 155, 30, 200, 1560), spR = spot(1020, 925, 30, 200, 1560);
     const motes = Array.from({ length: 14 }, (_, i) => ({ e: el('div', 'abs', cam, { width: '8px', height: '8px', background: '#FFE8BE' }), x: 380 + ((i * 197) % 320), y: (i * 331) % 700, sp: 12 + (i % 5) * 6, ph: i * 1.7 }));
     // fiyat panosu (LED), zincirle asılı
     [372, 708].forEach((x) => el('div', 'abs', cam, { left: px(x - 3), top: '560px', width: '6px', height: '296px', background: 'repeating-linear-gradient(#9A8560 0 10px, #4B3F2C 10px 14px)' }));
@@ -5604,15 +5641,13 @@ function defineValue() {
     stampB.textContent = 'SATILDI!';
     // mezatçı Bilge, tokmak kanadı, kürsü
     const bilge = new Mascot(cam, { who: 'bilge', w: 280 });
-    const wing = el('div', 'abs', cam, { left: 0, top: 0, height: '28px', background: '#3E4A8C', border: '5px solid #2A1E1A', borderRadius: '16px', transformOrigin: '0 50%', boxSizing: 'border-box' });
-    const gavel = el('div', 'abs', cam, { left: 0, top: 0, width: '110px', height: '56px', transformOrigin: '12px 28px', zIndex: 3 });
-    el('div', 'abs', gavel, { left: 0, top: '19px', width: '74px', height: '18px', background: '#8B5A2B', border: '4px solid #2A1E1A', borderRadius: '8px', boxSizing: 'border-box' });
-    el('div', 'abs', gavel, { left: '60px', top: 0, width: '44px', height: '56px', background: 'linear-gradient(90deg, #6B4428 0 28%, #E0AE4C 28% 40%, #6B4428 40% 60%, #E0AE4C 60% 72%, #6B4428 72%)', border: '5px solid #2A1E1A', borderRadius: '10px', boxSizing: 'border-box' });
-    const wtip = el('div', 'abs', cam, { left: 0, top: 0, width: '44px', height: '38px', borderRadius: '50%', background: '#5867B5', border: '5px solid #2A1E1A', boxSizing: 'border-box', zIndex: 4 });
+    // sağ kanat omuzdan çıkar, ucu tokmağın sapını kavrar (Bilge'yle aynı dönüşüm; sprite birimi)
+    const brig = el('div', 'abs', cam, { left: 0, top: 0, width: '280px', height: px(280 * 30 / 32), transformOrigin: '50% 100%', zIndex: 4 });
+    const WING = { S: [23.5, 16.5], rest: { E: [27, 18], P: [27.5, 14.5], a: -62 }, up: { E: [28, 14], P: [28.5, 9.5], a: -100 }, hit: { E: [27.5, 18.5], P: [28.5, 16], a: 24 } };
     el('div', 'abs', cam, { left: '356px', top: '1222px', width: '392px', height: '30px', background: 'linear-gradient(#946240, #6B4428)', border: '5px solid #2A1E1A', borderRadius: '8px', boxSizing: 'border-box', zIndex: 2 });
     const podF = el('div', 'abs', cam, { left: '378px', top: '1246px', width: '348px', height: '300px', background: 'linear-gradient(90deg, #4A2E1C, #613D26 35%, #613D26 65%, #4A2E1C)', border: '5px solid #2A1E1A', borderTop: 'none', boxSizing: 'border-box', zIndex: 1 });
     el('div', 'abs', podF, { left: '22px', right: '22px', top: '20px', bottom: '44px', border: '5px solid #C9962F', borderRadius: '8px' });
-    el('div', 'abs', cam, { left: '676px', top: '1204px', width: '64px', height: '24px', borderRadius: '50%', background: 'linear-gradient(#7A5032, #4A2E1C)', border: '4px solid #2A1E1A', boxSizing: 'border-box', zIndex: 3 });  // tokmak takozu
+    el('div', 'abs', cam, { left: '660px', top: '1204px', width: '64px', height: '24px', borderRadius: '50%', background: 'linear-gradient(#7A5032, #4A2E1C)', border: '4px solid #2A1E1A', boxSizing: 'border-box', zIndex: 3 });  // tokmak takozu
     // önde kaide ve fanus: içinde 100 TL
     el('div', 'abs', cam, { left: '486px', top: '1446px', width: '108px', height: '230px', background: 'linear-gradient(#0000 0 30px, #C9962F 30px 40px, #0000 40px), linear-gradient(90deg, #3E2617, #6B4428 45%, #3E2617)', border: '5px solid #2A1E1A', boxSizing: 'border-box', zIndex: 5 });
     el('div', 'abs', cam, { left: '466px', top: '1430px', width: '148px', height: '24px', background: '#C9962F', border: '5px solid #2A1E1A', borderRadius: '6px', boxSizing: 'border-box', zIndex: 5 });
@@ -5621,23 +5656,26 @@ function defineValue() {
     const dome = el('div', 'abs', cam, { left: '460px', top: '1296px', width: '160px', height: '142px', boxSizing: 'border-box', borderRadius: '80px 80px 8px 8px', background: 'linear-gradient(120deg, rgba(225,240,255,.30), rgba(200,225,255,.06) 55%, rgba(225,240,255,.18))', border: '5px solid rgba(235,245,255,.62)', zIndex: 5, overflow: 'hidden' });
     el('div', 'abs', dome, { left: '22px', top: '20px', width: '14px', height: '64px', borderRadius: '8px', background: 'rgba(255,255,255,.55)', transform: 'rotate(14deg)' });
     const glint = el('div', 'abs', dome, { top: '-40px', width: '30px', height: '240px', background: 'rgba(255,250,225,.6)', transform: 'rotate(24deg)' });
-    // teklifçiler: kol + kürek + pati (kol gövdeden çıkar, pati sapı kavrar)
+    // teklifçiler: kol omuzdan çıkar, dirsekten kalkar; kürek sapı patinin altından geçer (maskotla aynı dönüşüm; sprite birimi)
     const fistik = new Mascot(cam, { who: 'fistik', outfit: 'bowtie', w: 340 }), karamel = new Mascot(cam, { who: 'karamel', w: 340 });
-    const FUR = ['#E9893C', '#E2A75A'];
-    const SH = [[262, 1374], [790, 1362]], HI = [[322, 1262], [758, 1262]], LO = [[302, 1442], [778, 1442]];
+    const MW = 340, MC = MW / 32, BX = [155, 925];
+    const FUR = ['#E9893C', '#E2A75A'], FURD = ['#C46A26', '#B97C37'];
+    // Fıstık'ın sağ kolu; Karamel'inki aynası: omuz gövdenin kenarında boynun altında, kürek havadayken pati kulak hizasının üstünde
+    const ARM = { S: [23.5, 20], up: { E: [30.5, 15.5], P: [29.5, 9] }, down: { E: [27, 22.5], P: [26.5, 24.5] } };
+    const mx = (w, q) => (w ? [32 - q[0], q[1]] : q);
+    // ders: Fıstık'ın CEP DEFTERİ kartı (kürekle aynı patide, patinin altında)
     const rigs = [0, 1].map((w) => {
-      const arm = el('div', 'abs', cam, { left: 0, top: 0, height: '26px', background: FUR[w], border: '5px solid #2A1E1A', borderRadius: '16px', transformOrigin: '0 50%', boxSizing: 'border-box', zIndex: 6 });
-      const pad = el('div', 'abs', cam, { left: 0, top: 0, width: '132px', height: '214px', transformOrigin: '66px 180px', zIndex: 6 });
-      el('div', 'abs', pad, { left: '57px', top: '116px', width: '18px', height: '94px', background: '#8B5A2B', border: '5px solid #2A1E1A', borderRadius: '6px', boxSizing: 'border-box' });
-      const face = el('div', 'abs it', pad, { left: 0, top: 0, width: '132px', height: '124px', borderRadius: '50%', background: '#FFF8EC', border: '6px solid #2A1E1A', boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '68px', color: '#2A1E1A', boxShadow: 'inset 0 -8px 0 #E8D9C0' });
-      const tag = el('div', 'abs it', cam, { width: '170px', textAlign: 'center', fontSize: '46px', color: '#fff', border: '5px solid #2A1E1A', borderRadius: '10px', display: 'none', zIndex: 7, transformOrigin: '50% 50%' });
-      const flames = [0, 1].map((f) => pixEl(cam, f ? FIREP.map((r) => [...r].reverse().join('')) : FIREP, FIRE_C, 15, { display: 'none', zIndex: 7 }));
-      const sweat = pixEl(cam, SWEAT, SWEAT_C, 11, { display: 'none', zIndex: 7 });
-      const paw = pixEl(cam, PAWP, { o: '#2A1E1A', B: FUR[w] }, 9, { zIndex: 6 });
-      return { arm, pad, face, tag, flames, sweat, paw };
+      const box = el('div', 'abs', cam, { left: 0, top: 0, width: px(MW), height: px(MW * 30 / 32), transformOrigin: '50% 100%', zIndex: 6 });
+      const card = w ? null : el('div', 'abs', box, { left: 0, top: 0, width: '300px', height: '156px', boxSizing: 'border-box', background: 'repeating-linear-gradient(#FFFDF4 0 34px, #BFD3EA 34px 36px)', border: '6px solid #2A1E1A', borderRadius: '12px', padding: '2px 16px', transformOrigin: '0 100%', display: 'none' });
+      const limb = el('div', 'abs', box, { inset: 0 });
+      const tag = el('div', 'abs it', box, { width: '170px', textAlign: 'center', fontSize: '46px', color: '#fff', border: '5px solid #2A1E1A', borderRadius: '10px', display: 'none', transformOrigin: '50% 50%' });
+      const flames = [0, 1].map((f) => pixEl(box, f ? FIREP.map((r) => [...r].reverse().join('')) : FIREP, FIRE_C, 15, { display: 'none' }));
+      const sweat = pixEl(box, SWEAT, SWEAT_C, 11, { display: 'none' });
+      return { box, card, limb, tag, flames, sweat };
     });
-    // ders: Fıstık'ın CEP DEFTERİ kartı (kürekle aynı patide)
-    const card = el('div', 'abs', cam, { left: 0, top: 0, width: '300px', height: '156px', boxSizing: 'border-box', background: 'repeating-linear-gradient(#FFFDF4 0 34px, #BFD3EA 34px 36px)', border: '6px solid #2A1E1A', borderRadius: '12px', padding: '2px 16px', transformOrigin: '60px 156px', display: 'none', zIndex: 8 });
+    // Karamel pes edince kürek patiden düşer, yere yatar; sarsılan gövdeyle sallanmasın diye ayrı katmanda
+    const kLoose = el('div', 'abs', cam, { left: px(BX[1] - MW / 2), top: px(1540 - MW * 30 / 32), width: px(MW), height: px(MW * 30 / 32), zIndex: 6, display: 'none' });
+    const card = rigs[0].card;
     card.innerHTML = '<div style="font-size:30px;font-weight:800;color:#AE4716;letter-spacing:.05em;line-height:36px;white-space:nowrap">CEP DEFTERİ</div><div class="it ca" style="font-size:46px;color:#2A1E1A;height:46px;line-height:46px"></div><div class="it cb" style="font-size:46px;color:#2A1E1A;height:46px;line-height:46px"></div>';
     const ca = card.querySelector('.ca'), cb = card.querySelector('.cb');
     const okStamp = el('div', 'abs it', card, { right: '10px', top: '84px', fontSize: '44px', color: '#fff', background: '#2F8F5A', padding: '0 12px 4px', borderRadius: '10px', border: '5px solid #2A1E1A', display: 'none', transformOrigin: '50% 50%' });
@@ -5645,6 +5683,18 @@ function defineValue() {
     // ekran katmanları: kenar karartma, flaş
     const vig = el('div', 'abs', s.root, { inset: 0, zIndex: 17, pointerEvents: 'none', background: 'radial-gradient(ellipse 78% 64% at 50% 58%, transparent 50%, rgba(0,0,0,.62) 100%)' });
     const flash = el('div', 'abs', s.root, { inset: 0, zIndex: 21, opacity: 0, pointerEvents: 'none' });
+    // takip kartı (sondaki ortak takip satırıyla): yuvarlak simge, cep_defteri, "Her hafta bir para tuzağı", "Takip et";
+    // düğmeye mezat tokmağı vurur
+    const FW = 620, FT = 300;
+    const fcard = el('div', 'abs', s.root, { left: px((1080 - FW) / 2), top: px(FT), width: px(FW), height: '410px', borderRadius: '44px', background: '#FFFFFF', boxShadow: '0 24px 60px rgba(0,0,0,.45)', display: 'none', zIndex: 26, transformOrigin: '50% 50%', textAlign: 'center' });
+    const ficon = el('img', 'abs', fcard, { left: px(FW / 2 - 68), top: '34px', width: '136px', height: '136px', borderRadius: '50%', boxShadow: '0 0 0 4px #FFFFFF, 0 0 0 8px #E9E2D8' });
+    ficon.src = 'assets/icon.png';
+    el('div', 'abs', fcard, { left: 0, right: 0, top: '186px', fontSize: '50px', fontWeight: 800, color: '#141414', letterSpacing: '-.01em' }).textContent = 'cep_defteri';
+    el('div', 'abs', fcard, { left: 0, right: 0, top: '252px', fontSize: '32px', fontWeight: 600, color: '#5E5650' }).textContent = 'Her hafta bir para tuzağı';
+    const fbtn = el('div', 'abs', fcard, { left: '44px', right: '44px', top: '310px', height: '72px', borderRadius: '18px', background: '#0095F6', color: '#FFFFFF', fontSize: '38px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', transformOrigin: '50% 50%' });
+    const FBX = 782, FBY = FT + 310 + 36, GC = 11;  // tokmak düğmenin sağ ucuna vurur (yazıyı kapatmaz); sapın ucundan döner
+    const fgav = pixEl(s.root, GAVELP, GAVEL_C, GC, { left: px(FBX - 3 * GC), top: px(FBY + 32 - 9 * GC), display: 'none', zIndex: 27, transformOrigin: `${14.5 * GC}px ${4.5 * GC}px` });
+    const fring = el('div', 'abs', s.root, { left: px(FBX - 60), top: px(FBY - 60), width: '120px', height: '120px', boxSizing: 'border-box', borderRadius: '50%', border: '8px solid rgba(0,149,246,.75)', display: 'none', zIndex: 27 });
 
     const ramp = (lt, a, d) => E.inOut(prog(lt, a, d));
     const bump = (k) => (k < 0 || k > 0.3 ? 0 : 0.22 * Math.sin(Math.PI * k / 0.3));  // teklifte kürek bir an yukarı sıçrar
@@ -5663,25 +5713,37 @@ function defineValue() {
       [[0, 0], [REVEAL + 0.25, 0], [REVEAL + 0.5, 1], [BID - 0.1, 1], [BID, 0.8], [BID + 0.93, 0.8], [BID + 1.05, 1], [DROP - 0.05, 1], [DROP + 0.3, 0], [CTA - 0.1, 0], [CTA + 0.3, 1], [DIM, 1], [DIM + 0.3, 0]],
     ];
 
+    // kol: k (0 aşağıda, 1 havada) → omuz, dirsek, pati ve kürek yönü (derece; Karamel aynası)
+    const armAt = (w, lt) => {
+      let k = keyed(lt, KEYS[w]);
+      BIDS.forEach(([tb, ww]) => { if (ww === w) k += bump(lt - tb); });
+      if (w === 0 && lt >= COUNT && lt < DEC) k += 0.22 * Math.sin((lt - COUNT) * 5.3) + 0.03 * Math.sin(lt * 47);  // kararsız: kalkar, iner, titrer
+      if (w === 1 && lt >= LAST && lt < DROP) k += 0.02 * Math.sin(lt * 50);
+      const at2 = (q) => mx(w, [lerp(ARM.down[q][0], ARM.up[q][0], k), lerp(ARM.down[q][1], ARM.up[q][1], k)]);
+      // kürek yönü: inikken bel hizasında hafif dışa yatık, havada dik (sayı hep okunur); teklifte bir an sallanır
+      const ang = lerp(-58, -82, clamp(k)) - BIDS.reduce((a, [tb, ww]) => a + (ww === w ? 40 * bump(lt - tb) : 0), 0);
+      return { S: mx(w, ARM.S), E: at2('E'), P: at2('P'), ang: w ? 180 - ang : ang };
+    };
+
     s.update = (lt) => {
       const F = lt >= SCI && lt < DIM + 0.4;  // salon ışıkları açık
       // kamera planları
       let z = 1, fx = 540, fy = 1150;
       if (lt < REVEAL) { z = 1.66 + 0.08 * ramp(lt, 0, REVEAL); fy = 1330; }                                  // fanusta 100 TL, arkada mezatçı
       else if (lt < RULES) { const k = E.out(prog(lt, REVEAL, 0.4)); z = lerp(1.74, 1.04, k); fy = lerp(1330, 1160, k); }  // salon açılır
-      else if (lt < DP) { z = 1.4 + 0.04 * prog(lt, RULES, DP - RULES); fx = 840; fy = 1250; }                 // Karamel: en yüksek alır
-      else if (lt < BID) { z = 1.4 + 0.05 * prog(lt, DP, BID - DP); fx = 240; fy = 1250; }                     // Fıstık: ikinci de öder
+      else if (lt < DP) { z = 1.4 + 0.04 * prog(lt, RULES, DP - RULES); fx = 860; fy = 1250; }                 // Karamel: en yüksek alır
+      else if (lt < BID) { z = 1.4 + 0.05 * prog(lt, DP, BID - DP); fx = 220; fy = 1250; }                     // Fıstık: ikinci de öder
       else if (lt < BID + 1.1) { z = 1.04 + 0.05 * prog(lt, BID, 1.1); fy = 1160; }                             // teklif yağmuru
-      else if (lt < ASK) { z = 1.45 + 0.05 * prog(lt, BID + 1.1, ASK - BID - 1.1); fx = 250; fy = 1240; }        // Fıstık'ın 90'ı yanar
-      else if (lt < COUNT) { z = 1.2 + 0.08 * prog(lt, ASK, COUNT - ASK); fx = 390; fy = 1290; }                // Fıstık + pano (altyazı panonun altında)
-      else if (lt < DEC) { z = 1.28 + 0.14 * ramp(lt, COUNT, DEC - COUNT); fx = 370; fy = 1170; }               // SATIYORUM 3·2·1
+      else if (lt < ASK) { z = 1.45 + 0.05 * prog(lt, BID + 1.1, ASK - BID - 1.1); fx = 230; fy = 1240; }        // Fıstık'ın 90'ı yanar
+      else if (lt < COUNT) { z = 1.18 + 0.05 * prog(lt, ASK, COUNT - ASK); fx = 405; fy = 1290; }               // Fıstık + pano (altyazı panonun altında), sağda Karamel'in 100'ü
+      else if (lt < DEC) { z = 1.22 + 0.06 * ramp(lt, COUNT, DEC - COUNT); fx = 412; fy = 1170; }               // SATIYORUM 3·2·1 (iki kürek de kadrajda)
       else if (lt < SOLD - 0.4) { z = 1.04 + 0.12 * prog(lt, DEC, SOLD - 0.4 - DEC); fy = 1160; }              // tırmanma
       else if (lt < SOLD + 0.75) { z = 1.45; fx = 560; fy = 1070; }                                             // tokmak + pano: SATILDI
       else if (lt < TOTAL - 0.1) { z = 1.04; fy = 1160; }
       else if (lt < LESSON) { z = 1.55 + 0.04 * Math.sin((lt - TOTAL) * 0.8); fx = 540; fy = 980; }               // pano: toplam, deney, ad
-      else if (lt < CTA) { z = 1.5 + 0.04 * prog(lt, LESSON, CTA - LESSON); fx = 270; fy = 1250; }               // Fıstık'ın defteri
-      else if (lt < DIM + 0.3) { z = 1.04 + 0.08 * ramp(lt, CTA, 2.2); fy = 1160; }
-      else { const k = E.inOut(prog(lt, DIM + 0.3, 0.3)); z = lerp(1.12, 1.66, k); fy = lerp(1160, 1330, k); }  // döngü: fanusa dön
+      else if (lt < CTA) { z = 1.5 + 0.04 * prog(lt, LESSON, CTA - LESSON); fx = 260; fy = 1250; }               // Fıstık'ın defteri
+      else if (lt < DIM + 0.3) { z = 1.04 + 0.08 * ramp(lt, CTA, 2.2) + 0.03 * ramp(lt, FOLLOW - 0.2, 0.6); fy = 1160 - 30 * ramp(lt, FOLLOW - 0.2, 0.6); }  // soru, takip kartı
+      else { const k = E.inOut(prog(lt, DIM + 0.3, 0.3)), q = ramp(DIM + 0.3, FOLLOW - 0.2, 0.6); z = lerp(1.12 + 0.03 * q, 1.66, k); fy = lerp(1160 - 30 * q, 1330, k); }  // döngü: fanusa dön
       const sx = shake(lt, SOLD, 20, 0.45) + shake(lt, DEC, 10, 0.3) + shake(lt, DROP + 0.25, 8, 0.3) + (lt >= DEC && lt < SOLD - 0.4 ? 3 * Math.sin(lt * 61) * prog(lt, DEC, 2) : 0);
       cam.style.transform = `translate(${540 - fx * z + sx}px,${1060 - fy * z}px) scale(${z})`;
       // ışık: girişte yalnız orta spot; açılışta yan spotlar; deneyde salon ışığı; döngüden önce yine karanlık
@@ -5730,79 +5792,102 @@ function defineValue() {
       stampB.style.display = lt >= SOLD && lt < TOTAL - 0.1 ? 'block' : 'none';
       stampB.style.transform = `scale(${lerp(2.3, 1, E.out(prog(lt, SOLD, 0.18)))}) rotate(-9deg)`;
       // Bilge'nin tokmağı: dinlenirken dik, sayımda havada (her saniye hafif iner), SATILDI'da takoza vurur
-      let gx = 648, gy = 1168, ga = -62;
-      const up = (a) => { gx = lerp(gx, 662, a); gy = lerp(gy, 1112, a); ga = lerp(ga, -100, a); };
+      const pose = (a, b, k) => ({ E: [lerp(a.E[0], b.E[0], k), lerp(a.E[1], b.E[1], k)], P: [lerp(a.P[0], b.P[0], k), lerp(a.P[1], b.P[1], k)], a: lerp(a.a, b.a, k) });
+      let gp = WING.rest;
       if (lt >= COUNT - 0.35 && lt < DEC + 0.3) {
-        up(E.out(prog(lt, COUNT - 0.35, 0.3)) * (1 - E.inOut(prog(lt, DEC, 0.3))));
-        if (lt >= COUNT && lt < DEC) { const k = (lt - COUNT) % 1; ga += 18 * Math.exp(-k * 9) * (k < 0.5 ? 1 : 0); }
+        gp = pose(WING.rest, WING.up, E.out(prog(lt, COUNT - 0.35, 0.3)) * (1 - E.inOut(prog(lt, DEC, 0.3))));
+        if (lt >= COUNT && lt < DEC) { const k = (lt - COUNT) % 1; gp = { ...gp, a: gp.a + 18 * Math.exp(-k * 9) * (k < 0.5 ? 1 : 0) }; }
       }
-      if (lt >= SOLD - 0.4 && lt < SOLD) up(E.out(prog(lt, SOLD - 0.4, 0.25)));
-      if (lt >= SOLD && lt < SOLD + 0.9) { const k = prog(lt, SOLD, 0.06); gx = lerp(662, 650, k); gy = lerp(1112, 1176, k); ga = lerp(-100, 26, k); if (lt >= SOLD + 0.45) { const q = E.inOut(prog(lt, SOLD + 0.45, 0.4)); gx = lerp(650, 648, q); gy = lerp(1176, 1168, q); ga = lerp(26, -62, q); } }
-      gavel.style.transform = `translate(${gx - 12}px,${gy - 28}px) rotate(${ga}deg)`;
-      wtip.style.transform = `translate(${gx - 22}px,${gy - 19}px)`;
-      const wx = 606, wy = 1170, wl = Math.hypot(gx - wx, gy - wy);
-      wing.style.width = px(Math.max(wl, 20)); wing.style.transform = `translate(${wx}px,${wy - 14}px) rotate(${Math.atan2(gy - wy, gx - wx)}rad)`;
-      // teklifçilerin kürekleri
+      if (lt >= SOLD - 0.4 && lt < SOLD) gp = pose(WING.rest, WING.up, E.out(prog(lt, SOLD - 0.4, 0.25)));
+      if (lt >= SOLD && lt < SOLD + 0.9) gp = lt < SOLD + 0.45 ? pose(WING.up, WING.hit, prog(lt, SOLD, 0.06)) : pose(WING.hit, WING.rest, E.inOut(prog(lt, SOLD + 0.45, 0.4)));
+      {
+        const gv = new Map(), wg = new Map(), tp = new Map(), d = [Math.cos(gp.a * Math.PI / 180), Math.sin(gp.a * Math.PI / 180)];
+        limbCurve(gv, gp.P, [gp.P[0] + d[0] * 2.1, gp.P[1] + d[1] * 2.1], [gp.P[0] + d[0] * 4.2, gp.P[1] + d[1] * 4.2], 1.2, '#8B5A2B');  // sap
+        const H = [gp.P[0] + d[0] * 5.4, gp.P[1] + d[1] * 5.4];  // baş: sapa dik silindir, iki ucu altın halkalı
+        for (let i = Math.floor(H[0] - 4); i <= H[0] + 4; i++) for (let j = Math.floor(H[1] - 4); j <= H[1] + 4; j++) {
+          const al = (i + 0.5 - H[0]) * d[0] + (j + 0.5 - H[1]) * d[1], pe = -(i + 0.5 - H[0]) * d[1] + (j + 0.5 - H[1]) * d[0];
+          if (Math.abs(al) <= 1.35 && Math.abs(pe) <= 2.3) gv.set(i + ',' + j, Math.abs(pe) > 1.4 ? '#E0AE4C' : '#6B4428');
+        }
+        limbCurve(wg, WING.S, gp.E, gp.P, 2.2, '#3E4A8C');
+        limbDisk(tp, gp.P[0], gp.P[1], 1.5, '#5867B5');
+        brig.innerHTML = limbSVG([{ cells: gv }, { cells: wg }, { cells: tp }]);
+      }
+      // teklifçilerin kürekleri: piksel kol omuzdan dirseğe, dirsekten patiye; sap patinin altından geçer
       [0, 1].forEach((w) => {
         const r = rigs[w];
-        let k = keyed(lt, KEYS[w]);
-        BIDS.forEach(([tb, ww]) => { if (ww === w) k += bump(lt - tb); });
-        if (w === 0 && lt >= COUNT && lt < DEC) k += 0.22 * Math.sin((lt - COUNT) * 5.3) + 0.03 * Math.sin(lt * 47);  // kararsız: kalkar, iner, titrer
-        if (w === 1 && lt >= LAST && lt < DROP) k += 0.02 * Math.sin(lt * 50);
-        const gx2 = lerp(LO[w][0], HI[w][0], k), gy2 = lerp(LO[w][1], HI[w][1], k);
-        const tilt = (w ? -1 : 1) * (6 * k) + BIDS.reduce((a, [tb, ww]) => a + (ww === w ? 10 * bump(lt - tb) * (w ? -1 : 1) : 0), 0);
+        if (w === 1) kLoose.style.display = 'none';
         const lesson = w === 0 && lt >= LESSON && lt < CTA;
         const away = lt >= SCI + 0.05 && lt < CTA - 0.1;  // deney panosu yakın planında kürekler indirilmiş, kadraj dışında
         const hid = lt < REVEAL + 0.12 || lt >= DIM + 0.3 || (away && !lesson);
-        r.pad.style.display = lesson || hid ? 'none' : 'block';
-        r.arm.style.display = r.paw.style.display = hid ? 'none' : 'block';
-        r.pad.style.transform = `translate(${gx2 - 66}px,${gy2 - 180}px) rotate(${tilt}deg)`;
-        r.paw.style.transform = `translate(${gx2 - 31}px,${gy2 - 31}px)`;
-        const [ax, ay] = SH[w], al = Math.hypot(gx2 - ax, gy2 - ay);
-        r.arm.style.width = px(Math.max(al, 24)); r.arm.style.transform = `translate(${ax}px,${ay - 13}px) rotate(${Math.atan2(gy2 - ay, gx2 - ax)}rad)`;
+        r.box.style.display = hid ? 'none' : 'block';
+        if (hid) return;
+        const { S, E: E2, P, ang: a0 } = armAt(w, lt);
+        // kürek: tutuş noktası G, yönü ang. Karamel pes edince patiden düşer, salona doğru devrilip yere yatar, bir kez seker
+        let G = P, ang = a0;
+        const dropped = w === 1 && lt >= DROP && lt < CTA - 0.1;  // soruda yeniden elinde
+        if (dropped) {
+          const A0 = armAt(1, DROP), t = lt - DROP, q = Math.min(1, t / 0.3), bo = t > 0.3 && t < 0.5 ? Math.sin(Math.PI * (t - 0.3) / 0.2) : 0;
+          G = [lerp(A0.P[0], A0.P[0] - 1.2, q), lerp(A0.P[1], 25.2, q * q) - 1.1 * bo];
+          ang = lerp(A0.ang, 180, q * q) + 7 * bo;
+        }
+        const d = [Math.cos(ang * Math.PI / 180), Math.sin(ang * Math.PI / 180)], R = 4.5;
+        const C = [G[0] + d[0] * (4.6 + R), G[1] + d[1] * (4.6 + R)];  // kürek yüzünün merkezi
         // kürekteki sayı: teklif yokken "?"; deneyde boş
         const b = mine(lt, w);
         let txt = b ? String(b[2]) : '?', col = '#2A1E1A';
         if (lt >= SCI) txt = lt >= CTA ? '?' : '';
         if (w === 0 && lt >= FIRE && lt < ASK) col = '#C0392B';
         if (lt >= SOLD && lt < SCI) col = '#C0392B';
-        r.face.textContent = txt; r.face.style.color = col;
-        r.face.style.fontSize = txt.length > 2 ? '56px' : '68px';
         const fl = b && lt - b[0] < 0.12 ? 1 - (lt - b[0]) / 0.12 : 0;
-        r.face.style.transform = `scale(${1 + 0.25 * fl})`;
-        // etiketler: ALIR (Karamel), ÖDER → ELİ BOŞ (Fıstık)
+        const fs = (txt.length > 2 ? 5.0 : 6.0) * (1 + 0.25 * fl);
+        const layers = [], loose = [];
+        if (!lesson) {
+          const hd = new Map(), fc = new Map();
+          limbCurve(hd, G, [G[0] + d[0] * 2.4, G[1] + d[1] * 2.4], [G[0] + d[0] * 4.8, G[1] + d[1] * 4.8], 1.2, '#8B5A2B');
+          limbDisk(fc, C[0], C[1], R, (i, j) => ((i + 0.5 - C[0]) * -d[0] + (j + 0.5 - C[1]) * -d[1] > R * 0.55 ? '#E8D9C0' : '#FFF8EC'));
+          (dropped ? loose : layers).push({ cells: hd }, { cells: fc, after: `<text x="${C[0]}" y="${C[1] + fs * 0.34}" text-anchor="middle" font-family="Pixel" font-size="${fs}" fill="${col}" transform="rotate(${ang + 90} ${C[0]} ${C[1]})">${txt}</text>` });
+        }
+        if (loose.length) { kLoose.style.display = 'block'; kLoose.innerHTML = limbSVG(loose); }
+        const am = new Map(), pw = new Map();
+        limbCurve(am, S, E2, P, 2.1, FUR[w]);
+        limbDisk(pw, P[0], P[1], 1.55, FUR[w]);
+        pw.set(Math.floor(P[0]) + ',' + Math.floor(P[1]), FURD[w]);
+        layers.push({ cells: am }, { cells: pw });
+        r.limb.innerHTML = limbSVG(layers);
+        // etiketler: ALIR (Karamel), ÖDER → ELİ BOŞ (Fıstık); kürek yüzünün üstünde
         const tg = w === 1 ? (lt >= ALIR && lt < BID ? ['ALIR', '#2F8F5A', ALIR] : null) : (lt >= ODER && lt < BID ? (lt >= BOS ? ['ELİ BOŞ', '#6B6B6B', BOS] : ['ÖDER', '#C0392B', ODER]) : null);
         r.tag.style.display = tg ? 'block' : 'none';
         if (tg) {
           r.tag.textContent = tg[0]; r.tag.style.background = tg[1];
-          r.tag.style.left = px(gx2 - 85); r.tag.style.top = px(gy2 - 290);
+          r.tag.style.left = px(C[0] * MC - 85); r.tag.style.top = px((C[1] - R - 6.2) * MC);
           r.tag.style.transform = `scale(${lerp(1.8, 1, E.out(prog(lt, tg[2], 0.18)))}) rotate(${w ? 6 : -6}deg)`;
         }
-        // yanan 90: alevler kürekte titrer
+        // yanan 90: alevler kürek yüzünün üstünde titrer
         const fo = w === 0 && lt >= FIRE && lt < FIRE + 1.0;
         r.flames.forEach((f, i) => {
           f.style.display = fo && Math.floor(lt * 12) % 2 === i ? 'block' : 'none';
-          f.style.transform = `translate(${gx2 - 68}px,${gy2 - 330 + 10 * Math.sin(lt * 20)}px) scale(${E.back(prog(lt, FIRE, 0.25))})`;
+          f.style.transform = `translate(${C[0] * MC - 68}px,${(C[1] - R) * MC - 150 + 10 * Math.sin(lt * 20)}px) scale(${E.back(prog(lt, FIRE, 0.25))})`;
         });
-        // ter: sayımda Fıstık, tırmanmada ikisi
+        // ter: sayımda Fıstık, tırmanmada ikisi (başın dış yanından süzülür)
         const sw = (w === 0 && lt >= ASK && lt < DEC + 0.2) || (lt >= DEC && lt < SOLD + 0.6);
         r.sweat.style.display = sw ? 'block' : 'none';
-        if (sw) { const ph = ((lt * 1.4 + w * 0.5) % 1); r.sweat.style.transform = `translate(${(w ? 790 : 250) + (w ? 1 : -1) * 30 * ph}px,${1246 + 60 * ph * ph}px)`; r.sweat.style.opacity = 1 - ph; }
+        if (sw) { const ph = ((lt * 1.4 + w * 0.5) % 1); r.sweat.style.transform = `translate(${(w ? 25.5 : 5.5) * MC + (w ? 1 : -1) * 30 * ph}px,${10 * MC + 60 * ph * ph}px)`; r.sweat.style.opacity = 1 - ph; }
+        // ders: kart patide, "SINIRIM / 50 TL" yazılır, TAMAM
+        if (w === 0) {
+          card.style.display = lesson ? 'block' : 'none';
+          if (lesson) {
+            card.style.left = px((P[0] - 1.6) * MC); card.style.top = px((P[1] + 0.9) * MC - 156);
+            card.style.transform = 'rotate(4deg)';
+            const typed = (t, a) => t.slice(0, Math.floor(prog(lt, a, 0.4) * t.length));
+            ca.textContent = typed('SINIRIM', WRITE); cb.textContent = typed('50 TL', WRITE + 0.45);
+            okStamp.style.display = lt >= OK ? 'block' : 'none';
+            okStamp.style.transform = `scale(${lerp(2, 1, E.out(prog(lt, OK, 0.2)))}) rotate(-8deg)`;
+          }
+        }
       });
-      // ders: kart yükselir, "SINIRIM / 50 TL" yazılır, TAMAM
-      const lc = lt >= LESSON && lt < CTA;
-      card.style.display = lc ? 'block' : 'none';
-      if (lc) {
-        const k = keyed(lt, KEYS[0]), cx2 = lerp(LO[0][0], HI[0][0], k), cy2 = lerp(LO[0][1], HI[0][1], k);
-        card.style.transform = `translate(${cx2 - 60}px,${cy2 - 156 - 30}px) rotate(4deg)`;
-        const typed = (t, a) => t.slice(0, Math.floor(prog(lt, a, 0.4) * t.length));
-        ca.textContent = typed('SINIRIM', WRITE); cb.textContent = typed('50 TL', WRITE + 0.45);
-        okStamp.style.display = lt >= OK ? 'block' : 'none';
-        okStamp.style.transform = `scale(${lerp(2, 1, E.out(prog(lt, OK, 0.2)))}) rotate(-8deg)`;
-      }
       // fanustaki 100 TL: SATILDI'da Fıstık'a uçar; deneyde yerine yenisi gelir
       const nk = E.inOut(prog(lt, SOLD + 0.8, 0.5)) * (lt < SCI ? 1 : 0);
-      note.style.transform = `translate(${lerp(0, -230, nk)}px,${lerp(0, -40, nk) - Math.sin(nk * Math.PI) * 120}px) scale(${1 - 0.25 * nk})`;
+      note.style.transform = `translate(${lerp(0, -300, nk)}px,${lerp(0, -30, nk) - Math.sin(nk * Math.PI) * 120}px) scale(${1 - 0.25 * nk})`;
       note.style.opacity = lt >= SCI && lt < SCI + 0.3 ? prog(lt, SCI, 0.3) : 1;
       // flaşlar: alev turuncu, ARTIR yeşil, SATILDI beyaz
       const ff = lt >= FIRE ? 0.28 * Math.exp(-(lt - FIRE) * 6) : 0, fd = lt >= DEC ? 0.32 * Math.exp(-(lt - DEC) * 6) : 0, fs = lt >= SOLD ? 0.5 * Math.exp(-(lt - SOLD) * 7) : 0;
@@ -5810,6 +5895,31 @@ function defineValue() {
       flash.style.background = fm === fs ? '#FFF6E0' : fm === fd ? '#3FB06F' : '#F2662F';
       flash.style.opacity = fm;
       vig.style.opacity = 1 - 0.7 * L;
+      // takip kartı: FOLLOW'da açılır; TAPF'de tokmak "Takip et"e vurur, düğme "Takip ediliyor" olur
+      const fOn = lt >= FOLLOW && lt < DIM;
+      fcard.style.display = fOn ? 'block' : 'none';
+      if (fOn) popIn(fcard, prog(lt, FOLLOW, 0.35), { fromY: -60 });
+      const followed = lt >= TAPF + 0.02;
+      fbtn.textContent = followed ? 'Takip ediliyor' : 'Takip et';
+      fbtn.style.background = followed ? '#EFEFEF' : '#0095F6';
+      fbtn.style.color = followed ? '#141414' : '#FFFFFF';
+      const tq = lt - TAPF + 0.45;  // 0.45'te vuruş
+      fbtn.style.transform = `scale(${tq >= 0.45 && tq < 0.58 ? 0.94 : followed ? 1 + 0.08 * Math.sin(Math.PI * prog(tq, 0.58, 0.25)) : 1 + 0.03 * Math.sin(lt * 8)})`;
+      const gOn = fOn && tq >= 0 && tq < 1;  // tokmak sağdan havada gelir, iner, vurur, seker, çekilir
+      fgav.style.display = gOn ? 'block' : 'none';
+      if (gOn) {
+        const kin = E.out(prog(tq, 0, 0.3)), kout = E.inOut(prog(tq, 0.7, 0.3));
+        let ga = 40;
+        if (tq >= 0.3) ga = 40 * (1 - prog(tq, 0.3, 0.15) ** 2);
+        if (tq >= 0.45) ga = 14 * Math.sin(Math.PI * prog(tq, 0.45, 0.22));
+        if (tq >= 0.67) ga = 30 * prog(tq, 0.67, 0.25);
+        fgav.style.transform = `translate(${380 * (1 - kin) + 380 * kout}px,0) rotate(${ga}deg)`;
+        fgav.style.opacity = 1 - kout;
+      }
+      const rk = prog(lt, TAPF, 0.4);
+      fring.style.display = fOn && rk > 0 && rk < 1 ? 'block' : 'none';
+      fring.style.transform = `scale(${0.4 + 1.6 * rk})`;
+      fring.style.opacity = 1 - rk;
       // oyuncular
       const bl = (e, off) => (e === 'mood' && ((lt + off) * 1000) % 2900 < 120 ? 'closed' : e);
       let f = ['calm', null, 'mood'], c = ['calm', null, 'mood'], g = ['calm', null, 'mood'];
@@ -5832,6 +5942,7 @@ function defineValue() {
       if (F && lt >= LESSON) f = ['happy', null, 'mood'];
       if (F && lt >= OK) f = ['happy', null, 'closed'];
       if (F && lt >= CTA) { f = ['curious', null, 'mood']; c = ['thoughtful', null, 'mood']; g = ['curious', null, 'mood']; }
+      if (F && lt >= TAPF) { f = ['happy', null, 'closed']; c = ['happy', null, 'closed']; g = ['happy', null, 'mood']; }  // takip edildi: sevinirler
       fistik.set(f[0], f[1], bl(f[2], 0.3)); karamel.set(c[0], c[1], bl(c[2], 1.1)); bilge.set(g[0], g[1], bl(g[2], 0.7));
       // ışık: girişte teklifçiler karanlıkta, sayımda Karamel gölgede
       const dark = lt < REVEAL ? 0.32 : lt < REVEAL + 0.35 ? lerp(0.32, 1, prog(lt, REVEAL, 0.35)) : lt >= DIM + 0.3 ? lerp(1, 0.32, prog(lt, DIM + 0.3, 0.3)) : 1;
@@ -5839,8 +5950,6 @@ function defineValue() {
       fistik.root.style.filter = `brightness(${(dark * hit).toFixed(3)})`;
       karamel.root.style.filter = `brightness(${(dark * hit * (1 - 0.35 * tense)).toFixed(3)})`;
       bilge.root.style.filter = `brightness(${((lt < REVEAL ? 0.75 : 1) * hit).toFixed(3)})`;
-      [rigs[0].arm, rigs[0].pad, rigs[0].paw, card].forEach((e) => (e.style.filter = `brightness(${dark.toFixed(3)})`));
-      [rigs[1].arm, rigs[1].pad, rigs[1].paw].forEach((e) => (e.style.filter = `brightness(${(dark * (1 - 0.35 * tense)).toFixed(3)})`));
       let fy2 = 1540, fr = Math.sin(lt * 1.3) * 1.5, cy3 = 1540, cr = Math.sin(lt * 1.1 + 1) * 1.5, gr = Math.sin(lt * 0.9) * 1.5;
       if (lt >= REVEAL && lt < REVEAL + 0.5) { const k = lt - REVEAL; fr -= 6 * Math.exp(-k * 6) * Math.sin(k * 20); cr += 6 * Math.exp(-k * 6) * Math.sin(k * 20); }
       if (lt >= DEC && lt < SOLD) gr = (lead(lt) && lead(lt)[1] ? -5 : 5);  // Bilge teklif vereni izler
@@ -5848,7 +5957,12 @@ function defineValue() {
       if (lt >= SOLD && lt < TOTAL) fy2 -= hop(lt, 0.42, 26).y;
       if (F && lt >= OK && lt < CTA) fy2 -= hop(lt, 0.5, 16).y;
       if (F && lt >= CTA) { fr = Math.sin(lt * 2.4) * 4; cr = Math.sin(lt * 2.4 + 1.2) * 4; }
-      fistik.put(175, fy2, { rot: fr }); karamel.put(905, cy3, { rot: cr }); bilge.put(540, 1300, { rot: gr });
+      if (lt >= TAPF && lt < TAPF + 0.42) { fy2 -= hop(lt, 0.42, 22, -TAPF).y; cy3 -= hop(lt, 0.42, 22, -TAPF).y; }
+      fistik.put(BX[0], fy2, { rot: fr }); karamel.put(BX[1], cy3, { rot: cr }); bilge.put(540, 1300, { rot: gr });
+      [[fistik, rigs[0].box], [karamel, rigs[1].box], [bilge, brig]].forEach(([m, b]) => {  // uzuv katmanları maskotla birlikte sallanır, zıplar
+        b.style.left = m.root.style.left; b.style.top = m.root.style.top; b.style.transform = m.root.style.transform; b.style.filter = m.root.style.filter;
+      });
+      kLoose.style.filter = karamel.root.style.filter;
     };
   };
 }

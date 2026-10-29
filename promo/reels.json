@@ -6126,7 +6126,7 @@
   },
   "acik-artirma": {
     "title": "Dolar açık artırması: 100 TL'ye 200 TL verir misin? (mezat salonu, Fıstık / Karamel, mezatçı Bilge)",
-    "end": 32.55,
+    "end": 35.9,
     "loop": true,
     "handheld": true,
     "musicGain": 0.45,
@@ -6156,15 +6156,15 @@
       ],
       [
         29.65,
-        32.25,
+        35.6,
         "pop",
         {
           "bpm": 108
         }
       ],
       [
-        32.25,
-        32.55,
+        35.6,
+        35.9,
         "thriller",
         {
           "bpm": 116
@@ -6333,8 +6333,8 @@
         }
       ],
       [
-        32.25,
-        32.55,
+        35.6,
+        35.9,
         "100 TL'ye 200<br><b>verir misin?</b>",
         308,
         {
@@ -6372,12 +6372,14 @@
           "write": 27.75,
           "ok": 28.98,
           "cta": 29.65,
-          "dim": 31.95
+          "follow": 32.25,
+          "tapf": 34.5,
+          "dim": 35.3
         }
       ],
       [
         "mezat",
-        32.25,
+        35.6,
         {
           "wdur": 0.3
         }
@@ -6434,6 +6436,10 @@
       [
         29.7,
         "assets/voice/artirma/a10.mp3"
+      ],
+      [
+        32.25,
+        "assets/voice/ortak/takip.mp3"
       ]
     ],
     "captionYPlan": [

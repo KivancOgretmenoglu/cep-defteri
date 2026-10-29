@@ -2953,6 +2953,16 @@ def cue_mezat(t0, skip=0, o=None):
         C = o['cta']
         put(SFX, paddle(0.25), T(C + 0.05), pan=-0.4); put(SFX, paddle(0.25), T(C + 0.15), pan=0.4)
         put(SFX, bloop(500, 1100, 0.1, 0.18), T(C + 0.3), pan=-0.3); put(SFX, bloop(520, 1150, 0.1, 0.18), T(C + 0.38), pan=0.3)
+    if 'follow' in o:  # takip kartı açılır
+        F = o['follow']
+        put(SFX, stereo_move(whoosh(0.3, 500, 2400, 0.5), -0.3, 0.2), T(F - 0.05), 0.18)
+        put(SFX, bloop(520, 1300, 0.07, 0.28), T(F + 0.05))
+    if 'tapf' in o:  # tokmak "Takip et"e vurur: tak, zil
+        Tf = o['tapf']
+        put(SFX, whoosh(0.2, 500, 2200, 0.5), T(Tf - 0.16), 0.2, pan=0.3)
+        put(SFX, knock(0.7), T(Tf), 0.6, pan=0.25)
+        put(SFX, fm_bell(1568, 0.7, 0.18), T(Tf + 0.06))
+        put(SFX, pling(2093, 0.1, 0.5), T(Tf + 0.12), pan=0.3)
     if 'dim' in o:  # ışıklar söner; döngü karanlık salona döner
         put(SFX, clunk(0.4), T(o['dim'])); put(SFX, clunk(0.35), T(o['dim'] + 0.3), pan=0.3)
 

@@ -87,7 +87,7 @@ konuşmanın ~18–24 dB altında olmalı.
 | `cartHook` | Sepet ve "Siparişi onayla" düğmesinde tereddüt eden Fıstık |
 | `pieHook` | Dönen 50/30/20 pasta grafiği |
 | `mailHook` | Okul maili kartı ve kepli Fıstık |
-| `mezat` | Mezat salonu (dolar açık artırması): kadife perde, üç spot, LED fiyat panosu, kürsüde tokmaklı Bilge, kaidede fanusta 100 TL, kürek kaldıran Fıstık ve Karamel. Olaylar: `reveal`, `rules`, `alir`, `dp`, `oder`, `bos`, `bid` (10→100 teklif yağmuru), `fire`, `ask`, `count` (panoda SATIYORUM 3·2·1), `dec` (110→200 tırmanma), `drop`, `sold`, `total`, `kaching`, `sci`, `n3`, `n5`, `name`, `ult`, `lesson`, `write`, `ok`, `cta`, `dim`. Teklif takvimi `audio.py`'deki `cue_mezat` ile aynı |
+| `mezat` | Mezat salonu (dolar açık artırması): kadife perde, üç spot, LED fiyat panosu, kürsüde tokmaklı Bilge, kaidede fanusta 100 TL, kürek kaldıran Fıstık ve Karamel (kollar ve Bilge'nin kanadı sprite ızgarasında piksel uzuv: omuzdan çıkar, kürek sapını ya da tokmağı patide kavrar; `limbCurve`, `limbDisk`, `limbSVG`). Olaylar: `reveal`, `rules`, `alir`, `dp`, `oder`, `bos`, `bid` (10→100 teklif yağmuru), `fire`, `ask`, `count` (panoda SATIYORUM 3·2·1), `dec` (110→200 tırmanma), `drop`, `sold`, `total`, `kaching`, `sci`, `n3`, `n5`, `name`, `ult`, `lesson`, `write`, `ok`, `cta`, `follow` (takip kartı), `tapf` (tokmak "Takip et"e vurur), `dim`. Teklif takvimi `audio.py`'deki `cue_mezat` ile aynı |
 | (reels düzeyi) `captionYPlan` | `[[a, b, y], ...]`: başlangıcı a–b arasındaki altyazı öbeği y'ye konur (kamera planı panoyu ya da yüzü altyazı hizasına getirdiğinde) |
 
 Müzik türlerine `pop` (104 BPM, marimba, el çırpma) eklendi. Sıradaki konu fikirleri ve doğrulama notları:
