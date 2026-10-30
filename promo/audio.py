@@ -2999,6 +2999,8 @@ def cue_noel(t0, skip=0, o=None):
     o = o or {}
     T = at(t0, skip)
     g = lambda k: o.get(k, 99)
+    # mevsimsiz sürüm (season: 'kis'): kızak çanı yerine yumuşak tını
+    jg = (lambda v=0.1, n=5: jingle(v, n)) if o.get('season') != 'kis' else (lambda v=0.1, n=5: pling(2637, v * 0.9, 0.35))
 
     def thump(v):  # kalp: alt vuruş + üst katman
         x = np.sin(2 * np.pi * phase(glide(70, 40, 0.18))) * expd(0.18, 16)
@@ -3033,7 +3035,7 @@ def cue_noel(t0, skip=0, o=None):
     if OFF < 99:
         put(AMB, np.stack([wind(0.8)] * 2, 1) * 0.06, T(OFF - 0.1))
     # kanca: kar ve çan, 100 TL parıldar
-    put(SFX, jingle(0.08), T(0.05), pan=0.3)
+    put(SFX, jg(0.08), T(0.05), pan=0.3)
     if 'yuz' in o:
         put(SFX, pling(2093, 0.12, 0.45), T(o['yuz'])); put(SFX, pling(2637, 0.08, 0.45), T(o['yuz'] + 0.07))
     if 'opt' in o:  # kamera kahve kulübesine
@@ -3067,14 +3069,14 @@ def cue_noel(t0, skip=0, o=None):
         put(SFX, whoosh(0.3, 400, 2000, 0.5), T(C - 0.3), 0.18, pan=0.4)
         for j in range(int(round(Z - C))):
             put(SFX, fm_bell(1760 if j < 2 else 2093, 0.5, 0.2, ratio=2.0), T(C + j), pan=0.4)
-            put(SFX, jingle(0.05, 3), T(C + j + 0.01), pan=0.5)
+            put(SFX, jg(0.05, 3), T(C + j + 0.01), pan=0.5)
             put(SFX, tick(j % 2 == 0, 0.2), T(C + j + 0.5), pan=0.2)
         put(SFX, inhale(0.3), T(Z - 0.32), 0.55)
     if 'zero' in o:  # ekran ikiye bölünür: şerit iner, çanlar
         Z = o['zero']
         put(SFX, whoosh(0.35, 3000, 400, 0.8), T(Z - 0.05), 0.3)
         put(SFX, boom(0.5), T(Z), 0.3)
-        put(SFX, jingle(0.16, 8), T(Z + 0.02), pan=-0.3); put(SFX, jingle(0.14, 8), T(Z + 0.08), pan=0.3)
+        put(SFX, jg(0.16, 8), T(Z + 0.02), pan=-0.3); put(SFX, jg(0.14, 8), T(Z + 0.08), pan=0.3)
         # sol: 100 TL tezgâha uçar (kasa), fincan kayar, Pamuk alır
         P = Z + 0.45
         put(SFX, flutter(0.25), T(P), 0.25, pan=-0.6)
@@ -3088,9 +3090,10 @@ def cue_noel(t0, skip=0, o=None):
     if 'biri' in o:  # sol Pamuk kahvesini yudumlar
         put(SFX, gulp(), T(o['biri'] + 0.2), 0.4, pan=-0.5)
         put(SFX, pling(1760, 0.08, 0.4), T(o['biri'] + 0.55), pan=-0.5)
-    if 'oteki' in o:  # sağ Pamuk parmak ucunda gelir
-        for k in range(5):
-            put(SFX, tiptoe(k), T(o['oteki'] + 0.05 + 0.15 * k), pan=0.6 - 0.05 * k)
+    if 'oteki' in o:  # sağ Pamuk parmak ucunda gelir (adımlar masaya varana kadar)
+        steps = max(5, int((g('gizli') - o['oteki']) / 0.15))
+        for k in range(steps):
+            put(SFX, tiptoe(k), T(o['oteki'] + 0.05 + 0.15 * k), pan=0.6 - 0.4 * k / steps)
     if 'gizli' in o:  # fincanı ve etiketi bırakır, ağacın arkasına saklanır
         G = o['gizli']
         put(SFX, cup_down(0.4), T(G), pan=0.3)
@@ -3122,7 +3125,7 @@ def cue_noel(t0, skip=0, o=None):
         M = o['mutlu']
         for k, f in enumerate((1568, 2093, 2637, 3136)):
             put(SFX, fm_bell(f, 0.8, 0.12, ratio=2.0), T(M + 0.06 * k), pan=0.5)
-        put(SFX, jingle(0.12), T(M + 0.05), pan=0.5)
+        put(SFX, jg(0.12), T(M + 0.05), pan=0.5)
     if 'sci' in o:  # tebeşir tahtası: başlık, iki zarf, kalpler
         S = o['sci']
         put(SFX, stereo_move(whoosh(0.3, 500, 2200, 0.5), -0.3, 0.3), T(S - 0.05), 0.16)
@@ -3151,7 +3154,7 @@ def cue_noel(t0, skip=0, o=None):
     if 'cta' in o:  # kapanış: fincanlar tokuşur
         C = o['cta']
         put(SFX, clink(), T(C + 0.35), 0.5); put(SFX, clink(), T(C + 0.4), 0.35)
-        put(SFX, jingle(0.1), T(C + 0.45), pan=0.2)
+        put(SFX, jg(0.1), T(C + 0.45), pan=0.2)
     if 'follow' in o:  # takip kartı açılır
         F = o['follow']
         put(SFX, stereo_move(whoosh(0.3, 500, 2400, 0.5), -0.3, 0.2), T(F - 0.05), 0.18)
@@ -3161,7 +3164,7 @@ def cue_noel(t0, skip=0, o=None):
         put(SFX, ui_tap(0.6), T(Tf))
         put(SFX, fm_bell(1568, 0.7, 0.18), T(Tf + 0.06))
         put(SFX, pling(2093, 0.1, 0.5), T(Tf + 0.12), pan=0.3)
-        put(SFX, jingle(0.14, 7), T(Tf + 0.1), pan=-0.2)
+        put(SFX, jg(0.14, 7), T(Tf + 0.1), pan=-0.2)
     if 'off' in o:  # döngü: karlı meydana dönüş
         put(SFX, whoosh(0.3, 2400, 500, 0.5), T(o['off'] - 0.3), 0.18)  # döngü sahnesinin dairesel geçişiyle aynı anda
 

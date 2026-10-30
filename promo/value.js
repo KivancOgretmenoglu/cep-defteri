@@ -5973,7 +5973,8 @@ function defineValue() {
    * "Gizli Noel Baba'ndan" notu bırakıp ağacın arkasına saklanır. Akşam: mutluluk göstergeleri (sol %55, sağ %92). Tebeşir
    * tahtasında deney (5 $ = 20 $), Cep Defteri'nde Bütçe → Kategori limitleri: Hediye 100 / 300 TL; kapanışta kütüphanede ikisi
    * kahveyle, takip kartı; yeniden kanca (döngü).
-   * Dünyalar: A meydan (kanca, sol panel), E kütüphane içi (sağ panel, kapanış), C tebeşir tahtası, D telefon. */
+   * Dünyalar: A meydan (kanca, sol panel), E kütüphane içi (sağ panel, kapanış), C tebeşir tahtası, D telefon.
+   * season: 'kis' mevsimsiz sürüm (gizli-iyilik): kışlık bereli Pamuk, ağaç yerine kitaplık, notta "KOLAY GELSİN", süs yerine sayaç. */
   SCENES.noel = (t0, o = {}) => {
     const s = scene(t0, '#0A1430', undefined, o.wdur ?? 0.4);
     const ev = (k) => o[k] ?? 99;
@@ -5984,6 +5985,8 @@ function defineValue() {
     const CTA = ev('cta'), FOLLOW = ev('follow'), TAPF = ev('tapf'), OFF = ev('off');
     const PAY = ZERO + 0.45, SLIDE = ZERO + 0.95, PICK = ZERO + 1.45;  // sol panel: 100 TL kulübeye uçar, fincan tezgâhta kayar, Pamuk alır
     const SY = 1150;  // odak noktasının ekrandaki yüksekliği
+    const KIS = o.season === 'kis';
+    const POUT = KIS ? 'winter' : 'noel';
     const PIX = 'font-family:Pixel,monospace;font-weight:400;letter-spacing:.02em';
     const preSplit = (lt) => lt < ZERO || lt >= OFF;  // A tam ekran: kanca, seçenekler, soru, karar (ve döngü)
     const ramp = (lt, a, d) => E.inOut(prog(lt, a, d));
@@ -6091,7 +6094,7 @@ function defineValue() {
     for (let i = 0; i < 9; i++) el('div', 'abs', camA, { left: px(380 + i * 60), top: px(1560 + (i % 2) * 34), width: '30px', height: '16px', borderRadius: '50%', background: '#A9B8D2' });
     // Pamuk (Noel Baba şapkası, kırmızı atkı) ve 100 TL / fincan
     const PW = 440;
-    const pA = new Mascot(camA, { who: 'pamuk', outfit: 'noel', w: PW });
+    const pA = new Mascot(camA, { who: 'pamuk', outfit: POUT, w: PW });
     const pAR = rig(camA, PW);
     const pABill = holdLayer(pAR, 'bill'), pACup = holdLayer(pAR, 'cup');
     // kafe masası (karlı) ve zarflar
@@ -6138,15 +6141,18 @@ function defineValue() {
     zE.forEach((z) => (z.style.zIndex = 8));
     const fER = rig(camE, EW);
     const fECup = holdLayer(fER, 'cup');
-    const pE = new Mascot(camE, { who: 'pamuk', outfit: 'noel', w: EW });
+    const pE = new Mascot(camE, { who: 'pamuk', outfit: POUT, w: EW });
     const pER = rig(camE, EW);
     const pECup = holdLayer(pER, 'cup');
     // yılbaşı ağacı: üç kat, yıldız, yanıp sönen ışıklar, saksı
-    const tree = el('div', 'abs', camE, { left: '700px', top: '700px', width: '240px', height: '700px', zIndex: 4 });
+    const tree = el('div', 'abs', camE, { left: '700px', top: '700px', width: '240px', height: '700px', zIndex: 4, display: KIS ? 'none' : 'block' });
     [[0, 230, 160], [130, 300, 200], [270, 360, 240]].forEach(([y, h, w], i) => el('div', 'abs', tree, { left: px(120 - w / 2 - i * 20), top: px(60 + y), width: px(w + i * 40), height: px(h), background: i % 2 ? '#2F7A4A' : '#3E9A5C', clipPath: 'polygon(50% 0, 100% 100%, 0 100%)' }));
     el('div', 'abs', tree, { left: '84px', top: '610px', width: '72px', height: '80px', background: '#C0392B', border: '5px solid #2A1E1A', boxSizing: 'border-box' });
     pixEl(tree, STAR, STAR_ON, 10, { left: '85px', top: '0px' });
     const tLights = [[110, 170], [80, 250], [150, 280], [60, 380], [170, 400], [110, 450], [40, 530], [190, 540], [120, 580]].map(([x, y], i) => el('div', 'abs', tree, { left: px(x), top: px(y), width: '18px', height: '18px', borderRadius: '50%', background: ['#FF5A5A', '#FFD25A', '#5AB4FF'][i % 3] }));
+    // mevsimsiz sürümde Pamuk ağacın değil, masanın yanındaki alçak kitaplığın arkasına saklanır
+    const shelfE = el('div', 'abs', camE, { left: '712px', top: '820px', width: '220px', height: '590px', background: '#5A3A22', border: '8px solid #2A1E1A', boxSizing: 'border-box', zIndex: 4, display: KIS ? 'block' : 'none' });
+    for (let r = 0; r < 4; r++) el('div', 'abs', shelfE, { left: '12px', right: '12px', top: px(20 + r * 140), height: '112px', background: 'repeating-linear-gradient(90deg, #4351A3 0 18px, #E0AE4C 18px 32px, #C0392B 32px 50px, #2F8F5A 50px 64px, #D9D4CA 64px 76px)', borderBottom: '10px solid #3E2614' });
     // uzun masa, lamba; fincan ve not masaya bırakılır
     el('div', 'abs', camE, { left: '150px', top: '1250px', width: '560px', height: '24px', background: '#A0683A', border: '5px solid #2A1E1A', boxSizing: 'border-box', zIndex: 6 });
     el('div', 'abs', camE, { left: '170px', top: '1270px', width: '520px', height: '190px', background: 'repeating-linear-gradient(90deg, #5E3B22 0 128px, #4E3019 128px 132px)', border: '5px solid #2A1E1A', borderTop: 'none', boxSizing: 'border-box', zIndex: 6 });
@@ -6269,15 +6275,20 @@ function defineValue() {
     const tagUp = el('div', 'abs', s.root, { left: '622px', top: '1000px', width: '376px', height: '150px', borderRadius: '18px 50px 50px 18px', background: '#FFF6E5', border: '6px solid #2A1E1A', boxSizing: 'border-box', display: 'none', zIndex: 16, transformOrigin: '20% 50%' });
     el('div', 'abs', tagUp, { left: '20px', top: '56px', width: '26px', height: '26px', borderRadius: '50%', background: '#C0392B', border: '4px solid #2A1E1A', boxSizing: 'border-box' });
     const tagTx = el('div', 'abs it', tagUp, { left: '58px', right: '14px', top: '14px', textAlign: 'center', fontSize: '50px', lineHeight: '56px', color: '#B8366A' });
-    tagTx.innerHTML = 'GİZLİ NOEL<br>BABA\'NDAN';
+    tagTx.innerHTML = KIS ? 'KOLAY<br>GELSİN' : 'GİZLİ NOEL<br>BABA\'NDAN';
     pixEl(tagUp, HEARTP, HEARTP_C, 6, { right: '-30px', top: '-24px' });
     // yılbaşı süsü: karar anında sağ üstte ipe asılı, içinde 3·2·1
     const bauble = el('div', 'abs', s.root, { left: '850px', top: 0, width: '160px', height: '800px', transformOrigin: '80px 0', display: 'none', zIndex: 18 });
     el('div', 'abs', bauble, { left: '77px', top: 0, width: '6px', height: '620px', background: '#F2D27A' });
     el('div', 'abs', bauble, { left: '58px', top: '608px', width: '44px', height: '30px', background: '#C9962F', border: '4px solid #2A1E1A', borderRadius: '6px', boxSizing: 'border-box' });
     const ball = el('div', 'abs', bauble, { left: 0, top: '630px', width: '160px', height: '160px', borderRadius: '50%', background: 'radial-gradient(circle at 35% 30%, #FF8A80, #D2423A 45%, #8E1B1B)', border: '6px solid #2A1E1A', boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center' });
-    const ballN = el('div', 'it', ball, { fontSize: '108px', lineHeight: 1, color: '#FFFFFF', textShadow: '5px 5px 0 #2A1E1A' });
-    el('div', 'abs', ball, { left: '30px', top: '26px', width: '26px', height: '14px', borderRadius: '50%', background: 'rgba(255,255,255,.7)', transform: 'rotate(-30deg)' });
+    const ballN = el('div', 'it', ball, { fontSize: '108px', lineHeight: 1, color: '#FFFFFF', textShadow: '5px 5px 0 #2A1E1A', position: 'relative' });
+    const ballHi = el('div', 'abs', ball, { left: '30px', top: '26px', width: '26px', height: '14px', borderRadius: '50%', background: 'rgba(255,255,255,.7)', transform: 'rotate(-30deg)' });
+    if (KIS) {  // mevsimsiz: ipte süs yerine kenarı saniye saniye dolan sayaç
+      [...bauble.children].forEach((c) => { if (c !== ball) c.style.display = 'none'; });
+      ballHi.style.display = 'none';
+      Object.assign(ballN.style, { color: '#2A1E1A', textShadow: 'none' });
+    }
     const vig = el('div', 'abs', s.root, { inset: 0, zIndex: 17, pointerEvents: 'none', background: 'radial-gradient(ellipse 90% 70% at 50% 56%, transparent 58%, rgba(0,0,0,.45) 100%)' });
     el('div', 'abs', s.root, { left: 0, right: 0, top: 0, height: '260px', zIndex: 17, pointerEvents: 'none', background: 'linear-gradient(rgba(4,6,16,.45), rgba(4,6,16,0))' });
     const flash = el('div', 'abs', s.root, { inset: 0, zIndex: 21, opacity: 0, pointerEvents: 'none', background: '#FFFFFF' });
@@ -6555,6 +6566,7 @@ function defineValue() {
         ballN.textContent = String(3 - j);
         bauble.style.transform = `translateY(${-160 * (1 - E.out(prog(lt, COUNT, 0.3)))}px) rotate(${6 * Math.sin((lt - COUNT) * Math.PI * 2)}deg)`;
         ball.style.transform = `scale(${1 + 0.12 * Math.exp(-((lt - COUNT) % 1) * 9)})`;
+        if (KIS) ball.style.background = `radial-gradient(circle, #FFFCF6 0 58%, transparent 59%), conic-gradient(#E2689A ${360 * (((lt - COUNT) % 1) + 0)}deg, #F3E6EC 0)`;
       }
       vig.style.opacity = W === 'D' ? 0.4 : 1;
       flash.style.opacity = Math.max(!hk && lt >= ZERO && lt < ZERO + 0.25 ? 0.55 * (1 - prog(lt, ZERO, 0.25)) : 0, W === 'E' && lt < CTA + 0.2 ? 0.3 * (1 - prog(lt, CTA, 0.2)) : 0);

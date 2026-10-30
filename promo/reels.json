@@ -6732,5 +6732,284 @@
         "assets/voice/ortak/takip.mp3"
       ]
     ]
+  },
+  "gizli-iyilik": {
+    "title": "Gizli iyilik: 100 TL'yi kime harcarsın? (Gizli Noel Baba'nın mevsimsiz sürümü: sınav haftası, kışlık bereli Pamuk, kütüphanede Fıstık; Dunn, Aknin ve Norton 2008)",
+    "end": 34.5,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.45,
+    "noMusicVariant": true,
+    "limiter": true,
+    "musicPlan": [
+      [
+        0,
+        12.2,
+        "masal",
+        {
+          "mode": "minor",
+          "bpm": 132,
+          "gain": 0.8,
+          "bells": false
+        }
+      ],
+      [
+        12.2,
+        17.17,
+        "masal",
+        {
+          "mode": "major",
+          "bpm": 144,
+          "bells": false
+        }
+      ],
+      [
+        17.17,
+        28.12,
+        "lofi"
+      ],
+      [
+        28.12,
+        34.0,
+        "masal",
+        {
+          "mode": "festive",
+          "bpm": 138,
+          "bells": false
+        }
+      ],
+      [
+        34.0,
+        34.5,
+        "masal",
+        {
+          "mode": "minor",
+          "bpm": 132,
+          "gain": 0.8,
+          "bells": false
+        }
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          9.2,
+          12.2
+        ]
+      ]
+    },
+    "voiceDuck": {
+      "release": 0.25,
+      "music": 0.18,
+      "amb": 0.6
+    },
+    "captionPixel": true,
+    "captionY": 640,
+    "captionMaxWords": 3,
+    "captionUntil": 28.12,
+    "captionCut": [
+      [
+        9.2,
+        12.2
+      ],
+      [
+        20.72,
+        28.12
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        2.6,
+        "Bu 100 TL'yi<br><b>kime harcarsın?</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true
+        }
+      ],
+      [
+        2.65,
+        6.7,
+        "Kahve kendine mi,<br><b>Fıstık'a mı?</b>",
+        300,
+        {
+          "size": 84,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        6.75,
+        12.15,
+        "Sen olsan?<br><b>KENDİNE mi, BAŞKASINA mı?</b>",
+        300,
+        {
+          "size": 64,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        9.2,
+        12.15,
+        "Yoruma yaz",
+        548,
+        {
+          "size": 48,
+          "quiet": true
+        }
+      ],
+      [
+        20.72,
+        24.27,
+        "Tutar fark etmedi:<br><b>5 $ da 20 $ da</b>",
+        300,
+        {
+          "size": 84,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        24.32,
+        28.07,
+        "Mutluluk tutarda değil.<br><b>Hediyelere küçük limit koy</b>",
+        300,
+        {
+          "size": 68,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        28.12,
+        30.95,
+        "Sen 100 TL'yle<br><b>kimi sevindirirdin?</b>",
+        300,
+        {
+          "size": 80,
+          "pulse": true
+        }
+      ],
+      [
+        28.22,
+        30.95,
+        "Yoruma yaz",
+        548,
+        {
+          "size": 54,
+          "quiet": true
+        }
+      ],
+      [
+        34.0,
+        34.5,
+        "Bu 100 TL'yi<br><b>kime harcarsın?</b>",
+        300,
+        {
+          "size": 90,
+          "pulse": true,
+          "quiet": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "noel",
+        0,
+        {
+          "season": "kis",
+          "yuz": 2.02,
+          "opt": 2.65,
+          "kahve": 3.05,
+          "yoksa": 4.15,
+          "lib": 4.75,
+          "yalniz": 5.3,
+          "fis": 5.98,
+          "ask": 6.75,
+          "kend": 7.68,
+          "bask": 8.45,
+          "count": 9.2,
+          "zero": 12.2,
+          "biri": 13.57,
+          "oteki": 14.67,
+          "gizli": 15.9,
+          "oldu": 16.75,
+          "aksam": 17.17,
+          "fill": 18.77,
+          "mutlu": 19.92,
+          "sci": 20.72,
+          "bes": 22.37,
+          "yirmi": 23.35,
+          "eq": 23.95,
+          "app": 24.32,
+          "tap": 25.97,
+          "kucuk": 26.9,
+          "koy": 27.62,
+          "cta": 28.12,
+          "follow": 31.0,
+          "tapf": 33.25,
+          "off": 34.25,
+          "loopAt": 34.0
+        }
+      ],
+      [
+        "noel",
+        34.0,
+        {
+          "wdur": 0.2,
+          "loopEnd": 0.5,
+          "season": "kis"
+        }
+      ]
+    ],
+    "voiceTempo": 1.2,
+    "voiceFilter": "brand",
+    "voiceFiles": [
+      [
+        0.15,
+        "assets/voice/noel/m1.mp3",
+        "Sınav haftası. Pamuk'un cebinde 100 lira."
+      ],
+      [
+        2.65,
+        "assets/voice/noel/n2.mp3",
+        "Kendine kahve mi alsın, yoksa kütüphanede yalnız çalışan Fıstık'a mı?"
+      ],
+      [
+        6.75,
+        "assets/voice/noel/n3.mp3",
+        "Sen olsan? Kendine mi, başkasına mı?"
+      ],
+      [
+        12.35,
+        "assets/voice/noel/m4b.mp3",
+        "İki Pamuk'la deneyelim: biri kendine aldı, öteki gizlice Fıstık'ın masasına bıraktı."
+      ],
+      [
+        17.17,
+        "assets/voice/noel/n5.mp3",
+        "Bir deneyde, parayı başkasına harcayanlar akşam daha mutlu çıktı."
+      ],
+      [
+        20.72,
+        "assets/voice/noel/n6.mp3",
+        "Üstelik tutar fark etmedi: 5 dolar da, 20 dolar da."
+      ],
+      [
+        24.32,
+        "assets/voice/noel/n7.mp3",
+        "Mutluluk tutarda değil. Hediyelere baştan küçük bir limit koy."
+      ],
+      [
+        28.12,
+        "assets/voice/noel/m8.mp3"
+      ],
+      [
+        31.0,
+        "assets/voice/ortak/takip.mp3"
+      ]
+    ]
   }
 }

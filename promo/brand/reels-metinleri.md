@@ -608,3 +608,25 @@ Cep Defteri'nde Bütçe ve planlar → Kategori limitleri → + Limit: Hediye i�
 ```
 
 **Yayın notu:** Kapak karesi olarak 0,0 sn'yi seç (karlı kampüs gecesi, KAHVE kulübesinde Karamel, kütüphane penceresinde Fıstık, Noel Baba şapkalı Pamuk "100" yazılı banknotla KENDİME ve BAŞKASINA zarflarının arasında + "Bu 100 TL'yi kime harcarsın?"). Aralık'ın ilk yarısında, yılbaşı çekilişlerinin (gizli Noel Baba) konuşulduğu hafta yayınla. İlk yorumu sabitle: "Bir Pamuk kendine kahve aldı, öteki Fıstık'ın gizli Noel Baba'sı oldu. Sen 100 TL'yle kimi sevindirirdin? (Tutarlar örnek.)" Karar anında soru "KENDİNE mi, BAŞKASINA mı?" + "Yoruma yaz": izleyicinin kendi seçimi; video seçimi izleyiciye bırakır, iki sonucu yan yana gösterir. Çağrılar sonda: önce seslendirmeyle aynı soru + "Yoruma yaz", sonra ortak takip satırı ve takip kartı. "Arkadaşına gönder" ve "kaydet" açıklamada. Araştırma tek bir saha deneyinin sonucu: videoda "bir deneyde … daha mutlu çıktı" denir, etki büyüklüğü verilmez, göstergeler temsilî; yinelemelerin daha küçük ve karışık sonucu açıklamada. Dolar tutarları deneydeki tutarlar (2008), TL tutarları hikâyenin örneği. Instagram'da "Yapay zekâ bilgisi" etiketini aç. Yorumlarda en çok anılan kişiyi (ev arkadaşı, sınav arkadaşı, anne…) bir sonraki reelsin açılışında kullan.
+
+---
+
+## 29 · gizli-iyilik (Gizli Noel Baba'nın mevsimsiz sürümü; kavram: başkasına harcamak, seslendirme: Buğra, döngülü, 34,5 sn)
+
+**Açıklama:**
+```
+100 TL'yi kendine mi harcarsın, başkasına mı? ☕
+Sen 100 TL'yle kimi sevindirirdin? Yoruma yaz 👇
+📌 Kaydet; bir dahaki "kendime bir şey alayım" anında aklına gelsin. Android erken erişim yakında.
+
+Sınav haftası. Pamuk'un cebinde 100 TL var: kendine kahve mi alsın, yoksa kütüphanede tek başına çalışan Fıstık'a mı? İki Pamuk'la denedik: biri kendine aldı, öteki gizlice Fıstık'ın masasına bıraktı. Tutarlar örnek.
+Araştırma: Bir deneyde insanlara sabah 5 ya da 20 dolar verildi, gün bitmeden kendilerine ya da başkasına harcamaları istendi. Akşam başkasına harcayanlar daha mutluydu, tutar fark etmedi (Dunn, Aknin ve Norton, 2008, Science). İnsanlar tersini tahmin etmişti. Sonraki yinelemelerde etki daha küçük çıktı, yine de aynı yönde.
+Çözüm: büyük harcama şart değil. Hediyelere ve ısmarlamalara baştan küçük bir limit koy; o küçük pay da yeter.
+
+Sınav haftasında kütüphaneden çıkmayan arkadaşına gönder.
+Cep Defteri'nde Bütçe ve planlar → Kategori limitleri → + Limit: Hediye için aylık limit koy; ortak hediyede "Hesabı bölüş"ü kullan.
+
+#sınavhaftası #vizehaftası #kütüphane #iyilik #öğrencibütçesi #paraipuçları #bütçe #cepdefteri
+```
+
+**Yayın notu:** Yılbaşı sürümünü (`gizli-noel-baba`) beklemeden şimdi paylaşılabilen sürüm; en iyi zaman vize ya da final haftası (kütüphanelerin dolduğu günler). Kapak karesi olarak 0,0 sn'yi seç (karlı kampüs gecesi, KAHVE kulübesinde Karamel, kütüphane penceresinde Fıstık, kışlık bereli Pamuk "100" yazılı banknotla KENDİME ve BAŞKASINA zarflarının arasında + "Bu 100 TL'yi kime harcarsın?"). İlk yorumu sabitle: "Bir Pamuk kendine kahve aldı, öteki gizlice Fıstık'ın masasına bıraktı. Sen 100 TL'yle kimi sevindirirdin? (Tutarlar örnek.)" Karar anında soru "KENDİNE mi, BAŞKASINA mı?" + "Yoruma yaz"; sonda seslendirmeyle aynı soru + "Yoruma yaz", ardından ortak takip satırı ve takip kartı. İki sürüm aynı hikâye: ikisini de paylaşacaksan aralarına en az bir ay koy (bu sürüm şimdi, yılbaşı sürümü Aralık'ın ilk yarısında) ya da yılbaşında yalnız yılbaşı sürümünü kullan. Araştırma notları 28. maddedeki gibi. Instagram'da "Yapay zekâ bilgisi" etiketini aç.
