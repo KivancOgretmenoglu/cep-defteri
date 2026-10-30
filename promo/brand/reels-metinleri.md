@@ -586,3 +586,25 @@ Cep Defteri'nde kategorilere aylık sınır koy: sınır baştan yazılıysa ner
 ```
 
 **Yayın notu:** Kapak karesi olarak 2,4 sn'yi seç (perde, LED panoda "SATILIK 100 TL", kürsüde tokmaklı Bilge, iki yanda "?" kürekli Fıstık ve Karamel + "100 TL'ye 200 verir misin?"). İlk yorumu sabitle: "Fıstık 100 TL'yi 200'e aldı, Karamel 190'ını yaktı. Sen kaçta dururdun? (Tutarlar örnek.)" Karar anında soru "ARTIR mı, BIRAK mı?" + "Yoruma yaz: A mı, B mi?" (izleyicinin kendi seçimi; Bilge tokmağı kaldırır, panoda gerçek 3 sn "SATIYORUM 3·2·1"); sonda seslendirmeyle aynı soru "Sen kaçta dururdun?" + "Yoruma yaz: sınırın kaç TL?" + "Cep Defteri'nde sınırını önceden koy". Önce kapanış sorusu, sonra ortak takip satırı ("Her hafta bir para tuzağı. Kaçırmamak için takip et!") ve takip kartı; karttaki "Takip et"e mezat tokmağı vurur, Fıstık ile Karamel sevinir. Işıklar sönünce video kancaya döner. Ültimatomla aynı seri (Karar odası: iki kişilik para oyunu, tek mekân, şaşırtan soru, gerçek karar anı, sayıyla cevaplanan soru) ama kopyası gibi durmasın diye mekân (mezat salonu), kadro (Fıstık, Karamel, mezatçı Bilge), karar düzeneği (kürek + tokmak + LED pano), müzik (`thriller`) ve seslendirme kalıpları farklı. Araştırma: Shubik'in 1971 makalesindeki "toplam 3–5 dolar nadir değil" cümlesi (s. 110); Bazerman'ın 20 dolarlık sınıf açık artırmalarına dair rakamlar ikincil kaynaklarda farklı okullara atfedildiği için kullanılmadı. Deneme reelsi olarak paylaşıp geçme oranını ültimatomun %31,4'üyle karşılaştır. Instagram'da "Yapay zekâ bilgisi" etiketini aç. Yorumlara gelen sayılara "neden orada?" diye, "hiç girmezdim" diyenlere "10 TL'ye 100 TL alma şansını da mı?" diye yanıt ver. Test için alternatif kanca (yalnız ilk kutu): "100 TL'yi 200'e alır mısın?"
+
+---
+
+## 28 · gizli-noel-baba (kavram: başkasına harcamak / prosocial spending, Sahne serisi, seslendirme: Buğra, döngülü, 34,75 sn)
+
+**Açıklama:**
+```
+Gizli Noel Baba: 100 TL'yi kendine mi harcarsın, başkasına mı? 🎁
+Bu yılbaşı 100 TL'yle kimi sevindirirdin? Yoruma yaz 👇
+📌 Kaydet; yılbaşı çekilişinde hediye bütçeni belirlerken aklına gelsin. Android erken erişim yakında.
+
+Pamuk'un cebinde 100 TL var: kendine kahve mi alsın, yoksa kütüphanede tek başına çalışan Fıstık'a mı? İki Pamuk'la denedik: biri kendine aldı, öteki Fıstık'ın gizli Noel Baba'sı oldu. Tutarlar örnek.
+Araştırma: Bir deneyde insanlara sabah 5 ya da 20 dolar verildi, gün bitmeden kendilerine ya da başkasına harcamaları istendi. Akşam başkasına harcayanlar daha mutluydu, tutar fark etmedi (Dunn, Aknin ve Norton, 2008, Science). İnsanlar tersini tahmin etmişti. Sonraki yinelemelerde etki daha küçük çıktı, yine de aynı yönde.
+Çözüm: büyük hediye şart değil. Yılbaşı hediyelerine baştan küçük bir limit koy; ortak hediyede masrafı paylaş.
+
+Çekilişte "limit kaç TL olsun?" diye soran arkadaşına gönder.
+Cep Defteri'nde Bütçe ve planlar → Kategori limitleri → + Limit: Hediye için aylık limit koy; hediyeleri #yılbaşı etiketiyle yaz (Raporlar'da toplamı görünür), ortak hediyede "Hesabı bölüş"ü kullan.
+
+#gizlinoelbaba #yılbaşı #yılbaşıhediyesi #öğrencibütçesi #paraipuçları #bütçe #cepdefteri
+```
+
+**Yayın notu:** Kapak karesi olarak 0,0 sn'yi seç (karlı kampüs gecesi, KAHVE kulübesinde Karamel, kütüphane penceresinde Fıstık, Noel Baba şapkalı Pamuk "100" yazılı banknotla KENDİME ve BAŞKASINA zarflarının arasında + "Bu 100 TL'yi kime harcarsın?"). Aralık'ın ilk yarısında, yılbaşı çekilişlerinin (gizli Noel Baba) konuşulduğu hafta yayınla. İlk yorumu sabitle: "Bir Pamuk kendine kahve aldı, öteki Fıstık'ın gizli Noel Baba'sı oldu. Sen 100 TL'yle kimi sevindirirdin? (Tutarlar örnek.)" Karar anında soru "KENDİNE mi, BAŞKASINA mı?" + "Yoruma yaz": izleyicinin kendi seçimi; video seçimi izleyiciye bırakır, iki sonucu yan yana gösterir. Çağrılar sonda: önce seslendirmeyle aynı soru + "Yoruma yaz", sonra ortak takip satırı ve takip kartı. "Arkadaşına gönder" ve "kaydet" açıklamada. Araştırma tek bir saha deneyinin sonucu: videoda "bir deneyde … daha mutlu çıktı" denir, etki büyüklüğü verilmez, göstergeler temsilî; yinelemelerin daha küçük ve karışık sonucu açıklamada. Dolar tutarları deneydeki tutarlar (2008), TL tutarları hikâyenin örneği. Instagram'da "Yapay zekâ bilgisi" etiketini aç. Yorumlarda en çok anılan kişiyi (ev arkadaşı, sınav arkadaşı, anne…) bir sonraki reelsin açılışında kullan.

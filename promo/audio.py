@@ -2966,6 +2966,205 @@ def cue_mezat(t0, skip=0, o=None):
     if 'dim' in o:  # ışıklar söner; döngü karanlık salona döner
         put(SFX, clunk(0.4), T(o['dim'])); put(SFX, clunk(0.35), T(o['dim'] + 0.3), pan=0.3)
 
+
+def jingle(v=0.1, n=5):
+    """kızak çanı sallanması: birkaç minik çan vuruşu üst üste (4–9 kHz kısmiler) + parlak hışırtı"""
+    d = 0.2
+    out = np.zeros(int(d * SR))
+    for _ in range(n):
+        j = int(rng.uniform(0, 0.035) * SR)
+        tb = tt(0.13)
+        f0 = rng.uniform(4200, 5600)
+        b = sum(np.sin(2 * np.pi * f0 * r * tb + rng.uniform(0, 6.28)) for r in (1, 1.47, 2.09)) * np.exp(-tb * 36)
+        out[j : j + len(b)] += b[: len(out) - j] * 0.3
+    out += hp(noise(d), 6000)[: len(out)] * expd(d, 28) * 0.5
+    return out * v
+
+
+def chalk(d=0.35, v=0.3):
+    """tebeşir: tanecikli sürtünme (bant geçiren gürültü, düzensiz darbelerle)"""
+    n = int(d * SR)
+    x = bp(noise(d), 1400, 5200)[:n]
+    g = np.zeros(n)
+    idx = rng.choice(n, int(d * 260), replace=False)
+    g[idx] = rng.uniform(0.3, 1, len(idx))
+    g = np.convolve(g, np.exp(-np.arange(90) / 18), 'same')
+    return x * (0.25 + g) * np.sin(np.pi * np.linspace(0, 1, n)) ** 0.4 * v
+
+
+def cue_noel(t0, skip=0, o=None):
+    """Gizli Noel Baba: karlı kampüs gecesi (kahve kulübesi, kütüphane penceresinde Fıstık), gerçek 3 sn karar anı (yılbaşı süsünde
+    3·2·1), ikiye bölünmüş ekran (kendine kahve / Fıstık'a gizli Noel Baba), akşam mutluluk göstergeleri, tebeşir tahtası, uygulama,
+    kapanış ve takip kartı. Olay anları value.js'teki SCENES.noel ile aynı."""
+    o = o or {}
+    T = at(t0, skip)
+    g = lambda k: o.get(k, 99)
+
+    def thump(v):  # kalp: alt vuruş + üst katman
+        x = np.sin(2 * np.pi * phase(glide(70, 40, 0.18))) * expd(0.18, 16)
+        h = np.sin(2 * np.pi * phase(glide(170, 95, 0.1))) * expd(0.1, 30) * 0.45
+        x[: len(h)] += h
+        return x * v
+
+    def steam(d=0.6, v=0.25):  # kahve makinesi: buhar fısıltısı
+        n = int(d * SR)
+        x = bp(noise(d), 2500, 8000)[:n] * np.sin(np.pi * np.linspace(0, 1, n)) ** 0.6
+        return x * v
+
+    def tiptoe(k, v=0.22):  # parmak ucu: pizzicato tını + tahta tıkırtı
+        x = pluck([76, 79, 74, 77][k % 4], 0.09, 'tri', cut=2500, v=v)
+        w = woodblock(k % 2 == 0) * 0.15
+        x[: len(w)] += w
+        return x
+
+    def yawn(v=0.3):  # Fıstık esner: inen, açılıp kapanan ünlü
+        return voice([520, 430, 300], [(750, 1250), (600, 1000), (420, 820)], 0.62, v=v)
+
+    def cup_down(v=0.35):  # fincan masaya: tahta tok ses + porselen çınlaması
+        x = np.sin(2 * np.pi * phase(glide(230, 160, 0.09))) * expd(0.09, 40) * 0.8
+        c = clink()[: len(x)] * 0.5
+        x[: len(c)] += c
+        return x * v
+
+    # ortam: dışarıda rüzgâr (kanca, seçenekler, karar; döngü)
+    Z, OFF = g('zero'), g('off')
+    if Z < 99:
+        put(AMB, np.stack([wind(Z + 0.3)] * 2, 1) * 0.06, T(0))
+    if OFF < 99:
+        put(AMB, np.stack([wind(0.8)] * 2, 1) * 0.06, T(OFF - 0.1))
+    # kanca: kar ve çan, 100 TL parıldar
+    put(SFX, jingle(0.08), T(0.05), pan=0.3)
+    if 'yuz' in o:
+        put(SFX, pling(2093, 0.12, 0.45), T(o['yuz'])); put(SFX, pling(2637, 0.08, 0.45), T(o['yuz'] + 0.07))
+    if 'opt' in o:  # kamera kahve kulübesine
+        put(SFX, stereo_move(whoosh(0.3, 2000, 500, 0.5), 0.3, -0.4), T(o['opt'] - 0.05), 0.14)
+    if 'kahve' in o:  # makine buharı, fincan
+        put(SFX, steam(0.7), T(o['kahve'] - 0.05), 0.5, pan=-0.4)
+        put(SFX, clink(), T(o['kahve'] + 0.25), 0.5, pan=-0.4)
+    if 'yoksa' in o:  # kamera kütüphane penceresine
+        put(SFX, stereo_move(whoosh(0.4, 500, 2400, 0.5), -0.4, 0.4), T(o['yoksa'] - 0.05), 0.16)
+    if 'lib' in o:  # sayfa çevrilir
+        put(SFX, flutter(0.22), T(o['lib'] + 0.1), 0.25, pan=0.4)
+    if 'yalniz' in o:  # Fıstık esner
+        put(SFX, yawn(0.28), T(o['yalniz']), pan=0.4)
+    if 'fis' in o:  # yalnızlık: yumuşak, inen iki çan
+        put(SFX, fm_bell(659, 0.9, 0.1), T(o['fis'])); put(SFX, fm_bell(494, 1.0, 0.09), T(o['fis'] + 0.22))
+    if 'ask' in o:  # "Sen olsan?": alt vuruş, kalp atışı (sayımda hızlanır)
+        A, C = o['ask'], g('count')
+        put(SFX, np.sin(2 * np.pi * phase(glide(65, 30, 1.0))) * expd(1.0, 3) * 0.45, T(A - 0.03))
+        t, k = A + 0.45, 0
+        while t < g('zero') - 0.1:
+            vv = 0.75 if t < C else 0.85
+            put(SFX, thump(vv), T(t)); put(SFX, thump(vv * 0.66), T(t + 0.16))
+            t += max(0.42, 0.66 - 0.03 * k) if t < C else 0.42
+            k += 1
+    if 'kend' in o:  # zarflar parlar
+        put(SFX, pling(1318, 0.1, 0.5), T(o['kend']), pan=-0.5)
+    if 'bask' in o:
+        put(SFX, pling(1568, 0.1, 0.5), T(o['bask']), pan=0.5)
+    if 'count' in o:  # yılbaşı süsünde 3·2·1: her saniye çan, arada saat tıkı; sonda nefes
+        C, Z = o['count'], g('zero')
+        put(SFX, whoosh(0.3, 400, 2000, 0.5), T(C - 0.3), 0.18, pan=0.4)
+        for j in range(int(round(Z - C))):
+            put(SFX, fm_bell(1760 if j < 2 else 2093, 0.5, 0.2, ratio=2.0), T(C + j), pan=0.4)
+            put(SFX, jingle(0.05, 3), T(C + j + 0.01), pan=0.5)
+            put(SFX, tick(j % 2 == 0, 0.2), T(C + j + 0.5), pan=0.2)
+        put(SFX, inhale(0.3), T(Z - 0.32), 0.55)
+    if 'zero' in o:  # ekran ikiye bölünür: şerit iner, çanlar
+        Z = o['zero']
+        put(SFX, whoosh(0.35, 3000, 400, 0.8), T(Z - 0.05), 0.3)
+        put(SFX, boom(0.5), T(Z), 0.3)
+        put(SFX, jingle(0.16, 8), T(Z + 0.02), pan=-0.3); put(SFX, jingle(0.14, 8), T(Z + 0.08), pan=0.3)
+        # sol: 100 TL tezgâha uçar (kasa), fincan kayar, Pamuk alır
+        P = Z + 0.45
+        put(SFX, flutter(0.25), T(P), 0.25, pan=-0.6)
+        put(SFX, pling(2093, 0.12, 0.4), T(P + 0.35), pan=-0.6); put(SFX, pling(2637, 0.1, 0.4), T(P + 0.42), pan=-0.6)
+        put(SFX, woof(), T(P + 0.45), 0.18, pan=-0.7)
+        put(SFX, lp(noise(0.3), 1200) * np.sin(np.pi * np.linspace(0, 1, int(0.3 * SR))) * 0.12, T(Z + 0.95), pan=-0.5)
+        put(SFX, clink(), T(Z + 1.3), 0.4, pan=-0.5)
+        # sağ: Fıstık masada uyukluyor
+        put(SFX, snore(0.7), T(Z + 0.7), 0.35, pan=0.5)
+        put(SFX, snore(0.7), T(Z + 1.9), 0.3, pan=0.5)
+    if 'biri' in o:  # sol Pamuk kahvesini yudumlar
+        put(SFX, gulp(), T(o['biri'] + 0.2), 0.4, pan=-0.5)
+        put(SFX, pling(1760, 0.08, 0.4), T(o['biri'] + 0.55), pan=-0.5)
+    if 'oteki' in o:  # sağ Pamuk parmak ucunda gelir
+        for k in range(5):
+            put(SFX, tiptoe(k), T(o['oteki'] + 0.05 + 0.15 * k), pan=0.6 - 0.05 * k)
+    if 'gizli' in o:  # fincanı ve etiketi bırakır, ağacın arkasına saklanır
+        G = o['gizli']
+        put(SFX, cup_down(0.4), T(G), pan=0.3)
+        put(SFX, flutter(0.2), T(G + 0.12), 0.2, pan=0.35)
+        for k in range(3):
+            put(SFX, tiptoe(k + 1, 0.18), T(G + 0.38 + 0.13 * k), pan=0.5)
+        put(SFX, whoosh(0.2, 600, 2200, 0.5), T(G + 0.7), 0.12, pan=0.6)
+    if 'oldu' in o:  # Fıstık uyanır, fincanı ve notu görür; Pamuk ağacın arkasından bakar
+        W_ = o['oldu']
+        put(SFX, mrrp(), T(W_), 0.5, pan=0.3)
+        put(SFX, pling(1568, 0.1, 0.4), T(W_ + 0.05), pan=0.3)
+        for k, f in enumerate((1318, 1568, 2093)):  # not açılır: küçük sihir çanı
+            put(SFX, fm_bell(f, 0.6, 0.1, ratio=2.0), T(W_ + 0.25 + 0.07 * k), pan=0.4)
+        put(SFX, meow(1.15, 0.4, 0.3), T(W_ + 0.6), pan=0.3)
+    if 'aksam' in o:  # akşam: alçak çan ve rüzgâr çanı; göstergeler belirir
+        A = o['aksam']
+        put(SFX, fm_bell(392, 1.6, 0.12), T(A))
+        for k in range(6):
+            put(SFX, pling([2637, 3136, 2349, 2794, 3520, 2637][k], 0.04, 0.6), T(A + 0.1 + 0.07 * k), pan=0.5 - 0.2 * k)
+        put(SFX, bloop(500, 1100, 0.07, 0.18), T(A + 0.15), pan=-0.4); put(SFX, bloop(520, 1150, 0.07, 0.18), T(A + 0.22), pan=0.4)
+    if 'fill' in o:  # göstergeler dolar: sol %55'te durur, sağ %92'ye çıkar
+        F, M = o['fill'], g('mutlu')
+        for k in range(6):
+            put(SFX, pluck(67 + [0, 2, 4, 5, 7, 9][k], 0.12, 'tri', cut=3000, v=0.12), T(F + 0.12 * k), pan=-0.4)
+        steps = max(1, int((M - F) / 0.11))
+        for k in range(steps):
+            put(SFX, pluck(67 + [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19][min(k, 11)], 0.12, 'tri', cut=3500, v=0.13), T(F + 0.11 * k), pan=0.4)
+    if 'mutlu' in o:  # sağ gösterge doldu: parıltı
+        M = o['mutlu']
+        for k, f in enumerate((1568, 2093, 2637, 3136)):
+            put(SFX, fm_bell(f, 0.8, 0.12, ratio=2.0), T(M + 0.06 * k), pan=0.5)
+        put(SFX, jingle(0.12), T(M + 0.05), pan=0.5)
+    if 'sci' in o:  # tebeşir tahtası: başlık, iki zarf, kalpler
+        S = o['sci']
+        put(SFX, stereo_move(whoosh(0.3, 500, 2200, 0.5), -0.3, 0.3), T(S - 0.05), 0.16)
+        put(SFX, chalk(0.45, 0.35), T(S + 0.12))
+        put(SFX, chalk(0.35, 0.3), T(S + 0.62), pan=-0.4)
+        put(SFX, chalk(0.35, 0.3), T(S + 0.98), pan=0.4)
+        put(SFX, chalk(0.5, 0.22), T(S + 1.35))
+    for key, f0, pan_ in (('bes', 520, -0.4), ('yirmi', 620, 0.4)):  # 5 $ ve 20 $
+        if key in o:
+            put(SFX, woodblock(True) * 0.3, T(o[key]), pan=pan_)
+            put(SFX, bloop(f0, f0 * 1.6, 0.07, 0.18), T(o[key] + 0.02), pan=pan_)
+    if 'eq' in o:  # "=": iki tebeşir çizgisi, çan
+        E_ = o['eq']
+        put(SFX, chalk(0.12, 0.4), T(E_)); put(SFX, chalk(0.12, 0.4), T(E_ + 0.14))
+        put(SFX, fm_bell(1568, 0.7, 0.16), T(E_ + 0.2))
+    if 'app' in o:  # telefon gelir
+        put(SFX, whoosh(0.35, 400, 2400, 0.5), T(o['app'] - 0.05), 0.2)
+    if 'tap' in o:  # "+ Limit" dokunuşu, satır açılır
+        put(SFX, ui_tap(0.6), T(o['tap']))
+        put(SFX, bloop(520, 1200, 0.07, 0.2), T(o['tap'] + 0.15))
+    if 'kucuk' in o:  # çubuk 100 / 300'e dolar
+        for k in range(5):
+            put(SFX, tick(k % 2 == 0, 0.16), T(o['kucuk'] + 0.06 * k))
+    if 'koy' in o:  # onay
+        put(SFX, notif_ding(), T(o['koy']), 0.5)
+    if 'cta' in o:  # kapanış: fincanlar tokuşur
+        C = o['cta']
+        put(SFX, clink(), T(C + 0.35), 0.5); put(SFX, clink(), T(C + 0.4), 0.35)
+        put(SFX, jingle(0.1), T(C + 0.45), pan=0.2)
+    if 'follow' in o:  # takip kartı açılır
+        F = o['follow']
+        put(SFX, stereo_move(whoosh(0.3, 500, 2400, 0.5), -0.3, 0.2), T(F - 0.05), 0.18)
+        put(SFX, bloop(520, 1300, 0.07, 0.28), T(F + 0.05))
+    if 'tapf' in o:  # "Takip et" dokunuşu: tık, zil, çanlar; ikisi sevinir
+        Tf = o['tapf']
+        put(SFX, ui_tap(0.6), T(Tf))
+        put(SFX, fm_bell(1568, 0.7, 0.18), T(Tf + 0.06))
+        put(SFX, pling(2093, 0.1, 0.5), T(Tf + 0.12), pan=0.3)
+        put(SFX, jingle(0.14, 7), T(Tf + 0.1), pan=-0.2)
+    if 'off' in o:  # döngü: karlı meydana dönüş
+        put(SFX, whoosh(0.3, 2400, 500, 0.5), T(o['off'] - 0.3), 0.18)  # döngü sahnesinin dairesel geçişiyle aynı anda
+
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
 # ═════════ ANA MÜZİK ═════════
@@ -3405,8 +3604,79 @@ def melodrama(a, b, last=True, **kw):
         hit = np.stack([lp(hp(hit[:, c], 50), 6000) for c in range(2)], 1)
         put(ACC, hit * 3.5 * kw.get('stabGain', 1.0), a + st)
 
+
+def celesta(m, d=0.6, v=0.12):
+    """müzik kutusu / çelesta: sinüs + oktav üstü ve uyumsuz tını kısmisi, hızlı sönüm"""
+    t = tt(d)
+    f = freq(m)
+    x = np.sin(2 * np.pi * f * t) * np.exp(-t * 5.5) + 0.35 * np.sin(2 * np.pi * 2 * f * t) * np.exp(-t * 9) + 0.12 * np.sin(2 * np.pi * 4.02 * f * t) * np.exp(-t * 16)
+    return x * adsr(len(x), 0.002, 0.1, 1.0, 0.05) * v
+
+
+def pizz(m, d=0.35, v=0.25):
+    """pizzicato yaylı: kısa, yuvarlak"""
+    t = tt(d)
+    f = freq(m)
+    x = (np.sin(2 * np.pi * f * t) + 0.3 * np.sin(2 * np.pi * 2 * f * t) + 0.1 * np.sin(2 * np.pi * 3 * f * t)) * np.exp(-t * 9)
+    return lp(x * adsr(len(x), 0.003, 0.05, 1.0, 0.03), 1800) * v
+
+
+def masal(a, b, last=True, **kw):
+    """yılbaşı masalı: 3/4 vals, müzik kutusu (çelesta) ezgisi, birinci vuruşta pizzicato bas, ikinci ve üçüncüde yumuşak akor,
+    kızak çanları. mode: 'minor' (Em–C–Am–B, yalnız seyrek çelesta arpeji; ikilem), 'major' (G–Em–C–D7, sekiz ölçülük ezgi),
+    'festive' (major + oktavlı ezgi, pad, sekizlik çanlar). Seçenekler: bpm (138), bells, gain."""
+    BPM = kw.get('bpm', 138)
+    bt = 60 / BPM
+    L = b - a
+    mode = kw.get('mode', 'major')
+    bus = seg_bus(a, b)
+    if mode == 'minor':
+        prog_ = [(40, [64, 67, 71]), (36, [64, 67, 72]), (45, [64, 69, 72]), (47, [63, 66, 71])]  # Em C Am B
+    else:
+        prog_ = [(43, [62, 67, 71]), (40, [64, 67, 71]), (36, [64, 67, 72]), (38, [62, 66, 72])]  # G Em C D7
+    # özgün vals ezgisi: (ölçü içi vuruş, nota, süre/vuruş), sekiz ölçü
+    MEL = [[(0, 71, 2), (2, 74, 1)], [(0, 79, 1.5), (1.5, 78, 0.5), (2, 76, 1)], [(0, 76, 2), (2, 74, 1)], [(0, 72, 1), (1, 71, 1), (2, 69, 1)],
+           [(0, 71, 1), (1, 74, 1), (2, 79, 1)], [(0, 83, 2), (2, 81, 1)], [(0, 79, 1), (1, 76, 1), (2, 72, 1)], [(0, 74, 3)]]
+    end = L - (1.0 if last else 0)
+    nbar = int(np.ceil(end / (3 * bt)))
+    for bi in range(nbar):
+        t0 = bi * 3 * bt
+        root, ch = prog_[bi % 4]
+        put(bus, pizz(root, bt * 1.2, 0.3), t0)
+        for beat in (1, 2):
+            tb = t0 + beat * bt
+            if tb >= end:
+                break
+            for k, m in enumerate(ch):
+                put(bus, pizz(m, bt * 0.8, 0.07), tb + k * 0.004, pan=(k - 1) * 0.3)
+        if mode == 'minor':
+            for k in range(0, 6, 2):  # dörtlüklerde akor notası, oktav üstte
+                if t0 + k * bt / 2 < end:
+                    put(bus, celesta(ch[(k // 2) % 3] + 12, 0.8, 0.08), t0 + k * bt / 2, pan=0.3 if k % 4 else -0.3)
+        else:
+            for beat, m, du in MEL[bi % 8]:
+                tm = t0 + beat * bt
+                if tm < end:
+                    up = 12 if mode == 'festive' else 0
+                    put(bus, celesta(m + up, du * bt * 1.6, 0.13), tm, pan=0.15)
+                    if mode == 'festive':
+                        put(bus, celesta(m, du * bt * 1.4, 0.06), tm, pan=-0.2)
+        if kw.get('bells', True):  # kızak çanları: dörtlüklerde (festive'de sekizliklerde), ölçü başı daha güçlü
+            steps = 6 if mode == 'festive' else 3
+            for k in range(steps):
+                tm = t0 + k * 3 * bt / steps
+                if tm < end:
+                    put(bus, jingle(0.11 if k == 0 else 0.06, 4), tm, pan=0.4)
+        if mode == 'festive':
+            put(bus, pad([m - 12 for m in ch], 3 * bt, 0.05), t0)
+    if last:
+        for k, m in enumerate((67, 71, 74, 79)):
+            put(bus, celesta(m + 12, 1.6, 0.13), end + 0.04 * k)
+        put(bus, jingle(0.14, 7), end)
+    put(MUS, bus[: int(L * SR)] * 3.6 * kw.get('gain', 1.0), a)  # çelesta ve pizzicato tek başına kısık kalır: lofi ve pop ile aynı yüksekliğe
+
 STYLES = {'lofi': lofi, 'horror': horror, 'quiz': quiz, 'chip': chip, 'pop': pop, 'space': space, 'thriller': thriller, 'ragtime': ragtime,
-          'melodrama': melodrama}
+          'melodrama': melodrama, 'masal': masal}
 
 
 # ═════════ REELS'İ KUR ═════════

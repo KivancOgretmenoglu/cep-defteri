@@ -58,7 +58,9 @@ yarıda birbirine sürtünen yüksek yaylılar), `ragtime` (sessiz film piyanosu
 bas–akor, sağ elde senkoplu ezgi, eski kayıt gibi dar bant; seçenekler `bpm`, `minor` (Am–Dm–E7–Am, yoksa
 C–A7–D7–G7), `soft` (seyrek ezgi, kısık bas), `gain` (bölümün yüksekliği)), `melodrama` (sessiz film gerilimi: piyanoda
 alçak tremolo; `stab`: bölüm başından saniye, o anda vurucu akor; akor `ACC` kanalına gider, konuşmanın kısmasına uğramaz, o
-yüzden iki satırın arasına konur; `stabGain`, `gain`, `cresc`). Bölümler arasında boşluk bırakılabilir (ör. korku vuruşundan
+yüzden iki satırın arasına konur; `stabGain`, `gain`, `cresc`), `masal` (yılbaşı masalı: 3/4 vals, müzik kutusu/çelesta ezgisi, birinci vuruşta pizzicato bas, ikinci ve
+üçüncüde yumuşak akor, kızak çanları; `mode`: `minor` (Em–C–Am–B, seyrek arpej), `major` (G–Em–C–D7, sekiz ölçülük özgün ezgi),
+`festive` (oktavlı ezgi, pad, sekizlik çanlar); `bpm`, `bells`, `gain`). Bölümler arasında boşluk bırakılabilir (ör. korku vuruşundan
 sonra sessizlik). Plan yoksa eski chiptune düzeni kullanılır.
 
 Reels düzeyinde `"voiceDuck": {"release": 0.25, "music": 0.3, "amb": 0.7}`: konuşma altında müzik `music` tabanına kısılır
@@ -89,6 +91,7 @@ konuşmanın ~18–24 dB altında olmalı.
 | `mailHook` | Okul maili kartı ve kepli Fıstık |
 | `mezat` | Mezat salonu (dolar açık artırması): kadife perde, üç spot, LED fiyat panosu, kürsüde tokmaklı Bilge, kaidede fanusta 100 TL, kürek kaldıran Fıstık ve Karamel (kollar ve Bilge'nin kanadı sprite ızgarasında piksel uzuv: omuzdan çıkar, kürek sapını ya da tokmağı patide kavrar; `limbCurve`, `limbDisk`, `limbSVG`). Olaylar: `reveal`, `rules`, `alir`, `dp`, `oder`, `bos`, `bid` (10→100 teklif yağmuru), `fire`, `ask`, `count` (panoda SATIYORUM 3·2·1), `dec` (110→200 tırmanma), `drop`, `sold`, `total`, `kaching`, `sci`, `n3`, `n5`, `name`, `ult`, `lesson`, `write`, `ok`, `cta`, `follow` (takip kartı), `tapf` (tokmak "Takip et"e vurur), `dim`. Teklif takvimi `audio.py`'deki `cue_mezat` ile aynı |
 | (reels düzeyi) `captionYPlan` | `[[a, b, y], ...]`: başlangıcı a–b arasındaki altyazı öbeği y'ye konur (kamera planı panoyu ya da yüzü altyazı hizasına getirdiğinde) |
+| `noel` | Gizli Noel Baba (yılbaşı masalı): karlı kampüs gecesi, ışıklı KAHVE kulübesinde barista Karamel, kütüphane penceresinde sınav haftası kıyafetli Fıstık; Noel Baba şapkalı Pamuk (`pamuk@noel`) masada 100 TL'yi patilerinde tutar, KENDİME / BAŞKASINA zarfları arasında gidip gelir. Karar anında sağ üstte ipe asılı yılbaşı süsünde 3·2·1. `zero`'da ekran şeker kamışı şeritle ikiye bölünür: A dünyası (meydan) sol panelde, E dünyası (kütüphane içi) sağ panelde (paneller `overflow: hidden` kap, kamera panel ortasına bakar); solda kendine kahve, sağda uyuklayan Fıstık'a gizlice kahve ve "Gizli Noel Baba'ndan" notu. AKŞAM kalpli mutluluk göstergeleri, tebeşir tahtası (5 $ = 20 $), Cep Defteri (Pamuk teması) Kategori limitleri, kütüphanede kapanış ve takip kartı. Olaylar: `yuz`, `opt`, `kahve`, `yoksa`, `lib`, `yalniz`, `fis`, `ask`, `kend`, `bask`, `count`, `zero`, `biri`, `oteki`, `gizli`, `oldu`, `aksam`, `fill`, `mutlu`, `sci`, `bes`, `yirmi`, `eq`, `app`, `tap`, `kucuk`, `koy`, `cta`, `follow`, `tapf`, `off`. Döngü: ilk sahneye `loopAt` (döngü sahnesinin başladığı an: takip kartı ondan önce kapanır, geçiş bitince sahne gizlenir, z-index'li katmanları döngü karelerine binmez), döngü sahnesine `loopEnd` (son karesi videonun ilk karesine bağlanır). Ses `audio.py`'deki `cue_noel` |
 
 Müzik türlerine `pop` (104 BPM, marimba, el çırpma) eklendi. Sıradaki konu fikirleri ve doğrulama notları:
 `brand/icerik-fikirleri.md`.
@@ -114,7 +117,7 @@ Hikâye sahneleri `stories.js`, sesleri `audio.py` içindeki `cue_<sahne>` fonks
 Reels düzeyinde `"music": { "gaps": [[a, b]], "lowpass": [[a, b]] }`: müzik a–b arasında bant gibi durur
 ya da boğuklaşır (komik dönüşlerde efektlere yer açmak için).
 
-Uygulama ekranları `assets/ui/` altındadır (örnek veri modundan çekildi). Maskot pozları `assets/sprites.json` içindedir (uygulamanın kendi çiziminden üretildi).
+Uygulama ekranları `assets/ui/` altındadır (örnek veri modundan çekildi). Maskot pozları `assets/sprites.json` içindedir (uygulamanın kendi çiziminden üretildi). Pamuk'un yılbaşı pozları (`pamuk@noel`: uygulamanın çizicisi, kırmızı atkı ve sol kulağa sarkan ponponlu Noel Baba şapkası) `node promo/tools/sprites-noel.mjs` ile yeniden üretilir.
 
 ## Seslendirme (ElevenLabs)
 

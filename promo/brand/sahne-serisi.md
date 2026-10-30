@@ -407,6 +407,50 @@ Kelime zamanları ElevenLabs Scribe ile ölçüldü (`assets/voice/katil/words.j
 
 ---
 
+## 11. Gizli Noel Baba
+**Durum:** üretildi (`out/gizli-noel-baba.mp4`, 34,75 sn) · **Tür:** yılbaşı masalı · **Oyuncular:** Noel Baba şapkalı, kırmızı atkılı Pamuk (şapka sol kulağın üstüne sarkar, ucunda ponpon; `pamuk@noel` pozları, `tools/sprites-noel.mjs`), kütüphanede sınav haftası kıyafetli (gözlük, kitap) Fıstık, KAHVE kulübesinde barista Karamel
+**Fikir:** "Bu 100 TL'yi kime harcarsın?" Kendine mi, başkasına mı? İzleyici seçer; video iki sonucu yan yana gösterir: kendine kahve alan Pamuk ve Fıstık'ın gizli Noel Baba'sı olan Pamuk. Akşam ikincisi daha mutlu.
+
+**Kanca (0. kare):** Karlı kampüs gecesi. Solda ışıklı KAHVE kulübesi (çizgili tente, ışık zinciri, "100 TL · örnek fiyat" etiketi, servis penceresinde barista Karamel), sağda kemerli kütüphane penceresinde tek başına ders çalışan Fıstık; ortada karlı kafe masasında Pamuk patilerinde "100" yazılı banknotu tutar, KENDİME ve BAŞKASINA zarfları arasında gidip gelir, yaklaştığı zarf parlar. Kutu: **"Bu 100 TL'yi kime harcarsın?"**
+
+**Akış (videodaki zamanlar)**
+- 0–3,0 sn: Kanca; seslendirme 0,15'te. "Yüz lira"da (2,35) banknot büyür, parıldar.
+- 3,0–4,5 sn: "Kendine kahve mi alsın": kamera kulübeye kayar; "kahve"de (3,4) tezgâhta buharı tüten fincan belirir. Kutu: "Kahve kendine mi, Fıstık'a mı?"
+- 4,5–7,1 sn: "yoksa kütüphanede yalnız çalışan Fıstık'a mı?": kamera pencereye yaklaşır; raflar, yeşil lamba, kitap yığını, boş fincan; "yalnız"da (5,65) Fıstık esner (z z).
+- 7,1–9,55 sn: "Sen olsan? Kendine mi, başkasına mı?": kamera Pamuk'a ve zarflara döner, kalp atışı başlar; "kendine"de (8,03) KENDİME, "başkasına"da (8,8) BAŞKASINA parlar. Kutu: "Sen olsan? KENDİNE mi, BAŞKASINA mı?"
+- 9,55–12,55 sn: Karar anı (gerçek 3 sn): müzik ve altyazı susar; sağ üstte ipe asılı kırmızı yılbaşı süsünde 3·2·1 (her saniye çan, arada saat tıkı, hızlanan kalp atışı); Pamuk iki zarf arasında gidip gelir. Kutunun altında "Yoruma yaz".
+- 12,55 sn: Ekran ikiye bölünür: ortadan şeker kamışı şerit iner, solda KENDİNE, sağda BAŞKASINA etiketi.
+- 12,55–14,95 sn: Solda Pamuk kulübenin önünde: 100 TL Karamel'e uçar (13,0), fincan tezgâhta kayar, Pamuk patilerine alır (14,0); "biri kendine aldı"da (13,88) fincanı ağzına kaldırıp yudumlar. Sağda Fıstık masada uyukluyor (z z); anlatılmayan panel kararır.
+- 14,95–17,0 sn: "öteki Fıstık'ın gizli Noel Baba'sı oldu": öteki Pamuk elinde fincanla ağacın arkasından parmak ucunda gelir, "gizli"de (15,73) fincanı ve küçük notu Fıstık'ın masasına bırakır, ağacın arkasına saklanır; "oldu"da (16,58) Fıstık uyanır ("!"), not yakın planda: "GİZLİ NOEL BABA'NDAN"; Fıstık sevinip zıplar, Pamuk ağacın arkasından ona doğru eğilip bakar.
+- 17,0–20,55 sn: AKŞAM (ay simgeli hap), iki panelde kalpli mutluluk göstergesi; "harcayanlar"da (18,6) dolarlar: sol %55'te durur, sağ "mutlu"da (19,75) %92'ye çıkar, parıltı. Altta kaynak satırı "Kaynak: Dunn, Aknin ve Norton 2008". Seviyeler temsilî.
+- 20,55–24,15 sn: Kütüphanede tebeşir tahtası: "BİR DENEY / parayı başkasına harcayanlar", tebeşirle iki zarf (5 $ ve 20 $), altlarında aynı seviyede dolu iki kalp; "beş"te (22,2) ve "yirmi"de (23,18) zarflar büyür, sonda (23,78) aralarına "=". Kutu: "Tutar fark etmedi: 5 $ da 20 $ da". Bu planda altyazı susar, satırı kutu taşır.
+- 24,15–27,95 sn: Cep Defteri (Pamuk teması), Bütçe ve planlar → Kategori limitleri: "hediyelere"de (25,8) "+ Limit"e dokunuş (ekran kaydındaki gibi işaret), Hediye satırı açılır; "küçük"te (26,73) çubuk 100 / 300 TL'ye dolar; "koy"da (27,45) yeşil onay. Kutu: "Mutluluk tutarda değil. Hediyelere küçük limit koy".
+- 27,95–31,25 sn: Kapanış sorusu; kütüphanede Fıstık ve Pamuk masada kahveleriyle (masada not), ağaç ışıkları yanıp söner, pencerede kar.
+- 31,25–34,25 sn: Ortak takip satırı ve takip kartı; "takip et"te (33,5) dokunma işareti, düğme "Takip ediliyor" olur, ikisi sevinip zıplar.
+- 34,25–34,75 sn: Dairesel geçişle yeniden karlı meydan ve kanca kutusu (döngü: son kare ilk kareyle aynı; döngü sahnesine `loopEnd`, ilk sahneye `loopAt` verilir).
+
+**Müzik:** yeni `masal` türü (yılbaşı masalı: 3/4 vals, müzik kutusu/çelesta, birinci vuruşta pizzicato bas, ikinci ve üçüncüde yumuşak akor, kızak çanları). Kanca, seçenekler ve soru `minor` (Em–C–Am–B, seyrek arpej; kancada kısık), karar anında müzik yok, bölünmüş ekranda `major` (G–Em–C–D7, sekiz ölçülük özgün vals ezgisi), akşam, tahta ve uygulamada lofi, kapanış ve takipte `festive` (oktavlı ezgi, pad, sekizlik çanlar). Dışarıda rüzgâr; parmak ucu adımları pizzicato. Konuşma altında müzik `voiceDuck` ile kısılır (satır başına ses–müzik farkı 14–24 dB; önceki reelslerde aynı ölçümle 6–22 dB).
+
+**Seslendirme (videodaki hali; sekiz satır da ilk denemede marka sesine uydu, 3,39–4,96 dB)**
+1. `[energetic]` Yılbaşına bir hafta var. Pamuk'un cebinde yüz lira.
+2. `[curious]` Kendine kahve mi alsın, yoksa kütüphanede yalnız çalışan Fıstık'a mı?
+3. `[curious]` Sen olsan? Kendine mi, başkasına mı?
+4. `[excited]` İki Pamuk'la deneyelim: biri kendine aldı, öteki Fıstık'ın gizli Noel Baba'sı oldu.
+5. `[excited]` Bir deneyde, parayı başkasına harcayanlar akşam daha mutlu çıktı.
+6. `[dramatic]` Üstelik tutar fark etmedi: beş dolar da, yirmi dolar da.
+7. `[dramatic]` Mutluluk tutarda değil. Hediyelere baştan küçük bir limit koy.
+8. `[playful]` Bu yılbaşı yüz lirayla kimi sevindirirdin? Yoruma yaz!
+9. `[playful]` Her hafta bir para tuzağı. Kaçırmamak için takip et! (ortak takip satırı, `assets/voice/ortak/takip.mp3`)
+
+Kelime zamanları ElevenLabs Scribe ile ölçüldü (`assets/voice/noel/words.json`; satırlar tek dosyada döküldü, döküm metinle birebir aynı).
+
+**Kapanış kutusu:** "Bu yılbaşı 100 TL'yle kimi sevindirirdin?" (seslendirmeyle aynı) · çip: "Yoruma yaz" · ardından takip kartı
+**Uygulamayla bağı:** Bütçe ve planlar → Kategori limitleri → + Limit: Hediye için aylık limit (örnek 300 TL). Fıstık'a alınan 100 TL'lik kahve Hediye'ye yazılınca çubuk 100 / 300'e dolar. Araştırmaya göre mutluluğu tutar değil kime harcandığı belirliyor; küçük bir hediye limiti hem sevindirmeye yeter hem yılbaşı harcamalarını sınırlar. #yılbaşı etiketi (Raporlar'da toplamı) ve ortak hediyede "Hesabı bölüş" açıklamada.
+**Açıklamanın ilk satırı:** Gizli Noel Baba: 100 TL'yi kendine mi harcarsın, başkasına mı? 🎁
+**Doğrulama sonucu:** Dunn, Aknin ve Norton (2008), *Science* 319(5870): 1687–1688, "Spending Money on Others Promotes Happiness". Saha deneyinde 46 kişiye sabah 5 ya da 20 dolar verildi, gün bitmeden kendilerine ya da başkasına (hediye ya da bağış) harcamaları istendi; akşam başkasına harcayanlar daha mutlu olduklarını bildirdi, tutarın etkisi yoktu (Harvard Gazette; Norton: "$5 or $20, didn't matter at all"). Ayrı bir ankette 109 öğrenci tersini tahmin etti: kendine harcamanın ve 20 doların daha çok mutlu edeceğini sandılar. Yinelemeler: Aknin, Dunn, Proulx, Lok ve Norton (2020, *JPSP*) kayıtlı yineleme raporunda laboratuvarda başkasına harcayanlar daha mutluydu, harcamayı hatırlatan deneylerde etki küçük ya da yoktu (büyüklük yönteme bağlı); Kim ve ark. (2022, *PLOS ONE*) 133 kişilik yakın yinelemede özgün analizle anlamlı fark bulamadı, keşif amaçlı başka bir ölçümde etki aynı yöndeydi. Bu yüzden videoda "bir deneyde … daha mutlu çıktı" denir, etki büyüklüğü verilmez, göstergeler temsilî. Makalenin tam metnine bu ortamdan erişilemedi; rakamlar Harvard Gazette, ScienceDaily ve yinelemelerin özetlerinden. Hikâyedeki TL tutarları örnek.
+
+---
+
 ## Kaynaklar
 - Gneezy, Haruvy ve Yafe (2004): [RePEc](https://ideas.repec.org/a/ecj/econjl/v114y2004i495p265-280.html), [özet](https://en.wikipedia.org/wiki/Unscrupulous_diner%27s_dilemma)
 - Bankrate (2021) borç anketi: [PDF](https://www.bankrate.com/pdfs/pr/20211213-lending-money-survey.pdf)
@@ -421,3 +465,5 @@ Kelime zamanları ElevenLabs Scribe ile ölçüldü (`assets/voice/katil/words.j
 - Blake, Moshary, Sweeney ve Tadelis (2021): [DOI](https://doi.org/10.1287/mksc.2020.1261), [Berkeley Haas](https://newsroom.haas.berkeley.edu/research/buyer-beware-massive-experiment-shows-why-ticket-sellers-hit-you-with-hidden-fees-drip-pricing/), [NBER çalışma kâğıdı](https://www.nber.org/papers/w25186)
 - Pratchett, *Men at Arms* (1993), bot teorisi: [terrypratchett.com](https://terrypratchett.com/explore-discworld/sam-vimes-boots-theory-of-socio-economic-unfairness/), [Econlib (eleştirel)](https://www.econlib.org/buying-boots)
 - Orhun ve Palazzolo (2019): [DOI](https://doi.org/10.1177/0022243718821660), [SSRN](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2742431), [Washington Post](https://www.washingtonpost.com/news/wonk/wp/2016/03/08/why-the-poor-pay-more-for-toilet-paper-and-just-about-everything-else/), [AMA](https://www.ama.org/2020/03/20/frugality-is-hard-to-afford/)
+- Dunn, Aknin ve Norton (2008): [Science](https://www.science.org/doi/10.1126/science.1150952), [Harvard Gazette](https://news.harvard.edu/gazette/story/2008/04/money-spent-on-others-can-buy-happiness/), [ScienceDaily](https://www.sciencedaily.com/releases/2008/03/080320150034.htm), [HBS Working Knowledge](https://www.library.hbs.edu/working-knowledge/spending-on-happiness)
+- Aknin, Dunn, Proulx, Lok ve Norton (2020) kayıtlı yineleme: [ResearchGate](https://www.researchgate.net/publication/340468788_Does_spending_money_on_others_promote_happiness_A_registered_replication_report) · Kim ve ark. (2022): [PLOS ONE](https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0272434), [PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC9451075/)
