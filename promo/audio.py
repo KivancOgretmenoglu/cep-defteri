@@ -2796,6 +2796,135 @@ def cue_bot(t0, skip=0, o=None):
         iris(o['off'])
 
 
+def cue_cal(t0, skip=0, o=None):
+    """Paylaş mı, çal mı? (yarışma stüdyosu): şalter, ekran tıkları, kalp atışı, 3 sn sayım, kart açılışları, ihanet. Takvim karar.js'teki SCENES.cal ile aynı."""
+    o = o or {}
+    T = at(t0, skip)
+
+    def thump(v):  # kalp: alt vuruş + telefon hoparlöründe de duyulan üst katman
+        x = np.sin(2 * np.pi * phase(glide(70, 40, 0.18))) * expd(0.18, 16)
+        h = np.sin(2 * np.pi * phase(glide(170, 95, 0.1))) * expd(0.1, 30) * 0.45
+        x[: len(h)] += h
+        return x * v
+
+    sub = lambda d=1.0: np.tanh(np.sin(2 * np.pi * phase(glide(65, 30, d))) * expd(d, 3) * 1.4)
+
+    def gasp(d=0.7):  # seyirci: topluca nefes çeker, ardından uğultu
+        t = tt(d)
+        return sweep_bp(noise(d), 500 + 1800 * (t / d) ** 0.5, q=1.2) * np.sin(np.pi * (t / d) ** 0.6) * 0.5
+
+    def flip(v=0.3):  # ekrandaki kart döner
+        return whoosh(0.16, 700, 3200, 0.7) * v
+
+    if 'rules' in o:
+        R, RV = o['rules'], o.get('reveal', 1.3)
+        # karanlık stüdyo, spot altında 1.000 TL: alt vuruş ve desteden geçen parıltı
+        put(SFX, sub(1.2), T(0.02), 0.55)
+        put(SFX, pling(2093, 0.12, 0.4), T(0.45), pan=0.15)
+        # stüdyo ışıkları şalterle yanar; PAYLAŞ ve ÇAL düğmeleri sırayla parlar
+        put(SFX, key_click(0.7), T(RV - 0.04)); put(SFX, slam_hit(0.6), T(RV - 0.02), 0.25); put(SFX, sub(1.0), T(RV - 0.02), 0.5)
+        put(SFX, whoosh(0.35, 3000, 300, 0.7), T(RV - 0.08), 0.28)
+        put(SFX, pling(1318, 0.12, 0.35), T(RV + 0.12), pan=-0.3)
+        put(SFX, bloop(330, 160, 0.18, 0.2), T(RV + 0.7), pan=0.3)
+        # kurallar ekrana sırayla düşer
+        put(SFX, stereo_move(whoosh(0.25, 500, 2500, 0.6), -0.2, 0.2), T(R - 0.1), 0.18)
+        put(SFX, fm_bell(1047, 0.7, 0.16), T(R + 0.05))
+    if 'r2' in o:
+        put(SFX, bloop(520, 1100, 0.07, 0.2), T(o['r2']), pan=-0.2); put(SFX, pling(1568, 0.1, 0.3), T(o['r2'] + 0.08), pan=-0.2)
+    if 'r3' in o:  # "ikisi de sıfır": satır iki kez kırmızı yanar
+        R3 = o['r3']
+        put(SFX, bloop(330, 160, 0.16, 0.24), T(R3))
+        for k in range(3):
+            put(SFX, buzzer(0.07), T(R3 + 0.5 + k * 0.2), 0.22)
+    if 'promise' in o:  # Ceviz yakın plan: balon pat diye açılır
+        P = o['promise']
+        put(SFX, stereo_move(whoosh(0.3, 2000, 400, 0.6), 0.3, -0.3), T(P - 0.12), 0.22)
+        put(SFX, bloop(420, 980, 0.08, 0.3), T(P + 0.25), pan=-0.2)
+    if 'trust' in o:  # Pamuk inanır
+        put(SFX, stereo_move(whoosh(0.22, 500, 2500, 0.6), -0.3, 0.3), T(o['trust'] - 0.1), 0.18)
+        put(SFX, pling(1760, 0.1, 0.3), T(o['trust'] + 0.1), pan=0.3)
+    if 'ask' in o:  # "Sen Pamuk olsan?": alt vuruş; kalp atışı hızlanır (karar.js'teki nabızla aynı takvim)
+        A, Z = o['ask'], o['zero']
+        put(SFX, sub(1.0), T(A - 0.03), 0.55)
+        t, k = A + 0.2, 0
+        while t < Z - 0.1:
+            put(SFX, thump(0.9), T(t)); put(SFX, thump(0.6), T(t + 0.16))
+            t += max(0.42, 0.62 - 0.03 * k); k += 1
+    if 'count' in o:  # gerçek 3 saniye: her saniyede bip, aralarda saat tıkı, son anda nefes
+        C, Z = o['count'], o['zero']
+        n = int(round(Z - C))
+        for j in range(n):
+            put(SFX, pluck(81 if j < n - 1 else 86, 0.14, 'square', 0.5, cut=4000, v=0.3), T(C + j))
+            put(SFX, tick(j % 2 == 0, 0.22), T(C + j + 0.5), pan=0.2)
+        put(SFX, inhale(0.3), T(Z - 0.32), 0.6)
+    if 'zero' in o:  # iki düğmeye aynı anda basılır; kamera ekrana döner
+        Z = o['zero']
+        put(SFX, ui_tap(0.7), T(Z), pan=0.4); put(SFX, ui_tap(0.7), T(Z + 0.03), pan=-0.4)
+        put(SFX, sub(0.8), T(Z), 0.6)
+        put(SFX, stereo_move(whoosh(0.3, 400, 2600, 0.6), 0.3, 0.0), T(Z + 0.05), 0.2)
+        put(SFX, drumroll(max(0.3, o.get('pf', Z + 0.5) - Z - 0.12)), T(Z + 0.1), 0.22)
+    if 'pf' in o:  # Pamuk'un kartı: PAYLAŞ (zil)
+        P = o['pf']
+        put(SFX, flip(), T(P), pan=0.3)
+        put(SFX, fm_bell(1568, 0.9, 0.24), T(P + 0.16), pan=0.3); put(SFX, pling(2093, 0.12, 0.5), T(P + 0.22), pan=0.3)
+        if 'cf' in o:
+            put(SFX, drumroll(max(0.3, o['cf'] - P - 0.5)), T(P + 0.45), 0.3)
+    if 'cf' in o:  # Ceviz'in kartı: ÇAL! çarpma, büzer, seyirci nefesini tutar
+        C = o['cf']
+        put(SFX, flip(), T(C), pan=-0.3)
+        put(SFX, slam_hit(0.8), T(C + 0.15), 0.9); put(SFX, sub(1.3), T(C + 0.15), 0.9)
+        put(SFX, buzzer(0.3), T(C + 0.16), 0.5)
+        put(SFX, gasp(0.8), T(C + 0.3), 0.5)
+    if 'win' in o:  # para Ceviz'e kayar, kasa sesi; deftere yazılır
+        W = o['win']
+        put(SFX, stereo_move(whoosh(0.4, 2400, 500, 0.6), 0.1, -0.5), T(W - 0.05), 0.2)
+        put(SFX, flutter(0.5), T(W + 0.05), 0.3, pan=-0.3)
+        put(SFX, cash_register(), T(W + 0.42), 0.3, pan=-0.4)
+        for i in range(4):
+            put(SFX, key_click(0.15), T(W + 0.32 + i * 0.11), pan=0.0)
+        put(SFX, slide_whistle(900, 300, 0.5), T(W + 0.55), 0.35, pan=0.4)  # Pamuk'un kalbi kırılır
+        put(SFX, bloop(600, 240, 0.14, 0.22), T(W + 0.95), pan=0.4)
+    if 'sad' in o:
+        put(SFX, stereo_move(whoosh(0.22, 500, 2500, 0.6), -0.3, 0.3), T(o['sad'] - 0.1), 0.16)
+    if 'sci' in o:  # ekranda gerçek yarışma: on kişi belirir
+        S = o['sci']
+        put(SFX, stereo_move(whoosh(0.35, 400, 3000, 0.6), 0.3, -0.1), T(S - 0.08), 0.2)
+        for i in range(5):
+            put(SFX, bloop(500 + 80 * i, 900 + 120 * i, 0.05, 0.1), T(S + 0.12 + i * 0.08), pan=-0.6 + 0.3 * i)
+    if 'half' in o:  # beşi kırmızıya döner (ÇAL), beşi yeşile (PAYLAŞ)
+        H = o['half']
+        for j in range(5):
+            put(SFX, bloop(420, 220, 0.09, 0.14), T(H + j * 0.1), pan=-0.5 + 0.25 * j)
+        put(SFX, pling(1175, 0.12, 0.4), T(H + 0.65))
+    if 'lesson' in o:  # Ceviz paraya sarılmış
+        L = o['lesson']
+        put(SFX, stereo_move(whoosh(0.3, 2000, 400, 0.6), 0.2, -0.3), T(L - 0.1), 0.2)
+        put(SFX, cash_register(), T(L + 0.15), 0.2, pan=-0.3)
+    if 'l2' in o:  # Pamuk'un spotu şalterle söner; ekranda oyunun adı; cırcır böcekleri
+        L = o['l2']
+        for k in range(3):
+            put(SFX, bloop(700 - 60 * k, 900 - 60 * k, 0.05, 0.14), T(L - 0.45 + k * 0.2), pan=0.3 + 0.2 * k)
+        put(SFX, key_click(0.7), T(L - 0.02), pan=0.4); put(SFX, sub(0.9), T(L), 0.5)
+        put(SFX, fm_bell(659, 1.0, 0.2), T(L + 0.1))
+        put(SFX, crickets(max(0.6, o.get('cta', L + 1.8) - L - 0.5)), T(L + 0.4), 1.2, pan=0.3)
+    if 'cta' in o:  # soru: Pamuk döner, para ortada toplanır, kartlar kapanır
+        C = o['cta']
+        put(SFX, key_click(0.5), T(C - 0.02), pan=0.4)
+        put(SFX, flutter(0.3), T(C), 0.18)
+        put(SFX, bloop(500, 1100, 0.1, 0.2), T(C + 0.3), pan=0.1)
+    if 'follow' in o:  # takip kartı açılır
+        F = o['follow']
+        put(SFX, stereo_move(whoosh(0.3, 500, 2400, 0.5), -0.3, 0.2), T(F - 0.05), 0.18)
+        put(SFX, bloop(520, 1300, 0.07, 0.28), T(F + 0.05))
+    if 'tapf' in o:  # Pamuk'un patisi "Takip et"e basar
+        Tf = o['tapf']
+        put(SFX, ui_tap(0.6), T(Tf))
+        put(SFX, fm_bell(1568, 0.7, 0.18), T(Tf + 0.06))
+        put(SFX, pling(2093, 0.1, 0.5), T(Tf + 0.12), pan=0.3)
+    if 'dim' in o:  # stüdyo ışıkları söner; döngü karanlık stüdyoya döner
+        put(SFX, key_click(0.4), T(o['dim'])); put(SFX, sub(0.8), T(o['dim'] + 0.02), 0.3)
+
+
 def cue_mezat(t0, skip=0, o=None):
     """Mezat salonu: spot şalterleri, kürek savuruşu, LED pano tıkları, tokmak. Teklif takvimi value.js'teki SCENES.mezat ile aynı."""
     o = o or {}

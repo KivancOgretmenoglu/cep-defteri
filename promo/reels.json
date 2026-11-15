@@ -7011,5 +7011,248 @@
         "assets/voice/ortak/takip.mp3"
       ]
     ]
+  },
+  "paylas-mi-cal-mi": {
+    "title": "Paylaş mı, çal mı? (mahkûm ikilemi): 1.000 TL'yi çalar mısın? (yarışma stüdyosu, Ceviz / Pamuk, dev ekran; Karar odası serisi)",
+    "end": 32.6,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.45,
+    "noMusicVariant": true,
+    "limiter": true,
+    "musicPlan": [
+      [
+        0,
+        10.6,
+        "quiz"
+      ],
+      [
+        10.6,
+        16.0,
+        "thriller",
+        {
+          "bpm": 120
+        }
+      ],
+      [
+        19.75,
+        25.9,
+        "lofi"
+      ],
+      [
+        25.9,
+        32.3,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ],
+      [
+        32.3,
+        32.6,
+        "quiz"
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          13.0,
+          16.0
+        ]
+      ]
+    },
+    "captionPixel": true,
+    "captionY": 590,
+    "captionMaxWords": 3,
+    "captionUntil": 25.9,
+    "captionCut": [
+      [
+        13.0,
+        16.0
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        2.55,
+        "1.000 TL'yi<br><b>çalar mısın?</b>",
+        308,
+        {
+          "size": 92,
+          "pulse": true
+        }
+      ],
+      [
+        2.6,
+        6.2,
+        "İkisi de PAYLAŞ: yarı yarıya<br><b>Biri ÇAL: hepsi onun</b>",
+        308,
+        {
+          "size": 64,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        6.25,
+        8.6,
+        "İkisi de ÇAL derse<br><b>ikisi de 0 TL</b>",
+        308,
+        {
+          "size": 88,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        8.65,
+        10.55,
+        "Ceviz söz verdi:<br><b>“Paylaşacağım!”</b>",
+        308,
+        {
+          "size": 88,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        10.6,
+        15.97,
+        "Sen Pamuk olsan?<br><b>PAYLAŞ mı, ÇAL mı?</b>",
+        308,
+        {
+          "size": 84,
+          "pulse": true,
+          "quiet": true,
+          "dim": [
+            13.0,
+            16.0
+          ]
+        }
+      ],
+      [
+        16.02,
+        17.45,
+        "Pamuk paylaştı.<br><b>Ya Ceviz?</b>",
+        308,
+        {
+          "size": 92,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        17.5,
+        19.7,
+        "Ceviz ÇALDI!<br><b>1.000 TL'nin hepsi onun</b>",
+        308,
+        {
+          "size": 80,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        19.75,
+        22.6,
+        "Gerçek yarışmada da<br><b>oyuncuların yarısı çaldı</b>",
+        308,
+        {
+          "size": 72,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        22.65,
+        25.85,
+        "Çalan bir kez kazanır,<br><b>sonra kimse onunla oynamaz</b>",
+        308,
+        {
+          "size": 66,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        25.9,
+        28.85,
+        "Arkadaşın söz verse<br><b>inanır mıydın?</b>",
+        308,
+        {
+          "size": 88,
+          "pulse": true
+        }
+      ],
+      [
+        26.0,
+        28.85,
+        "Yoruma yaz",
+        596,
+        {
+          "size": 44,
+          "quiet": true
+        }
+      ],
+      [
+        26.1,
+        28.85,
+        "Ortak hesabı Cep Defteri'ne yaz",
+        664,
+        {
+          "size": 34,
+          "quiet": true
+        }
+      ],
+      [
+        32.3,
+        32.6,
+        "1.000 TL'yi<br><b>çalar mısın?</b>",
+        308,
+        {
+          "size": 92,
+          "pulse": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "cal",
+        0,
+        {
+          "rules": 2.6,
+          "r2": 4.5,
+          "r3": 6.25,
+          "promise": 8.65,
+          "trust": 9.9,
+          "ask": 10.6,
+          "pw": 11.5,
+          "cw": 12.2,
+          "count": 13.0,
+          "zero": 16.0,
+          "pf": 16.5,
+          "cf": 17.5,
+          "win": 18.2,
+          "sad": 19.0,
+          "sci": 19.75,
+          "half": 21.3,
+          "lesson": 22.65,
+          "l2": 24.1,
+          "cta": 25.9,
+          "follow": 28.9,
+          "tapf": 31.2,
+          "dim": 32.0
+        }
+      ],
+      [
+        "cal",
+        32.3,
+        {
+          "wdur": 0.3
+        }
+      ]
+    ],
+    "voiceTempo": 1.2,
+    "voiceFilter": "brand"
   }
 }

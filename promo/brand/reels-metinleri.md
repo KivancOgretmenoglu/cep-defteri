@@ -630,3 +630,41 @@ Cep Defteri'nde Bütçe ve planlar → Kategori limitleri → + Limit: Hediye i�
 ```
 
 **Yayın notu:** Yılbaşı sürümünü (`gizli-noel-baba`) beklemeden şimdi paylaşılabilen sürüm; en iyi zaman vize ya da final haftası (kütüphanelerin dolduğu günler). Kapak karesi olarak 0,0 sn'yi seç (karlı kampüs gecesi, KAHVE kulübesinde Karamel, kütüphane penceresinde Fıstık, kışlık bereli Pamuk "100" yazılı banknotla KENDİME ve BAŞKASINA zarflarının arasında + "Bu 100 TL'yi kime harcarsın?"). İlk yorumu sabitle: "Bir Pamuk kendine kahve aldı, öteki gizlice Fıstık'ın masasına bıraktı. Sen 100 TL'yle kimi sevindirirdin? (Tutarlar örnek.)" Karar anında soru "KENDİNE mi, BAŞKASINA mı?" + "Yoruma yaz"; sonda seslendirmeyle aynı soru + "Yoruma yaz", ardından ortak takip satırı ve takip kartı. İki sürüm aynı hikâye: ikisini de paylaşacaksan aralarına en az bir ay koy (bu sürüm şimdi, yılbaşı sürümü Aralık'ın ilk yarısında) ya da yılbaşında yalnız yılbaşı sürümünü kullan. Araştırma notları 28. maddedeki gibi. Instagram'da "Yapay zekâ bilgisi" etiketini aç.
+
+---
+
+## 30 · paylas-mi-cal-mi (kavram: mahkûm ikilemi / "Paylaş mı, çal mı?", Karar odası serisi, seslendirme: Buğra, döngülü, ~32,6 sn; TASLAK: seslendirme dosyaları henüz videoya eklenmedi)
+
+**Neden bu video:** Kendi verimizde açık ara en iyi reels Ültimatom (9.172 görüntüleme, %67 izlenme); sonraki çok mekânlı sinematik reelsler 1,4–1,6 B'de kaldı. Bu reels Ültimatom kalıbına geri döner (iki kişilik para oyunu, tek mekân, kendiliğinden cevaplanan soru, gerçek 3 sn karar, başa dönen döngü) ve üstüne üç şey ekler: söz + ihanet (yorum ve gönderim tetikleyicisi), sevimli mağdur (Pamuk), herkesin taraf tutabildiği kapanış sorusu.
+
+**Seslendirme satırları** (`assets/voice/cal/c1…c9.mp3`, `eleven_v4`, satır başına tek üretim; ElevenLabs akışı "Cep Defteri – Paylaş mı, çal mı?"):
+1. `[energetic]` Masada bin lira var. Paylaş, ya da çal!
+2. `[excited]` İkisi de paylaşırsa, yarı yarıya. Biri çalarsa, hepsi onun!
+3. `[dramatic]` İkisi de çalarsa, ikisi de sıfır!
+4. `[playful]` Ceviz söz verdi: Paylaşacağım!
+5. `[curious]` Sen Pamuk olsan? Paylaş mı, çal mı?
+6. `[dramatic]` Pamuk paylaştı. Ceviz çaldı! Bin liranın hepsi Ceviz'in.
+7. `[excited]` Gerçek bir yarışmada da, oyuncuların yarısı çaldı!
+8. `[dramatic]` Çalan bir kez kazanır. Sonra kimse onunla oynamaz!
+9. `[playful]` Peki sen? Arkadaşın söz verse, inanır mıydın? (altyazısız) + ortak takip satırı
+
+**Açıklama:**
+```
+Paylaş mı, çal mı? 1.000 TL'yi çalar mıydın? 🎲
+Arkadaşın "paylaşacağım" diye söz verse inanır mıydın? Yoruma yaz 👇
+📌 Kaydet; ortak hesabı Cep Defteri'nde böl. Android erken erişim yakında.
+
+Masada 1.000 TL var. İki oyuncu aynı anda seçer: PAYLAŞ ya da ÇAL.
+İkisi de PAYLAŞ derse yarı yarıya. Biri ÇAL derse hepsi onun. İkisi de ÇAL derse ikisi de 0 TL.
+Ceviz söz verdi, Pamuk inandı. Ceviz çaldı.
+Bu oyunun adı mahkûm ikilemi. Tek elde çalan kazanır; ama aynı insanlarla yarın yine aynı masadasın. Tutarlar örnek.
+Araştırma: Bir İngiliz TV yarışmasının finalinde oyuncuların yaklaşık yarısı (%53) PAYLAŞ dedi (van den Assem, van Dolder ve Thaler, 2012).
+
+Sana "söz, öderim" deyip unutan arkadaşına gönder.
+Kim kime ne kadar borçlu: Cep Defteri'nde yazılı kalsın.
+
+#mahkûmikilemi #oyunteorisi #davranışsalekonomi #öğrencibütçesi #paraipuçları #cepdefteri
+```
+
+**Yayın notu:** Kapak karesi olarak ~2,0 sn'yi seç (ışıklar yanmış, iki maskot ve 1.000 TL geniş planda). İlk yorumu sabitle: "Pamuk inandı, Ceviz çaldı. Sen Pamuk olsan P mi derdin, Ç mi? Tutarlar örnek." Ültimatom'la arasında en az 5–7 gün bırak (aynı kalıp). Yayından önce doğrula: %53 (makalenin kendi metninden; arama sonuçlarında rakam görünmedi, bu yüzden ekranda oyuncu sayısı yazmıyor). Instagram'da "Yapay zekâ bilgisi" etiketini aç.
+
