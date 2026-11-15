@@ -7014,7 +7014,7 @@
   },
   "paylas-mi-cal-mi": {
     "title": "Paylaş mı, çal mı? (mahkûm ikilemi): 1.000 TL'yi çalar mısın? (yarışma stüdyosu, Ceviz / Pamuk, dev ekran; Karar odası serisi)",
-    "end": 32.6,
+    "end": 32.93,
     "loop": true,
     "handheld": true,
     "musicGain": 0.45,
@@ -7023,58 +7023,58 @@
     "musicPlan": [
       [
         0,
-        10.6,
+        10.87,
         "quiz"
       ],
       [
-        10.6,
-        16.0,
+        10.87,
+        16.240000000000002,
         "thriller",
         {
           "bpm": 120
         }
       ],
       [
-        19.75,
-        25.9,
+        20.04,
+        26.3,
         "lofi"
       ],
       [
-        25.9,
-        32.3,
+        26.3,
+        32.63,
         "pop",
         {
           "bpm": 108
         }
       ],
       [
-        32.3,
-        32.6,
+        32.63,
+        32.93,
         "quiz"
       ]
     ],
     "music": {
       "gaps": [
         [
-          13.0,
-          16.0
+          13.24,
+          16.240000000000002
         ]
       ]
     },
     "captionPixel": true,
     "captionY": 590,
     "captionMaxWords": 3,
-    "captionUntil": 25.9,
+    "captionUntil": 26.3,
     "captionCut": [
       [
-        13.0,
-        16.0
+        13.24,
+        16.240000000000002
       ]
     ],
     "boxes": [
       [
         0,
-        2.55,
+        2.7,
         "1.000 TL'yi<br><b>çalar mısın?</b>",
         308,
         {
@@ -7083,8 +7083,8 @@
         }
       ],
       [
-        2.6,
-        6.2,
+        2.75,
+        6.4,
         "İkisi de PAYLAŞ: yarı yarıya<br><b>Biri ÇAL: hepsi onun</b>",
         308,
         {
@@ -7094,8 +7094,8 @@
         }
       ],
       [
-        6.25,
-        8.6,
+        6.45,
+        8.82,
         "İkisi de ÇAL derse<br><b>ikisi de 0 TL</b>",
         308,
         {
@@ -7105,8 +7105,8 @@
         }
       ],
       [
-        8.65,
-        10.55,
+        8.87,
+        10.82,
         "Ceviz söz verdi:<br><b>“Paylaşacağım!”</b>",
         308,
         {
@@ -7116,8 +7116,8 @@
         }
       ],
       [
-        10.6,
-        15.97,
+        10.87,
+        16.21,
         "Sen Pamuk olsan?<br><b>PAYLAŞ mı, ÇAL mı?</b>",
         308,
         {
@@ -7125,14 +7125,14 @@
           "pulse": true,
           "quiet": true,
           "dim": [
-            13.0,
-            16.0
+            13.24,
+            16.240000000000002
           ]
         }
       ],
       [
-        16.02,
-        17.45,
+        16.26,
+        17.74,
         "Pamuk paylaştı.<br><b>Ya Ceviz?</b>",
         308,
         {
@@ -7142,8 +7142,8 @@
         }
       ],
       [
-        17.5,
-        19.7,
+        17.79,
+        19.99,
         "Ceviz ÇALDI!<br><b>1.000 TL'nin hepsi onun</b>",
         308,
         {
@@ -7153,8 +7153,8 @@
         }
       ],
       [
-        19.75,
-        22.6,
+        20.04,
+        22.9,
         "Gerçek yarışmada da<br><b>oyuncuların yarısı çaldı</b>",
         308,
         {
@@ -7164,8 +7164,8 @@
         }
       ],
       [
-        22.65,
-        25.85,
+        22.95,
+        26.25,
         "Çalan bir kez kazanır,<br><b>sonra kimse onunla oynamaz</b>",
         308,
         {
@@ -7175,8 +7175,8 @@
         }
       ],
       [
-        25.9,
-        28.85,
+        26.3,
+        29.35,
         "Arkadaşın söz verse<br><b>inanır mıydın?</b>",
         308,
         {
@@ -7185,8 +7185,8 @@
         }
       ],
       [
-        26.0,
-        28.85,
+        26.4,
+        29.35,
         "Yoruma yaz",
         596,
         {
@@ -7195,8 +7195,8 @@
         }
       ],
       [
-        26.1,
-        28.85,
+        26.5,
+        29.35,
         "Ortak hesabı Cep Defteri'ne yaz",
         664,
         {
@@ -7205,8 +7205,8 @@
         }
       ],
       [
-        32.3,
-        32.6,
+        32.63,
+        32.93,
         "1.000 TL'yi<br><b>çalar mısın?</b>",
         308,
         {
@@ -7220,39 +7220,91 @@
         "cal",
         0,
         {
-          "rules": 2.6,
-          "r2": 4.5,
-          "r3": 6.25,
-          "promise": 8.65,
-          "trust": 9.9,
-          "ask": 10.6,
-          "pw": 11.5,
-          "cw": 12.2,
-          "count": 13.0,
-          "zero": 16.0,
-          "pf": 16.5,
-          "cf": 17.5,
-          "win": 18.2,
-          "sad": 19.0,
-          "sci": 19.75,
-          "half": 21.3,
-          "lesson": 22.65,
-          "l2": 24.1,
-          "cta": 25.9,
-          "follow": 28.9,
-          "tapf": 31.2,
-          "dim": 32.0
+          "rules": 2.75,
+          "r2": 4.73,
+          "r3": 6.45,
+          "zeroAt": 7.62,
+          "promise": 8.87,
+          "say": 10.09,
+          "trust": 10.37,
+          "ask": 10.87,
+          "pw": 12.12,
+          "cw": 12.69,
+          "count": 13.24,
+          "zero": 16.240000000000002,
+          "pf": 16.81,
+          "cf": 17.79,
+          "win": 18.34,
+          "sad": 19.24,
+          "sci": 20.04,
+          "half": 21.44,
+          "lesson": 22.95,
+          "l2": 24.44,
+          "cta": 26.3,
+          "follow": 29.4,
+          "tapf": 31.9,
+          "dim": 32.38
         }
       ],
       [
         "cal",
-        32.3,
+        32.63,
         {
           "wdur": 0.3
         }
       ]
     ],
     "voiceTempo": 1.2,
-    "voiceFilter": "brand"
+    "voiceFilter": "brand",
+    "voiceFiles": [
+      [
+        0.1,
+        "assets/voice/cal/c1.mp3",
+        "Masada 1.000 lira var. Paylaş, ya da çal!"
+      ],
+      [
+        2.75,
+        "assets/voice/cal/c2.mp3",
+        "İkisi de paylaşırsa, yarı yarıya. Biri çalarsa, hepsi onun!"
+      ],
+      [
+        6.45,
+        "assets/voice/cal/c3.mp3",
+        "İkisi de çalarsa, ikisi de sıfır!"
+      ],
+      [
+        8.87,
+        "assets/voice/cal/c4.mp3",
+        "Ceviz söz verdi: Paylaşacağım!"
+      ],
+      [
+        10.87,
+        "assets/voice/cal/c5.mp3",
+        "Sen Pamuk olsan? Paylaş mı, çal mı?"
+      ],
+      [
+        16.44,
+        "assets/voice/cal/c6.mp3",
+        "Pamuk paylaştı. Ceviz çaldı! 1.000 liranın hepsi Ceviz'in."
+      ],
+      [
+        20.04,
+        "assets/voice/cal/c7.mp3",
+        "Gerçek bir yarışmada da, oyuncuların yarısı çaldı!"
+      ],
+      [
+        22.95,
+        "assets/voice/cal/c8.mp3",
+        "Çalan bir kez kazanır. Sonra kimse onunla oynamaz!"
+      ],
+      [
+        26.3,
+        "assets/voice/cal/c9.mp3"
+      ],
+      [
+        29.4,
+        "assets/voice/ortak/takip.mp3"
+      ]
+    ]
   }
 }

@@ -633,7 +633,7 @@ Cep Defteri'nde Bütçe ve planlar → Kategori limitleri → + Limit: Hediye i�
 
 ---
 
-## 30 · paylas-mi-cal-mi (kavram: mahkûm ikilemi / "Paylaş mı, çal mı?", Karar odası serisi, seslendirme: Buğra, döngülü, ~32,6 sn; TASLAK: seslendirme dosyaları henüz videoya eklenmedi)
+## 30 · paylas-mi-cal-mi (kavram: mahkûm ikilemi / "Paylaş mı, çal mı?", Karar odası serisi, seslendirme: Buğra, döngülü, 32,93 sn)
 
 **Neden bu video:** Kendi verimizde açık ara en iyi reels Ültimatom (9.172 görüntüleme, %67 izlenme); sonraki çok mekânlı sinematik reelsler 1,4–1,6 B'de kaldı. Bu reels Ültimatom kalıbına geri döner (iki kişilik para oyunu, tek mekân, kendiliğinden cevaplanan soru, gerçek 3 sn karar, başa dönen döngü) ve üstüne üç şey ekler: söz + ihanet (yorum ve gönderim tetikleyicisi), sevimli mağdur (Pamuk), herkesin taraf tutabildiği kapanış sorusu.
 

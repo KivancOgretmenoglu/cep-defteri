@@ -2835,11 +2835,11 @@ def cue_cal(t0, skip=0, o=None):
         R3 = o['r3']
         put(SFX, bloop(330, 160, 0.16, 0.24), T(R3))
         for k in range(3):
-            put(SFX, buzzer(0.07), T(R3 + 0.5 + k * 0.2), 0.22)
+            put(SFX, buzzer(0.07), T(o.get('zeroAt', R3 + 0.5) + k * 0.2), 0.22)
     if 'promise' in o:  # Ceviz yakın plan: balon pat diye açılır
         P = o['promise']
         put(SFX, stereo_move(whoosh(0.3, 2000, 400, 0.6), 0.3, -0.3), T(P - 0.12), 0.22)
-        put(SFX, bloop(420, 980, 0.08, 0.3), T(P + 0.25), pan=-0.2)
+        put(SFX, bloop(420, 980, 0.08, 0.3), T(o.get('say', P + 0.25)), pan=-0.2)
     if 'trust' in o:  # Pamuk inanır
         put(SFX, stereo_move(whoosh(0.22, 500, 2500, 0.6), -0.3, 0.3), T(o['trust'] - 0.1), 0.18)
         put(SFX, pling(1760, 0.1, 0.3), T(o['trust'] + 0.1), pan=0.3)

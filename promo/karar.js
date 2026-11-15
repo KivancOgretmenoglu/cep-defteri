@@ -1,7 +1,7 @@
 /* Karar odası serisi: Paylaş mı, çal mı? (mahkûm ikilemi).
  * Tek mekân: yarışma stüdyosu. Solda Ceviz, sağda Pamuk; ortada 1.000 TL, herkesin önünde PAYLAŞ ve ÇAL düğmeleri.
  * Arkadaki dev ekran sırayla tutarı, üç kuralı, iki kapalı kartı (karar anı ve açılış), araştırmayı ve oyunun adını gösterir.
- * Olaylar: reveal, rules, r2, r3, promise, trust, ask, count, zero, pf (Pamuk'un kartı), cf (Ceviz'in kartı), win, sad,
+ * Olaylar: reveal, rules, r2, r3, zeroAt, promise, say, trust, ask, count, zero, pf (Pamuk'un kartı), cf (Ceviz'in kartı), win, sad,
  * sci, half, lesson, l2, cta, follow, tapf, dim. Ses takvimi audio.py'deki cue_cal ile aynı. */
 const KHEART = ['.oo.oo.', 'oRRoRRo', 'oRRRRRo', 'oRRRRRo', '.oRRRo.', '..oRo..', '...o...'];
 const KHEART_C = { o: '#2A1E1A', R: '#E8577A' };
@@ -14,6 +14,7 @@ function defineKarar() {
     const RULES = ev('rules'), R2 = ev('r2'), R3 = ev('r3'), PROMISE = ev('promise'), TRUST = ev('trust'), ASK = ev('ask'), COUNT = ev('count'), ZERO = ev('zero');
     const PF = ev('pf'), CF = ev('cf'), WIN = ev('win'), SAD = ev('sad'), SCI = ev('sci'), HALF = ev('half'), LESSON = ev('lesson'), L2 = ev('l2');
     const CTA = ev('cta'), FOLLOW = ev('follow'), TAPF = ev('tapf'), DIM = ev('dim');
+    const SAY = o.say ?? PROMISE + 0.25, ZA = o.zeroAt ?? R3 + 0.5;
     const REVEAL = o.reveal ?? (o.rules ? 1.3 : 99);  // stüdyo ışıkları yanar: para yakın planından geniş plana
     const GREEN = '#2F8F5A', RED = '#C0392B', GOLD = '#F2B63C', INK = '#2A1E1A';
     const outline = (c, w = 5) => `${w}px 0 0 ${c}, -${w}px 0 0 ${c}, 0 ${w}px 0 ${c}, 0 -${w}px 0 ${c}`;
@@ -205,7 +206,7 @@ function defineKarar() {
         b.style.boxShadow = red ? '0 0 16px 5px rgba(255,90,72,.7)' : lit ? '0 0 16px 5px rgba(255,220,130,.75)' : 'none';
       });
       scr.style.borderColor = red ? '#FF5A48' : '#C9962E';
-      scrDim.style.opacity = dim * 0.82;
+      scrDim.style.opacity = dim * 0.96;
       scr.style.opacity = on;
       flash.style.background = lt >= CF ? '#E04A3A' : '#FFFFFF';
       flash.style.opacity = Math.max(lt >= CF ? 0.5 * Math.exp(-(lt - CF) * 5) : 0, lt >= PF && lt < CF ? 0.16 * Math.exp(-(lt - PF) * 8) : 0, lt >= REVEAL && lt < RULES ? 0.2 * Math.exp(-(lt - REVEAL) * 9) : 0);
@@ -216,7 +217,7 @@ function defineKarar() {
       if (M === 'B') rows.forEach((r, i) => {
         const t = [RULES, R2, R3][i], act = lt >= t && (i === 2 || lt < [R2, R3][i]);
         r.style.opacity = lt < t ? 0 : act ? 1 : 0.45;
-        const blink = i === 2 && lt >= R3 + 0.5 && lt < R3 + 1.1 && Math.floor((lt - R3 - 0.5) / 0.1) % 2 === 0;
+        const blink = i === 2 && lt >= ZA && lt < ZA + 0.6 && Math.floor((lt - ZA) / 0.1) % 2 === 0;
         r.style.transform = `scale(${E.back(prog(lt, t, 0.25)) * (blink ? 1.06 : 1)})`;
         r.style.filter = blink ? 'brightness(1.5)' : 'none';
       });
@@ -256,7 +257,7 @@ function defineKarar() {
       });
       glintBar.style.transform = `translateX(${lerp(-60, 200, prog(lt, 0.4, 0.5))}px) rotate(24deg)`;
       glint.style.display = lt < 1.0 ? 'block' : 'none';
-      total.style.display = (lt < WIN && (lt < RULES || lt >= TRUST)) || (Q && cp > 0.5) ? 'block' : 'none';
+      total.style.display = (lt < WIN && (lt < RULES || lt >= ASK)) || (Q && cp > 0.5) ? 'block' : 'none';
       winL.style.display = WON && wp > 0.7 && lt < SAD ? 'block' : 'none';
       winL.style.transform = `scale(${E.back(prog(lt, WIN + 0.4, 0.25))})`;
       zeroL.style.display = WON && lt >= WIN + 0.55 && lt < SAD ? 'block' : 'none';
@@ -351,9 +352,9 @@ function defineKarar() {
       if (lt >= L2 && !Q) cr = Math.sin(lt * 1.1) * 1.5;
       cz.put(cx, cy, { rot: cr }); pm.put(pxx, py, { rot: pr, flip: lt >= L2 - 0.45 && !Q });
       // balon, ünlem, kırık kalp, gözyaşı, ter
-      const bOn = lt >= PROMISE + 0.25 && lt < ASK;
+      const bOn = lt >= SAY && lt < ASK;
       bub.style.display = bOn ? 'block' : 'none';
-      if (bOn) bub.style.transform = `scale(${E.back(prog(lt, PROMISE + 0.25, 0.25))}) rotate(${Math.sin(lt * 3) * 1.5}deg)`;
+      if (bOn) bub.style.transform = `scale(${E.back(prog(lt, SAY, 0.25))}) rotate(${Math.sin(lt * 3) * 1.5}deg)`;
       const bg = lt >= CF + 0.05 && lt < WIN;
       bang.style.display = bg ? 'block' : 'none';
       if (bg) bang.style.transform = `scale(${E.back(prog(lt, CF + 0.05, 0.2))}) rotate(8deg)`;
