@@ -6,6 +6,11 @@ on:
   push:
     paths-ignore: ['**.md']
   workflow_dispatch:
+    inputs:
+      publish_latest:
+        description: "Ana dal dışındaki bir daldan da Releases sayfasına 'Latest' (APK + AAB) olarak yayınla"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -81,8 +86,9 @@ jobs:
             CepDefteri-*.apk
             CepDefteri-*.aab
 
+      # Ana dal ya da elle başlatılıp "publish_latest" seçilen derleme: son sürüm (Latest), APK + AAB.
       - name: Releases sayfasına ekle
-        if: github.ref_name == github.event.repository.default_branch
+        if: github.ref_name == github.event.repository.default_branch || inputs.publish_latest
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.1.${{ github.run_number }}
@@ -100,7 +106,7 @@ jobs:
       # Ana dal dışındaki dallar: hızlı deneme için "test edilmemiş" ön sürüm olarak eklenir.
       # "Son sürüm" (releases/latest) değişmez; Releases sayfasında en üstte görünür.
       - name: Releases sayfasına test sürümü olarak ekle
-        if: github.ref_name != github.event.repository.default_branch
+        if: github.ref_name != github.event.repository.default_branch && !inputs.publish_latest
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.1.${{ github.run_number }}-test
