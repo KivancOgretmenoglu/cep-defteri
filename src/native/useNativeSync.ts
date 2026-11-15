@@ -4,9 +4,9 @@
  * App içinde bir kez çağrılır.
  */
 import { useEffect, useRef } from 'react';
-import { getState, refreshToday, useStore } from '../store/store';
+import { getState, refreshToday, showToast, useStore } from '../store/store';
 import { getDevice, useDevice } from '../store/device';
-import { openSheet } from '../ui/nav';
+import { go, openSheet } from '../ui/nav';
 import { isNative } from '../platform';
 import { rescheduleNotifications, onNotificationTap } from './notifications';
 import { updateWidget } from './widget';
@@ -16,6 +16,11 @@ import { runAutoBackup } from './autoBackup';
 import { initShortcuts } from './shortcuts';
 import { backedUpToday } from './backupPlan';
 import type { NotifExtra } from './schedule';
+import { checkForUpdate, completeUpdate } from './playStore';
+import { t } from '../i18n';
+
+/** Esnek güncelleme indirildi: "Yeniden başlat" düğmeli uzun süreli bildirim. */
+const updateReady = () => showToast(t('upd.toastReady'), { ms: 60_000, action: { label: t('upd.restart'), run: () => void completeUpdate() } });
 
 export const DEEP_LINK_SCHEME = 'io.github.kivancogretmenoglu.cepdefteri';
 
@@ -45,6 +50,7 @@ export function parseDeepLink(url: string | undefined | null): { type?: 'expense
 
 function handleNotif(ex: NotifExtra) {
   if (ex.open === 'add') return openSheet({ kind: 'add' });
+  if (ex.open === 'reports') return go('reports');
   const { data } = getState();
   if (data.plans.some((p) => p.id === ex.planId)) openSheet({ kind: 'confirm', planId: ex.planId, due: ex.due });
 }
@@ -86,6 +92,7 @@ function setupOnce() {
         App.addListener('appUrlOpen', ({ url }) => handleDeepLink(url));
         App.addListener('appStateChange', ({ isActive }) => {
           if (isActive) {
+            void checkForUpdate(updateReady);
             refreshToday();
             void ingestWidgetQueue();
             syncNow({ backupIfStale: true });
@@ -95,6 +102,8 @@ function setupOnce() {
             flushBackup();
           }
         });
+        // Play'de yeni sürüm varsa açılışta "Güncelle" penceresi.
+        void checkForUpdate(updateReady, { force: true });
         const launch = await App.getLaunchUrl().catch(() => undefined);
         handleDeepLink(launch?.url);
         // Araçtaki çiplerle uygulama kapalıyken eklenen kayıtlar

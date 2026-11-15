@@ -128,7 +128,7 @@ function SheetBody() {
     case 'account':
       return <AccountSheet key={sheet.accountId ?? 'new-' + sheet.kindPreset} accountId={sheet.accountId} kindPreset={sheet.kindPreset} />;
     case 'plan':
-      return <PlanSheet key={sheet.planId ?? 'new'} planId={sheet.planId} preset={sheet.preset} />;
+      return <PlanSheet key={sheet.planId ?? 'new'} planId={sheet.planId} preset={sheet.preset} draft={sheet.draft} />;
     case 'valuation':
       return <ValuationSheet accountId={sheet.accountId} />;
     case 'goal':
@@ -155,6 +155,11 @@ function Toast() {
         {toast.undo && (
           <button className="toast__undo" onClick={undo}>
             <Undo2 size={16} /> {t('common.undo')}
+          </button>
+        )}
+        {toast.action && (
+          <button className="toast__undo" onClick={() => { hideToast(); toast.action!.run(); }}>
+            {toast.action.label}
           </button>
         )}
         <button className="icon-btn icon-btn--small" onClick={hideToast} aria-label={t('common.close')}><X size={16} /></button>

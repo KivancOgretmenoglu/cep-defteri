@@ -15,6 +15,15 @@ export interface TxFilter {
   tag?: string;
 }
 
+/** Yeni plan formunu doldurmak için (ör. abonelik avcısının önerisi). */
+export interface PlanPrefill {
+  title: string;
+  amount: number;
+  categoryId: ID;
+  accountId: ID;
+  startDate: string;
+}
+
 export type SheetState =
   | { kind: 'add'; preset?: { type?: TxType | 'invest' | 'debt'; direction?: 'in' | 'out'; accountId?: ID; personId?: ID; paidByPerson?: boolean } }
   | { kind: 'edit'; txId: ID }
@@ -24,7 +33,7 @@ export type SheetState =
   | { kind: 'cancelPlan'; planId: ID }
   | { kind: 'reportCard'; month: string }
   | { kind: 'account'; accountId?: ID; kindPreset?: 'investment' | 'person' }
-  | { kind: 'plan'; planId?: ID; preset?: 'expense' | 'income' | 'transfer' }
+  | { kind: 'plan'; planId?: ID; preset?: 'expense' | 'income' | 'transfer'; draft?: PlanPrefill }
   | { kind: 'valuation'; accountId: ID }
   | { kind: 'goal'; goalId?: ID; accountId?: ID }
   | { kind: 'category'; categoryId?: ID; catKind?: 'expense' | 'income' }

@@ -4,9 +4,10 @@
  */
 import type { Data, ID } from '../domain/types';
 import type { NotificationPrefs } from '../store/device';
-import { accountIndex, pendingUntil, planIsOutflow } from '../domain/ledger';
-import { addDays, type ISODate } from '../domain/dates';
+import { accountIndex, pendingUntil, planIsOutflow, rangeSummary } from '../domain/ledger';
+import { addDays, weekStart, type ISODate } from '../domain/dates';
 import { formatMoney } from '../domain/money';
+import { categoryName } from '../domain/defaults';
 import { translator } from '../i18n/core';
 
 /** Bizim bildirimlerimiz bu aralıktaki kimlikleri kullanır; yeniden planlarken yalnız bunlar iptal edilir. */
@@ -19,8 +20,10 @@ export const PAYMENT_HOUR = 10;
 export const INCOME_HOUR = 12;
 /** Saati geçmiş (ama vadesi geçmemiş) kalem için "hemen" bildirimi bu kadar sonra çıkar. */
 export const LATE_DELAY_MS = 60_000;
+/** Haftalık özet: pazar 20:00. */
+export const WEEKLY_HOUR = 20;
 
-export type NotifExtra = { open: 'confirm'; planId: ID; due: ISODate } | { open: 'add' };
+export type NotifExtra = { open: 'confirm'; planId: ID; due: ISODate } | { open: 'add' } | { open: 'reports' };
 
 export interface PlannedNotification {
   id: number;
@@ -115,10 +118,47 @@ export function computeSchedule(
     }
   }
 
+  if (prefs.weekly) {
+    const w = weeklySummary(data, today, t, lang);
+    // Saati geçtiyse gönderilmez (geç kalmış "haftanın özeti" anlamsız).
+    if (w && w.at.getTime() > nowMs) out.push(w);
+  }
+
   return out
     .sort((a, b) => a.at.getTime() - b.at.getTime() || a.key.localeCompare(b.key))
     .slice(0, MAX_NOTIFICATIONS)
     .map((n, i) => ({ ...n, id: NOTIF_ID_BASE + i }));
+}
+
+/**
+ * Bu haftanın (pazartesi–pazar) özeti, pazar 20:00 için: toplam harcama, geçen haftayla farkı, en çok
+ * harcanan kategori. Haftada hiç harcama yoksa null. Metin zamanlama anında hesaplanır; veri her
+ * değiştiğinde bildirimler yeniden planlandığı için gönderildiğinde günceldir.
+ */
+export function weeklySummary(data: Data, today: ISODate, t: ReturnType<typeof translator>, lang: 'tr' | 'en'): Omit<PlannedNotification, 'id'> | null {
+  const mon = weekStart(today);
+  const sun = addDays(mon, 6);
+  const cur = rangeSummary(data, mon, sun);
+  if (cur.spending <= 0) return null;
+  const prev = rangeSummary(data, addDays(mon, -7), addDays(mon, -1));
+  let cmp = '';
+  if (prev.spending > 0) {
+    const ch = Math.round((Math.abs(cur.spending - prev.spending) / prev.spending) * 100);
+    const p = lang === 'en' ? `${ch}%` : `%${ch}`;
+    if (ch >= 5) cmp = t(cur.spending < prev.spending ? 'notif.weekLess' : 'notif.weekMore', { pct: p });
+  }
+  let topId: ID | null = null;
+  let topAmt = 0;
+  for (const [id, v] of cur.spendingByCategory) if (v > topAmt) [topId, topAmt] = [id, v];
+  const cat = topId ? data.categories.find((c) => c.id === topId) : undefined;
+  const top = cat ? t('notif.weekTop', { cat: categoryName(cat, lang) }) : '';
+  return {
+    key: `week|${sun}`,
+    at: localAt(sun, WEEKLY_HOUR),
+    title: t('notif.weekTitle'),
+    body: t('notif.weekBody', { amount: formatMoney(cur.spending, { lang }), cmp, top }),
+    extra: { open: 'reports' },
+  };
 }
 
 /** Gönderim kaydını günceller: yeni planlananları ekler, 40 günden eski kayıtları atar. */

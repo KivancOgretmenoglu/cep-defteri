@@ -2707,6 +2707,59 @@ fieldset.block {
   font-size: 13.5px;
   color: var(--ink-3);
 }
+/* Abonelik avcısı (Bütçe ekranı) */
+.rec-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.rec-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.rec-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.rec-row__icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: var(--cat, var(--ink-2));
+  background: color-mix(in srgb, var(--cat, var(--ink-3)) 16%, transparent);
+}
+.rec-row__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.rec-row__main b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rec-row__main small {
+  color: var(--ink-3);
+}
+.rec-row__amt {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.rec-row__actions {
+  grid-column: 2 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 /* Bütçe dışı gider anahtarı (işlem formu) */
 .off-budget {
   display: grid;

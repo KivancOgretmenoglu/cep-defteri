@@ -245,6 +245,9 @@ export function NotificationSettings() {
           <Row title={t('ns.evening')} hint={t('ns.eveningHint')}>
             <Segmented<OnOff> size="sm" label={t('ns.evening')} value={n.dailyReminder ? 'on' : 'off'} onChange={(v) => setNotif({ dailyReminder: v === 'on' })} options={ONOFF} />
           </Row>
+          <Row title={t('ns.weekly')} hint={t('ns.weeklyHint')}>
+            <Segmented<OnOff> size="sm" label={t('ns.weekly')} value={n.weekly ? 'on' : 'off'} onChange={(v) => setNotif({ weekly: v === 'on' })} options={ONOFF} />
+          </Row>
           {n.dailyReminder && (
             <Row title={t('ns.reminderHour')}>
               <select className="input input--small nset-select" value={n.reminderHour} onChange={(e) => setNotif({ reminderHour: Number(e.target.value) })} aria-label={t('ns.reminderHour')}>

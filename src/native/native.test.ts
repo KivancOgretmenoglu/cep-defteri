@@ -3,13 +3,14 @@ import { emptyData } from '../domain/defaults';
 import * as A from '../domain/actions';
 import type { Data } from '../domain/types';
 import { DEFAULT_DEVICE, type NotificationPrefs } from '../store/device';
-import { computeSchedule, localAt, MAX_NOTIFICATIONS, NOTIF_ID_BASE, updateSent, LATE_DELAY_MS } from './schedule';
+import { computeSchedule, localAt, MAX_NOTIFICATIONS, NOTIF_ID_BASE, updateSent, LATE_DELAY_MS, WEEKLY_HOUR } from './schedule';
 import { autoBackupName, backupNudgeDue, backupReminder, filesToDelete, fitSnapshots, nextSnapshots, parseAutoBackupName, sortAutoBackups, type WebSnapshot } from './backupPlan';
 import { widgetPayload } from './widgetPayload';
 
 const TODAY = '2026-10-15';
 const TL = (n: number) => Math.round(n * 100);
-const PREFS: NotificationPrefs = { ...DEFAULT_DEVICE.notifications, enabled: true, dailyReminder: false };
+// Haftalık özet ayrı testte (aşağıda); diğer testlerde kapalı.
+const PREFS: NotificationPrefs = { ...DEFAULT_DEVICE.notifications, enabled: true, dailyReminder: false, weekly: false };
 
 function setup() {
   let d = emptyData();
@@ -209,5 +210,28 @@ describe('ana ekran aracı', () => {
     expect(hidden.note).toBe('örnek veri');
     expect(widgetPayload(A.updateSettings(d, { periodMode: 'days30' }), TODAY, 'real').label).toBe('13 Kasım tarihine kadar');
     expect(widgetPayload(emptyData(), TODAY, 'real').amount).toBe('—');
+  });
+});
+
+describe('haftalık özet bildirimi', () => {
+  const W: NotificationPrefs = { ...PREFS, payments: false, income: false, weekly: true };
+  const exp = (d: Data, date: string, amount: number, categoryId = 'e-food') => A.addTx(d, { type: 'expense', amount: TL(amount), date, accountId: d.accounts[0].id, categoryId }, TODAY).data;
+  it('pazar 20:00; toplam, geçen haftaya göre fark ve en çok harcanan kategori', () => {
+    let d = setup().d;
+    // Geçen hafta (5–11 Ekim) 1.000 TL; bu hafta (12–18 Ekim) 850 TL, çoğu ulaşım.
+    d = exp(d, '2026-10-06', 1000);
+    d = exp(d, '2026-10-12', 200);
+    d = exp(d, '2026-10-14', 650, 'e-transport');
+    const s = computeSchedule(d, TODAY, W, new Date(2026, 9, 15, 9));
+    expect(s).toHaveLength(1);
+    expect(s[0]).toMatchObject({ key: 'week|2026-10-18', at: localAt('2026-10-18', WEEKLY_HOUR), title: 'Haftanın özeti', extra: { open: 'reports' } });
+    expect(s[0].body).toBe('Bu hafta 850 TL harcadın · geçen haftadan %15 az 👏. En çok: Ulaşım.');
+    expect(computeSchedule({ ...d, settings: { ...d.settings, lang: 'en' } }, TODAY, W, new Date(2026, 9, 15, 9))[0].body).toBe('You spent ₺850 this week · 15% less than last week 👏. Top: Transport.');
+  });
+  it('harcama yoksa, kapalıysa ya da saati geçtiyse gönderilmez', () => {
+    const d = exp(setup().d, '2026-10-13', 100);
+    expect(computeSchedule(setup().d, TODAY, W, new Date(2026, 9, 15, 9))).toEqual([]);
+    expect(computeSchedule(d, TODAY, { ...W, weekly: false }, new Date(2026, 9, 15, 9))).toEqual([]);
+    expect(computeSchedule(d, '2026-10-18', W, new Date(2026, 9, 18, 21))).toEqual([]);
   });
 });

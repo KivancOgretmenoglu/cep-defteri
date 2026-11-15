@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { maybeAskReview } from '../native/playStore';
 import { Share2 } from 'lucide-react';
 import { catName, formatMoney, monthLabel, monthName, pctForm, shortDate } from '../i18n/format';
 import { useT } from '../i18n';
@@ -39,6 +40,9 @@ export function ReportCardSheet({ month }: { month: string }) {
       markMonthCelebrated(scope, month);
       setParty(true);
       burst(28, mascotRef.current);
+      // Bütçe içinde biten ayın kutlaması: puanlama istemek için en iyi an.
+      const st = getState();
+      void maybeAskReview(st.data, st.mode);
     }, 380);
     return () => clearTimeout(id);
     // Yalnız açılışta karar verilir.

@@ -28,6 +28,8 @@ export interface NotificationPrefs {
   dailyReminder: boolean;
   /** Akşam hatırlatmasının saati (0–23). */
   reminderHour: number;
+  /** Pazar akşamı haftanın harcama özeti. */
+  weekly: boolean;
 }
 
 export interface AutoBackupPrefs {
@@ -51,7 +53,7 @@ const KEY = DEVICE_KEY;
 
 export const DEFAULT_DEVICE: DevicePrefs = {
   lock: { pinHash: null, salt: null, biometric: false, relockAfterSec: 60, failed: 0, blockedUntil: null },
-  notifications: { enabled: false, payments: true, income: true, dailyReminder: true, reminderHour: 21 },
+  notifications: { enabled: false, payments: true, income: true, dailyReminder: true, reminderHour: 21, weekly: true },
   autoBackup: { enabled: true, lastAt: null, lastPath: null, lastError: null },
 };
 

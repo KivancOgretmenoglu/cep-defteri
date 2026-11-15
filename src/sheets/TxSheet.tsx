@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Trash2, RotateCcw, CalendarClock, Repeat, UserRound, Split, Tag, X, PiggyBank } from 'lucide-react';
+import { maybeAskReview } from '../native/playStore';
+import { mascotMood } from '../domain/mood';
 import type { ID, PlanRef, Tx } from '../domain/types';
 import * as A from '../domain/actions';
 import { addDays, diffDays, type ISODate } from '../domain/dates';
@@ -9,7 +11,7 @@ import type { Key } from '../i18n/core';
 import { AssetQtyFields, type AssetValue } from './AssetFields';
 import { allTags, cashBalance, isInvestment, isPerson, occurrences, planIsInflow, planIsOutflow, transferKind } from '../domain/ledger';
 import { mascotEvent, type MascotEvent } from '../mascot/events';
-import { commit } from '../store/store';
+import { commit, getState } from '../store/store';
 import { closeSheet, openSheet, type SheetState } from '../ui/nav';
 import { discardTxDraft, stashTxDraft, takeTxDraft, type TxSnap } from './txDraft';
 import { Chip, FormError, MoneyInput, Segmented, Sheet, inputFromMoney } from '../ui/kit';
@@ -245,6 +247,11 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
     else {
       mascotEvent(eventFor(draft));
       closeSheet();
+      // İyi an: yeni kayıt kaydedildi ve maskot keyifli/sakin (bütçe sıkıntısı yokken) → puanlama isteği.
+      if (!editing) {
+        const st = getState();
+        if (mascotMood(st.data, st.today).mood !== 'thoughtful') void maybeAskReview(st.data, st.mode);
+      }
     }
   }
 
