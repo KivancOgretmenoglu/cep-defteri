@@ -74,7 +74,8 @@ function set(patch: Patch) {
   if (patch.base || patch.quotes) next.book = withStockPrices(next.base, next.quotes);
   state = next;
   try {
-    localStorage.setItem(PRICES_KEY, JSON.stringify({ base: state.base, quotes: state.quotes, fetchedAt: state.fetchedAt, auto: state.auto }));
+    // "book" (yalnız altın/döviz) önceki sürümün okuduğu anahtardır: sürüm geri alınsa da fiyatlar kaybolmaz.
+    localStorage.setItem(PRICES_KEY, JSON.stringify({ base: state.base, book: state.base, quotes: state.quotes, fetchedAt: state.fetchedAt, auto: state.auto }));
   } catch {
     // Depolama yoksa fiyatlar yalnız bu oturumda kalır.
   }
