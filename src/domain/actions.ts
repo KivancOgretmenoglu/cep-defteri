@@ -58,6 +58,8 @@ export interface TxDraft {
   unit?: AssetUnit;
   qty?: number;
   unitPrice?: Money;
+  /** Yalnız gider: aylık bütçeye sayılmasın. */
+  offBudget?: boolean;
 }
 
 /** Transferin altın/döviz tutan yatırım tarafı (varsa). */
@@ -176,8 +178,9 @@ export function validateTx(data: Data, d: TxDraft, today: ISODate, editingId?: I
   }
 }
 
-function cleanDraft(d: TxDraft, data: Data): TxDraft {
-  const out: TxDraft = { type: d.type, amount: d.amount, date: d.date, accountId: d.accountId };
+/** Doğrulanmış taslaktan saklanacak alanlar (işlem türüne göre gereksizler atılır). */
+function cleanDraft(d: TxDraft, data: Data): Omit<Tx, 'id' | 'seq' | 'createdAt'> {
+  const out: Omit<Tx, 'id' | 'seq' | 'createdAt'> = { type: d.type, amount: d.amount, date: d.date, accountId: d.accountId };
   if (d.type === 'transfer') out.toAccountId = d.toAccountId;
   const asset = assetSideOf(data, d);
   if (asset) {
@@ -187,6 +190,7 @@ function cleanDraft(d: TxDraft, data: Data): TxDraft {
   }
   else out.categoryId = d.categoryId;
   if (d.type === 'refund') out.refundOf = d.refundOf;
+  if (d.type === 'expense' && d.offBudget) out.offBudget = true;
   const note = d.note?.trim();
   if (note) out.note = note.slice(0, 200);
   if (d.planRef) out.planRef = { ...d.planRef };

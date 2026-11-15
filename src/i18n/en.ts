@@ -4,6 +4,7 @@ import { plural } from './grammar';
 import { hintsEn } from './hints.en';
 import { assetsEn } from './assets.en';
 import { stocksEn } from './stocks.en';
+import { offBudgetEn } from './offbudget.en';
 import { defaultsEn } from './defaults.en';
 import { ringsEn } from './rings.en';
 import { planEn } from './plan.en';
@@ -16,6 +17,7 @@ export const en: Dict = {
   ...hintsEn,
   ...assetsEn,
   ...stocksEn,
+  ...offBudgetEn,
   ...defaultsEn,
   'err.validDate': "Pick a valid date.",
   'err.futureDate': "You can't log something in the future. Add a plan for upcoming payments instead.",

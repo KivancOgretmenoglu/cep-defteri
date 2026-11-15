@@ -6,6 +6,7 @@ import type { Entry } from './core';
 import { hintsTr } from './hints.tr';
 import { assetsTr } from './assets.tr';
 import { stocksTr } from './stocks.tr';
+import { offBudgetTr } from './offbudget.tr';
 import { defaultsTr } from './defaults.tr';
 
 import { ringsTr } from './rings.tr';
@@ -19,6 +20,7 @@ export const tr = {
   ...hintsTr,
   ...assetsTr,
   ...stocksTr,
+  ...offBudgetTr,
   ...defaultsTr,
   'err.validDate': "Geçerli bir tarih seç.",
   'err.futureDate': "Gelecek tarihli kayıt girilemez. Yaklaşan ödemeler için plan ekleyebilirsin.",

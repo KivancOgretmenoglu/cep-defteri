@@ -2707,6 +2707,14 @@ fieldset.block {
   font-size: 13.5px;
   color: var(--ink-3);
 }
+/* Bütçe dışı gider anahtarı (işlem formu) */
+.off-budget {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  margin: 4px 0;
+}
+
 .split {
   display: flex;
   flex-direction: column;

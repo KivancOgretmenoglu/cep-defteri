@@ -25,6 +25,8 @@ export interface TxSnap {
   note: string;
   showNote: boolean;
   planRef?: PlanRef;
+  /** Gider bütçe dışı mı (eski taslaklarda yok). */
+  offBudget?: boolean;
   /** Yeni hesap açılırsa hangi alana yerleşeceği */
   target: 'accountId' | 'toAccountId' | 'personId' | 'splitPerson' | 'invId';
   /** Sayfa açılmadan önceki kimlikler: yeni olanı bulmak için */

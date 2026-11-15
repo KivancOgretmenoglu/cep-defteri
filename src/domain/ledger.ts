@@ -357,8 +357,13 @@ export interface RangeSummary {
   /** Tüketim harcaması = giderler − iadeler. Transfer ve yatırım katkısı hariç. */
   spending: Money;
   spendingByCategory: Map<ID, Money>;
-  /** Bu aralıkta planlı ödemelere bağlı harcama (iadeleri düşülmüş). */
+  /** Bu aralıkta planlı ödemelere bağlı harcama (iadeleri düşülmüş; bütçe dışı olanlar hariç). */
   plannedSpending: Money;
+  /** Bütçe dışı işaretli giderler − onların iadeleri (spending'in içindedir). */
+  offBudget: Money;
+  offBudgetByCategory: Map<ID, Money>;
+  /** Bütçe dışı gider sayısı. */
+  offBudgetCount: number;
   refunds: Money;
   contributions: Money;
   withdrawals: Money;
@@ -371,6 +376,8 @@ export function rangeSummary(data: Data, from: ISODate, to: ISODate): RangeSumma
   const txById = new Map(data.txs.map((t) => [t.id, t]));
   const incomeBySource = new Map<ID, Money>();
   const spendingByCategory = new Map<ID, Money>();
+  const offBudgetByCategory = new Map<ID, Money>();
+  let offBudget = 0, offBudgetCount = 0;
   const add = (m: Map<ID, Money>, k: ID | undefined, v: Money) => {
     const key = k ?? 'none';
     m.set(key, (m.get(key) ?? 0) + v);
@@ -387,14 +394,21 @@ export function rangeSummary(data: Data, from: ISODate, to: ISODate): RangeSumma
       case 'expense':
         spending += t.amount;
         add(spendingByCategory, t.categoryId, t.amount);
-        if (t.planRef) plannedSpending += t.amount;
+        if (t.offBudget) {
+          offBudget += t.amount;
+          offBudgetCount++;
+          add(offBudgetByCategory, t.categoryId, t.amount);
+        } else if (t.planRef) plannedSpending += t.amount;
         break;
       case 'refund': {
         spending -= t.amount;
         refunds += t.amount;
         add(spendingByCategory, refundCategory(t, txById), -t.amount);
         const orig = t.refundOf ? txById.get(t.refundOf) : undefined;
-        if (orig?.planRef) plannedSpending -= t.amount;
+        if (orig?.offBudget) {
+          offBudget -= t.amount;
+          add(offBudgetByCategory, refundCategory(t, txById), -t.amount);
+        } else if (orig?.planRef) plannedSpending -= t.amount;
         break;
       }
       case 'transfer': {
@@ -405,7 +419,7 @@ export function rangeSummary(data: Data, from: ISODate, to: ISODate): RangeSumma
       }
     }
   }
-  return { from, to, income, incomeBySource, spending, spendingByCategory, plannedSpending, refunds, contributions, withdrawals, txCount };
+  return { from, to, income, incomeBySource, spending, spendingByCategory, plannedSpending, offBudget, offBudgetByCategory, offBudgetCount, refunds, contributions, withdrawals, txCount };
 }
 
 export const monthSummary = (data: Data, m: MonthKey) => rangeSummary(data, monthStart(m), monthEnd(m));
@@ -623,8 +637,11 @@ export interface CategoryLimitStatus {
 export interface BudgetStatus {
   month: MonthKey;
   budget: Money | null;
-  /** Ayın toplam tüketim harcaması (iadeler düşülmüş). */
+  /** Bütçeye sayılan harcama: ayın tüketim harcaması − bütçe dışı giderler (iadeler düşülmüş). */
   spent: Money;
+  /** Bütçe dışı tutulan harcama (bilgi; spent'e dahil değil). */
+  offBudget: Money;
+  offBudgetCount: number;
   /** Planlı ödemelere bağlı gerçekleşen harcama. */
   plannedSpent: Money;
   /** Bu ay vadesi gelen ama henüz ödenmemiş planlı ödemeler. */
@@ -658,12 +675,15 @@ export function budgetStatus(data: Data, month: MonthKey, today: ISODate): Budge
         )
       : 0;
   const plannedSpent = s.plannedSpending;
-  const flexibleSpent = s.spending - plannedSpent;
+  // Bütçe dışı giderler (biriktirip alınan gitar gibi) bütçe, tempo ve kategori limitlerine sayılmaz.
+  const spent = s.spending - s.offBudget;
+  const flexibleSpent = spent - plannedSpent;
+  const off = { offBudget: s.offBudget, offBudgetCount: s.offBudgetCount };
 
   const categories: CategoryLimitStatus[] = data.categories
     .filter((c) => c.kind === 'expense' && c.limit && c.limit > 0 && !c.archived)
     .map((c) => {
-      const used = s.spendingByCategory.get(c.id) ?? 0;
+      const used = (s.spendingByCategory.get(c.id) ?? 0) - (s.offBudgetByCategory.get(c.id) ?? 0);
       const pct = Math.round((used / (c.limit as Money)) * 100);
       return { category: c, limit: c.limit as Money, used, pct, level: pct >= 100 ? 'over' : pct >= 70 ? 'near' : 'ok' };
     });
@@ -671,19 +691,19 @@ export function budgetStatus(data: Data, month: MonthKey, today: ISODate): Budge
   const B = data.settings.monthlyBudget;
   if (B === null || B <= 0) {
     return {
-      month, budget: null, spent: s.spending, plannedSpent, plannedPending, flexibleSpent,
+      month, budget: null, spent, ...off, plannedSpent, plannedPending, flexibleSpent,
       flexibleBudget: null, remaining: null, usedPct: null, flexUsedPct: null, elapsedPct, state: 'none', categories,
     };
   }
   const flexibleBudget = B - plannedSpent - plannedPending;
-  const remaining = B - s.spending - plannedPending;
-  const usedPct = Math.round((s.spending / B) * 100);
+  const remaining = B - spent - plannedPending;
+  const usedPct = Math.round((spent / B) * 100);
   const flexUsedPct = flexibleBudget > 0 ? Math.round((Math.max(flexibleSpent, 0) / flexibleBudget) * 100) : null;
   let state: BudgetState;
   // Planlı ödemeler bütçeyi tek başına dolduruyorsa bu bir aşım değil, bilgidir.
   if (month > current) state = 'future';
   else if (flexibleBudget <= 0) state = 'planned-full';
-  else if (s.spending > B) state = 'over';
+  else if (spent > B) state = 'over';
   else if (!isCurrent) state = 'closed-within';
   else if ((flexUsedPct ?? 0) > 100) state = 'tight';
   else {
@@ -691,7 +711,7 @@ export function budgetStatus(data: Data, month: MonthKey, today: ISODate): Budge
     state = lead <= 10 ? 'on-track' : lead <= 25 ? 'watch' : 'tight';
   }
   return {
-    month, budget: B, spent: s.spending, plannedSpent, plannedPending, flexibleSpent,
+    month, budget: B, spent, ...off, plannedSpent, plannedPending, flexibleSpent,
     flexibleBudget, remaining, usedPct, flexUsedPct, elapsedPct, state, categories,
   };
 }

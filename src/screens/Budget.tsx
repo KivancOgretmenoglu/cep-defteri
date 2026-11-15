@@ -114,6 +114,7 @@ export function Budget() {
             <div><dt><i className="sw sw--left" />{t('bud.remaining')}</dt><dd>{formatMoney(Math.max(b.remaining ?? 0, 0))}</dd></div>
           </dl>
           <p className="note-line">{t('bud.lineNote', { pct: pctPlain(b.elapsedPct) })}</p>
+          {b.offBudget > 0 && <p className="note-line">{t('ob.budgetLine', { amount: formatMoney(b.offBudget) })}</p>}
           {note && <MascotNote compact mood={note.mood} text={note.text} why={note.why} outfit="planner" size={64} />}
           <FloorRow />
         </section>

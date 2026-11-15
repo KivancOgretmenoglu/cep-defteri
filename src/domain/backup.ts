@@ -81,6 +81,7 @@ export function parseBackup(text: string, lang: Lang = 'tr'): Result {
     if (!optStr(t.note) || !optStr(t.refundOf)) return err('bk.txNote');
     if (t.tags !== undefined && (!Array.isArray(t.tags) || !t.tags.every((x) => isStr(x) && x.length > 0 && x.length <= 24) || t.tags.length > 5)) return err('bk.tags');
     if (t.planRef !== undefined && (!isObj(t.planRef) || !isStr(t.planRef.planId) || !isISODate(t.planRef.due))) return err('bk.planRef');
+    if (t.offBudget !== undefined && (t.offBudget !== true || t.type !== 'expense')) return err('bk.tx');
     if ((t.qty !== undefined && !isQty(t.qty)) || (t.unitPrice !== undefined && (!isMoney(t.unitPrice) || (t.unitPrice as number) <= 0)) || (t.unit !== undefined && !isAssetUnit(t.unit))) return err('bk.assetTx');
     txIds.add(t.id);
     maxSeq = Math.max(maxSeq, t.seq as number);
@@ -229,7 +230,9 @@ export function transactionsCSV(data: Data, lang: Lang = 'tr'): string {
   const withQty = data.txs.some((t) => t.qty !== undefined);
   const qtyCell = (q: number) => (lang === 'en' ? String(q) : String(q).replace('.', ','));
   const unitCell = (u: AssetUnit | undefined) => (u ? unitLabel(T, u) : '');
-  const header = [T('csv.date'), T('csv.type'), T('csv.amount'), T('csv.account'), T('csv.toAccount'), T('csv.category'), T('csv.note'), T('csv.planned'), T('csv.tags'), ...(withQty ? [T('csv.qty'), T('csv.unit'), T('csv.unitPrice')] : [])];
+  // Bütçe dışı gider varsa ayrı sütun (yoksa CSV eskisiyle aynı).
+  const withOff = data.txs.some((t) => t.offBudget);
+  const header = [T('csv.date'), T('csv.type'), T('csv.amount'), T('csv.account'), T('csv.toAccount'), T('csv.category'), T('csv.note'), T('csv.planned'), T('csv.tags'), ...(withQty ? [T('csv.qty'), T('csv.unit'), T('csv.unitPrice')] : []), ...(withOff ? [T('csv.offBudget')] : [])];
   const rows = [...data.txs]
     .sort((a, b) => (a.date === b.date ? a.seq - b.seq : a.date < b.date ? -1 : 1))
     .map((t) => {
@@ -245,6 +248,7 @@ export function transactionsCSV(data: Data, lang: Lang = 'tr'): string {
         t.planRef ? T('csv.yes') : '',
         (t.tags ?? []).join(', '),
         ...(withQty ? [t.qty !== undefined ? qtyCell(t.qty) : '', unitCell(t.unit), t.unitPrice !== undefined ? csvAmount(t.unitPrice, lang) : ''] : []),
+        ...(withOff ? [t.offBudget ? T('csv.yes') : ''] : []),
       ];
     });
   return csvRows([header, ...rows], lang);

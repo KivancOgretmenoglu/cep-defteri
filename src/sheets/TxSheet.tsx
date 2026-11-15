@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Trash2, RotateCcw, CalendarClock, Repeat, UserRound, Split, Tag, X } from 'lucide-react';
+import { Trash2, RotateCcw, CalendarClock, Repeat, UserRound, Split, Tag, X, PiggyBank } from 'lucide-react';
 import type { ID, PlanRef, Tx } from '../domain/types';
 import * as A from '../domain/actions';
 import { addDays, diffDays, type ISODate } from '../domain/dates';
-import { catName, dueLabel, formatMoney, lower, parseMoney, shortDate } from '../i18n/format';
+import { catName, dueLabel, formatMoney, lower, parseMoney, pctPlain, shortDate } from '../i18n/format';
 import { useT } from '../i18n';
 import type { Key } from '../i18n/core';
 import { AssetQtyFields, type AssetValue } from './AssetFields';
@@ -71,6 +71,8 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
       pick('personId', editing && init.tab === 'debt' ? (init.dir === 'out' ? editing.toAccountId! : editing.accountId) : preset?.personId ?? persons[0]?.id ?? ''),
   );
   const [split, setSplit] = useState(pick('split', false));
+  // Bütçe dışı gider: aylık bütçeye ve kategori limitine sayılmaz (biriktirip alınan gitar gibi).
+  const [offBudget, setOffBudget] = useState<boolean>(pick('offBudget', editing?.type === 'expense' && !!editing.offBudget) ?? false);
   const [splitPerson, setSplitPerson] = useState<ID>((rs?.target === 'splitPerson' && newPerson) || pick('splitPerson', persons[0]?.id ?? ''));
   const [splitShare, setSplitShare] = useState(pick('splitShare', ''));
   const [tags, setTags] = useState<string[]>(pick('tags', editing?.tags ?? []));
@@ -96,7 +98,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
   function openNew(next: SheetState, target: TxSnap['target'] = 'accountId') {
     const back: SheetState = editing ? { kind: 'edit', txId: editing.id } : { kind: 'add', preset: preset as Extract<SheetState, { kind: 'add' }>['preset'] };
     stashTxDraft(
-      { tab, dir, amount, categoryId, personId, split, splitPerson, splitShare, tags, tagInput, accountId, toAccountId, invId, date, note, showNote, planRef, target, catIds: data.categories.map((c) => c.id), accIds: data.accounts.map((a) => a.id) },
+      { tab, dir, amount, categoryId, personId, split, splitPerson, splitShare, offBudget, tags, tagInput, accountId, toAccountId, invId, date, note, showNote, planRef, target, catIds: data.categories.map((c) => c.id), accIds: data.accounts.map((a) => a.id) },
       back,
       next,
     );
@@ -181,7 +183,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
     if (tab === 'expense' || tab === 'income') {
       if (!categoryId) return T('err.pickCategory');
       if (!accountId) return T('err.pickAccount');
-      return { type: tab, amount: amt, date, accountId, categoryId, note, planRef, tags };
+      return { type: tab, amount: amt, date, accountId, categoryId, note, planRef, tags, ...(tab === 'expense' && offBudget ? { offBudget: true } : {}) };
     }
     if (tab === 'transfer') return { type: 'transfer', amount: amt, date, accountId, toAccountId, note, planRef, tags };
     if (tab === 'debt') {
@@ -488,6 +490,22 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
           )}
         </div>
       )}
+
+      {tab === 'expense' && (() => {
+        // Aylık bütçenin %30'unu aşan tek bir gider için "bütçe dışı tut" önerisi.
+        const amt = parseMoney(amount);
+        const B = data.settings.monthlyBudget;
+        const big = !offBudget && amt && B && B > 0 && amt >= B * 0.3 ? Math.round((amt / B) * 100) : null;
+        return (
+          <div className="off-budget">
+            <button type="button" className={`chip ${offBudget ? 'is-on' : ''}`} aria-pressed={offBudget} onClick={() => setOffBudget(!offBudget)} data-testid="off-budget">
+              <PiggyBank size={15} aria-hidden /> {T('ob.toggle')}
+            </button>
+            {offBudget && <p className="note-line">{T('ob.toggleHint')}</p>}
+            {big !== null && <p className="note-line">{T('ob.bigNudge', { pct: pctPlain(big) })}</p>}
+          </div>
+        );
+      })()}
 
       {tab === 'debt' && (
         <>
