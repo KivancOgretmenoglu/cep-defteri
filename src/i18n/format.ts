@@ -44,3 +44,9 @@ export const pctForm = (n: number, form: PctForm) => (getLang() === 'en' ? `${n}
 
 /** Intl yerel ayarı (tarih/saat biçimleri için). */
 export const intlLocale = () => (getLang() === 'en' ? 'en-US' : 'tr-TR');
+
+/** Hisse fiyatı kendi para biriminde: TL → formatMoney, USD → "$356,27" (en: "$356.27"). */
+export function formatQuote(minor: number, ccy: 'TRY' | 'USD'): string {
+  if (ccy === 'TRY') return formatMoney(minor, { compact: false });
+  return new Intl.NumberFormat(getLang() === 'en' ? 'en-US' : 'tr-TR', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(minor / 100);
+}

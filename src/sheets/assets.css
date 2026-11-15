@@ -92,3 +92,92 @@
 .asset-breakdown__row--total .asset-breakdown__val {
   color: inherit;
 }
+
+/* Hisse seçici (formun içinde açılan panel) */
+.stock-picker {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  margin: 8px 0;
+  background: var(--surface);
+  display: grid;
+  gap: 8px;
+}
+.stock-picker__title {
+  margin: 0;
+  font-weight: 700;
+}
+.stock-picker__search {
+  position: relative;
+  display: block;
+}
+.stock-picker__search svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-3);
+  pointer-events: none;
+}
+.stock-picker__search .input {
+  padding-left: 34px;
+  width: 100%;
+}
+.stock-picker .field__label {
+  margin: 0;
+}
+.stock-hits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  border-top: 1px solid var(--line);
+}
+.stock-hit {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 4px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.stock-hit:hover,
+.stock-hit:focus-visible {
+  background: var(--surface-2, rgba(0, 0, 0, 0.04));
+}
+.stock-hit:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.stock-hit__sym {
+  font-variant-numeric: tabular-nums;
+  min-width: 4.2em;
+}
+.stock-hit__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-2, inherit);
+}
+.stock-hit__mkt {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.stock-picker__code {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.stock-name-line {
+  margin-top: -4px;
+}

@@ -9,7 +9,7 @@
  * Ayrıştırıcılar savunmacıdır: bilinmeyen/bozuk alanlar atlanır, saçma değerler (≤0, NaN) alınmaz.
  */
 import type { Money } from './money';
-import { FX_UNITS, GOLD_UNITS, PURE_GRAMS, type AssetUnit } from './assets';
+import { FX_UNITS, GOLD_UNITS, PURE_GRAMS, type AssetUnit, type FixedUnit } from './assets';
 
 export type PriceSource = 'live' | 'estimate' | 'manual';
 
@@ -23,6 +23,10 @@ export interface UnitPrice {
   source: PriceSource;
 }
 
+/**
+ * Birim başına TL fiyat. Altın/döviz kaynaktan doğrudan gelir; hisseler kendi para biriminde saklanan
+ * kotasyondan (src/domain/stocks.ts) türetilip buraya eklenir, böylece değer hesabı tek kitaptan okur.
+ */
 export type PriceBook = Partial<Record<AssetUnit, UnitPrice>>;
 
 export const PRIMARY_URL = 'https://finans.truncgil.com/today.json';
@@ -65,7 +69,7 @@ const toMoney = (n: number | null): Money | null => (n !== null && n > 0 && n < 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 
 /** Kaynaktaki olası anahtarlar (eski "today.json" ve v4 biçimi). */
-const TRUNCGIL_KEYS: Record<AssetUnit, string[]> = {
+const TRUNCGIL_KEYS: Record<FixedUnit, string[]> = {
   gram: ['gram-altin', 'GRA', 'gram altın'],
   ceyrek: ['ceyrek-altin', 'CEYREKALTIN'],
   yarim: ['yarim-altin', 'YARIMALTIN'],

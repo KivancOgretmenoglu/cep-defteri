@@ -4,7 +4,7 @@
 
 ## 1. Android APK (önerilen: gerçek uygulama)
 
-**APK'yı indir:** telefonda <https://github.com/KivancOgretmenoglu/cep-defteri/releases/latest> adresini aç, `CepDefteri-1.0.N.apk` dosyasına dokun.
+**APK'yı indir:** telefonda <https://github.com/KivancOgretmenoglu/cep-defteri/releases/latest> adresini aç, `CepDefteri-1.1.N.apk` dosyasına dokun.
 
 **Kur:** indirilen dosyayı aç. Android "bilinmeyen uygulamaları yükleme" izni isterse tarayıcına (Chrome) bu izni ver ve **Yükle**'ye dokun. Play Protect uyarısı çıkarsa *Yine de yükle* de: uygulama Play Store'dan gelmediği için bu uyarı normal.
 
@@ -70,7 +70,7 @@ Betik tarayıcı gerektirmez (PNG'yi kendisi kodlar); maskot pikselleri keskin k
 
 ### APK nasıl üretiliyor?
 
-`.github/workflows/android.yml` her gönderimde testleri çalıştırır, web uygulamasını derler, Capacitor ile Android projesine gömer ve `assembleRelease` ile APK üretir. Varsayılan daldaki her derleme *Releases* sayfasına `v1.0.<çalıştırma no>` olarak eklenir.
+`.github/workflows/android.yml` her gönderimde testleri çalıştırır, web uygulamasını derler, Capacitor ile Android projesine gömer ve `assembleRelease` ile APK üretir. Varsayılan daldaki her derleme *Releases* sayfasına `v1.1.<çalıştırma no>` olarak eklenir.
 
 ### Kalıcı imza anahtarı (bir kez yapılır)
 

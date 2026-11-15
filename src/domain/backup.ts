@@ -7,6 +7,7 @@ import { isISODate } from './dates';
 import { DEFAULT_SETTINGS } from './defaults';
 import { accountIndex, assetOverdraft, refundCategory, transferKind } from './ledger';
 import { isAssetAccount, isAssetUnit, isQty, type AssetUnit } from './assets';
+import { unitLabel } from '../i18n/units';
 import { migrateRawData } from './migrate';
 
 export const APP_ID = 'cep-defteri';
@@ -224,10 +225,10 @@ export function transactionsCSV(data: Data, lang: Lang = 'tr'): string {
   const acc = accountIndex(data);
   const cats = new Map(data.categories.map((c) => [c.id, c]));
   const txById = new Map(data.txs.map((t) => [t.id, t]));
-  // Altın/döviz işlemi varsa miktar, birim ve birim fiyat sütunları eklenir (yoksa CSV eskisiyle aynı).
+  // Altın/döviz/hisse işlemi varsa miktar, birim ve birim fiyat sütunları eklenir (yoksa CSV eskisiyle aynı).
   const withQty = data.txs.some((t) => t.qty !== undefined);
   const qtyCell = (q: number) => (lang === 'en' ? String(q) : String(q).replace('.', ','));
-  const unitCell = (u: AssetUnit | undefined) => (u ? T(`asset.unit.${u}`) : '');
+  const unitCell = (u: AssetUnit | undefined) => (u ? unitLabel(T, u) : '');
   const header = [T('csv.date'), T('csv.type'), T('csv.amount'), T('csv.account'), T('csv.toAccount'), T('csv.category'), T('csv.note'), T('csv.planned'), T('csv.tags'), ...(withQty ? [T('csv.qty'), T('csv.unit'), T('csv.unitPrice')] : [])];
   const rows = [...data.txs]
     .sort((a, b) => (a.date === b.date ? a.seq - b.seq : a.date < b.date ? -1 : 1))

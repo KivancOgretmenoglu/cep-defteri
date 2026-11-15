@@ -32,7 +32,8 @@ describe('sözlükler', () => {
     }
   });
   it('İngilizce metinlerde Türkçe harf yok (marka/klasör adları hariç)', () => {
-    const allowed: Key[] = ['rc.imageHeader'];
+    // "İş Yatırım" bir fiyat kaynağının adıdır.
+    const allowed: Key[] = ['rc.imageHeader', 'asset.privacy', 'stock.src.isyatirim'];
     for (const k of Object.keys(en) as Key[]) {
       const v = en[k];
       const s = typeof v === 'function' ? v({ n: 2, a: 1, tx: 3, p: 1, v: 0, month: 'May', dates: 'x', label: 'x' }) : v;

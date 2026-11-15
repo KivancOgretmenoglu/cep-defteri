@@ -575,6 +575,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
                   initial={editing?.qty !== undefined && editing.unit && editing.unitPrice && init.tab === 'invest' && init.dir === dir && (editing.toAccountId === invId || editing.accountId === invId) ? { unit: editing.unit, qty: editing.qty, unitPrice: editing.unitPrice } : undefined}
                   editingTxId={editing?.id}
                   onChange={setAssetVal}
+                  onAmount={setAmount}
                 />
               )}
               <p className="note-line">
@@ -794,7 +795,7 @@ export function ConfirmSheet({ planId, due }: { planId: ID; due: ISODate }) {
         {plan.kind === 'transfer' && ` · ${accounts.get(plan.accountId)?.name} → ${accounts.get(plan.toAccountId!)?.name}`}
       </p>
       <MoneyInput big label={T('conf.actualAmount')} value={amount} onChange={setAmount} autoFocus onEnter={save} />
-      {assetAcc && <AssetQtyFields account={assetAcc} dir={assetAcc.id === plan.toAccountId ? 'in' : 'out'} amount={amount} onChange={setAssetVal} />}
+      {assetAcc && <AssetQtyFields account={assetAcc} dir={assetAcc.id === plan.toAccountId ? 'in' : 'out'} amount={amount} onChange={setAssetVal} onAmount={setAmount} />}
       {plan.kind !== 'transfer' && (
         <fieldset className="block">
           <legend>{T('csv.account')}</legend>

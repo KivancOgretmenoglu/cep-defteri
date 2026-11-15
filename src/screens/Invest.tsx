@@ -13,9 +13,11 @@ import { openSheet } from '../ui/nav';
 import { useData } from '../ui/hooks';
 import { MascotNote, SceneEmpty, LiveMascot } from '../mascot/MascotNote';
 import { refreshPrices, usePrices } from '../store/prices';
-import { agoText, formatQty, unitName, unitShort } from '../sheets/AssetFields';
+import { useStockList } from '../store/stockList';
+import { agoText, formatQty, quoteSourceText, unitName, unitShort } from '../sheets/AssetFields';
 import type { AssetHolding, AssetPosition } from '../domain/ledger';
-import { roundQty, unitOrder, type AssetLot, type AssetUnit } from '../domain/assets';
+import { isStockUnit, roundQty, unitOrder, type AssetLot, type AssetUnit } from '../domain/assets';
+import { formatQuote } from '../i18n/format';
 
 export function Invest() {
   const t = useT();
@@ -23,6 +25,8 @@ export function Invest() {
   const prices = usePrices();
   const book = prices.book;
   const hasAsset = data.accounts.some((a) => isInvestment(a) && a.asset);
+  // Hisse adları gömülü listeden gelir (ilk ihtiyaçta yüklenir).
+  useStockList();
   // Altın/döviz hesabı varsa ekran açılınca fiyatlar (15 dk'dan eskiyse) yenilenir.
   useEffect(() => {
     if (hasAsset) void refreshPrices();
@@ -207,7 +211,7 @@ export function Invest() {
                   {e.kind === 'value' && <>{t('inv.ev.value')} <small>{t('inv.ev.valueHint')}</small></>}
                   {e.kind === 'opening' && <>{t('inv.ev.opening')} <small>{t('inv.ev.openingHint')}</small></>}
                   {st.asset && e.unit && e.qty !== undefined && e.unitPrice !== undefined && (
-                    <small className="inv-ev__qty">{unitName(t, e.unit)}: {t('asset.ev.qty', { qty: formatQty(t, e.qty, e.unit), unit: unitShort(t, e.unit), price: formatMoney(e.unitPrice) })}</small>
+                    <small className="inv-ev__qty">{isStockUnit(e.unit) ? '' : `${unitName(t, e.unit)}: `}{t('asset.ev.qty', { qty: formatQty(t, e.qty, e.unit), unit: unitShort(t, e.unit), price: formatMoney(e.unitPrice) })}</small>
                   )}
                   {st.asset && e.lots && e.lots.length > 0 && (
                     <small className="inv-ev__qty">{t('asset.ev.openingQty', { qty: e.lots.map((l) => formatQty(t, l.qty, l.unit)).join(' + ') })}</small>
@@ -236,6 +240,9 @@ export function Invest() {
 /** Altın/döviz hesabı: tür tür miktar ve değer, toplam, fiyatların yaşı ve kaynağı, yenile. */
 function AssetBreakdown({ asset, failed, loading, hide }: { asset: AssetHolding; failed: boolean; loading: boolean; hide: boolean }) {
   const t = useT();
+  const { quotes } = usePrices();
+  const hasStock = asset.positions.some((p) => isStockUnit(p.unit));
+  const hasUs = asset.positions.some((p) => isStockUnit(p.unit) && p.unit.startsWith('US:'));
   const srcText = (p: AssetPosition) => (p.priceSource === 'estimate' ? t('asset.src.estimate') : p.priceSource === 'manual' ? t('asset.src.manual') : p.priceSource === 'last-tx' ? t('asset.src.lastTx') : '');
   // En eski güncel fiyat zamanı: "Fiyatlar: 5 dk önce"
   const liveAts = asset.positions.map((p) => p.priceAt).filter((x): x is number => typeof x === 'number');
@@ -253,6 +260,9 @@ function AssetBreakdown({ asset, failed, loading, hide }: { asset: AssetHolding;
                 <small>
                   {p.price !== null ? t('asset.ev.qty', { qty: hide ? '•••' : formatQty(t, p.qty, p.unit), unit: unitShort(t, p.unit), price: formatMoney(p.price) }) : `${hide ? '•••' : formatQty(t, p.qty, p.unit)} · ${t('asset.noPriceShort')}`}
                   {src && <> · {src}</>}
+                  {isStockUnit(p.unit) && quotes[p.unit] && p.priceSource !== 'last-tx' && (
+                    <>{quotes[p.unit]!.ccy === 'USD' && ` · ${formatQuote(quotes[p.unit]!.price, 'USD')}`}{quotes[p.unit]!.source !== 'manual' && ` · ${quoteSourceText(t, quotes[p.unit]!.source)}`}</>
+                  )}
                 </small>
               </span>
               <span className="asset-breakdown__val">{hide ? hiddenMoney() : p.price !== null ? formatMoney(p.value) : '—'}</span>
@@ -271,7 +281,7 @@ function AssetBreakdown({ asset, failed, loading, hide }: { asset: AssetHolding;
         <button className="link link--small" disabled={loading} onClick={() => void refreshPrices({ force: true })}>{loading ? t('asset.refreshing') : t('asset.refresh')}</button>
       </p>
       {failed && <p className="note-line">{t('asset.fetchFailed')}</p>}
-      <p className="note-line">{t('asset.valueNote')}</p>
+      <p className="note-line">{t('asset.valueNote')}{hasStock && <> {t('stock.delayNote')}</>}{hasUs && <> {t('stock.valueNote')}</>}</p>
     </>
   );
 }

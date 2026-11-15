@@ -3,6 +3,7 @@ import type { Dict } from './core';
 import { plural } from './grammar';
 import { hintsEn } from './hints.en';
 import { assetsEn } from './assets.en';
+import { stocksEn } from './stocks.en';
 import { defaultsEn } from './defaults.en';
 import { ringsEn } from './rings.en';
 import { planEn } from './plan.en';
@@ -14,6 +15,7 @@ import { accdelEn } from './accdel.en';
 export const en: Dict = {
   ...hintsEn,
   ...assetsEn,
+  ...stocksEn,
   ...defaultsEn,
   'err.validDate': "Pick a valid date.",
   'err.futureDate': "You can't log something in the future. Add a plan for upcoming payments instead.",
