@@ -161,6 +161,8 @@ export const tr = {
   'home.perDayPre': "günde yaklaşık",
   'home.perDayPost': "",
   'home.inDaily': "Günlük hesaplarda",
+  'home.nowTitle': "Hesaplarındaki para",
+  'home.afterPayments': "Ödemelerden sonra kullanılabilir",
   'home.upcomingPayments': "Yaklaşan ödemeler",
   'home.plannedInvest': "Planlı yatırım aktarımı",
   'home.reserve': "Kenarda tuttuğun birikim payı",

@@ -9,7 +9,7 @@ import { isMoney, type Money } from './money';
 import { isISODate, type ISODate } from './dates';
 import { accountIndex, assetOverdraft, assetQuantities, availableQty, cashBalance, installmentEnd, isDaily, isInvestment, isPerson, occKey, occurrences } from './ledger';
 import { addDays } from './dates';
-import { isAssetLot, isAssetUnit, isQty, roundQty, unitOrder, valueOf, type AssetLot, type AssetUnit } from './assets';
+import { isAssetLot, isAssetUnit, isQty, isUnitPrice, roundQty, unitOrder, valueOf, type AssetLot, type AssetUnit } from './assets';
 
 /**
  * Doğrulama hatası. Mesaj bir sözlük anahtarı + değişkenler olarak taşınır; arayüz sınırında
@@ -122,7 +122,7 @@ export function validateTx(data: Data, d: TxDraft, today: ISODate, editingId?: I
     if (asset) {
       if (!isAssetUnit(d.unit)) fail('err.assetUnit');
       if (!isQty(d.qty)) fail('err.assetQty');
-      if (!isMoney(d.unitPrice) || d.unitPrice! <= 0) fail('err.assetPrice');
+      if (!isUnitPrice(d.unitPrice, d.unit)) fail('err.assetPrice');
       if (asset.id === d.accountId) {
         // Çekim: o tarihte (ve sonraki çekimleri karşılıksız bırakmadan) o birimden elde olan kadar.
         const held = availableQty(data, asset, d.unit!, { date: d.date, seq: existing?.seq ?? data.nextSeq }, editingId);
@@ -274,7 +274,7 @@ function validateAccount(data: Data, d: AccountDraft, editing?: Account) {
     for (const l of d.asset.opening) {
       if (!isAssetUnit(l.unit)) fail('err.assetInvalid');
       if (!isQty(l.qty)) fail('err.assetQty');
-      if (!isMoney(l.price) || l.price <= 0) fail('err.assetPrice');
+      if (!isUnitPrice(l.price, l.unit)) fail('err.assetPrice');
       if (!isAssetLot(l)) fail('err.assetInvalid');
     }
     if (new Set(d.asset.opening.map((l) => l.unit)).size !== d.asset.opening.length) fail('err.assetDupUnit');

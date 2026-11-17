@@ -14,7 +14,7 @@
  * Ayrıştırıcılar savunmacıdır: para birimi borsayla uyuşmayan, sıfır/negatif ya da saçma fiyat alınmaz.
  */
 import type { Money } from './money';
-import { isStockUnit, stockCurrency, stockMarket, stockSymbol, type StockUnit } from './assets';
+import { isStockUnit, isUnitPrice, stockCurrency, stockMarket, stockSymbol, type StockUnit } from './assets';
 import type { PriceBook, UnitPrice } from './prices';
 
 export type StockCcy = 'TRY' | 'USD';
@@ -157,7 +157,7 @@ export function sanitizeQuotes(v: unknown): QuoteBook {
   for (const [k, q] of Object.entries(v)) {
     if (!isStockUnit(k) || !isObj(q)) continue;
     const { price, ccy, at, source, name } = q;
-    if (!Number.isSafeInteger(price) || (price as number) <= 0 || ccy !== stockCurrency(k) || typeof at !== 'number') continue;
+    if (!isUnitPrice(price, k) || ccy !== stockCurrency(k) || typeof at !== 'number') continue;
     if (!['yahoo', 'nasdaq', 'isyatirim', 'manual'].includes(source as string)) continue;
     out[k] = { price: price as number, ccy: ccy as StockCcy, at, source: source as QuoteSource, ...(typeof name === 'string' ? { name: name.slice(0, 80) } : {}) };
   }

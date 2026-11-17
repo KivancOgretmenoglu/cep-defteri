@@ -118,23 +118,19 @@ export function Home() {
       <div className="home-grid">
         <section className="card receipt" aria-labelledby="avail-h">
           <div className="receipt__top">
-            <h2 id="avail-h" className="label">{t('home.available')}</h2>
+            <h2 id="avail-h" className="label">{t('home.nowTitle')}</h2>
             <span className="receipt__period">{periodText}</span>
           </div>
           {av.confidence === 'none' ? (
             <p className="muted">{t('home.availableEmpty')}</p>
           ) : (
             <>
+              {/* Büyük rakam: günlük hesaplardaki anlık para. Ödemelerden sonra kalan, alttaki dökümün toplamı. */}
               <div className="receipt__hero">
-                <Amount value={av.available} size="xl" hide={hide} animate className={av.available < 0 && !hide ? 'tone-warn' : ''} />
+                <Amount value={av.dailyBalance} size="xl" hide={hide} animate className={av.dailyBalance < 0 && !hide ? 'tone-warn' : ''} />
                 <button className="icon-btn icon-btn--small" onClick={toggleHide} aria-label={hide ? t('home.showBalances') : t('home.hideBalances')}>{hide ? <EyeOff size={18} /> : <Eye size={18} />}</button>
               </div>
-              {av.available > 0 && <p className="receipt__perday">{t('home.perDayPre')} <b><AnimatedMoney value={av.perDay} hide={hide} /></b>{t('home.perDayPost')} · {t('common.days', { n: av.daysLeft })}</p>}
               <dl className="receipt__lines">
-                <div>
-                  <dt>{t('home.inDaily')}</dt>
-                  <dd><AnimatedMoney value={av.dailyBalance} hide={hide} /></dd>
-                </div>
                 <div>
                   <dt>
                     − {t('home.upcomingPayments')}{av.payments.length ? ` (${av.payments.length})` : ''}
@@ -160,10 +156,11 @@ export function Home() {
                   </div>
                 )}
                 <div className="receipt__total">
-                  <dt>= {t('home.availableShort')}</dt>
-                  <dd><AnimatedMoney value={av.available} hide={hide} /></dd>
+                  <dt>= {t('home.afterPayments')}</dt>
+                  <dd className={av.available < 0 && !hide ? 'tone-warn' : ''}><AnimatedMoney value={av.available} hide={hide} /></dd>
                 </div>
               </dl>
+              {av.available > 0 && <p className="receipt__perday">{t('home.perDayPre')} <b><AnimatedMoney value={av.perDay} hide={hide} /></b>{t('home.perDayPost')} · {t('common.days', { n: av.daysLeft })}</p>}
               {av.debtsReceivable > 0 && (
                 <p className="receipt__note">
                   <Info size={14} aria-hidden /> {t('home.receivableNote', { amount: formatMoney(av.debtsReceivable) })}

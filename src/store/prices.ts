@@ -168,7 +168,9 @@ async function fetchQuote(u: StockUnit, now: number, ctx: { skipYahoo: boolean }
       return null;
     }
   };
-  const chain = stockMarket(u) === 'BIST' ? [yahoo, isy] : [nasdaq, yahoo];
+  // Fon (TEFAS): otomatik kaynak yok; yalnız elle girilen fiyat.
+  const m = stockMarket(u);
+  const chain = m === 'BIST' ? [yahoo, isy] : m === 'US' ? [nasdaq, yahoo] : [];
   for (const src of chain) {
     const q = await src();
     if (q) return q;
@@ -182,7 +184,8 @@ export function heldStocks(data: Data): StockUnit[] {
   const ids = new Set(data.accounts.filter((a) => a.kind === 'investment' && a.asset && !a.archived).map((a) => a.id));
   for (const a of data.accounts) if (ids.has(a.id)) for (const l of a.asset!.opening) if (isStockUnit(l.unit)) out.add(l.unit);
   for (const t of data.txs) if (t.unit && isStockUnit(t.unit) && (ids.has(t.accountId) || ids.has(t.toAccountId ?? ''))) out.add(t.unit);
-  return [...out].sort();
+  // Fonların fiyatı internetten alınmaz (elle girilir).
+  return [...out].filter((u) => stockMarket(u) !== 'FON').sort();
 }
 
 /** Birkaç hisseyi aynı anda (en fazla 3 istek) çeker. */
@@ -214,6 +217,7 @@ const pendingOne = new Map<StockUnit, Promise<StockQuote | null>>();
 export function fetchStockQuote(u: StockUnit, opts: { force?: boolean; now?: number } = {}): Promise<StockQuote | null> {
   const now = opts.now ?? Date.now();
   const have = state.quotes[u];
+  if (stockMarket(u) === 'FON') return Promise.resolve(have ?? null);
   if (!opts.force && (!state.auto || (have && have.source !== 'manual' && now - have.at < STALE_MS))) return Promise.resolve(have ?? null);
   const p = pendingOne.get(u);
   if (p) return p;

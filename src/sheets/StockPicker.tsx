@@ -40,6 +40,8 @@ export function StockPicker({ onPick, onClose, held = [], taken = [] }: {
 
   async function tryCode(u: StockUnit) {
     if (isTaken(u)) return;
+    // Fon fiyatı otomatik alınamaz: kod doğrulanmadan eklenir, fiyatı elle girilir.
+    if (stockMarket(u) === 'FON') return onPick(u);
     setNotFound(null);
     setChecking(u);
     const quote = await fetchStockQuote(u, { force: true });

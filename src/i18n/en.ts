@@ -158,6 +158,8 @@ export const en: Dict = {
   'home.perDayPre': "about",
   'home.perDayPost': " a day",
   'home.inDaily': "In everyday accounts",
+  'home.nowTitle': "Money in your accounts",
+  'home.afterPayments': "Spendable after payments",
   'home.upcomingPayments': "Upcoming payments",
   'home.plannedInvest': "Planned investing",
   'home.reserve': "Savings you set aside",

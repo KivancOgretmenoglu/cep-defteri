@@ -9,13 +9,13 @@ import type { Account } from '../domain/types';
 import type { Money } from '../domain/money';
 import {
   ALL_UNITS, FX_UNITS, GOLD_UNITS, isFixedUnit, isStockUnit, parseQty, priceFromQty, qtyDecimals, qtyFromAmount, qtyToInput,
-  stockCurrency, stockMarket, stockSymbol, unitOrder,
+  isFundUnit, stockCurrency, stockMarket, stockSymbol, unitOrder,
   type AssetLot, type AssetUnit, type FixedUnit, type StockUnit,
 } from '../domain/assets';
 import { assetQuantities } from '../domain/ledger';
 import type { QuoteSource } from '../domain/stocks';
 import type { Key } from '../i18n/core';
-import { formatMoney, formatQuote, moneyToInput, moneyUnit, parseMoney } from '../i18n/format';
+import { formatMoney, formatQuote, formatUnitPrice, moneyToInput, moneyUnit, parseMoney, parseUnitPrice, unitPriceToInput } from '../i18n/format';
 import { useT, type TFn } from '../i18n';
 import { getLang } from '../i18n/lang';
 import { unitLabel, unitShortLabel } from '../i18n/units';
@@ -100,7 +100,7 @@ const rowId = () => `lot-${++rowSeq}`;
 /** Hesabın açılış kalemlerinden form satırları. */
 export function lotRowsFrom(lots: AssetLot[] | undefined): LotRow[] {
   const lang = getLang();
-  return (lots ?? []).map((l) => ({ id: rowId(), unit: l.unit, qty: qtyToInput(l.qty, l.unit, lang), price: moneyToInput(l.price) }));
+  return (lots ?? []).map((l) => ({ id: rowId(), unit: l.unit, qty: qtyToInput(l.qty, l.unit, lang), price: unitPriceToInput(l.price, l.unit) }));
 }
 
 /** Satırları açılış kalemlerine çevirir; miktarı boş satırlar atlanır. Hatada sözlük anahtarı döner. */
@@ -112,7 +112,7 @@ export function parseLotRows(rows: LotRow[]): { lots: AssetLot[] } | { error: Ke
     const qty = parseQty(r.qty, lang);
     if (qty === null) return { error: 'err.assetQty' };
     if (isWhole(r.unit) && !Number.isInteger(qty)) return { error: 'stock.qtyWhole' };
-    const price = parseMoney(r.price);
+    const price = parseUnitPrice(r.price, r.unit);
     if (price === null) return { error: 'err.assetPrice' };
     if (lots.some((l) => l.unit === r.unit)) return { error: 'err.assetDupUnit' };
     lots.push({ unit: r.unit, qty, price });
@@ -179,12 +179,12 @@ export function OpeningLots({ rows, onChange }: { rows: LotRow[]; onChange: (row
   }
   // Fiyatı boş satırlara güncel alış fiyatı yazılır.
   useEffect(() => {
-    if (rows.some((r) => !r.price && prices.book[r.unit])) onChange(rows.map((r) => (!r.price && prices.book[r.unit] ? { ...r, price: moneyToInput(prices.book[r.unit]!.buy) } : r)));
+    if (rows.some((r) => !r.price && prices.book[r.unit])) onChange(rows.map((r) => (!r.price && prices.book[r.unit] ? { ...r, price: unitPriceToInput(prices.book[r.unit]!.buy, r.unit) } : r)));
   }, [rows, prices.book, onChange]);
   const patch = (id: string, p: Partial<LotRow>) => onChange(rows.map((r) => (r.id === id ? { ...r, ...p } : r)));
   let total = 0;
   for (const r of rows) {
-    const q = parseQty(r.qty, lang), p = parseMoney(r.price);
+    const q = parseQty(r.qty, lang), p = parseUnitPrice(r.price, r.unit);
     if (q && p) total += Math.round(q * p);
   }
   return (
@@ -203,10 +203,10 @@ export function OpeningLots({ rows, onChange }: { rows: LotRow[]; onChange: (row
               </div>
               {picking === r.id && <StockPicker onPick={pickStock} onClose={() => setPicking(null)} taken={takenStocks.filter((x) => x !== r.unit)} />}
               <div className="asset-fields__row">
-                <QtyInput label={isStockUnit(r.unit) ? T('stock.qtyLabel', { unit: u }) : T('asset.openingQty', { unit: u })} value={r.qty} onChange={(qty) => patch(r.id, { qty })} whole={isWhole(r.unit)} />
-                <PriceInput label={T('asset.unitPriceLabel', { unit: u })} value={r.price} onChange={(price) => patch(r.id, { price })} />
+                <QtyInput label={isFundUnit(r.unit) ? T('stock.fundQtyLabel', { unit: u }) : isStockUnit(r.unit) ? T('stock.qtyLabel', { unit: u }) : T('asset.openingQty', { unit: u })} value={r.qty} onChange={(qty) => patch(r.id, { qty })} whole={isWhole(r.unit)} />
+                <PriceInput label={T('asset.unitPriceLabel', { unit: u })} value={r.price} onChange={(price) => patch(r.id, { price })} unit={r.unit} />
               </div>
-              {isStockUnit(r.unit) && <StockQuoteLine unit={r.unit} side="buy" />}
+              {isFundUnit(r.unit) && !prices.quotes[r.unit] ? <p className="note-line">{T('stock.fundNote')}</p> : isStockUnit(r.unit) && <StockQuoteLine unit={r.unit} side="buy" />}
             </li>
           );
         })}
@@ -249,11 +249,11 @@ function QtyInput({ label, value, onChange, whole }: { label: string; value: str
 }
 
 /** Birim fiyat alanı; `ccy` verilmezse TL ("TL" / "₺"). */
-function PriceInput({ label, value, onChange, ccy }: { label: string; value: string; onChange: (v: string) => void; ccy?: string }) {
+function PriceInput({ label, value, onChange, ccy, unit }: { label: string; value: string; onChange: (v: string) => void; ccy?: string; unit?: AssetUnit }) {
   const T = useT();
-  const invalid = value.trim() !== '' && parseMoney(value) === null;
+  const invalid = value.trim() !== '' && parseUnitPrice(value, unit) === null;
   return (
-    <Field label={`${label} (${ccy ?? moneyUnit()})`} error={invalid ? T('asset.priceFormat') : null}>
+    <Field label={`${label} (${ccy ?? moneyUnit()})`} error={invalid ? T(isFundUnit(unit) ? 'stock.fundPriceFormat' : 'asset.priceFormat') : null}>
       <input className="input" inputMode="decimal" autoComplete="off" value={value} onChange={(e) => onChange(e.target.value.replace(/[^\d.,]/g, ''))} aria-invalid={invalid} />
     </Field>
   );
@@ -370,7 +370,7 @@ function UnitQtyFields({ unit, dir, amount, held, initial, onChange, onAmount }:
   const stock = isStockUnit(unit);
   // Hissede önce adet sorulur (BIST'te tam adet): tutar ÷ adet = birim fiyat.
   const [mode, setMode] = useState<'price' | 'qty'>(initial || stock ? 'qty' : 'price');
-  const [priceRaw, setPriceRaw] = useState(initial ? moneyToInput(initial.unitPrice) : '');
+  const [priceRaw, setPriceRaw] = useState(initial ? unitPriceToInput(initial.unitPrice, unit) : '');
   const [priceTouched, setPriceTouched] = useState(!!initial);
   const [qtyRaw, setQtyRaw] = useState(initial ? qtyToInput(initial.qty, unit, lang) : '');
 
@@ -380,21 +380,21 @@ function UnitQtyFields({ unit, dir, amount, held, initial, onChange, onAmount }:
   }, [unit]);
 
   const amt = parseMoney(amount);
-  const effPriceRaw = priceTouched ? priceRaw : suggested ? moneyToInput(suggested) : '';
+  const effPriceRaw = priceTouched ? priceRaw : suggested ? unitPriceToInput(suggested, unit) : '';
   let qty: number | null;
   let price: Money | null;
   if (mode === 'price') {
-    price = parseMoney(effPriceRaw);
+    price = parseUnitPrice(effPriceRaw, unit);
     qty = amt && price ? qtyFromAmount(amt, price, unit) : null;
   } else {
     qty = parseQty(qtyRaw, lang);
     if (qty !== null && isWhole(unit) && !Number.isInteger(qty)) qty = null;
-    price = amt && qty ? priceFromQty(amt, qty) : null;
+    price = amt && qty ? priceFromQty(amt, qty, unit) : null;
   }
   // Hissede adet yazıldı ama tutar boş: "adet × güncel fiyat" ile doldurmayı öner.
   const typedQty = mode === 'qty' ? qty : null;
   const fill = stock && onAmount && !amt && typedQty && suggested ? Math.round(typedQty * suggested) : null;
-  const priceShown = mode === 'price' ? effPriceRaw : price ? moneyToInput(price) : '';
+  const priceShown = mode === 'price' ? effPriceRaw : price ? unitPriceToInput(price, unit) : '';
   const qtyShown = mode === 'qty' ? qtyRaw : qty ? qtyToInput(qty, unit, lang) : '';
 
   useEffect(() => {
@@ -407,6 +407,7 @@ function UnitQtyFields({ unit, dir, amount, held, initial, onChange, onAmount }:
       <div className="asset-fields__row">
         <PriceInput
           label={T(dir === 'in' ? 'asset.priceBuyLabel' : 'asset.priceSellLabel', { unit: u })}
+          unit={unit}
           value={priceShown}
           onChange={(v) => {
             setMode('price');
@@ -415,7 +416,7 @@ function UnitQtyFields({ unit, dir, amount, held, initial, onChange, onAmount }:
           }}
         />
         <QtyInput
-          label={stock ? T('stock.qtyLabel', { unit: u }) : T('asset.qtyLabel', { unit: u })}
+          label={isFundUnit(unit) ? T('stock.fundQtyLabel', { unit: u }) : stock ? T('stock.qtyLabel', { unit: u }) : T('asset.qtyLabel', { unit: u })}
           value={qtyShown}
           whole={isWhole(unit)}
           onChange={(v) => {
@@ -433,7 +434,7 @@ function UnitQtyFields({ unit, dir, amount, held, initial, onChange, onAmount }:
       {stock && <StockQuoteLine unit={unit} side={dir === 'in' ? 'sell' : 'buy'} />}
       <p className="note-line">
         {stock
-          ? suggested ? T('stock.editHint', { price: formatMoney(suggested) }) : T('asset.noPrice')
+          ? suggested ? T('stock.editHint', { price: formatUnitPrice(suggested, unit) }) : isFundUnit(unit) ? T('stock.fundNote') : T('asset.noPrice')
           : live && suggested
             ? T('asset.liveNote', { side: T(dir === 'in' ? 'asset.side.sell' : 'asset.side.buy'), price: formatMoney(suggested), ago: agoText(T, live.at) })
             : T('asset.noPrice')}{' '}
@@ -463,7 +464,7 @@ export function useManualPrice(account: Account, onDone: () => void, onError: (m
   /** Alandaki fiyat: altın/dövizde TL alış, hissede kendi para biriminde son fiyat. */
   const priceOf = (u: AssetUnit) => {
     const p = getPrices();
-    if (isStockUnit(u)) return p.quotes[u] ? moneyToInput(p.quotes[u]!.price) : '';
+    if (isStockUnit(u)) return p.quotes[u] ? unitPriceToInput(p.quotes[u]!.price, u) : '';
     return p.book[u] ? moneyToInput(p.book[u]!.buy) : '';
   };
   const [price, setPrice] = useState(() => priceOf(units[0]));
@@ -473,8 +474,8 @@ export function useManualPrice(account: Account, onDone: () => void, onError: (m
     onError(null);
   }
   function save() {
-    const p = parseMoney(price);
-    if (!p) return onError(T('asset.priceFormat'));
+    const p = parseUnitPrice(price, unit);
+    if (!p) return onError(T(isFundUnit(unit) ? 'stock.fundPriceFormat' : 'asset.priceFormat'));
     if (isStockUnit(unit)) setManualQuote(unit, p);
     else setManualPrice(unit, p);
     onDone();
@@ -502,9 +503,9 @@ export function useManualPrice(account: Account, onDone: () => void, onError: (m
       {isStockUnit(unit) ? (
         <>
           <p className="muted">{unitName(T, unit)} · {T('stock.priceQ', { unit: u, ccy })}</p>
-          <PriceInput label={T('stock.priceLabel', { unit: u })} value={price} onChange={setPrice} ccy={ccy} />
-          {quote && <p className="note-line">{T('stock.priceLine', { unit: u, price: formatQuote(quote.price, quote.ccy), ago: agoText(T, quote.at) })} · {quoteSourceText(T, quote.source)}</p>}
-          <p className="note-line">{T('stock.delayNote')}</p>
+          <PriceInput label={T('stock.priceLabel', { unit: u })} value={price} onChange={setPrice} ccy={ccy} unit={unit} />
+          {quote && <p className="note-line">{T('stock.priceLine', { unit: u, price: isFundUnit(unit) ? formatUnitPrice(quote.price, unit) : formatQuote(quote.price, quote.ccy), ago: agoText(T, quote.at) })} · {quoteSourceText(T, quote.source)}</p>}
+          <p className="note-line">{T(isFundUnit(unit) ? 'stock.fundNote' : 'stock.delayNote')}</p>
         </>
       ) : (
         <>
@@ -539,7 +540,7 @@ export function StockQuoteLine({ unit, side }: { unit: StockUnit; side: 'buy' | 
   if (!q) return prices.loading ? <p className="note-line">{T('asset.refreshing')}</p> : null;
   const usd = prices.base.USD;
   const src = `${quoteSourceText(T, q.source)} · ${agoText(T, q.at)}`;
-  if (q.ccy === 'TRY') return <p className="note-line">{T('stock.priceLine', { unit: stockSymbol(unit), price: formatQuote(q.price, q.ccy), ago: src })}</p>;
+  if (q.ccy === 'TRY') return <p className="note-line">{T('stock.priceLine', { unit: stockSymbol(unit), price: isFundUnit(unit) ? formatUnitPrice(q.price, unit) : formatQuote(q.price, q.ccy), ago: src })}</p>;
   if (!usd) return <p className="note-line">{T('stock.priceLine', { unit: stockSymbol(unit), price: formatQuote(q.price, 'USD'), ago: src })} · {T('stock.noUsd')}</p>;
   return (
     <p className="note-line">
