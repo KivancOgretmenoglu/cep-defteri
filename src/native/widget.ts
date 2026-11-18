@@ -3,6 +3,8 @@
  * yazar ve araçları hemen yeniler; çiplerle eklenen kayıtların kuyruğunu okur/siler (widgetQueue.ts).
  * Tarayıcıda hiçbir şey yapmaz.
  */
+import { investmentTotal } from '../domain/ledger';
+import { getPrices } from '../store/prices';
 import { registerPlugin } from '@capacitor/core';
 import type { Data } from '../domain/types';
 import type { ISODate } from '../domain/dates';
@@ -28,7 +30,8 @@ let last = '';
 export async function updateWidget(data: Data, today: ISODate, mode: 'real' | 'demo', force = false) {
   if (!isNative()) return;
   const prefs = getWidgetPrefs();
-  const p = widgetPayload(data, today, mode, Date.now(), { animate: prefs.animate, hideAmount: prefs.hideAmount, seen: loadSeen().slice(-SEEN_IN_PAYLOAD) });
+  const portfolio = prefs.showPortfolio ? investmentTotal(data, getPrices().book) : null;
+  const p = widgetPayload(data, today, mode, Date.now(), { animate: prefs.animate, hideAmount: prefs.hideAmount, seen: loadSeen().slice(-SEEN_IN_PAYLOAD), portfolio });
   const sig = JSON.stringify({ ...p, updatedAt: 0 });
   if (!force && sig === last) return;
   try {

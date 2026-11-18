@@ -282,9 +282,11 @@ export function unitChoices(held: Map<AssetUnit, number>, dir: 'in' | 'out', kee
  * Altın/döviz hesabına katkı (dir 'in') ya da çekimde: hangi tür + miktar + birim fiyat.
  * Türler çip olarak gelir; elde olanlar önce. Çekimde yalnız elde olan türler seçilebilir.
  */
-export function AssetQtyFields({ account, dir, amount, initial, editingTxId, onChange, onAmount }: {
+export function AssetQtyFields({ account, dir, amount, initial, editingTxId, onChange, onAmount, presetUnit }: {
   account: Account;
   dir: 'in' | 'out';
+  /** Pozisyon ayrıntısından "Al/Sat" ile gelindiyse seçili gelecek tür. */
+  presetUnit?: AssetUnit;
   /** TL tutar alanının ham metni */
   amount: string;
   initial?: AssetValue;
@@ -297,9 +299,9 @@ export function AssetQtyFields({ account, dir, amount, initial, editingTxId, onC
   const { data } = useData();
   useStockList();
   const held = assetQuantities(data, account, editingTxId);
-  const [picked, setPicked] = useState<AssetUnit | null>(initial?.unit ?? null);
+  const [picked, setPicked] = useState<AssetUnit | null>(initial?.unit ?? presetUnit ?? null);
   // Yeni alınan (elde olmayan) hisse de seçenekler arasında kalsın.
-  const [newStock, setNewStock] = useState<StockUnit | null>(null);
+  const [newStock, setNewStock] = useState<StockUnit | null>(presetUnit && isStockUnit(presetUnit) ? presetUnit : null);
   const [picking, setPicking] = useState(false);
   const choices = unitChoices(held, dir, [initial?.unit, dir === 'in' ? newStock : null].filter((u): u is AssetUnit => !!u));
   const unit = picked && choices.some((c) => c.unit === picked) ? picked : choices[0]?.unit ?? null;
@@ -451,7 +453,7 @@ function UnitQtyFields({ unit, dir, amount, held, initial, onChange, onAmount }:
  * Değerleme yerine: varlık hesabındaki bir türün birim fiyatını elle gir (bu cihazda saklanır, yedeğe girmez).
  * Kanca: sayfa gövdesini ve kaydet işlevini döndürür (ValuationSheet kullanır).
  */
-export function useManualPrice(account: Account, onDone: () => void, onError: (m: string | null) => void) {
+export function useManualPrice(account: Account, onDone: () => void, onError: (m: string | null) => void, initialUnit?: AssetUnit) {
   const T = useT();
   const { data } = useData();
   const prices = usePrices();
@@ -460,14 +462,14 @@ export function useManualPrice(account: Account, onDone: () => void, onError: (m
   const held = assetQuantities(data, account);
   const have = [...held].filter(([, q]) => q > 0).map(([u]) => u).sort(unitOrder);
   const units: AssetUnit[] = have.length ? have : ALL_UNITS;
-  const [unit, setUnit] = useState<AssetUnit>(units[0]);
+  const [unit, setUnit] = useState<AssetUnit>(initialUnit && units.includes(initialUnit) ? initialUnit : units[0]);
   /** Alandaki fiyat: altın/dövizde TL alış, hissede kendi para biriminde son fiyat. */
   const priceOf = (u: AssetUnit) => {
     const p = getPrices();
     if (isStockUnit(u)) return p.quotes[u] ? unitPriceToInput(p.quotes[u]!.price, u) : '';
     return p.book[u] ? moneyToInput(p.book[u]!.buy) : '';
   };
-  const [price, setPrice] = useState(() => priceOf(units[0]));
+  const [price, setPrice] = useState(() => priceOf(initialUnit && units.includes(initialUnit) ? initialUnit : units[0]));
   function pick(u: AssetUnit) {
     setUnit(u);
     setPrice(priceOf(u));

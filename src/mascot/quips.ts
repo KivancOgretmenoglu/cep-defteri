@@ -46,7 +46,7 @@ const GOAL: Pool = [L('Hedef tamam! Konfeti benden.', 'Goal reached! Confetti’
 const UNDO: Pool = [L('Olur böyle şeyler. Sanki hiç olmamış gibi.', 'It happens. As if it never was.')];
 const DEBT: Pool = [L('Borç-alacak defteri güncel. Dostluk bozulmaz.', 'IOUs updated. Friendships intact.')];
 
-export const GREET: Record<'morning' | 'monday' | 'night' | 'monthStart' | 'spy' | 'spyOff' | 'exam' | 'newyear' | 'bayram' | 'summer', Pool> = {
+export const GREET: Record<'morning' | 'monday' | 'night' | 'monthStart' | 'spy' | 'spyOff' | 'exam' | 'newyear' | 'bayram' | 'summer' | 'party', Pool> = {
   morning: [L('Günaydın! Defter açık, gün başlıyor.', 'Good morning! Notebook’s open, let’s go.'), L('Günaydın! Önce kahve, sonra kuruşlar.', 'Morning! Coffee first, coins second.')],
   monday: [L('Pazartesi... Gözlerim yarı açık ama defter tamamen açık.', 'Monday… eyes half open, notebook wide open.')],
   night: [L('Geç oldu, ben esnemeye başladım.', 'It’s late, I’m starting to yawn.'), L('Gece kuşu musun? Ben biraz uykuluyum.', 'Night owl? I’m a bit sleepy.')],
@@ -57,6 +57,7 @@ export const GREET: Record<'morning' | 'monday' | 'night' | 'monthStart' | 'spy'
   newyear: [L('Mutlu yıllar! Yeni yılda defterimiz bol olsun.', 'Happy New Year! May our notebook stay full.')],
   bayram: [L('İyi bayramlar! Harçlık geldiyse kaydetmeyi unutma.', 'Happy holidays! If you got holiday money, log it.')],
   summer: [L('Yaz geldi! Dondurma bütçesi ayırdık mı?', 'Summer’s here! Did we budget for ice cream?')],
+  party: [L('Bugün kutlama var! Şapkamı taktım bile. 🎉', 'Party day! Hat’s already on. 🎉'), L('Pasta benden, kayıtlar senden! 🎂', 'Cake’s on me, entries on you! 🎂')],
 };
 
 export const TIPS: Pool = [
@@ -79,6 +80,12 @@ export const TICKLE = L('Gıdıklanıyorum!', 'That tickles!');
 export const DIZZY = L('Başım döndü...', 'So dizzy…');
 export const SNEEZE = L('Hapşu!', 'Achoo!');
 export const YAWN = L('Hıaaa...', 'Yaaawn…');
+/** Telefon sallanınca (ana ekran maskotu). */
+export const SHAKE: Pool = [L('Deprem mi?! Defteri tuttum!', 'Earthquake?! I’ve got the notebook!'), L('Dünya dönüyor...', 'The world is spinning…'), L('Yavaş, kuruşlar döküldü!', 'Easy, the coins are spilling!')];
+/** Gece 23:00–05:59 kayıt girilince. */
+export const NIGHT_LOG: Pool = [L('Bu saatte mi? Hıaaa... Not aldım, şimdi uyku.', 'At this hour? Yaaawn… Noted, now bedtime.'), L('Gece kuşu kayıtları da sayılır. İyi uykular!', 'Night-owl entries count too. Sleep well!')];
+/** Sabah 06:00–09:59 günün ilk kaydı. */
+export const MORNING_LOG: Pool = [L('Günün ilk kaydı! Gerindim, hazırım.', 'First entry of the day! Stretched and ready.'), L('Erken kalkan kuruşu kaydeder.', 'The early bird logs the coin.')];
 
 // ── Karakter ağızları ───────────────────────────────
 interface Voice {
@@ -192,6 +199,6 @@ export function allLines(): Line[] {
   const voices = Object.values(VOICES).flatMap((v) => [...v.expense, ...v.income, ...v.jokes, ...v.pops, ...(v.invest ?? []), ...(v.debt ?? [])]);
   return [
     ...ANY_EXPENSE, ...Object.values(EXPENSE).flat(), ...ANY_INCOME, ...Object.values(INCOME).flat(), ...INVEST, ...REFUND, ...GOAL, ...UNDO, ...DEBT,
-    ...Object.values(GREET).flat(), ...TIPS, ...JOKES, ...TAP_POPS, TICKLE, DIZZY, SNEEZE, YAWN, ...voices,
+    ...Object.values(GREET).flat(), ...TIPS, ...JOKES, ...TAP_POPS, TICKLE, DIZZY, SNEEZE, YAWN, ...SHAKE, ...NIGHT_LOG, ...MORNING_LOG, ...voices,
   ];
 }

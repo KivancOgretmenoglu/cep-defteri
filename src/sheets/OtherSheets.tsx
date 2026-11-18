@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Trash2, Archive, ArchiveRestore, Ban, RotateCw } from 'lucide-react';
+import { isAssetUnit, type AssetUnit } from '../domain/assets';
 import type { AccountKind, Freq, ID, PlanKind } from '../domain/types';
 import * as A from '../domain/actions';
 import { catName, formatMoney, moneyUnit, parseMoney, shortDate } from '../i18n/format';
@@ -248,19 +249,19 @@ function CascadeConfirm({ accountId, onCancel, onConfirm }: { accountId: ID; onC
 }
 
 // ───────────────────────── Yatırım değeri ─────────────────────────
-export function ValuationSheet({ accountId }: { accountId: ID }) {
+export function ValuationSheet({ accountId, unit }: { accountId: ID; unit?: string }) {
   const { data } = useData();
-  if (data.accounts.find((a) => a.id === accountId)?.asset) return <AssetPriceSheet accountId={accountId} />;
+  if (data.accounts.find((a) => a.id === accountId)?.asset) return <AssetPriceSheet accountId={accountId} unit={isAssetUnit(unit) ? unit : undefined} />;
   return <ValueSheet accountId={accountId} />;
 }
 
 /** Altın/döviz hesabında "değeri güncelle" yerine birim fiyat elle girilir. */
-function AssetPriceSheet({ accountId }: { accountId: ID }) {
+function AssetPriceSheet({ accountId, unit }: { accountId: ID; unit?: AssetUnit }) {
   const T = useT();
   const { data } = useData();
   const account = data.accounts.find((a) => a.id === accountId)!;
   const [err, setErr] = useState<string | null>(null);
-  const { save, body } = useManualPrice(account, () => { closeSheet(); }, setErr);
+  const { save, body } = useManualPrice(account, () => { closeSheet(); }, setErr, unit);
   return (
     <Sheet title={T('asset.priceTitle')} onClose={closeSheet} footer={<button className="btn btn--primary btn--block" onClick={save}>{T('common.save')}</button>}>
       {body}

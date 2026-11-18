@@ -8,6 +8,7 @@ import { assetsTr } from './assets.tr';
 import { stocksTr } from './stocks.tr';
 import { offBudgetTr } from './offbudget.tr';
 import { growthTr } from './growth.tr';
+import { portfolioTr } from './portfolio.tr';
 import { defaultsTr } from './defaults.tr';
 
 import { ringsTr } from './rings.tr';
@@ -23,6 +24,7 @@ export const tr = {
   ...stocksTr,
   ...offBudgetTr,
   ...growthTr,
+  ...portfolioTr,
   ...defaultsTr,
   'err.validDate': "Geçerli bir tarih seç.",
   'err.futureDate': "Gelecek tarihli kayıt girilemez. Yaklaşan ödemeler için plan ekleyebilirsin.",

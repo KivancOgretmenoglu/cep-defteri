@@ -154,3 +154,81 @@
     border-radius: var(--radius-card) var(--radius-card) 6px 6px;
   }
 }
+
+/* ── Mevsim süsü (kar, fener, bahar ve sonbahar yaprakları) ── */
+.sfx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.sfx__p {
+  position: absolute;
+  left: var(--x);
+  top: -8px;
+  width: var(--s);
+  height: var(--s);
+  animation: sfx-fall var(--dur) linear var(--delay) infinite;
+  opacity: 0.85;
+}
+.sfx--snow .sfx__p {
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(120, 140, 170, 0.18);
+}
+.sfx--petals .sfx__p {
+  height: calc(var(--s) - 1px);
+  border-radius: 2px 0;
+  background: #f4a7c0;
+}
+.sfx--petals .sfx__p:nth-child(3n) {
+  background: #ffd1df;
+}
+.sfx--leaves .sfx__p {
+  background: #d9822b;
+  border-radius: 0 3px;
+}
+.sfx--leaves .sfx__p:nth-child(3n) {
+  background: #b5532a;
+}
+.sfx--leaves .sfx__p:nth-child(3n + 1) {
+  background: #e3b23c;
+}
+@keyframes sfx-fall {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(6px, 40px) rotate(60deg); }
+  50% { transform: translate(-4px, 80px) rotate(120deg); }
+  75% { transform: translate(5px, 120px) rotate(200deg); }
+  100% { transform: translate(0, 170px) rotate(270deg); opacity: 0; }
+}
+.sfx__lantern {
+  position: absolute;
+  left: var(--x);
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: top center;
+  animation: sfx-sway 4s ease-in-out var(--d) infinite alternate;
+}
+.sfx__lantern::before {
+  content: '';
+  width: 1px;
+  height: var(--len);
+  background: color-mix(in srgb, var(--ink) 35%, transparent);
+}
+.sfx__lantern-top { fill: #8a5a1c; }
+.sfx__lantern-body { fill: #c4542f; }
+.sfx__lantern-glow { fill: #ffd27a; }
+@keyframes sfx-sway {
+  from { transform: rotate(-4deg); }
+  to { transform: rotate(4deg); }
+}
+/* Hareket azaltma: parçacıklar bandın içine dağılmış hâlde sabit durur. */
+@media (prefers-reduced-motion: reduce) {
+  .sfx__p {
+    animation: none;
+    top: var(--top);
+  }
+  .sfx__lantern {
+    animation: none;
+  }
+}

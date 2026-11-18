@@ -1,7 +1,9 @@
 /** Ayarlar: maskot seçimi, adı, ana ekran kıyafeti, espriler, sınav haftası. */
 import { useState } from 'react';
 import * as A from '../domain/actions';
-import { addDays } from '../domain/dates';
+import { addDays, daysInMonth } from '../domain/dates';
+import { useT } from '../i18n';
+import { monthName as monthNameOf } from '../i18n/format';
 import { commit, useStore } from '../store/store';
 import { characterOf, type Lang, type MascotKey } from './characters';
 import { Mascot } from './Mascot';
@@ -110,7 +112,40 @@ export function MascotSettings({ iconRow, children }: { iconRow?: React.ReactNod
           </button>
         )}
       </div>
+      <BirthdayRow />
       {children}
     </section>
+  );
+}
+
+/** İsteğe bağlı doğum günü (ay + gün; yıl sorulmaz). O gün maskot parti şapkasıyla kutlar. */
+function BirthdayRow() {
+  const t = useT();
+  const bday = useStore((s) => s.data.settings.birthday ?? null);
+  const [m, d] = bday ? bday.split('-') : ['', ''];
+  const monthNames = Array.from({ length: 12 }, (_, i) => monthNameOf(`2024-${String(i + 1).padStart(2, '0')}`));
+  const days = m ? daysInMonth(`2024-${m}`) : 31;
+  const set = (mm: string, dd: string) => {
+    if (!mm) return commit((x) => A.updateSettings(x, { birthday: null }));
+    const max = daysInMonth(`2024-${mm}`);
+    const day = String(Math.min(Number(dd || '1'), max)).padStart(2, '0');
+    commit((x) => A.updateSettings(x, { birthday: `${mm}-${day}` }));
+  };
+  return (
+    <div className="bday-row">
+      <div>
+        <b>🎂 {t('party.settingsLabel')}</b>
+        <p className="muted small">{t('party.settingsHint')}</p>
+      </div>
+      <div className="bday-row__fields">
+        <select className="input input--small" aria-label={t('party.month')} value={m} onChange={(e) => set(e.target.value, d)}>
+          <option value="">{t('party.none')}</option>
+          {monthNames.map((n, i) => <option key={n} value={String(i + 1).padStart(2, '0')}>{n}</option>)}
+        </select>
+        <select className="input input--small" aria-label={t('party.day')} value={d} disabled={!m} onChange={(e) => set(m, e.target.value)}>
+          {Array.from({ length: days }, (_, i) => String(i + 1).padStart(2, '0')).map((x) => <option key={x} value={x}>{Number(x)}</option>)}
+        </select>
+      </div>
+    </div>
   );
 }

@@ -4,7 +4,8 @@
  * (sky.css), böylece her karakter paletinde ve iki temada da metin okunur kalır.
  */
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { skyBand, skyBody, type SkyBand } from '../mascot/seasonal';
+import { seasonFxFor, skyBand, skyBody, type SeasonFx, type SkyBand } from '../mascot/seasonal';
+import { useStore } from '../store/store';
 import './sky.css';
 
 /** Bant tonları: `a` üst, `b` orta renk; `p` kâğıda karışım oranı (%). Testler kontrastı bu değerlerle doğrular. */
@@ -111,12 +112,58 @@ export function Sky() {
     '--sky-y': body.y,
   } as React.CSSProperties;
   const ref = useSunLane();
+  const fx = seasonFxFor(useStore((s) => s.today));
   return (
     <div ref={ref} className="sky" data-band={band} style={style} aria-hidden="true">
       <span className="sky__stars" />
+      <SeasonLayer fx={fx} />
       <span className={`sky-body sky-body--${body.kind}`}>
         <Pixel rows={body.kind === 'sun' ? SUN : MOON} cls={body.kind} />
       </span>
     </div>
+  );
+}
+
+/** Sabit (rastgele olmayan) parçacık yerleri: [sol %, gecikme s, süre s, boyut px, başlangıç üst %]. */
+const FLAKES: [number, number, number, number, number][] = [
+  [6, 0, 9, 3, 10], [14, 3.2, 11, 2, 60], [23, 1.4, 8, 3, 30], [31, 5.1, 12, 2, 80], [40, 2.2, 10, 3, 20],
+  [49, 6.3, 9, 2, 50], [57, 0.8, 11, 3, 70], [66, 4.4, 8.5, 2, 15], [74, 2.9, 12, 3, 45], [83, 5.8, 9.5, 2, 85],
+  [91, 1.1, 10.5, 3, 35], [97, 3.7, 9, 2, 65],
+];
+
+/**
+ * Gökyüzü bandında mevsim süsü: kar taneleri, Ramazan fenerleri, bahar yaprakları ya da sonbahar yaprakları.
+ * Yalnız süs (aria-hidden); hareket azaltma tercihinde parçacıklar yerinde durur.
+ */
+function SeasonLayer({ fx }: { fx: SeasonFx }) {
+  if (!fx) return null;
+  if (fx === 'lantern') {
+    return (
+      <span className="sfx sfx--lantern">
+        {[18, 42, 70].map((x, i) => (
+          <span key={x} className="sfx__lantern" style={{ '--x': `${x}%`, '--d': `${i * 0.7}s`, '--len': `${10 + (i % 2) * 8}px` } as React.CSSProperties}>
+            <svg viewBox="0 0 6 9" shapeRendering="crispEdges" width="12" height="18">
+              <rect x="2" y="0" width="2" height="1" className="sfx__lantern-top" />
+              <rect x="1" y="1" width="4" height="1" className="sfx__lantern-top" />
+              <rect x="0" y="2" width="6" height="5" className="sfx__lantern-body" />
+              <rect x="1" y="3" width="4" height="3" className="sfx__lantern-glow" />
+              <rect x="1" y="7" width="4" height="1" className="sfx__lantern-top" />
+              <rect x="2" y="8" width="2" height="1" className="sfx__lantern-body" />
+            </svg>
+          </span>
+        ))}
+      </span>
+    );
+  }
+  return (
+    <span className={`sfx sfx--${fx}`}>
+      {FLAKES.map(([x, delay, dur, size, top], i) => (
+        <span
+          key={i}
+          className="sfx__p"
+          style={{ '--x': `${x}%`, '--delay': `${-delay}s`, '--dur': `${fx === 'snow' ? dur : dur * 1.3}s`, '--s': `${fx === 'snow' ? size : size + 2}px`, '--top': `${top}%`, '--hue': i % 3 } as React.CSSProperties}
+        />
+      ))}
+    </span>
   );
 }

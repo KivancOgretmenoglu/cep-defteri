@@ -75,6 +75,8 @@ export interface WidgetPayload {
   queuedText: string;
   /** En fazla 3; örnek veri modunda ve hesap yokken boş */
   chips: WidgetChip[];
+  /** Büyük araç: "Yatırım: 41.857 TL" ("" = gösterme; tercih kapalı ya da yatırım hesabı yok) */
+  portfolio: string;
 }
 
 const MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -87,6 +89,7 @@ const STR = {
     expense: 'Gider',
     income: 'Gelir',
     today: (m: string) => `Bugün: ${m}`,
+    portfolio: (m: string) => `Yatırım: ${m}`,
     monthEndShort: (m: MonthKey) => `${monthName(m)} sonu`,
     untilShort: (d: ISODate) => `${dayOfMonth(d)} ${monthName(monthOf(d))}`,
     noted: 'Not aldım! ✓',
@@ -104,6 +107,7 @@ const STR = {
     expense: 'Expense',
     income: 'Income',
     today: (m: string) => `Today: ${m}`,
+    portfolio: (m: string) => `Investments: ${m}`,
     monthEndShort: (m: MonthKey) => `end of ${MONTHS_EN[Number(m.slice(5, 7)) - 1].slice(0, 3)}`,
     untilShort: (d: ISODate) => `to ${dayOfMonth(d)} ${MONTHS_EN[Number(d.slice(5, 7)) - 1].slice(0, 3)}`,
     noted: 'Got it! ✓',
@@ -146,6 +150,8 @@ export interface WidgetOpts {
   hideAmount?: boolean;
   /** İşlenmiş kuyruk qid'leri (widgetSeen.ts) */
   seen?: string[];
+  /** Portföy değeri (kuruş; güncel fiyatlarla, widget.ts hesaplar). null/verilmezse satır gösterilmez. */
+  portfolio?: Money | null;
 }
 
 /** Kategori simgesi → çip emojisi (ui/icons.tsx'teki adlar). */
@@ -196,6 +202,7 @@ export function widgetPayload(data: Data, today: ISODate, mode: 'real' | 'demo',
     real: !demo,
     todayISO: today,
     seen: demo ? [] : (opts.seen ?? []),
+    portfolio: opts.portfolio != null && data.accounts.some((a) => a.kind === 'investment' && !a.archived) ? s.portfolio(money(opts.portfolio)) : '',
   };
   const av = availability(data, today);
   if (av.confidence === 'none') {

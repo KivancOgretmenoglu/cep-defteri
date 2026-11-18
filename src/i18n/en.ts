@@ -6,6 +6,7 @@ import { assetsEn } from './assets.en';
 import { stocksEn } from './stocks.en';
 import { offBudgetEn } from './offbudget.en';
 import { growthEn } from './growth.en';
+import { portfolioEn } from './portfolio.en';
 import { defaultsEn } from './defaults.en';
 import { ringsEn } from './rings.en';
 import { planEn } from './plan.en';
@@ -20,6 +21,7 @@ export const en: Dict = {
   ...stocksEn,
   ...offBudgetEn,
   ...growthEn,
+  ...portfolioEn,
   ...defaultsEn,
   'err.validDate': "Pick a valid date.",
   'err.futureDate': "You can't log something in the future. Add a plan for upcoming payments instead.",

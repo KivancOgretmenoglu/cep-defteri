@@ -12,6 +12,7 @@ import { rescheduleNotifications, onNotificationTap } from './notifications';
 import { updateWidget } from './widget';
 import { ingestWidgetQueue } from './widgetQueue';
 import { useWidgetPrefs } from './widgetPrefs';
+import { usePrices } from '../store/prices';
 import { runAutoBackup } from './autoBackup';
 import { initShortcuts } from './shortcuts';
 import { backedUpToday } from './backupPlan';
@@ -128,6 +129,9 @@ export function useNativeSync(): void {
   const notif = useDevice((p) => p.notifications);
   const abEnabled = useDevice((p) => p.autoBackup.enabled);
   const widgetPrefs = useWidgetPrefs();
+  // Araçta portföy satırı açıksa fiyatlar değişince de güncellenir.
+  const priceBook = usePrices().book;
+  const pricesKey = widgetPrefs.showPortfolio ? priceBook : null;
   const first = useRef(true);
 
   useEffect(() => setupOnce(), []);
@@ -143,7 +147,7 @@ export function useNativeSync(): void {
     clearTimeout(widgetTimer);
     widgetTimer = setTimeout(() => void updateWidget(data, today, mode), 300);
     return () => clearTimeout(widgetTimer);
-  }, [data, today, mode, widgetPrefs]);
+  }, [data, today, mode, widgetPrefs, pricesKey]);
 
   // Bildirimler: daha pahalı, 1.5 sn gecikmeyle.
   useEffect(() => {

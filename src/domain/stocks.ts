@@ -29,6 +29,8 @@ export interface StockQuote {
   source: QuoteSource;
   /** Kaynağın verdiği şirket adı (varsa). */
   name?: string;
+  /** Önceki kapanış (aynı birimde; günlük değişim için). */
+  prevClose?: number;
 }
 
 export type QuoteBook = Partial<Record<StockUnit, StockQuote>>;
@@ -86,7 +88,8 @@ export function parseYahooChart(json: unknown, u: StockUnit, now: number): Stock
   if (meta.currency !== ccy) return null;
   const price = toMinor(meta.regularMarketPrice) ?? toMinor(meta.previousClose) ?? toMinor(meta.chartPreviousClose);
   if (price === null) return null;
-  return { price, ccy, at: now, source: 'yahoo', name: cleanName(meta.longName) ?? cleanName(meta.shortName) };
+  const prev = toMinor(meta.chartPreviousClose) ?? toMinor(meta.previousClose);
+  return { price, ccy, at: now, source: 'yahoo', name: cleanName(meta.longName) ?? cleanName(meta.shortName), ...plausiblePrev(price, prev) };
 }
 
 /** Nasdaq `{ data: { symbol, companyName, primaryData: { lastSalePrice: "$356.27" } } }` → kotasyon. */
@@ -99,7 +102,10 @@ export function parseNasdaq(json: unknown, u: StockUnit, now: number): StockQuot
   if (typeof pd.currency === 'string' && pd.currency && pd.currency !== 'USD') return null;
   const price = toMinor(parseUsNumber(pd.lastSalePrice));
   if (price === null) return null;
-  return { price, ccy: 'USD', at: now, source: 'nasdaq', name: cleanStockName(cleanName(d.companyName)) };
+  // netChange "+1.39" / "-2.66": önceki kapanış = fiyat − değişim.
+  const ch = typeof pd.netChange === 'string' ? Number(pd.netChange.replace(/[+,\s]/g, '')) : NaN;
+  const prev = Number.isFinite(ch) ? price - Math.round(ch * 100) : null;
+  return { price, ccy: 'USD', at: now, source: 'nasdaq', name: cleanStockName(cleanName(d.companyName)), ...plausiblePrev(price, prev) };
 }
 
 /** İş Yatırım `{ ok: true, value: [{ HGDG_HS_KODU, HGDG_TARIH, HGDG_KAPANIS }, …] }` → son kapanış. */
@@ -107,11 +113,15 @@ export function parseIsYatirim(json: unknown, u: StockUnit, now: number): StockQ
   if (!isObj(json) || !Array.isArray(json.value)) return null;
   const sym = stockSymbol(u);
   const rows = json.value.filter((r): r is Record<string, unknown> => isObj(r) && (r.HGDG_HS_KODU === undefined || r.HGDG_HS_KODU === sym));
-  for (let i = rows.length - 1; i >= 0; i--) {
-    const price = toMinor(rows[i].HGDG_KAPANIS) ?? toMinor(rows[i].HG_KAPANIS);
-    if (price !== null) return { price, ccy: 'TRY', at: now, source: 'isyatirim' };
-  }
-  return null;
+  const closes = rows.map((r) => toMinor(r.HGDG_KAPANIS) ?? toMinor(r.HG_KAPANIS)).filter((x): x is number => x !== null);
+  if (!closes.length) return null;
+  const price = closes[closes.length - 1];
+  return { price, ccy: 'TRY', at: now, source: 'isyatirim', ...plausiblePrev(price, closes.length > 1 ? closes[closes.length - 2] : null) };
+}
+
+/** Önceki kapanış makulse (fiyatın ±%50'si içinde) { prevClose } döner; yoksa boş. */
+function plausiblePrev(price: number, prev: number | null): { prevClose?: number } {
+  return prev !== null && prev > 0 && prev > price / 1.5 && prev < price * 1.5 ? { prevClose: prev } : {};
 }
 
 /** Nasdaq adlarındaki hisse sınıfı eklerini kısaltır: "Apple Inc. Common Stock" → "Apple Inc.". */
@@ -142,12 +152,15 @@ export function withStockPrices(base: PriceBook, quotes: QuoteBook): PriceBook {
 
 export function quoteToTl(q: StockQuote, base: PriceBook): UnitPrice | null {
   const source = q.source === 'manual' ? 'manual' : 'live';
-  if (q.ccy === 'TRY') return { buy: q.price, sell: q.price, at: q.at, source };
+  const prev = source === 'live' ? q.prevClose : undefined;
+  if (q.ccy === 'TRY') return { buy: q.price, sell: q.price, at: q.at, source, ...(prev ? { prevBuy: prev } : {}) };
   const usd = base.USD;
   if (!usd) return null;
   const buy: Money = Math.round((q.price * usd.buy) / 100);
   const sell: Money = Math.round((q.price * usd.sell) / 100);
-  return buy > 0 && sell > 0 ? { buy, sell, at: q.at, source } : null;
+  // Önceki TL değeri: önceki dolar kapanışı × önceki dolar kuru (kurdaki değişim de günlük değişime girer).
+  const prevBuy = prev ? Math.round((prev * (usd.prevBuy ?? usd.buy)) / 100) : undefined;
+  return buy > 0 && sell > 0 ? { buy, sell, at: q.at, source, ...(prevBuy ? { prevBuy } : {}) } : null;
 }
 
 /** Önbellekten okunan kotasyonları doğrular. */
@@ -159,7 +172,12 @@ export function sanitizeQuotes(v: unknown): QuoteBook {
     const { price, ccy, at, source, name } = q;
     if (!isUnitPrice(price, k) || ccy !== stockCurrency(k) || typeof at !== 'number') continue;
     if (!['yahoo', 'nasdaq', 'isyatirim', 'manual'].includes(source as string)) continue;
-    out[k] = { price: price as number, ccy: ccy as StockCcy, at, source: source as QuoteSource, ...(typeof name === 'string' ? { name: name.slice(0, 80) } : {}) };
+    const prevClose = (q as Record<string, unknown>).prevClose;
+    out[k] = {
+      price: price as number, ccy: ccy as StockCcy, at, source: source as QuoteSource,
+      ...(typeof name === 'string' ? { name: name.slice(0, 80) } : {}),
+      ...(typeof prevClose === 'number' && Number.isFinite(prevClose) && prevClose > 0 ? { prevClose } : {}),
+    };
   }
   return out;
 }

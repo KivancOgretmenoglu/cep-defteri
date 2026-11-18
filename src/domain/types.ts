@@ -181,6 +181,8 @@ export interface Settings {
   monthEndFloor: Money | null;
   /** Tamamlanan/geçilen spot ışıklı rehberin sürümü; null = hiç görülmedi. */
   guideVersion?: number | null;
+  /** Kullanıcının doğum günü "MM-DD" (isteğe bağlı; maskot o gün kutlar). Yıl sorulmaz. */
+  birthday?: string | null;
 }
 
 export interface Data {

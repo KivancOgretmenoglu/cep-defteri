@@ -3,6 +3,7 @@
  * geçersiz girişte ActionError fırlatır. Bakiye/rapor gibi türetilmiş değerler saklanmaz,
  * bu yüzden düzenleme ve silme her şeyi kendiliğinden tutarlı günceller.
  */
+import { isBirthday } from './special';
 import type { Account, Category, Data, Goal, ID, Lang, Plan, PlanRef, Settings, Tx, TxType, Valuation } from './types';
 import { translate, type Key, type Vars } from '../i18n/core';
 import { isMoney, type Money } from './money';
@@ -630,5 +631,6 @@ export function updateSettings(data: Data, patch: Partial<Settings>): Data {
   if (patch.monthlyBudget != null && (!isMoney(patch.monthlyBudget) || patch.monthlyBudget <= 0)) fail('err.budgetPositive');
   if (patch.reserve !== undefined && (!isMoney(patch.reserve) || patch.reserve < 0)) fail('err.reserveNegative');
   if (patch.monthEndFloor != null && (!isMoney(patch.monthEndFloor) || patch.monthEndFloor < 0)) fail('err.floorNegative');
+  if (patch.birthday != null && !isBirthday(patch.birthday)) fail('err.validDate');
   return { ...data, settings: { ...data.settings, ...patch } };
 }

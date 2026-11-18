@@ -83,3 +83,11 @@ export function parseUnitPrice(raw: string, u?: AssetUnit): number | null {
   const v = roundPrice(Number(s) * 100, u);
   return v > 0 ? v : null;
 }
+
+/** İşaretli yüzde (bir ondalık): TR "+%3,1" / "−%2", EN "+3.1%" / "−2%". */
+export function pctSigned(n: number): string {
+  const r = Math.round(Math.abs(n) * 10) / 10;
+  const s = new Intl.NumberFormat(getLang() === 'en' ? 'en-US' : 'tr-TR', { maximumFractionDigits: 1 }).format(r);
+  const sign = n > 0 && r > 0 ? '+' : n < 0 && r > 0 ? '−' : '';
+  return getLang() === 'en' ? `${sign}${s}%` : `${sign}%${s}`;
+}

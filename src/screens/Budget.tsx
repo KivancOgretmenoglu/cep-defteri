@@ -14,6 +14,7 @@ import { useData, useLookups } from '../ui/hooks';
 import { MascotNote, EmptyState, SceneEmpty } from '../mascot/MascotNote';
 import { CatIcon } from '../ui/icons';
 import { DueRow } from '../ui/DueRow';
+import { PixelWallet, walletState } from '../ui/Wallet';
 import type { Mood } from '../domain/mood';
 import { recurringSuggestions, RECURRING_DISMISS_PREFIX, type RecurringSuggestion } from '../domain/recurring';
 
@@ -63,6 +64,8 @@ export function Budget() {
     </li>
   );
 
+  // Maskotun cüzdanı: kalan bütçeye göre (yalnız bu ay).
+  const wallet = walletState(b.remaining, b.budget);
   let note: { text: string; why: string; mood: Mood } | null = null;
   if (b.budget !== null) {
     const st = STATE_TEXT[b.state];
@@ -106,6 +109,7 @@ export function Budget() {
             <span className="budget-head__spent">{formatMoney(b.spent)}</span>
             <span className="budget-head__of">/ {formatMoney(b.budget)}</span>
             {STATE_TEXT[b.state].label && <span className={`badge badge--${b.state}`}>{t(STATE_TEXT[b.state].label!)}</span>}
+            {wallet && <PixelWallet state={wallet} />}
           </div>
           <BudgetBar spentPlanned={b.plannedSpent} spentFlex={Math.max(b.flexibleSpent, 0)} pending={b.plannedPending} budget={b.budget} elapsed={b.elapsedPct} />
           <dl className="legend">

@@ -25,16 +25,20 @@ export interface PlanPrefill {
 }
 
 export type SheetState =
-  | { kind: 'add'; preset?: { type?: TxType | 'invest' | 'debt'; direction?: 'in' | 'out'; accountId?: ID; personId?: ID; paidByPerson?: boolean } }
+  | { kind: 'add'; preset?: { type?: TxType | 'invest' | 'debt'; direction?: 'in' | 'out'; accountId?: ID; personId?: ID; paidByPerson?: boolean; unit?: string } }
   | { kind: 'edit'; txId: ID }
   | { kind: 'refund'; txId: ID }
   | { kind: 'confirm'; planId: ID; due: string }
   | { kind: 'occurrence'; planId: ID; due: string }
   | { kind: 'cancelPlan'; planId: ID }
   | { kind: 'reportCard'; month: string }
+  /** Ayın ilk günlerinde maskottan mektup (biten ay) */
+  | { kind: 'letter'; month: string }
   | { kind: 'account'; accountId?: ID; kindPreset?: 'investment' | 'person' }
   | { kind: 'plan'; planId?: ID; preset?: 'expense' | 'income' | 'transfer'; draft?: PlanPrefill }
-  | { kind: 'valuation'; accountId: ID }
+  | { kind: 'valuation'; accountId: ID; unit?: string }
+  /** Yatırım hesabındaki bir türün (altın, hisse, fon…) ayrıntısı */
+  | { kind: 'position'; accountId: ID; unit: string }
   | { kind: 'goal'; goalId?: ID; accountId?: ID }
   | { kind: 'category'; categoryId?: ID; catKind?: 'expense' | 'income' }
   | { kind: 'budget' }

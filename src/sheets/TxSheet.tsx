@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Trash2, RotateCcw, CalendarClock, Repeat, UserRound, Split, Tag, X, PiggyBank } from 'lucide-react';
+import { isAssetUnit } from '../domain/assets';
 import { maybeAskReview } from '../native/playStore';
 import { mascotMood } from '../domain/mood';
 import type { ID, PlanRef, Tx } from '../domain/types';
@@ -35,7 +36,7 @@ function tabOf(tx: Tx, accounts: Map<ID, import('../domain/types').Account>): { 
   return { tab: tx.type === 'income' ? 'income' : 'expense', dir: 'in' };
 }
 
-export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string; direction?: 'in' | 'out'; accountId?: ID; personId?: ID; paidByPerson?: boolean } }) {
+export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string; direction?: 'in' | 'out'; accountId?: ID; personId?: ID; paidByPerson?: boolean; unit?: string } }) {
   const T = useT();
   const { data, today } = useData();
   const { accounts, cats } = useLookups(data);
@@ -599,6 +600,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
                   amount={amount}
                   initial={editing?.qty !== undefined && editing.unit && editing.unitPrice && init.tab === 'invest' && init.dir === dir && (editing.toAccountId === invId || editing.accountId === invId) ? { unit: editing.unit, qty: editing.qty, unitPrice: editing.unitPrice } : undefined}
                   editingTxId={editing?.id}
+                  presetUnit={!editing && isAssetUnit(preset?.unit) ? preset.unit : undefined}
                   onChange={setAssetVal}
                   onAmount={setAmount}
                 />

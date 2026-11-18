@@ -68,7 +68,7 @@ describe('kaynak adresleri', () => {
 describe('ayrıştırıcılar', () => {
   it('Yahoo grafik yanıtı', () => {
     const json = { chart: { result: [{ meta: { currency: 'TRY', symbol: 'THYAO.IS', regularMarketPrice: 320.25, chartPreviousClose: 319, longName: 'Türk Hava Yollari Anonim Ortakligi' } }], error: null } };
-    expect(parseYahooChart(json, 'BIST:THYAO', NOW)).toEqual({ price: 32025, ccy: 'TRY', at: NOW, source: 'yahoo', name: 'Türk Hava Yollari Anonim Ortakligi' });
+    expect(parseYahooChart(json, 'BIST:THYAO', NOW)).toEqual({ price: 32025, ccy: 'TRY', at: NOW, source: 'yahoo', name: 'Türk Hava Yollari Anonim Ortakligi', prevClose: 31900 });
     // Para birimi borsayla uyuşmazsa alınmaz.
     expect(parseYahooChart({ chart: { result: [{ meta: { currency: 'USD', regularMarketPrice: 5 } }] } }, 'BIST:THYAO', NOW)).toBeNull();
     // Fiyat yoksa önceki kapanış.
@@ -83,7 +83,7 @@ describe('ayrıştırıcılar', () => {
       message: null,
       status: { rCode: 200 },
     };
-    expect(parseNasdaq(json, 'US:AAPL', NOW)).toEqual({ price: 35627, ccy: 'USD', at: NOW, source: 'nasdaq', name: 'Apple Inc.' });
+    expect(parseNasdaq(json, 'US:AAPL', NOW)).toEqual({ price: 35627, ccy: 'USD', at: NOW, source: 'nasdaq', name: 'Apple Inc.', prevClose: 35488 });
     expect(parseNasdaq({ data: null, status: { rCode: 400, bCodeMessage: [{ code: 1001, errorMessage: 'Symbol not exists.' }] } }, 'US:AAPL', NOW)).toBeNull();
     expect(parseNasdaq({ data: { symbol: 'MSFT', primaryData: { lastSalePrice: '$1' } } }, 'US:AAPL', NOW)).toBeNull();
     // Binlik ayırıcı ve 4 ondalık ABD biçimidir.
@@ -99,7 +99,7 @@ describe('ayrıştırıcılar', () => {
         { HGDG_HS_KODU: 'THYAO', HGDG_TARIH: '13-11-2026', HGDG_KAPANIS: 320.25 },
       ],
     };
-    expect(parseIsYatirim(json, 'BIST:THYAO', NOW)).toEqual({ price: 32025, ccy: 'TRY', at: NOW, source: 'isyatirim' });
+    expect(parseIsYatirim(json, 'BIST:THYAO', NOW)).toEqual({ price: 32025, ccy: 'TRY', at: NOW, source: 'isyatirim', prevClose: 31900 });
     expect(parseIsYatirim({ ok: true, value: [] }, 'BIST:ZZZZZ', NOW)).toBeNull();
     expect(parseIsYatirim({ ok: true, value: [{ HGDG_HS_KODU: 'GARAN', HGDG_KAPANIS: 1 }] }, 'BIST:THYAO', NOW)).toBeNull();
   });

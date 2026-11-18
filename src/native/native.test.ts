@@ -235,3 +235,14 @@ describe('haftalık özet bildirimi', () => {
     expect(computeSchedule(d, '2026-10-18', W, new Date(2026, 9, 18, 21))).toEqual([]);
   });
 });
+
+describe('araçta yatırım satırı', () => {
+  it('yalnız değer verilince ve yatırım hesabı varken; gizlemede maskelenir', () => {
+    const s = setup();
+    expect(widgetPayload(s.d, TODAY, 'real').portfolio).toBe('');
+    expect(widgetPayload(s.d, TODAY, 'real', 0, { portfolio: TL(41857.65) }).portfolio).toBe('Yatırım: 41.857,65 TL');
+    expect(widgetPayload(s.d, TODAY, 'real', 0, { portfolio: TL(100), hideAmount: true }).portfolio).toBe('Yatırım: •••• TL');
+    const noInv = { ...s.d, accounts: s.d.accounts.filter((a) => a.kind !== 'investment') };
+    expect(widgetPayload(noInv, TODAY, 'real', 0, { portfolio: 0 }).portfolio).toBe('');
+  });
+});

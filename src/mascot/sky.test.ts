@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { homeOutfit, pajamaTime, skyBand, skyBody } from './seasonal';
+import { homeOutfit, pajamaTime, seasonFxFor, skyBand, skyBody } from './seasonal';
 import { SKY_ACCENT, SKY_TINTS } from '../ui/Sky';
 import { CHARACTERS, MASCOT_KEYS } from './characters';
 import { compose, OUTFITS } from './render';
@@ -91,5 +91,17 @@ describe('gece pijaması', () => {
       expect(compose(k, 'calm', 'pajama').figure.length, k).toBeGreaterThan(plain + 10);
     }
     expect(OUTFIT_ACTIONS.pajama).toContain('yawn');
+  });
+});
+
+describe('mevsim süsü', () => {
+  it('tarihe göre', () => {
+    expect(seasonFxFor('2026-11-18')).toBe('leaves');
+    expect(seasonFxFor('2026-12-24')).toBe('snow');
+    expect(seasonFxFor('2027-01-07')).toBe('snow');
+    expect(seasonFxFor('2027-01-08')).toBeNull();
+    expect(seasonFxFor('2027-02-20')).toBe('lantern');
+    expect(seasonFxFor('2027-03-25')).toBe('petals');
+    expect(seasonFxFor('2027-07-10')).toBeNull();
   });
 });

@@ -337,6 +337,8 @@ public class CepWidgetProvider extends AppWidgetProvider {
         String expense;
         String income;
         String today = "";
+        /** Büyük araç: "Yatırım: 41.857 TL" ("" = gizli) */
+        String portfolio = "";
         String note = "";
         String noted;
         String writing;
@@ -457,6 +459,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
                 st.expense = o.optString("expense", st.expense);
                 st.income = o.optString("income", st.income);
                 st.today = o.optString("today", "");
+                st.portfolio = o.optString("portfolio", "");
                 st.note = o.optString("note", "");
                 st.noted = o.optString("notedText", st.noted);
                 st.writing = o.optString("writingText", st.writing);
@@ -691,7 +694,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
      *   küçük          + widget_mascot (büst)
      *   geniş, kare    + widget_mascot, widget_body, widget_title, widget_label, widget_note, widget_add
      *   orta           + widget_mascot, widget_body, widget_title, widget_label, widget_note, widget_btn_expense/income
-     *   büyük          + widget_body, widget_title, widget_label, widget_note, widget_today, widget_btn_expense/income,
+     *   büyük          + widget_body, widget_title, widget_label, widget_note, widget_today, widget_portfolio, widget_btn_expense/income,
      *                    widget_flipper, widget_frame_0..5, widget_static, widget_chips, widget_chip_0..2
      * w, h: aracın dp boyutu (0 = bilinmiyor; o zaman XML varsayılanları kalır).
      */
@@ -830,6 +833,8 @@ public class CepWidgetProvider extends AppWidgetProvider {
         // ── Büyük ──
         views.setTextViewText(R.id.widget_today, st.today);
         views.setViewVisibility(R.id.widget_today, st.today.isEmpty() ? View.GONE : View.VISIBLE);
+        views.setTextViewText(R.id.widget_portfolio, st.portfolio);
+        views.setViewVisibility(R.id.widget_portfolio, st.portfolio.isEmpty() ? View.GONE : View.VISIBLE);
 
         for (int i = 0; i < FRAME_IDS.length; i++) {
             views.setImageViewResource(FRAME_IDS[i], frames[i]);

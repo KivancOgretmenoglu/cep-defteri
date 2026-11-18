@@ -6,6 +6,7 @@ import { useLively, type Lively } from './lively';
 import { HOME_OUTFITS } from './render';
 import { characterOf, type Lang } from './characters';
 import { examActive, homeOutfit, pajamaTime, seasonFor } from './seasonal';
+import { specialDay } from '../domain/special';
 import { useNow } from '../ui/Sky';
 import { Plus } from 'lucide-react';
 import { useT } from '../i18n';
@@ -31,6 +32,8 @@ export function useMascot() {
   const quips = useStore((s) => s.data.settings.quips) !== false;
   const today = useStore((s) => s.today);
   const examUntil = useStore((s) => s.data.settings.examUntil);
+  // Doğum günü / kullanım yıl dönümü: parti şapkası (diğer özel günlerin önünde).
+  const party = useStore((s) => specialDay(s.data, s.today, s.mode) !== null);
   const ch = characterOf(who);
   return {
     ch,
@@ -38,7 +41,7 @@ export function useMascot() {
     lang,
     name: custom?.trim() || ch.name[lang],
     quips,
-    season: seasonFor(today),
+    season: party ? ('party' as const) : seasonFor(today),
     exam: examActive(examUntil, today),
   };
 }

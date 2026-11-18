@@ -337,3 +337,19 @@
   }
 }
 
+
+/* Doğum günü satırı (maskot ayarları) */
+.bday-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  margin-top: 8px;
+  border-top: 1px solid var(--line);
+}
+.bday-row__fields {
+  display: flex;
+  gap: 8px;
+}

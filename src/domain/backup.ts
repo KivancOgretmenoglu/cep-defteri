@@ -9,6 +9,7 @@ import { accountIndex, assetOverdraft, refundCategory, transferKind } from './le
 import { isAssetAccount, isAssetUnit, isQty, isUnitPrice, priceDecimals, type AssetUnit } from './assets';
 import { unitLabel } from '../i18n/units';
 import { migrateRawData } from './migrate';
+import { isBirthday } from './special';
 
 export const APP_ID = 'cep-defteri';
 
@@ -113,6 +114,7 @@ export function parseBackup(text: string, lang: Lang = 'tr'): Result {
   if (s.theme !== undefined && !['system', 'light', 'dark'].includes(s.theme as string)) return err('bk.theme');
   if (s.lang !== undefined && !['tr', 'en'].includes(s.lang as string)) return err('bk.lang');
   if (s.examUntil != null && !isISODate(s.examUntil)) return err('bk.exam');
+  if (s.birthday != null && !isBirthday(s.birthday)) return err('bk.settings');
   // Eski sürümden kalan Clawd ayarları taşınmaz.
   const { clawd: _oldClawd, clawdQuips: _oldQuips, ...rest } = s;
   const settings = {
