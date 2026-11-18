@@ -1323,7 +1323,8 @@ fieldset.block {
   /* Uzun adlar heceden bölünür ("Subscrip-tions"), kelime ortasından değil */
   hyphens: auto;
   -webkit-hyphens: auto;
-  overflow-wrap: break-word;
+  /* Heceleme sözlüğü olmayan tarayıcıda yedek: kutudan taşmak yerine kelime içinden bölünür. */
+  overflow-wrap: anywhere;
 }
 .cat-btn.is-on {
   border-color: var(--cat);
@@ -1984,10 +1985,33 @@ fieldset.block {
 .inv-ev {
   display: grid;
   grid-template-columns: 64px minmax(0, 1fr) auto 36px;
+  grid-template-areas: 'date main amt act';
   align-items: center;
   gap: 8px;
   min-height: 52px;
   border-bottom: 1px solid var(--line);
+}
+.inv-ev__date { grid-area: date; }
+.inv-ev__main { grid-area: main; min-width: 0; overflow-wrap: anywhere; }
+.inv-ev__amt { grid-area: amt; }
+.inv-ev > .icon-btn { grid-area: act; }
+/* Dar ekranda tarih üstte; açıklama ve tutar yan yana tam genişlik kullanır (tutar yazının üstüne binmez). */
+@media (max-width: 520px) {
+  .inv-ev {
+    grid-template-columns: minmax(0, 1fr) auto 36px;
+    grid-template-areas:
+      'date date act'
+      'main amt act';
+    row-gap: 2px;
+    padding: 8px 0;
+    align-items: start;
+  }
+  .inv-ev__amt {
+    align-self: start;
+  }
+  .inv-ev > .icon-btn {
+    align-self: center;
+  }
 }
 .inv-ev:last-child {
   border-bottom: 0;
@@ -2068,6 +2092,14 @@ fieldset.block {
 .cmp-table td:last-child {
   color: var(--ink-3);
   font-weight: 600;
+}
+/* Dar telefonda (≤ 360 px) rakamlar sığsın: dolgu ve yazı biraz küçülür. */
+@media (max-width: 360px) {
+  .cmp-table th,
+  .cmp-table td {
+    padding: 8px 2px;
+    font-size: 14px;
+  }
 }
 .bars {
   display: flex;
@@ -2911,6 +2943,33 @@ fieldset.block {
 @media (max-width: 420px) {
   .icon-only-phone span {
     display: none;
+  }
+}
+
+/* Dar telefonlar (≤ 360 px, ör. 320 px genişlik): yazı sütunu sıkışmasın. */
+@media (max-width: 360px) {
+  /* Yaklaşan ödeme: açıklama + tutar üst satırda tam genişlik, "Ödendi" düğmesi altta sağda */
+  .due-list li {
+    flex-wrap: wrap;
+    row-gap: 2px;
+  }
+  .due-list__open {
+    flex: 1 1 100%;
+  }
+  .due-list li > .btn {
+    margin-left: auto;
+  }
+  /* Hesap satırı: tutar adın altına iner, ad tam genişliği kullanır */
+  .acc-row {
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+  .acc-row__name {
+    flex: 1 1 calc(100% - 60px);
+  }
+  .acc-row > .amount,
+  .acc-row > [class*='amount'] {
+    margin-left: auto;
   }
 }
 
