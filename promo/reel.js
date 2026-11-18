@@ -653,6 +653,7 @@ window.ready = (async () => {
   if (typeof defineHooks === 'function') defineHooks();
   if (typeof defineValue === 'function') defineValue();
   if (typeof defineKarar === 'function') defineKarar();
+  if (typeof defineBilet === 'function') defineBilet();
   for (const [type, t0, opts = {}] of reel.scenes) {
     OPTS = opts;
     SCENES[type](t0, opts);

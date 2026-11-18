@@ -668,3 +668,36 @@ Kim kime ne kadar borçlu: Cep Defteri'nde yazılı kalsın.
 
 **Yayın notu:** Kapak karesi olarak ~2,0 sn'yi seç (ışıklar yanmış, iki maskot ve 1.000 TL geniş planda). İlk yorumu sabitle: "Pamuk inandı, Ceviz çaldı. Sen Pamuk olsan P mi derdin, Ç mi? Tutarlar örnek." Ültimatom'la arasında en az 5–7 gün bırak (aynı kalıp). Yayından önce doğrula: %53 (makalenin kendi metninden; arama sonuçlarında rakam görünmedi, bu yüzden ekranda oyuncu sayısı yazmıyor). Instagram'da "Yapay zekâ bilgisi" etiketini aç.
 
+---
+
+## 31 · kayip-bilet (kavram: zihinsel muhasebe / kayıp bilet, Sahne serisi, seslendirme: Buğra, döngülü, 24,23 sn)
+
+**Neden bu video:** 30–40 sn'lik sahne reelsleri uzun bulundu; bu, 20–25 sn bandındaki ilk sahne reelsi. Tek mekân (tiyatro girişi), tek karar anı; ikinci evren bölünmüş ekranda aynı anda gelir: hikâye kısalırken iki evrenin karşılaştırması korunur.
+
+**Seslendirme satırları** (`assets/voice/bilet/b1…b7.mp3`; ElevenLabs akışı "Cep Defteri · Kayıp bilet seslendirme"):
+1. `[dramatic]` Fıstık'ın tiyatro bileti kayıp!
+2. Gişe: iki yüz lira daha! Alır mısın? (`eleven_multilingual_v2`, etiketsiz)
+3. `[dramatic]` Fıstık döndü: Bana dört yüze patlar!
+4. `[excited]` Peki bilet değil de, para düşseydi?
+5. `[excited]` Gerçek deneyde: yüzde seksen sekize kırk altı!
+6. Oysa kayıp aynı... iki yüz lira! (`eleven_multilingual_v2`, etiketsiz)
+7. `[playful]` Hangisi daha çok koyar: bilet mi, para mı? (altyazısız) + ortak takip satırı
+
+**Açıklama:**
+```
+Bileti kaybettin: yenisini alır mısın? 🎭
+Sana hangisi daha çok koyar: bileti kaybetmek mi, parayı mı? Yoruma yaz 👇
+📌 Kaydet; bir dahaki "iki kere mi ödeyeceğim?" anında aklına gelsin. Android erken erişim yakında.
+
+Fıstık tiyatronun kapısında 200 TL'lik biletini kaybetti. Gişede yenisi yine 200 TL. Fıstık döndü: "Bana 400'e patlar!"
+Peki bilet değil de cebindeki 200 TL düşseydi? Hiç düşünmeden yeni bilet alırdı. Tutarlar örnek.
+Araştırma: Üniversite öğrencilerine sorulmuş. 10 dolarlık banknotunu kaybettiğini düşünenlerin %88'i yine bilet alırım demiş; aldığı 10 dolarlık bileti kaybettiğini düşünenlerde oran %46 (Tversky ve Kahneman, 1981, Science). Kafamız ikinci bileti aynı "tiyatro hesabına" yazıyor, oyun iki katına mal olmuş gibi geliyor.
+Oysa iki durumda da cebinden aynı para çıktı. Soru aynı: bu oyunu kalan paranla izlemek istiyor musun?
+
+Bileti kaybolunca konsere gitmekten vazgeçen arkadaşına gönder.
+Cep Defteri'nde kaybı da harcama olarak yaz: kullanılabilir para gerçeği gösterir, karar kafadaki hesaba değil kalan paraya göre verilir.
+
+#zihinselmuhasebe #davranışsalekonomi #tiyatro #öğrencibütçesi #paraipuçları #bütçe #cepdefteri
+```
+
+**Yayın notu:** Kapak karesi olarak 0,0 sn'yi seç (tiyatro kapısında papyonlu Fıstık, rüzgârda uçan "BİLET 200 TL" + "Bileti kaybettin. Yenisini alır mısın?"). İlk yorumu sabitle: "Bir Fıstık bileti kaybetti ve döndü, öteki parayı kaybetti ve yine bilet aldı. Sen hangisi olurdun? (Tutarlar örnek.)" Karar anında soru "AL mı, DÖN mü?" + "Yoruma yaz": izleyicinin kendi seçimi. Çağrılar sonda: önce kapanış sorusu + "Yoruma yaz", sonra ortak takip satırı ve takip kartı. Süre 24,23 sn (Kasım 2026'dan itibaren hedef 20–25 sn). Bulunmuş para ve Batık maliyet ile kavram akrabası: aralarına en az bir hafta koy. Yayından önce doğrula: iki sorunun örneklem sayıları (makalenin metni; ikincil kaynaklarda "yaklaşık 200"). Instagram'da "Yapay zekâ bilgisi" etiketini aç.

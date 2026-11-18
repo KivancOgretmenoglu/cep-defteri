@@ -453,6 +453,49 @@ Kelime zamanları ElevenLabs Scribe ile ölçüldü (`assets/voice/noel/words.js
 
 ---
 
+## 12. Kayıp bilet
+**Durum:** üretildi (`out/kayip-bilet.mp4`, 24,23 sn; serinin ilk 20–25 sn'lik reelsi) · **Tür:** tiyatro gecesi (Hamlet göndermeli) · **Oyuncular:** papyonlu Fıstık (`fistik@bowtie`), gişede Karamel
+**Fikir:** "Bileti kaybettin. Yenisini alır mısın?" Aynı 200 TL'lik kayıp bilet olarak gidince insanların yarısından fazlasını geri döndürüyor, para olarak gidince döndürmüyor. İzleyici önce bilet evreninde karar verir; sonra ekran ikiye bölünür ve para evreni yanına gelir.
+
+**Kanca (0. kare):** Gece, tiyatro girişi: ışıklı TİYATRO tabelası, "BU GECE: HAMLET" panosu, kırmızı halı, pirinç direkler; kemerli kırmızı kapının önünde papyonlu Fıstık patileri havada, "BİLET · 200 TL" yazılı bilet rüzgârda patisinin yanından uçuyor. Kutu: **"Bileti kaybettin. Yenisini alır mısın?"**
+
+**Akış (videodaki zamanlar)**
+- 0–2,2 sn: Kanca; seslendirme 0,15'te. Bilet sağ üste savrulur, yapraklar soldan geçer, rüzgâr çizgileri; "kayıp"ta (1,42) Fıstık'ın patisi yüzünde, başının yanında kırmızı "!", alt vuruş; 2,1'de melodram akoru.
+- 2,25–4,0 sn: "Gişe: 200 lira daha!": kamera gişeye kayar (çizgili tente, GİŞE tabelası, pencerede bileti uzatan Karamel, BİLET 200 TL panosu). "daha"da (3,41) pano kırmızı parlar, kasa sesi, Fıstık cüzdanını çıkarır. Kutu: "Bilet 200 TL'ydi. Yenisi de 200 TL".
+- 4,0–4,95 sn: "Alır mısın?": kamera Fıstık'a döner, kalp atışı başlar. Kutu: "Sen olsan? Yenisini alır mısın?" (sayım başlayınca kapanır: soluk hâli "BU GECE: HAMLET" panosunun üstüne biniyordu).
+- 4,95–7,95 sn: Karar anı (gerçek 3 sn): müzik ve altyazı susar; halka ve "KARAR VER / AL mı, DÖN mü? Yoruma yaz". Fıstık cüzdanı Hamlet'in kafatası gibi havada tutar, balonda "ALMAK YA DA ALMAMAK?", bir gişeye bir sokağa bakar; tabela ampulleri kalp atışıyla yanar.
+- 7,95 sn: Fıstık döner: kırmızı "DÖNDÜ" damgası, cüzdan cebe girer.
+- 8,1–10,55 sn: "Fıstık döndü: Bana 400'e patlar!": Fıstık lambaya doğru yürür; "Bana"da (9,22) balonda "200 + 200", "400'e"de (9,56) kırmızı "= 400" ve aşağı kayan düdük. Kutu: "Fıstık döndü. Kafasında bilet 400 TL!"
+- 10,7 sn: Ekran ikiye bölünür (kadife-pirinç şerit): solda BİLET DÜŞTÜ (aynı evren: Fıstık lambanın altında, tepesinde yağmur bulutu), sağda PARA DÜŞTÜ (öbür evren). Kutu: "Bilet değil de 200 TL düşseydi?"
+- 10,7–12,75 sn: Sağda Fıstık neşeyle gişeye gelir; "para"da (11,9) cebinden 200 TL uçar, Fıstık arkasından bakar, omuz silker.
+- 12,75–14 sn: Sağda Karamel bileti uzatır, bilet Fıstık'ın patisine uçar: yeşil ALDI damgası, kasa; kapı açılır, içeriden ışık ve alkış.
+- 12,9–15,9 sn: "Gerçek deneyde: %88'e %46!": kartların gövdesi açılır (13,6), sağda %88, solda %46 ALDI sayacı ve çubuğu; altta "Kaynak: Tversky ve Kahneman 1981 · üniversite öğrencileri". Kutu: "Parayı kaybeden aldı, bileti kaybeden döndü".
+- 15,95–18,0 sn: "Oysa kayıp aynı: 200 lira!": "kayıp"ta (16,36) iki evrende de aynı Cep Defteri satırı yazılır, "Kayıp −200 TL"; "aynı"da (16,71) ortada "="; "200 lira"da (17,14) iki satır birlikte zıplar. Kutu: "Oysa iki kayıp da aynı 200 TL".
+- 18,05–20,65 sn: Kapanış sorusu; iki Fıstık kameraya bakar, kartlar başlıklarına (BİLET DÜŞTÜ / PARA DÜŞTÜ) iner. Kutu: "Hangisi daha çok koyar: bilet mi, para mı?" + "Yoruma yaz" + "Kaybı da Cep Defteri'ne yaz".
+- 20,7–23,68 sn: Ortak takip satırı ve takip kartı; 23,2'de Fıstık'ın patisi "Takip et"e basar.
+- 23,68–24,23 sn: Işıklar söner, dairesel geçişle yeniden kanca (döngü). Sahne kökü `isolation: isolate`: karartma ve bölme şeridi döngü sahnesinin üstüne binmez.
+
+**Müzik:** kancada `melodrama` (alçak tremolo, "kayıp"tan sonra vurucu akor), gişe ve soruda `thriller`, karar anında müzik yok (bant durması), döndükten sonra `ragtime` (minör, seyrek), bölünmüş ekranda ve araştırmada `lofi`, ders, soru ve takipte `pop`, döngüde yine `melodrama`. Kancada rüzgâr, sol panelde ince yağmur. Konuşma altında müzik `voiceDuck` ile kısılır. Miks −14,0 LUFS, tepe −2,5 dBFS.
+
+**Seslendirme (videodaki hali)**
+1. `[dramatic]` Fıstık'ın tiyatro bileti kayıp! (ikinci deneme, 5,27 dB)
+2. Gişe: iki yüz lira daha! Alır mısın? (`eleven_multilingual_v2`, etiketsiz, 5,34 dB. İlk metin "Yenisi iki yüz lira. Alır mısın?" yedi denemede, dört tonda ve iki modelde 5,77–7,09 dB'de kaldı; cümle değişince tuttu.)
+3. `[dramatic]` Fıstık döndü: Bana dört yüze patlar! (4,52 dB)
+4. `[excited]` Peki bilet değil de, para düşseydi? (4,83 dB)
+5. `[excited]` Gerçek deneyde: yüzde seksen sekize kırk altı! (4,71 dB)
+6. Oysa kayıp aynı... iki yüz lira! (`eleven_multilingual_v2`, etiketsiz, 4,25 dB; `[dramatic]` v4 iki denemede 5,74 dB)
+7. `[playful]` Hangisi daha çok koyar: bilet mi, para mı? (altyazısız, 3,58 dB)
+8. `[playful]` Her hafta bir para tuzağı. Kaçırmamak için takip et! (ortak takip satırı, `assets/voice/ortak/takip.mp3`)
+
+Kelime zamanları ElevenLabs Scribe ile ölçüldü (`assets/voice/bilet/words.json`; dökümler metinle birebir aynı). ElevenLabs akışı: "Cep Defteri · Kayıp bilet seslendirme".
+
+**Kapanış kutusu:** "Hangisi daha çok koyar: bilet mi, para mı?" · çipler: "Yoruma yaz", "Kaybı da Cep Defteri'ne yaz" · ardından takip kartı
+**Uygulamayla bağı:** Kayıp da bir harcamadır. Cep Defteri'ne yazınca iki evrende de aynı satır çıkar ("Kayıp −200 TL") ve kullanılabilir para aynı kalır; yeni bilet kararı kafadaki "tiyatro hesabına" değil, kalan paraya göre verilir.
+**Açıklamanın ilk satırı:** Bileti kaybettin: yenisini alır mısın? 🎭
+**Doğrulama sonucu:** Tversky ve Kahneman (1981), "The Framing of Decisions and the Psychology of Choice", *Science* 211(4481): 453–458. Katılımcılar Stanford ve British Columbia Üniversitesi öğrencileri; sınıfta kısa anket. Bilet 10 dolar: 10 dolarlık banknotunu kaybettiğini düşünenlerin %88'i yine bilet alırım dedi, aldığı bileti kaybettiğini düşünenlerde oran %46. Yazarlara göre ikinci bilet aynı "tiyatro hesabına" yazıldığı için oyun 20 dolara mal olmuş gibi geliyor. Makalenin tam metnine bu ortamdan erişilemedi (ağ kuralı); yüzdeler ve örneklem tanımı ikincil kaynaklardan (ders kitabı özeti, Indiana Public Media; iki soruda da yaklaşık 200 kişi). Videodaki 200 TL örnek tutar. Kavram akrabaları: Bulunmuş para (paranın etiketi yok) ve Batık maliyet (geri gelmeyecek parayı karara katma); bu reels "aynı kayıp, iki farklı karar"ı gösterir.
+
+---
+
 ## Kaynaklar
 - Gneezy, Haruvy ve Yafe (2004): [RePEc](https://ideas.repec.org/a/ecj/econjl/v114y2004i495p265-280.html), [özet](https://en.wikipedia.org/wiki/Unscrupulous_diner%27s_dilemma)
 - Bankrate (2021) borç anketi: [PDF](https://www.bankrate.com/pdfs/pr/20211213-lending-money-survey.pdf)
@@ -469,3 +512,4 @@ Kelime zamanları ElevenLabs Scribe ile ölçüldü (`assets/voice/noel/words.js
 - Orhun ve Palazzolo (2019): [DOI](https://doi.org/10.1177/0022243718821660), [SSRN](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2742431), [Washington Post](https://www.washingtonpost.com/news/wonk/wp/2016/03/08/why-the-poor-pay-more-for-toilet-paper-and-just-about-everything-else/), [AMA](https://www.ama.org/2020/03/20/frugality-is-hard-to-afford/)
 - Dunn, Aknin ve Norton (2008): [Science](https://www.science.org/doi/10.1126/science.1150952), [Harvard Gazette](https://news.harvard.edu/gazette/story/2008/04/money-spent-on-others-can-buy-happiness/), [ScienceDaily](https://www.sciencedaily.com/releases/2008/03/080320150034.htm), [HBS Working Knowledge](https://www.library.hbs.edu/working-knowledge/spending-on-happiness)
 - Aknin, Dunn, Proulx, Lok ve Norton (2020) kayıtlı yineleme: [ResearchGate](https://www.researchgate.net/publication/340468788_Does_spending_money_on_others_promote_happiness_A_registered_replication_report) · Kim ve ark. (2022): [PLOS ONE](https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0272434), [PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC9451075/)
+- Tversky ve Kahneman (1981): [Science](https://www.science.org/doi/10.1126/science.7455683), [Indiana Public Media](https://indianapublicmedia.org/amomentofscience/when-psychology-meets-accounting.php)

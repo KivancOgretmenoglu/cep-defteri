@@ -21,6 +21,7 @@ Tüm seslendirmelerde aynı ses ve aynı tarif kullanılır. Kulakta referans: *
 
 3. İndir ve ölç: `python3 promo/voice_check.py assets/voice/<reels>/*.mp3`. Her satır **UYGUN** çıkmalı (ses rengi farkı ≤ 5,5 dB).
 4. UYGUN çıkmayan satırı bir kez daha `eleven_v4` ile dene. Yine olmazsa `eleven_multilingual_v2` ile **etiketsiz** üret (bu model etiketi sesli okur), vurguyu noktalama ve ünlemle ver.
+   Bazı cümleler hangi ton ve modelle üretilirse üretilsin sınırın üstünde kalabiliyor (ölçüm satırın uzun dönem spektrumuna bakar). O zaman cümleyi değiştir: Kayıp bilet'te "Yenisi iki yüz lira. Alır mısın?" yedi denemede (dört ton, iki model) 5,77–7,09 dB'de kaldı; aynı anlamı taşıyan "Gişe: iki yüz lira daha! Alır mısın?" `eleven_multilingual_v2` ile ilk denemede 5,34 dB çıktı.
 5. Dosyaları `promo/assets/voice/<reels>/` altına koy.
 
 ## Videoya yerleştirme (reels.json)

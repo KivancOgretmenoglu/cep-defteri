@@ -7306,5 +7306,284 @@
         "assets/voice/ortak/takip.mp3"
       ]
     ]
+  },
+  "kayip-bilet": {
+    "title": "Kayıp bilet (zihinsel muhasebe): Bileti kaybettin, yenisini alır mısın? (gece tiyatro girişi, papyonlu Fıstık, gişede Karamel, gerçek 3 sn karar anı, bölünmüş ekranda iki evren; Tversky ve Kahneman 1981; Sahne serisi)",
+    "end": 24.23,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.45,
+    "noMusicVariant": true,
+    "limiter": true,
+    "musicPlan": [
+      [
+        0,
+        2.25,
+        "melodrama",
+        {
+          "stab": 2.1,
+          "cresc": 2.0
+        }
+      ],
+      [
+        2.25,
+        7.95,
+        "thriller",
+        {
+          "bpm": 120
+        }
+      ],
+      [
+        7.95,
+        10.7,
+        "ragtime",
+        {
+          "minor": true,
+          "soft": true,
+          "bpm": 96
+        }
+      ],
+      [
+        10.7,
+        15.95,
+        "lofi"
+      ],
+      [
+        15.95,
+        23.93,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ],
+      [
+        23.93,
+        24.23,
+        "melodrama",
+        {
+          "cresc": 2.0
+        }
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          4.95,
+          7.95
+        ]
+      ]
+    },
+    "voiceDuck": {
+      "release": 0.25,
+      "music": 0.22
+    },
+    "captionPixel": true,
+    "captionY": 590,
+    "captionMaxWords": 3,
+    "captionUntil": 18.05,
+    "captionCut": [
+      [
+        4.95,
+        7.95
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        2.2,
+        "Bileti kaybettin.<br><b>Yenisini alır mısın?</b>",
+        300,
+        {
+          "size": 84,
+          "pulse": true
+        }
+      ],
+      [
+        2.25,
+        3.98,
+        "Bilet 200 TL'ydi.<br><b>Yenisi de 200 TL</b>",
+        300,
+        {
+          "size": 80,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        4.01,
+        4.95,
+        "Sen olsan?<br><b>Yenisini alır mısın?</b>",
+        300,
+        {
+          "size": 84,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        7.98,
+        10.65,
+        "Fıstık döndü.<br><b>Kafasında bilet 400 TL!</b>",
+        300,
+        {
+          "size": 76,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        10.7,
+        12.85,
+        "Bilet değil de<br><b>200 TL düşseydi?</b>",
+        300,
+        {
+          "size": 84,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        12.9,
+        15.9,
+        "Parayı kaybeden aldı,<br><b>bileti kaybeden döndü</b>",
+        300,
+        {
+          "size": 70,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        15.95,
+        18.0,
+        "Oysa iki kayıp da<br><b>aynı 200 TL</b>",
+        300,
+        {
+          "size": 84,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        18.05,
+        20.65,
+        "Hangisi daha çok koyar:<br><b>bilet mi, para mı?</b>",
+        300,
+        {
+          "size": 76,
+          "pulse": true
+        }
+      ],
+      [
+        18.15,
+        20.65,
+        "Yoruma yaz",
+        596,
+        {
+          "size": 50,
+          "quiet": true
+        }
+      ],
+      [
+        18.25,
+        20.65,
+        "Kaybı da Cep Defteri'ne yaz",
+        664,
+        {
+          "size": 36,
+          "quiet": true
+        }
+      ],
+      [
+        23.93,
+        24.23,
+        "Bileti kaybettin.<br><b>Yenisini alır mısın?</b>",
+        300,
+        {
+          "size": 84,
+          "pulse": true,
+          "quiet": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "bilet",
+        0,
+        {
+          "lost": 1.42,
+          "gise": 2.25,
+          "daha": 3.41,
+          "ask": 4.01,
+          "count": 4.95,
+          "zero": 7.95,
+          "don": 8.49,
+          "bana": 9.22,
+          "dort": 9.56,
+          "split": 10.7,
+          "para": 11.9,
+          "aldi": 12.75,
+          "sci": 12.99,
+          "s88": 14.09,
+          "s46": 15.12,
+          "kayip": 16.36,
+          "ayni": 16.71,
+          "iki": 17.14,
+          "cta": 18.05,
+          "follow": 20.7,
+          "tapf": 23.2,
+          "dim": 23.68
+        }
+      ],
+      [
+        "bilet",
+        23.93,
+        {
+          "wdur": 0.3
+        }
+      ]
+    ],
+    "voiceTempo": 1.2,
+    "voiceFilter": "brand",
+    "voiceFiles": [
+      [
+        0.15,
+        "assets/voice/bilet/b1.mp3",
+        "Fıstık'ın tiyatro bileti kayıp!"
+      ],
+      [
+        2.25,
+        "assets/voice/bilet/b2.mp3",
+        "Gişe: 200 lira daha! Alır mısın?"
+      ],
+      [
+        8.1,
+        "assets/voice/bilet/b3.mp3",
+        "Fıstık döndü: Bana 400'e patlar!"
+      ],
+      [
+        10.7,
+        "assets/voice/bilet/b4.mp3",
+        "Peki bilet değil de, para düşseydi?"
+      ],
+      [
+        12.9,
+        "assets/voice/bilet/b5.mp3",
+        "Gerçek deneyde: %88'e %46!"
+      ],
+      [
+        15.95,
+        "assets/voice/bilet/b6.mp3",
+        "Oysa kayıp aynı: 200 lira!"
+      ],
+      [
+        18.05,
+        "assets/voice/bilet/b7.mp3"
+      ],
+      [
+        20.7,
+        "assets/voice/ortak/takip.mp3"
+      ]
+    ]
   }
 }

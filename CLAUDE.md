@@ -9,4 +9,7 @@ Devamlılık için her yeni seslendirmede `promo/brand/marka-sesi.md` tarifini u
 ## Reels sonu: takip çağrısı
 Her yeni reelsin son satırı ortak takip satırıdır: `voiceFiles`'a altyazısız `["…", "assets/voice/ortak/takip.mp3"]` ("Her hafta bir para tuzağı. Kaçırmamak için takip et!"), ekranda da takip kartı. Yeniden üretme, aynı dosyayı kullan. Önce kapanış sorusu, sonra takip.
 
+## Reels süresi
+Yeni reelsler 20–25 sn (karar anı ve takip satırı dahil); 30–40 sn uzun bulundu. Ayrıntı: `promo/brand/izlenme-rehberi.md`, 11. kural.
+
 Diğer reels kuralları (hook, süre, çağrılar, döngü): `promo/brand/izlenme-rehberi.md`.
