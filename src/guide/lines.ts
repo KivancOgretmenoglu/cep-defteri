@@ -1,7 +1,7 @@
 /**
  * Rehberin maskot ağzından satırları: adım × 6 karakter × tr+en. Her satır 1–2 kısa cümle.
  * Ton: Fıstık oyuncu, Bilge sakin ve az sözlü, Ceviz tutumlu/telaşlı, Diken kuru ve minimal, Karamel neşeli/sadık,
- * Pamuk tatlı, şefkatli ve biraz dramatik. Karafatma (gizli) pişkin ve küfürbaz: duruma söver, kullanıcıya değil.
+ * Pamuk tatlı, şefkatli ve biraz dramatik. Hamamcan (gizli) pişkin ve küfürbaz: duruma söver, kullanıcıya değil.
  */
 import type { Lang, MascotKey } from '../mascot/characters';
 import type { StepId } from './steps';

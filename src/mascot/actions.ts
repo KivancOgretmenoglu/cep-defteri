@@ -251,7 +251,7 @@ export function buildAction(name: ActionName, ctx: ActionCtx): Frame[] {
       ];
     }
     case 'antenna': {
-      // Antenler seğirir: uçlara birer piksel eklenip kalkar (Karafatma'nın anten uçları gövdede (0,2) ve (23,2)).
+      // Antenler seğirir: uçlara birer piksel eklenip kalkar (Hamamcan'ın anten uçları gövdede (0,2) ve (23,2)).
       const c = '#4A2410';
       const tipL = (down: boolean): R[] => [[OX - 1, OY + (down ? 3 : 1), 1, 1, c]];
       const tipR = (down: boolean): R[] => [[OX + 24, OY + (down ? 3 : 1), 1, 1, c]];

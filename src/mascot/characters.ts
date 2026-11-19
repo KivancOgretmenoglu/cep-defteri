@@ -1,5 +1,5 @@
 /**
- * Cep Defteri'nin maskotları: altı özgün hayvan karakter ve gizli kodla açılan bir yedinci (Karafatma).
+ * Cep Defteri'nin maskotları: altı özgün hayvan karakter ve gizli kodla açılan bir yedinci (Hamamcan; iç anahtarı 'karafatma').
  * Her biri 24×24 piksellik bir gövde çizimi, yüz ve aksesuarlar için bağlantı noktaları (anchors),
  * renk teması ve kişilik bilgisinden oluşur. Bu dosya saftır (tarayıcıya dokunmaz):
  * uygulama, Android simge üretici ve testler aynı tanımı kullanır.
@@ -384,11 +384,11 @@ export const CHARACTERS: Record<MascotKey, Character> = {
   karafatma: {
     key: 'karafatma',
     fur: '#5A2C12',
-    name: { tr: 'Karafatma', en: 'Karafatma' },
+    name: { tr: 'Hamamcan', en: 'Hamamcan' },
     species: { tr: 'Hamam böceği', en: 'Cockroach' },
     intro: {
-      tr: 'Ben Karafatma. Terlikten kaçtım, enflasyondan kaçamadım lan. Ağzım bozuk ama defterim tertemiz.',
-      en: "I'm Karafatma. Dodged the slipper, couldn't dodge inflation, damn it. Filthy mouth, spotless books.",
+      tr: 'Ben Hamamcan. Terlikten kaçtım, enflasyondan kaçamadım lan. Ağzım bozuk ama defterim tertemiz.',
+      en: "I'm Hamamcan. Dodged the slipper, couldn't dodge inflation, damn it. Filthy mouth, spotless books.",
     },
     traits: {
       tr: 'Pişkin, küfürbaz, her şeye rağmen hayatta kalır. Çayı, cipsi ve maçı sever. Sana değil, fiyatlara söver.',

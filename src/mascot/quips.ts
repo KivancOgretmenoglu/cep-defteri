@@ -1,7 +1,7 @@
 /**
  * Maskotların kısa espri, selam ve ipuçları (Türkçe + İngilizce).
  * Ton: sıcak, yargılamayan; harcamayı asla ayıplamaz, yatırım değerinin düşüşünü yorumlamaz.
- * Karafatma (gizli maskot) küfürbazdır: fiyatlara, faturaya, terliğe, ay sonuna söver; kullanıcıya asla.
+ * Hamamcan (gizli maskot, anahtarı 'karafatma') küfürbazdır: fiyatlara, faturaya, terliğe, ay sonuna söver; kullanıcıya asla.
  * `{name}` yer tutucusu maskotun (kullanıcının verdiği ya da varsayılan) adıyla değişir.
  * Her karakterin kendi "ağzı" vardır; ortak havuzla karıştırılır.
  */

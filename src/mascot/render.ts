@@ -255,7 +255,7 @@ export const OUTFITS: Record<string, Outfit> = {
   pajama: { name: { tr: 'Pijama', en: 'Pajamas' }, hat: 'pjcap', neck: 'pjcollar' },
   /** Yatırım ekranı: takım elbise + kravat + evrak çantası */
   suit: { name: { tr: 'Takım elbise', en: 'Suit' }, neck: 'suit', hold: { side: 'l', item: 'briefcase' } },
-  /** Karafatma'ya özel: pembe takım, siyah gömlek, altın zincir */
+  /** Hamamcan'a özel: pembe takım, siyah gömlek, altın zincir */
   pinksuit: { name: { tr: 'Pembe takım', en: 'Pink suit' }, neck: 'pinksuit', only: 'karafatma' },
 };
 export const HOME_OUTFITS = ['plain', 'winter', 'cap', 'headphones', 'bowtie'] as const;
@@ -265,7 +265,7 @@ export function wardrobeFor(key: MascotKey): string[] {
   return [...HOME_OUTFITS, ...Object.keys(OUTFITS).filter((o) => OUTFITS[o].only === key)];
 }
 
-/** Kıyafet çözümü: başka maskota özel kıyafet sade görünür; Karafatma takım elbiseyi hep pembe giyer. */
+/** Kıyafet çözümü: başka maskota özel kıyafet sade görünür; Hamamcan takım elbiseyi hep pembe giyer. */
 export function outfitFor(key: MascotKey, outfitKey: string): Outfit {
   const o = OUTFITS[outfitKey] ?? OUTFITS.plain;
   if (o.only && o.only !== key) return OUTFITS.plain;
@@ -391,12 +391,13 @@ interface SuitColors {
   chain?: string;
 }
 const NAVY_SUIT: SuitColors = { jacket: '#454E6B', lapel: '#7581A6', shirt: '#FFFFFF', button: '#2C3247' };
-export const PINK_SUIT: SuitColors = { jacket: '#E0679B', lapel: '#F6A9C8', shirt: '#2B2530', button: '#A63A6B', chain: GOLD };
+export const PINK_SUIT: SuitColors = { jacket: '#E0679B', lapel: '#A8326A', shirt: '#2B2530', button: '#A63A6B', chain: GOLD };
 
 function suitRects(ch: Character, colors: SuitColors = NAVY_SUIT): R[] {
   const fit = SUIT_FIT[ch.key];
   const { jacket: SUIT, lapel: LAPEL, shirt: SHIRT } = colors;
   const res = ch.res ?? 1;
+  if (res > 1) return hiSuitRects(ch, colors, fit);
   const hi = bodyGrid(ch.key);
   const g = unitGrid(ch.key);
   const y0 = ch.anchors.neck.y;
@@ -412,7 +413,6 @@ function suitRects(ch: Character, colors: SuitColors = NAVY_SUIT): R[] {
       last = Math.floor(y / res);
     }
   }
-  if (res > 1) return [...r, ...hiCollarRects(ch, colors, fit.tie, (last + 1) * res)];
   // V yaka: gömlek üçgeni, açık renk yaka kenarları, kravat (düğüm + uç)
   const shirt: [number, number, number][] = [[0, m - 2, 4], [1, m - 2, 4], [2, m - 1, 2]];
   for (const [dy, x, w] of shirt) if (y0 + dy <= last) r.push(at(x, y0 + dy, w, 1, SHIRT));
@@ -434,25 +434,93 @@ function suitRects(ch: Character, colors: SuitColors = NAVY_SUIT): R[] {
 }
 
 /**
- * Ayrıntılı gövdede (res 2) V yaka: gömlek üçgeni, ince yaka kenarları, düğme hattı; kravat ya da altın zincir.
- * Koordinatlar gövde ızgarasında; `end` ceketin bittiği satır (dahil değil).
+ * Ayrıntılı gövdede (res 2) takım elbise, gövde ızgarasının kendi pikselleriyle:
+ * ince çizgili kumaş, sol üstten ışık / sağ alttan gölge, ayrı tonda kollar (kanatlar) ve kol dikişi,
+ * kenarı koyu, çentikli geniş yakalar, V'de gömlek (kravat ya da altın zincir), orta dikiş ve altın düğmeler,
+ * göğüs cebinde mendil, iki yan cep kapağı. Bacaklar (`keep`) boyanmaz.
  */
-function hiCollarRects(ch: Character, colors: SuitColors, tie: string, end: number): R[] {
+function hiSuitRects(ch: Character, colors: SuitColors, fit: (typeof SUIT_FIT)[MascotKey]): R[] {
   const res = ch.res ?? 2;
-  const k = 1 / res;
-  const out: R[] = [];
-  const h = (x: number, y: number, w: number, hh: number, c: string) => out.push(at(x * k, y * k, w * k, hh * k, c));
+  const g = bodyGrid(ch.key);
+  const n = g.length;
   const Y = ch.anchors.neck.y * res;
   const M = Math.round(ch.anchors.neck.x * res); // orta çizgi: M-1 | M
-  const depth = 6;
-  for (let d = 0; d < depth; d++) {
+  const x0 = fit.x0 * res, x1 = (fit.x1 + 1) * res;
+  const J = colors.jacket;
+  const tone = {
+    base: J, light: shade(J, 0.22), dark: shade(J, -0.18), deep: shade(J, -0.36), pin: shade(J, 0.09),
+    sleeve: shade(J, -0.1), sleeveLight: shade(J, 0.1), sleeveDark: shade(J, -0.28),
+    // Saten yaka: ceketten koyu, dış kenarında ince parlak çizgi
+    lapel: colors.lapel, lapelEdge: shade(colors.lapel, 0.45),
+  };
+  const isJ = (x: number, y: number) => {
+    const c = g[y]?.[x];
+    return y >= Y && x >= x0 && x < x1 && !!c && c !== INK && !fit.keep?.includes(c);
+  };
+  const isSleeve = (x: number, y: number) => isJ(x, y) && !!fit.sleeve?.includes(g[y][x]!);
+  const out: Grid = Array.from({ length: n }, () => Array<string | null>(n).fill(null));
+  const set = (x: number, y: number, c: string) => {
+    if (isJ(x, y)) out[y][x] = c;
+  };
+  let last = Y;
+  // Kumaş: ışık, gölge, ince çizgi; kollar ayrı tonda, gövdeyle birleştiği yerde dikiş
+  for (let y = Y; y < n; y++)
+    for (let x = x0; x < x1; x++) {
+      if (!isJ(x, y)) continue;
+      last = Math.max(last, y);
+      const sl = isSleeve(x, y);
+      let c: string;
+      if (!isJ(x - 1, y) || !isJ(x, y - 1)) c = sl ? tone.sleeveLight : tone.light;
+      else if (!isJ(x + 1, y) || !isJ(x, y + 1)) c = sl ? tone.sleeveDark : tone.dark;
+      else if (!sl && (isSleeve(x - 1, y) || isSleeve(x + 1, y))) c = tone.deep;
+      else if (sl) c = (x + y) % 7 === 0 ? tone.sleeveLight : tone.sleeve;
+      else c = (x - M) % 4 === 0 ? tone.pin : tone.base;
+      out[y][x] = c;
+    }
+  // Orta dikiş ve düğmeler (yakaların birleştiği yerin altından eteğe)
+  for (let y = Y + 8; y < last; y++) set(M, y, tone.deep);
+  for (const y of [Y + 9, Y + 13]) {
+    set(M - 1, y, GOLD);
+    set(M, y, shade(GOLD, -0.25));
+  }
+  // Yan cep kapakları
+  for (const [a, b] of [[M - 10, M - 5], [M + 4, M + 9]] as const) {
+    for (let x = a; x <= b; x++) set(x, Y + 14, tone.deep);
+    for (let x = a; x <= b; x++) set(x, Y + 13, tone.light);
+  }
+  // Göğüs cebi + mendil (giyenin solu, bakanın sağı)
+  for (let x = M + 5; x <= M + 9; x++) set(x, Y + 9, tone.deep);
+  const sq: [number, number, string][] = [
+    [M + 6, Y + 8, '#FFFFFF'], [M + 7, Y + 8, '#FFFFFF'], [M + 8, Y + 8, '#F3E6EC'],
+    [M + 7, Y + 7, '#FFFFFF'], [M + 8, Y + 7, GOLD], [M + 6, Y + 7, '#F3E6EC'], [M + 8, Y + 6, '#F6D36B'],
+  ];
+  for (const [x, y, c] of sq) set(x, y, c);
+  // Yakalar: dış kenar omuzdan V'nin dibine iner; dışı koyu kenar, 2. satırda çentik
+  for (let d = 0; d <= 8; d++) {
+    const outer = M - 9 + d;
+    const half = Math.max(1, 5 - d);
+    const inner = d <= 5 ? M - half - 1 : M - 1;
+    for (let x = outer; x <= inner; x++) {
+      const c = x === outer ? tone.lapelEdge : tone.lapel;
+      set(x, Y + d, c);
+      set(2 * M - 1 - x, Y + d, c);
+    }
+    if (d === 2) {
+      set(outer, Y + d, tone.base);
+      set(2 * M - 1 - outer, Y + d, tone.base);
+      set(outer + 1, Y + d, tone.lapelEdge);
+      set(2 * M - 2 - outer, Y + d, tone.lapelEdge);
+    }
+  }
+  const r = gridRects(out, OX, OY, res);
+  // V'de gömlek; kravat ya da altın zincir
+  const k = 1 / res;
+  const h = (x: number, y: number, w: number, hh: number, c: string) => r.push(at(x * k, y * k, w * k, hh * k, c));
+  for (let d = 0; d < 6; d++) {
     const half = Math.max(1, 5 - d);
     h(M - half, Y + d, half * 2, 1, colors.shirt);
-    h(M - half - 1, Y + d, 1, 1, colors.lapel);
-    h(M + half, Y + d, 1, 1, colors.lapel);
   }
   if (colors.chain) {
-    // Zincir V boyunca sarkar, ucunda madalyon
     const c = colors.chain, hl = shade(c, 0.4);
     for (let d = 0; d < 4; d++) {
       h(M - 4 + d, Y + d, 1, 1, d % 2 ? hl : c);
@@ -461,13 +529,10 @@ function hiCollarRects(ch: Character, colors: SuitColors, tie: string, end: numb
     h(M - 1, Y + 4, 2, 2, c);
     h(M - 1, Y + 4, 1, 1, hl);
   } else {
-    h(M - 1, Y, 2, 1, shade(tie, -0.2));
-    h(M - 1, Y + 1, 2, depth + 2, tie);
-    h(M - 1, Y + depth + 3, 2, 1, shade(tie, -0.2));
+    h(M - 1, Y, 2, 1, shade(fit.tie, -0.2));
+    h(M - 1, Y + 1, 2, 7, fit.tie);
   }
-  // Düğmeler
-  for (let y = Y + depth + 2; y < end - 2; y += 4) h(M - 1, y, 1, 1, colors.button);
-  return out;
+  return r;
 }
 
 function neckRects(ch: Character, neck: Neck): R[] {
