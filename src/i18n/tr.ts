@@ -5,6 +5,10 @@
 import type { Entry } from './core';
 import { hintsTr } from './hints.tr';
 import { assetsTr } from './assets.tr';
+import { stocksTr } from './stocks.tr';
+import { offBudgetTr } from './offbudget.tr';
+import { growthTr } from './growth.tr';
+import { portfolioTr } from './portfolio.tr';
 import { defaultsTr } from './defaults.tr';
 
 import { ringsTr } from './rings.tr';
@@ -17,6 +21,10 @@ import { accdelTr } from './accdel.tr';
 export const tr = {
   ...hintsTr,
   ...assetsTr,
+  ...stocksTr,
+  ...offBudgetTr,
+  ...growthTr,
+  ...portfolioTr,
   ...defaultsTr,
   'err.validDate': "Geçerli bir tarih seç.",
   'err.futureDate': "Gelecek tarihli kayıt girilemez. Yaklaşan ödemeler için plan ekleyebilirsin.",
@@ -155,6 +163,8 @@ export const tr = {
   'home.perDayPre': "günde yaklaşık",
   'home.perDayPost': "",
   'home.inDaily': "Günlük hesaplarda",
+  'home.nowTitle': "Hesaplarındaki para",
+  'home.afterPayments': "Ödemelerden sonra kullanılabilir",
   'home.upcomingPayments': "Yaklaşan ödemeler",
   'home.plannedInvest': "Planlı yatırım aktarımı",
   'home.reserve': "Kenarda tuttuğun birikim payı",

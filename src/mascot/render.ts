@@ -216,7 +216,7 @@ const shade = (hex: string, amt: number) => {
   return '#' + ((ch(n >> 16) << 16) | (ch((n >> 8) & 255) << 8) | ch(n & 255)).toString(16).padStart(6, '0');
 };
 
-type Hat = 'beanie' | 'cap' | 'straw' | 'fedora' | 'hardhat' | 'santa' | 'visor' | 'headphones' | 'nightcap' | 'pjcap';
+type Hat = 'beanie' | 'cap' | 'straw' | 'fedora' | 'hardhat' | 'santa' | 'visor' | 'headphones' | 'nightcap' | 'pjcap' | 'party';
 type Neck = 'scarf' | 'scarfRed' | 'bowtie' | 'bowtieGold' | 'collar' | 'pjcollar' | 'suit' | 'pinksuit';
 type Face = 'glasses' | 'sunglasses';
 type Item = 'receipt' | 'notebook' | 'clipboard' | 'pot' | 'box' | 'book' | 'icecream' | 'briefcase';
@@ -251,6 +251,8 @@ export const OUTFITS: Record<string, Outfit> = {
   newyear: { name: { tr: 'Yılbaşı', en: 'New Year' }, hat: 'santa', neck: 'scarfRed' },
   bayram: { name: { tr: 'Bayramlık', en: 'Holiday best' }, neck: 'bowtieGold', sparkle: true },
   summer: { name: { tr: 'Yaz', en: 'Summer' }, face: 'sunglasses', hold: { side: 'r', item: 'icecream' } },
+  /** Doğum günü ve kullanım yıl dönümü (bkz. domain/special.ts) */
+  party: { name: { tr: 'Doğum günü', en: 'Birthday' }, hat: 'party', neck: 'bowtieGold', sparkle: true },
   /** Gece 22:00–05:59, ana ekranda (bkz. seasonal.homeOutfit) */
   pajama: { name: { tr: 'Pijama', en: 'Pajamas' }, hat: 'pjcap', neck: 'pjcollar' },
   /** Yatırım ekranı: takım elbise + kravat + evrak çantası */
@@ -280,6 +282,18 @@ function hatRects(ch: Character, hat: Hat, lift: boolean): R[] {
   const r: R[] = [];
   const box = (x: number, yy: number, ww: number, hh: number, c: string) => r.push(at(x, yy, ww, hh, c));
   switch (hat) {
+    case 'party': {
+      // Çizgili külah + ponpon: kafanın ortasında hafif yana yatık durur.
+      const a = '#E86A92';
+      const b = '#F5C451';
+      const top = Math.round(cx);
+      box(top - 3, y - 1, 6, 1, shade(a, -0.2));
+      // Noel Baba şapkasıyla aynı yükseklik (tuvalden taşmaz): 4 sıra külah + 1 sıra ponpon.
+      const rows: [number, string][] = [[3, a], [2, b], [2, a], [1, b]];
+      rows.forEach(([half, c], i) => box(top - half + (i >= 2 ? 1 : 0), y - 2 - i, half * 2, 1, c));
+      box(top + 1, y - 6, 2, 1, CREAM);
+      break;
+    }
     case 'beanie': {
       const c = '#3E8A8C';
       box(l, y - 1, w, 2, shade(c, -0.25));

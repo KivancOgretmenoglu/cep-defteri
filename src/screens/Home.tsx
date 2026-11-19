@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { Settings, ChevronRight, Plus, Sprout, Info, Eye, EyeOff, HandCoins, ScrollText, ChartLine, ChartColumn } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
+import { Settings, ChevronRight, Plus, Sprout, Info, Eye, EyeOff, HandCoins, Mail, ChartLine, ChartColumn } from 'lucide-react';
 import { monthOf } from '../domain/dates';
 import { formatMoney, hiddenMoney, monthLabel, monthName, shortDate } from '../i18n/format';
 import { useT } from '../i18n';
@@ -8,7 +8,9 @@ import {
 } from '../domain/ledger';
 import { usePrices } from '../store/prices';
 import * as A from '../domain/actions';
-import { commit } from '../store/store';
+import { commit, useStore } from '../store/store';
+import { specialDay } from '../domain/special';
+import { burst } from '../ui/Celebrate';
 import { mascotEvent } from '../mascot/events';
 import { BalanceChart } from '../ui/BalanceChart';
 import { DueRow } from '../ui/DueRow';
@@ -18,7 +20,8 @@ import { SpendingChart } from '../ui/SpendingChart';
 import { addDays } from '../domain/dates';
 import { Amount, AnimatedMoney, Progress, SectionHead } from '../ui/kit';
 import { useListSettle } from '../ui/motion';
-import { MascotNote, SceneEmpty } from '../mascot/MascotNote';
+import { MascotNote, SceneEmpty, useMascot } from '../mascot/MascotNote';
+import { properSuffix } from '../domain/tr';
 import { Rings } from '../ui/Rings';
 import { TxRow } from '../ui/TxRow';
 import { go, openSheet } from '../ui/nav';
@@ -27,6 +30,8 @@ import { ACCOUNT_ICONS } from '../ui/icons';
 import { BackupReminderCard } from '../native/BackupReminder';
 import { Sky } from '../ui/Sky';
 import { GuideInvite } from '../guide/Invite';
+
+const PARTY_KEY = 'cep-defteri:party';
 
 export function Home() {
   const t = useT();
@@ -50,7 +55,33 @@ export function Home() {
     const card = pendingReportCard(data, today);
     return { av, mood, sum, budget, up, soon, spark, spend, card };
   }, [data, today, month, lang]);
-  const { av, mood, sum, budget, soon } = d;
+  const { av, sum, budget, soon } = d;
+  const mascotName = useMascot().name;
+  const mascotFrom = lang === 'en' ? mascotName : properSuffix(mascotName, 'abl');
+  // Doğum günü / kullanım yıl dönümü: maskot notu kutlamaya döner (kurallı not "Neden böyle?" içinde kalır).
+  const mode = useStore((s) => s.mode);
+  const special = useMemo(() => specialDay(data, today, mode), [data, today, mode]);
+  const mood = special
+    ? {
+        ...d.mood,
+        mood: 'celebrate' as const,
+        text: special.kind === 'birthday' ? t('party.birthday') : t('party.anniversary', { n: special.years, tx: special.txCount }),
+        why: `${t(special.kind === 'birthday' ? 'party.birthdayWhy' : 'party.anniversaryWhy')} ${d.mood.text}`,
+      }
+    : d.mood;
+  useEffect(() => {
+    if (!special) return;
+    // Günde bir kez konfeti (bu cihazda).
+    const key = `${special.kind}|${today}`;
+    try {
+      if (localStorage.getItem(PARTY_KEY) === key) return;
+      localStorage.setItem(PARTY_KEY, key);
+    } catch {
+      /* depolama yoksa yine de patlat */
+    }
+    const id = setTimeout(() => burst(36, document.querySelector('.mascot-note__avatar')), 600);
+    return () => clearTimeout(id);
+  }, [special, today]);
   const dailyAccs = data.accounts.filter((a) => isDaily(a) && (!a.archived || cashBalance(data, a.id) !== 0));
   const invAccs = data.accounts.filter((a) => isInvestment(a) && !a.archived);
   const recent = [...data.txs].sort((a, b) => (a.date === b.date ? b.seq - a.seq : a.date < b.date ? 1 : -1)).slice(0, 5);
@@ -90,9 +121,10 @@ export function Home() {
       </header>
 
       {d.card && (
-        <button className="report-prompt" onClick={() => openSheet({ kind: 'reportCard', month: d.card! })}>
-          <ScrollText size={20} aria-hidden />
-          <span><b>{t('home.cardReady', { month: monthName(d.card) })}</b><small>{t('home.cardSub')}</small></span>
+        // Biten ayın mektubu (zarf); içinden ay karnesine geçilir.
+        <button className="report-prompt report-prompt--letter" onClick={() => openSheet({ kind: 'letter', month: d.card! })}>
+          <Mail size={20} aria-hidden />
+          <span><b>{t('letter.prompt', { fromName: mascotFrom })}</b><small>{t('letter.promptSub', { month: monthName(d.card) })}</small></span>
           <ChevronRight size={18} aria-hidden />
         </button>
       )}
@@ -118,23 +150,19 @@ export function Home() {
       <div className="home-grid">
         <section className="card receipt" aria-labelledby="avail-h">
           <div className="receipt__top">
-            <h2 id="avail-h" className="label">{t('home.available')}</h2>
+            <h2 id="avail-h" className="label">{t('home.nowTitle')}</h2>
             <span className="receipt__period">{periodText}</span>
           </div>
           {av.confidence === 'none' ? (
             <p className="muted">{t('home.availableEmpty')}</p>
           ) : (
             <>
+              {/* Büyük rakam: günlük hesaplardaki anlık para. Ödemelerden sonra kalan, alttaki dökümün toplamı. */}
               <div className="receipt__hero">
-                <Amount value={av.available} size="xl" hide={hide} animate className={av.available < 0 && !hide ? 'tone-warn' : ''} />
+                <Amount value={av.dailyBalance} size="xl" hide={hide} animate className={av.dailyBalance < 0 && !hide ? 'tone-warn' : ''} />
                 <button className="icon-btn icon-btn--small" onClick={toggleHide} aria-label={hide ? t('home.showBalances') : t('home.hideBalances')}>{hide ? <EyeOff size={18} /> : <Eye size={18} />}</button>
               </div>
-              {av.available > 0 && <p className="receipt__perday">{t('home.perDayPre')} <b><AnimatedMoney value={av.perDay} hide={hide} /></b>{t('home.perDayPost')} · {t('common.days', { n: av.daysLeft })}</p>}
               <dl className="receipt__lines">
-                <div>
-                  <dt>{t('home.inDaily')}</dt>
-                  <dd><AnimatedMoney value={av.dailyBalance} hide={hide} /></dd>
-                </div>
                 <div>
                   <dt>
                     − {t('home.upcomingPayments')}{av.payments.length ? ` (${av.payments.length})` : ''}
@@ -160,10 +188,11 @@ export function Home() {
                   </div>
                 )}
                 <div className="receipt__total">
-                  <dt>= {t('home.availableShort')}</dt>
-                  <dd><AnimatedMoney value={av.available} hide={hide} /></dd>
+                  <dt>= {t('home.afterPayments')}</dt>
+                  <dd className={av.available < 0 && !hide ? 'tone-warn' : ''}><AnimatedMoney value={av.available} hide={hide} /></dd>
                 </div>
               </dl>
+              {av.available > 0 && <p className="receipt__perday">{t('home.perDayPre')} <b><AnimatedMoney value={av.perDay} hide={hide} /></b>{t('home.perDayPost')} · {t('common.days', { n: av.daysLeft })}</p>}
               {av.debtsReceivable > 0 && (
                 <p className="receipt__note">
                   <Info size={14} aria-hidden /> {t('home.receivableNote', { amount: formatMoney(av.debtsReceivable) })}

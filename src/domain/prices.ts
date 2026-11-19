@@ -9,7 +9,7 @@
  * Ayrıştırıcılar savunmacıdır: bilinmeyen/bozuk alanlar atlanır, saçma değerler (≤0, NaN) alınmaz.
  */
 import type { Money } from './money';
-import { FX_UNITS, GOLD_UNITS, PURE_GRAMS, type AssetUnit } from './assets';
+import { FX_UNITS, GOLD_UNITS, PURE_GRAMS, type AssetUnit, type FixedUnit } from './assets';
 
 export type PriceSource = 'live' | 'estimate' | 'manual';
 
@@ -21,8 +21,14 @@ export interface UnitPrice {
   /** Fiyatın alındığı an (ms). */
   at: number;
   source: PriceSource;
+  /** Önceki kapanışın alış karşılığı (günlük değişim için; kaynak vermiyorsa yok). */
+  prevBuy?: Money;
 }
 
+/**
+ * Birim başına TL fiyat. Altın/döviz kaynaktan doğrudan gelir; hisseler kendi para biriminde saklanan
+ * kotasyondan (src/domain/stocks.ts) türetilip buraya eklenir, böylece değer hesabı tek kitaptan okur.
+ */
 export type PriceBook = Partial<Record<AssetUnit, UnitPrice>>;
 
 export const PRIMARY_URL = 'https://finans.truncgil.com/today.json';
@@ -65,7 +71,7 @@ const toMoney = (n: number | null): Money | null => (n !== null && n > 0 && n < 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 
 /** Kaynaktaki olası anahtarlar (eski "today.json" ve v4 biçimi). */
-const TRUNCGIL_KEYS: Record<AssetUnit, string[]> = {
+const TRUNCGIL_KEYS: Record<FixedUnit, string[]> = {
   gram: ['gram-altin', 'GRA', 'gram altın'],
   ceyrek: ['ceyrek-altin', 'CEYREKALTIN'],
   yarim: ['yarim-altin', 'YARIMALTIN'],
@@ -78,6 +84,14 @@ const TRUNCGIL_KEYS: Record<AssetUnit, string[]> = {
 };
 const BUY_FIELDS = ['Alış', 'Alis', 'alis', 'alış', 'Buying', 'buying', 'buy'];
 const SELL_FIELDS = ['Satış', 'Satis', 'satis', 'satış', 'Selling', 'selling', 'sell'];
+const CHANGE_FIELDS = ['Değişim', 'Degisim', 'Change', 'change'];
+
+/** Günlük % değişimden önceki kapanışın alışı: alış ÷ (1 + %/100). Uçuk (|%| ≥ 20) ya da yoksa undefined. */
+function prevFromPct(buy: Money, pct: number | null): Money | undefined {
+  if (pct === null || !Number.isFinite(pct) || Math.abs(pct) >= 20) return undefined;
+  const p = Math.round(buy / (1 + pct / 100));
+  return p > 0 ? p : undefined;
+}
 
 const field = (o: Record<string, unknown>, names: string[]) => {
   for (const n of names) if (n in o) return o[n];
@@ -102,7 +116,8 @@ export function parseTruncgil(json: unknown, now: number): PriceBook {
     // Makas ters gelirse küçük olan alıştır; uçuk fark (×2) bozuk veridir.
     const lo = Math.min(b, s), hi = Math.max(b, s);
     if (hi > lo * 2) continue;
-    book[unit] = { buy: lo, sell: hi, at: now, source: 'live' };
+    const prevBuy = prevFromPct(lo, parseNumberLoose(field(row, CHANGE_FIELDS)));
+    book[unit] = { buy: lo, sell: hi, at: now, source: 'live', ...(prevBuy ? { prevBuy } : {}) };
   }
   return book;
 }
@@ -150,7 +165,7 @@ export function sanitizeBook(v: unknown): PriceBook {
     if (!isObj(p)) continue;
     const { buy, sell, at, source } = p;
     if (Number.isSafeInteger(buy) && (buy as number) > 0 && Number.isSafeInteger(sell) && (sell as number) > 0 && typeof at === 'number' && ['live', 'estimate', 'manual'].includes(source as string))
-      out[unit] = { buy: buy as Money, sell: sell as Money, at, source: source as PriceSource };
+      out[unit] = { buy: buy as Money, sell: sell as Money, at, source: source as PriceSource, ...(Number.isSafeInteger(p.prevBuy) && (p.prevBuy as number) > 0 ? { prevBuy: p.prevBuy as Money } : {}) };
   }
   return out;
 }

@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Trash2, RotateCcw, CalendarClock, Repeat, UserRound, Split, Tag, X } from 'lucide-react';
+import { Trash2, RotateCcw, CalendarClock, Repeat, UserRound, Split, Tag, X, PiggyBank } from 'lucide-react';
+import { isAssetUnit } from '../domain/assets';
+import { maybeAskReview } from '../native/playStore';
+import { mascotMood } from '../domain/mood';
 import type { ID, PlanRef, Tx } from '../domain/types';
 import * as A from '../domain/actions';
 import { addDays, diffDays, type ISODate } from '../domain/dates';
-import { catName, dueLabel, formatMoney, lower, parseMoney, shortDate } from '../i18n/format';
+import { catName, dueLabel, formatMoney, lower, parseMoney, pctPlain, shortDate } from '../i18n/format';
 import { useT } from '../i18n';
 import type { Key } from '../i18n/core';
 import { AssetQtyFields, type AssetValue } from './AssetFields';
 import { allTags, cashBalance, isInvestment, isPerson, occurrences, planIsInflow, planIsOutflow, transferKind } from '../domain/ledger';
 import { mascotEvent, type MascotEvent } from '../mascot/events';
-import { commit } from '../store/store';
+import { commit, getState } from '../store/store';
 import { closeSheet, openSheet, type SheetState } from '../ui/nav';
 import { discardTxDraft, stashTxDraft, takeTxDraft, type TxSnap } from './txDraft';
 import { Chip, FormError, MoneyInput, Segmented, Sheet, inputFromMoney } from '../ui/kit';
@@ -33,7 +36,7 @@ function tabOf(tx: Tx, accounts: Map<ID, import('../domain/types').Account>): { 
   return { tab: tx.type === 'income' ? 'income' : 'expense', dir: 'in' };
 }
 
-export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string; direction?: 'in' | 'out'; accountId?: ID; personId?: ID; paidByPerson?: boolean } }) {
+export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string; direction?: 'in' | 'out'; accountId?: ID; personId?: ID; paidByPerson?: boolean; unit?: string } }) {
   const T = useT();
   const { data, today } = useData();
   const { accounts, cats } = useLookups(data);
@@ -71,6 +74,8 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
       pick('personId', editing && init.tab === 'debt' ? (init.dir === 'out' ? editing.toAccountId! : editing.accountId) : preset?.personId ?? persons[0]?.id ?? ''),
   );
   const [split, setSplit] = useState(pick('split', false));
+  // Bütçe dışı gider: aylık bütçeye ve kategori limitine sayılmaz (biriktirip alınan gitar gibi).
+  const [offBudget, setOffBudget] = useState<boolean>(pick('offBudget', editing?.type === 'expense' && !!editing.offBudget) ?? false);
   const [splitPerson, setSplitPerson] = useState<ID>((rs?.target === 'splitPerson' && newPerson) || pick('splitPerson', persons[0]?.id ?? ''));
   const [splitShare, setSplitShare] = useState(pick('splitShare', ''));
   const [tags, setTags] = useState<string[]>(pick('tags', editing?.tags ?? []));
@@ -96,7 +101,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
   function openNew(next: SheetState, target: TxSnap['target'] = 'accountId') {
     const back: SheetState = editing ? { kind: 'edit', txId: editing.id } : { kind: 'add', preset: preset as Extract<SheetState, { kind: 'add' }>['preset'] };
     stashTxDraft(
-      { tab, dir, amount, categoryId, personId, split, splitPerson, splitShare, tags, tagInput, accountId, toAccountId, invId, date, note, showNote, planRef, target, catIds: data.categories.map((c) => c.id), accIds: data.accounts.map((a) => a.id) },
+      { tab, dir, amount, categoryId, personId, split, splitPerson, splitShare, offBudget, tags, tagInput, accountId, toAccountId, invId, date, note, showNote, planRef, target, catIds: data.categories.map((c) => c.id), accIds: data.accounts.map((a) => a.id) },
       back,
       next,
     );
@@ -181,7 +186,7 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
     if (tab === 'expense' || tab === 'income') {
       if (!categoryId) return T('err.pickCategory');
       if (!accountId) return T('err.pickAccount');
-      return { type: tab, amount: amt, date, accountId, categoryId, note, planRef, tags };
+      return { type: tab, amount: amt, date, accountId, categoryId, note, planRef, tags, ...(tab === 'expense' && offBudget ? { offBudget: true } : {}) };
     }
     if (tab === 'transfer') return { type: 'transfer', amount: amt, date, accountId, toAccountId, note, planRef, tags };
     if (tab === 'debt') {
@@ -243,6 +248,11 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
     else {
       mascotEvent(eventFor(draft));
       closeSheet();
+      // İyi an: yeni kayıt kaydedildi ve maskot keyifli/sakin (bütçe sıkıntısı yokken) → puanlama isteği.
+      if (!editing) {
+        const st = getState();
+        if (mascotMood(st.data, st.today).mood !== 'thoughtful') void maybeAskReview(st.data, st.mode);
+      }
     }
   }
 
@@ -489,6 +499,22 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
         </div>
       )}
 
+      {tab === 'expense' && (() => {
+        // Aylık bütçenin %30'unu aşan tek bir gider için "bütçe dışı tut" önerisi.
+        const amt = parseMoney(amount);
+        const B = data.settings.monthlyBudget;
+        const big = !offBudget && amt && B && B > 0 && amt >= B * 0.3 ? Math.round((amt / B) * 100) : null;
+        return (
+          <div className="off-budget">
+            <button type="button" className={`chip ${offBudget ? 'is-on' : ''}`} aria-pressed={offBudget} onClick={() => setOffBudget(!offBudget)} data-testid="off-budget">
+              <PiggyBank size={15} aria-hidden /> {T('ob.toggle')}
+            </button>
+            {offBudget && <p className="note-line">{T('ob.toggleHint')}</p>}
+            {big !== null && <p className="note-line">{T('ob.bigNudge', { pct: pctPlain(big) })}</p>}
+          </div>
+        );
+      })()}
+
       {tab === 'debt' && (
         <>
           <Segmented
@@ -574,7 +600,9 @@ export function TxSheet({ txId, preset }: { txId?: ID; preset?: { type?: string;
                   amount={amount}
                   initial={editing?.qty !== undefined && editing.unit && editing.unitPrice && init.tab === 'invest' && init.dir === dir && (editing.toAccountId === invId || editing.accountId === invId) ? { unit: editing.unit, qty: editing.qty, unitPrice: editing.unitPrice } : undefined}
                   editingTxId={editing?.id}
+                  presetUnit={!editing && isAssetUnit(preset?.unit) ? preset.unit : undefined}
                   onChange={setAssetVal}
+                  onAmount={setAmount}
                 />
               )}
               <p className="note-line">
@@ -794,7 +822,7 @@ export function ConfirmSheet({ planId, due }: { planId: ID; due: ISODate }) {
         {plan.kind === 'transfer' && ` · ${accounts.get(plan.accountId)?.name} → ${accounts.get(plan.toAccountId!)?.name}`}
       </p>
       <MoneyInput big label={T('conf.actualAmount')} value={amount} onChange={setAmount} autoFocus onEnter={save} />
-      {assetAcc && <AssetQtyFields account={assetAcc} dir={assetAcc.id === plan.toAccountId ? 'in' : 'out'} amount={amount} onChange={setAssetVal} />}
+      {assetAcc && <AssetQtyFields account={assetAcc} dir={assetAcc.id === plan.toAccountId ? 'in' : 'out'} amount={amount} onChange={setAssetVal} onAmount={setAmount} />}
       {plan.kind !== 'transfer' && (
         <fieldset className="block">
           <legend>{T('csv.account')}</legend>

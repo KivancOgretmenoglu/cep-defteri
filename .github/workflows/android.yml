@@ -6,6 +6,11 @@ on:
   push:
     paths-ignore: ['**.md']
   workflow_dispatch:
+    inputs:
+      publish_latest:
+        description: "Ana dal dışındaki bir daldan da Releases sayfasına 'Latest' (APK + AAB) olarak yayınla"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -52,7 +57,7 @@ jobs:
         env:
           CEP_KEYSTORE_PATH: ${{ steps.sign.outputs.path }}
           CEP_KEYSTORE_PASSWORD: ${{ secrets.CEP_KEYSTORE_PASSWORD }}
-        run: ./gradlew assembleRelease -PversionCode=${{ github.run_number }} -PversionName=1.0.${{ github.run_number }} --no-daemon
+        run: ./gradlew assembleRelease -PversionCode=${{ github.run_number }} -PversionName=1.1.${{ github.run_number }} --no-daemon
 
       # Play Store APK değil AAB (Android App Bundle) ister; aynı anahtar "yükleme anahtarı" olur.
       - name: AAB derle (Play Store)
@@ -60,12 +65,12 @@ jobs:
         env:
           CEP_KEYSTORE_PATH: ${{ steps.sign.outputs.path }}
           CEP_KEYSTORE_PASSWORD: ${{ secrets.CEP_KEYSTORE_PASSWORD }}
-        run: ./gradlew bundleRelease -PversionCode=${{ github.run_number }} -PversionName=1.0.${{ github.run_number }} --no-daemon
+        run: ./gradlew bundleRelease -PversionCode=${{ github.run_number }} -PversionName=1.1.${{ github.run_number }} --no-daemon
 
       - name: Dosyaları adlandır
         run: |
-          cp android/app/build/outputs/apk/release/app-release.apk "CepDefteri-1.0.${{ github.run_number }}.apk"
-          cp android/app/build/outputs/bundle/release/app-release.aab "CepDefteri-1.0.${{ github.run_number }}.aab"
+          cp android/app/build/outputs/apk/release/app-release.apk "CepDefteri-1.1.${{ github.run_number }}.apk"
+          cp android/app/build/outputs/bundle/release/app-release.aab "CepDefteri-1.1.${{ github.run_number }}.aab"
 
       # Play Console'daki izin beyanları için: birleşmiş manifestteki izinleri günlüğe yaz.
       - name: İzinleri listele
@@ -76,40 +81,41 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: CepDefteri-1.0.${{ github.run_number }}
+          name: CepDefteri-1.1.${{ github.run_number }}
           path: |
             CepDefteri-*.apk
             CepDefteri-*.aab
 
+      # Ana dal ya da elle başlatılıp "publish_latest" seçilen derleme: son sürüm (Latest), APK + AAB.
       - name: Releases sayfasına ekle
-        if: github.ref_name == github.event.repository.default_branch
+        if: github.ref_name == github.event.repository.default_branch || inputs.publish_latest
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: Cep Defteri 1.0.${{ github.run_number }}
+          tag_name: v1.1.${{ github.run_number }}
+          name: Cep Defteri 1.1.${{ github.run_number }}
           target_commitish: ${{ github.sha }}
           make_latest: true
           files: |
             CepDefteri-*.apk
             CepDefteri-*.aab
           body: |
-            Telefonda bu sayfadan **CepDefteri-1.0.${{ github.run_number }}.apk** dosyasını indirip aç. Android "bilinmeyen uygulamalar" izni isteyebilir.
+            Telefonda bu sayfadan **CepDefteri-1.1.${{ github.run_number }}.apk** dosyasını indirip aç. Android "bilinmeyen uygulamalar" izni isteyebilir.
             ${{ steps.sign.outputs.signed == 'true' && 'Kalıcı anahtarla imzalandı: önceki sürümün üzerine kurabilirsin, verilerin korunur.' || '⚠️ Geçici test anahtarıyla imzalandı: önceki bir sürüm yüklüyse önce Ayarlar → Yedek indir, sonra eski uygulamayı kaldırıp bunu kur.' }}
-            Play Console'a yüklemek için **CepDefteri-1.0.${{ github.run_number }}.aab** dosyasını kullan (telefona kurulmaz).
+            Play Console'a yüklemek için **CepDefteri-1.1.${{ github.run_number }}.aab** dosyasını kullan (telefona kurulmaz).
 
       # Ana dal dışındaki dallar: hızlı deneme için "test edilmemiş" ön sürüm olarak eklenir.
       # "Son sürüm" (releases/latest) değişmez; Releases sayfasında en üstte görünür.
       - name: Releases sayfasına test sürümü olarak ekle
-        if: github.ref_name != github.event.repository.default_branch
+        if: github.ref_name != github.event.repository.default_branch && !inputs.publish_latest
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.${{ github.run_number }}-test
-          name: Cep Defteri 1.0.${{ github.run_number }} (test edilmemiş sürüm)
+          tag_name: v1.1.${{ github.run_number }}-test
+          name: Cep Defteri 1.1.${{ github.run_number }} (test edilmemiş sürüm)
           target_commitish: ${{ github.sha }}
           prerelease: true
           make_latest: false
           files: CepDefteri-*.apk
           body: |
             ⚠️ **Test edilmemiş sürüm** (dal: `${{ github.ref_name }}`, commit: `${{ github.sha }}`). Denemek için.
-            Telefonda bu sayfadan **CepDefteri-1.0.${{ github.run_number }}.apk** dosyasını indirip aç. Android "bilinmeyen uygulamalar" izni isteyebilir.
+            Telefonda bu sayfadan **CepDefteri-1.1.${{ github.run_number }}.apk** dosyasını indirip aç. Android "bilinmeyen uygulamalar" izni isteyebilir.
             ${{ steps.sign.outputs.signed == 'true' && 'Kalıcı anahtarla imzalandı: önceki sürümün üzerine kurabilirsin, verilerin korunur.' || '⚠️ Geçici test anahtarıyla imzalandı: önceki bir sürüm yüklüyse önce Ayarlar → Yedek indir, sonra eski uygulamayı kaldırıp bunu kur.' }}

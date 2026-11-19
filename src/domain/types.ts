@@ -86,6 +86,11 @@ export interface Tx {
   qty?: number;
   /** Varlık hesabı transferinde işlem anındaki birim fiyat (kuruş). amount ≈ qty × unitPrice. */
   unitPrice?: Money;
+  /**
+   * Yalnız gider: aylık bütçeye ve kategori limitlerine sayılmaz (ör. biriktirip alınan gitar, tek seferlik
+   * büyük alışveriş). Bakiyeden düşer; raporlardaki toplam harcamada yer alır. İadesi de bütçe dışıdır.
+   */
+  offBudget?: true;
   createdAt: number;
 }
 
@@ -178,6 +183,8 @@ export interface Settings {
   guideVersion?: number | null;
   /** Gizli kodla açılmış maskotlar (src/mascot/secret.ts). */
   unlockedMascots?: string[];
+  /** Kullanıcının doğum günü "MM-DD" (isteğe bağlı; maskot o gün kutlar). Yıl sorulmaz. */
+  birthday?: string | null;
 }
 
 export interface Data {

@@ -1,7 +1,7 @@
 {
   "name": "cep-defteri",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -19,6 +19,8 @@
     "@capacitor/local-notifications": "^8.3.1",
     "@capacitor/preferences": "^8.0.1",
     "@capacitor/share": "^8.0.2",
+    "@capawesome/capacitor-app-review": "^8.1.0",
+    "@capawesome/capacitor-app-update": "^8.1.1",
     "@capgo/capacitor-native-biometric": "^8.7.0",
     "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",

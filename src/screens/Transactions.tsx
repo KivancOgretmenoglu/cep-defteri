@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Search, X } from 'lucide-react';
+import { CalendarDays, List, Search, X } from 'lucide-react';
 import type { Tx } from '../domain/types';
 import { monthEnd, monthOf, monthStart, type MonthKey } from '../domain/dates';
 import { catName, formatMoney, relativeDay } from '../i18n/format';
@@ -9,12 +9,15 @@ import '../ui/polish.css';
 import { useT } from '../i18n';
 import type { Key } from '../i18n/core';
 import { allTags, rangeSummary, transferKind, refundCategory } from '../domain/ledger';
-import { Chip, MonthSwitcher } from '../ui/kit';
+import { Chip, MonthSwitcher, Segmented } from '../ui/kit';
+import { MonthCalendar } from '../ui/MonthCalendar';
 import { TxRow, txView } from '../ui/TxRow';
 import { setFilter, useNav, openSheet, type TxFilter } from '../ui/nav';
 import { useData, useLookups } from '../ui/hooks';
 import { useListSettle } from '../ui/motion';
 import { EmptyState, SceneEmpty } from '../mascot/MascotNote';
+
+const VIEW_KEY = 'cep-defteri:txview';
 
 const KINDS: { value: NonNullable<TxFilter['kind']>; label: Key }[] = [
   { value: 'all', label: 'common.all' },
@@ -34,6 +37,25 @@ export function Transactions() {
   const month: MonthKey | 'all' = filter.month ?? (filter.accountId || filter.tag ? 'all' : monthOf(today));
   const kind = filter.kind ?? 'all';
   const [q, setQ] = useState('');
+  // Liste / Takvim (bu cihazda hatırlanır; ay seçiliyken)
+  const [view, setView] = useState<'list' | 'cal'>(() => {
+    try {
+      return localStorage.getItem(VIEW_KEY) === 'cal' ? 'cal' : 'list';
+    } catch {
+      return 'list';
+    }
+  });
+  const pickView = (v: 'list' | 'cal') => {
+    setView(v);
+    try {
+      localStorage.setItem(VIEW_KEY, v);
+    } catch {
+      /* yok say */
+    }
+  };
+  // undefined: henüz seçilmedi (bugün bu aydaysa bugün açılır); null: kullanıcı seçimi kaldırdı.
+  const [selDay, setSelDay] = useState<string | null | undefined>(undefined);
+  useEffect(() => setSelDay(undefined), [month]);
   // Telefonda arama alanı başlıktaki simgeyle açılır; geniş ekranda hep görünür (polish.css).
   const [searchOpen, setSearchOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -88,6 +110,9 @@ export function Transactions() {
     return rangeSummary(sub, from, to);
   }, [data, list, month]);
 
+  // Takvim yalnız bir ay seçiliyken; seçili gün yoksa (ve bugün bu aydaysa) bugün açılır.
+  const calOn = view === 'cal' && month !== 'all';
+  const calDay = !calOn ? null : selDay && selDay.startsWith(month) ? selDay : selDay === undefined && today.startsWith(month) ? today : null;
   const acc = filter.accountId ? lookups.accounts.get(filter.accountId) : undefined;
   const cat = filter.categoryId ? lookups.cats.get(filter.categoryId) : undefined;
 
@@ -156,6 +181,21 @@ export function Transactions() {
         )}
       </div>
 
+      {month !== 'all' && (data.txs.length > 0) && (
+        <div className="tx-view">
+          <Segmented<'list' | 'cal'>
+            size="sm"
+            label={t('cal.view')}
+            value={view}
+            onChange={pickView}
+            options={[
+              { value: 'list', label: <><List size={15} aria-hidden /> {t('cal.list')}</> },
+              { value: 'cal', label: <><CalendarDays size={15} aria-hidden /> {t('cal.calendar')}</> },
+            ]}
+          />
+        </div>
+      )}
+
       {list.length > 0 && (
         <div className="totals-strip" aria-label={t('txs.totalsLabel')}>
           <span>{t('tx.income')} <b className="tone-pos">{formatMoney(totals.income)}</b></span>
@@ -165,8 +205,15 @@ export function Transactions() {
         </div>
       )}
 
+      {calOn && (
+        <section className="card mcal-card">
+          <MonthCalendar month={month as MonthKey} txs={list} today={today} metric={kind === 'income' ? 'income' : 'spending'} selected={calDay} onSelect={setSelDay} />
+          {!calDay ? <p className="note-line">{t('cal.pick')}</p> : !groups.some((g) => g.date === calDay) && <p className="note-line">{t('cal.empty')}</p>}
+        </section>
+      )}
+
       {groups.length === 0 ? (
-        data.txs.length === 0 ? (
+        calOn ? null : data.txs.length === 0 ? (
           <section className="card">
             <SceneEmpty scene="tx" onAction={() => openSheet({ kind: 'add', preset: { type: 'expense' } })} />
           </section>
@@ -177,7 +224,7 @@ export function Transactions() {
         )
       ) : (
         <div className="day-groups" ref={listRef}>
-          {groups.map((g) => {
+          {(calOn ? groups.filter((g) => g.date === calDay) : groups).map((g) => {
             const s = rangeSummary({ ...data, txs: g.txs }, g.date, g.date);
             return (
               <section key={g.date} className="day-group" aria-label={relativeDay(g.date, today)}>

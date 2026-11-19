@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { ArrowLeftRight, Sprout, RotateCcw, CalendarCheck, HandCoins, Trash2, CopyPlus } from 'lucide-react';
+import { ArrowLeftRight, Sprout, RotateCcw, CalendarCheck, HandCoins, Trash2, CopyPlus, PiggyBank } from 'lucide-react';
 import type { Account, Category, Data, ID, Tx } from '../domain/types';
 import { catName, formatMoney } from '../i18n/format';
 import { t as tr_, useT } from '../i18n';
@@ -221,6 +221,13 @@ export function TxRow({ t, data, lookups, showDate }: { t: Tx; data: Data; looku
           <span className="tx-row__title">{v.title}</span>
           <span className="tx-row__sub">
             {showDate && <>{showDate} · </>}
+            {/* Bütçe dışı etiketi başta: alt satır uzunsa kırpılan kısımda kalmasın. */}
+            {t.offBudget && (
+              <span className="tag" title={tt('ob.tagTitle')}>
+                <PiggyBank size={12} aria-hidden /> {tt('ob.tag')}
+              </span>
+            )}
+            {t.offBudget && ' '}
             {v.sub}
             {t.planRef && (
               <span className="tag" title={tt('tx.plannedItem')}>

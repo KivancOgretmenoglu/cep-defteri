@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Archive, ArchiveRestore, ArrowDownLeft, ArrowUpRight, Plus, RefreshCw, Target, Pencil, Trash2 } from 'lucide-react';
+import { Archive, ArchiveRestore, ArrowDownLeft, ArrowUpRight, ChevronRight, Plus, RefreshCw, Target, Pencil, Trash2 } from 'lucide-react';
 import type { ID } from '../domain/types';
 import type { Money } from '../domain/money';
 import { monthEnd, monthOf, monthStart } from '../domain/dates';
 import { formatMoney, hiddenMoney, pctForm, pctPlain, shortDate } from '../i18n/format';
 import { useT } from '../i18n';
-import { accountIndex, goalProgress, investmentLists, investmentState, isInvestment, rangeSummary, transferKind } from '../domain/ledger';
+import { accountIndex, goalProgress, investmentLists, investmentState, isInvestment, portfolioDayChange, portfolioMix, rangeSummary, staleFunds, transferKind, type MixKey } from '../domain/ledger';
 import * as A from '../domain/actions';
 import { commit } from '../store/store';
 import { Amount, Chip, Progress, SectionHead } from '../ui/kit';
@@ -13,9 +13,13 @@ import { openSheet } from '../ui/nav';
 import { useData } from '../ui/hooks';
 import { MascotNote, SceneEmpty, LiveMascot } from '../mascot/MascotNote';
 import { refreshPrices, usePrices } from '../store/prices';
-import { agoText, formatQty, unitName, unitShort } from '../sheets/AssetFields';
+import { useStockList } from '../store/stockList';
+import { agoText, formatQty, quoteSourceText, unitName, unitShort } from '../sheets/AssetFields';
 import type { AssetHolding, AssetPosition } from '../domain/ledger';
-import { roundQty, unitOrder, type AssetLot, type AssetUnit } from '../domain/assets';
+import { isFundUnit, isStockUnit, roundQty, unitOrder, type AssetLot, type AssetUnit } from '../domain/assets';
+import { formatQuote, formatUnitPrice, pctSigned } from '../i18n/format';
+import { getLang } from '../i18n/lang';
+import type { Key } from '../i18n/core';
 
 export function Invest() {
   const t = useT();
@@ -23,6 +27,8 @@ export function Invest() {
   const prices = usePrices();
   const book = prices.book;
   const hasAsset = data.accounts.some((a) => isInvestment(a) && a.asset);
+  // Hisse adları gömülü listeden gelir (ilk ihtiyaçta yüklenir).
+  useStockList();
   // Altın/döviz hesabı varsa ekran açılınca fiyatlar (15 dk'dan eskiyse) yenilenir.
   useEffect(() => {
     if (hasAsset) void refreshPrices();
@@ -114,6 +120,7 @@ export function Invest() {
       </header>
 
       <div className="invest-grid">
+        <PortfolioCard />
         {isArchived && (
           <section className="card card--span callout archived-banner" role="status">
             <span>{t('accdel.archivedBanner')}</span>
@@ -130,7 +137,7 @@ export function Invest() {
           </div>
           <Amount value={st.currentValue} size="xl" tone="invest" hide={data.settings.hideTotals} />
           {st.asset ? (
-            <AssetBreakdown asset={st.asset} failed={prices.failed} loading={prices.loading} hide={data.settings.hideTotals} />
+            <AssetBreakdown accountId={st.account.id} asset={st.asset} failed={prices.failed} loading={prices.loading} hide={data.settings.hideTotals} />
           ) : (
           <p className="invest-hero__date">
             {st.lastValuation.isOpening ? t('inv.openingValue') : t('inv.lastValue')}: {data.settings.hideTotals ? hiddenMoney() : formatMoney(st.lastValuation.value)} · {shortDate(st.lastValuation.date, today)}
@@ -207,7 +214,7 @@ export function Invest() {
                   {e.kind === 'value' && <>{t('inv.ev.value')} <small>{t('inv.ev.valueHint')}</small></>}
                   {e.kind === 'opening' && <>{t('inv.ev.opening')} <small>{t('inv.ev.openingHint')}</small></>}
                   {st.asset && e.unit && e.qty !== undefined && e.unitPrice !== undefined && (
-                    <small className="inv-ev__qty">{unitName(t, e.unit)}: {t('asset.ev.qty', { qty: formatQty(t, e.qty, e.unit), unit: unitShort(t, e.unit), price: formatMoney(e.unitPrice) })}</small>
+                    <small className="inv-ev__qty">{isStockUnit(e.unit) ? '' : `${unitName(t, e.unit)}: `}{t('asset.ev.qty', { qty: formatQty(t, e.qty, e.unit), unit: unitShort(t, e.unit), price: formatUnitPrice(e.unitPrice, e.unit) })}</small>
                   )}
                   {st.asset && e.lots && e.lots.length > 0 && (
                     <small className="inv-ev__qty">{t('asset.ev.openingQty', { qty: e.lots.map((l) => formatQty(t, l.qty, l.unit)).join(' + ') })}</small>
@@ -234,8 +241,14 @@ export function Invest() {
 }
 
 /** Altın/döviz hesabı: tür tür miktar ve değer, toplam, fiyatların yaşı ve kaynağı, yenile. */
-function AssetBreakdown({ asset, failed, loading, hide }: { asset: AssetHolding; failed: boolean; loading: boolean; hide: boolean }) {
+function AssetBreakdown({ accountId, asset, failed, loading, hide }: { accountId: ID; asset: AssetHolding; failed: boolean; loading: boolean; hide: boolean }) {
   const t = useT();
+  const stale = staleFunds(asset, Date.now());
+  const M = (v: number, sign = false) => (hide ? hiddenMoney() : formatMoney(v, { sign }));
+  const { quotes } = usePrices();
+  const hasStock = asset.positions.some((p) => isStockUnit(p.unit) && !isFundUnit(p.unit));
+  const hasFund = asset.positions.some((p) => isFundUnit(p.unit));
+  const hasUs = asset.positions.some((p) => isStockUnit(p.unit) && p.unit.startsWith('US:'));
   const srcText = (p: AssetPosition) => (p.priceSource === 'estimate' ? t('asset.src.estimate') : p.priceSource === 'manual' ? t('asset.src.manual') : p.priceSource === 'last-tx' ? t('asset.src.lastTx') : '');
   // En eski güncel fiyat zamanı: "Fiyatlar: 5 dk önce"
   const liveAts = asset.positions.map((p) => p.priceAt).filter((x): x is number => typeof x === 'number');
@@ -247,15 +260,27 @@ function AssetBreakdown({ asset, failed, loading, hide }: { asset: AssetHolding;
         {asset.positions.map((p) => {
           const src = p.priceSource !== 'live' ? srcText(p) : '';
           return (
-            <li key={p.unit} className="asset-breakdown__row">
+            <li key={p.unit}>
+              <button className="asset-breakdown__row asset-breakdown__row--btn" onClick={() => openSheet({ kind: 'position', accountId, unit: p.unit })} aria-label={t('pos.open', { name: unitName(t, p.unit) })}>
               <span className="asset-breakdown__name">
                 {unitName(t, p.unit)}
                 <small>
-                  {p.price !== null ? t('asset.ev.qty', { qty: hide ? '•••' : formatQty(t, p.qty, p.unit), unit: unitShort(t, p.unit), price: formatMoney(p.price) }) : `${hide ? '•••' : formatQty(t, p.qty, p.unit)} · ${t('asset.noPriceShort')}`}
+                  {p.price !== null ? t('asset.ev.qty', { qty: hide ? '•••' : formatQty(t, p.qty, p.unit), unit: unitShort(t, p.unit), price: formatUnitPrice(p.price, p.unit) }) : `${hide ? '•••' : formatQty(t, p.qty, p.unit)} · ${t('asset.noPriceShort')}`}
                   {src && <> · {src}</>}
+                  {isStockUnit(p.unit) && quotes[p.unit] && p.priceSource !== 'last-tx' && (
+                    <>{quotes[p.unit]!.ccy === 'USD' && ` · ${formatQuote(quotes[p.unit]!.price, 'USD')}`}{quotes[p.unit]!.source !== 'manual' && ` · ${quoteSourceText(t, quotes[p.unit]!.source)}`}</>
+                  )}
                 </small>
+                {(p.pnl !== null || p.dayChange !== null) && (
+                  <small className="asset-breakdown__pnl">
+                    {p.pnl !== null && <span className={p.pnl > 0 ? 'tone-pos' : p.pnl < 0 ? 'tone-warn' : ''}>{t('pos.costLine', { amount: M(p.cost) })} · {M(p.pnl, true)} ({pctSigned(p.pnlPct!)})</span>}
+                    {p.pnl !== null && p.dayChange !== null && ' · '}
+                    {p.dayChange !== null && <span>{t('pos.dayShort', { pct: pctSigned((p.dayChange / Math.max(1, p.value - p.dayChange)) * 100) })}</span>}
+                  </small>
+                )}
               </span>
-              <span className="asset-breakdown__val">{hide ? hiddenMoney() : p.price !== null ? formatMoney(p.value) : '—'}</span>
+              <span className="asset-breakdown__val">{hide ? hiddenMoney() : p.price !== null ? formatMoney(p.value) : '—'}<ChevronRight size={16} aria-hidden /></span>
+              </button>
             </li>
           );
         })}
@@ -266,12 +291,24 @@ function AssetBreakdown({ asset, failed, loading, hide }: { asset: AssetHolding;
           </li>
         )}
       </ul>
+      {asset.pnl !== null && asset.pricedCost > 0 && (
+        <p className="invest-hero__pnl">
+          <span className={asset.pnl > 0 ? 'tone-pos' : asset.pnl < 0 ? 'tone-warn' : ''}>{t('inv.pnlLine', { amount: M(asset.pnl, true), pct: pctSigned((asset.pnl / asset.pricedCost) * 100) })}</span>{' '}
+          <small className="muted">{t('inv.pnlHint')}</small>
+        </p>
+      )}
+      {stale.map((x) => (
+        <p key={x.unit} className="callout callout--quiet stale-fund" role="status">
+          <span>{t('fund.stale', { sym: unitShort(t, x.unit), n: x.ageDays })}</span>
+          <button className="btn btn--secondary btn--small" onClick={() => openSheet({ kind: 'valuation', accountId, unit: x.unit })}>{t('fund.update')}</button>
+        </p>
+      ))}
       <p className="invest-hero__date">
         {oldest !== null && <>{t('asset.pricesAgo', { ago: agoText(t, oldest) })} </>}
         <button className="link link--small" disabled={loading} onClick={() => void refreshPrices({ force: true })}>{loading ? t('asset.refreshing') : t('asset.refresh')}</button>
       </p>
       {failed && <p className="note-line">{t('asset.fetchFailed')}</p>}
-      <p className="note-line">{t('asset.valueNote')}</p>
+      <p className="note-line">{t('asset.valueNote')}{hasStock && <> {t('stock.delayNote')}</>}{hasUs && <> {t('stock.valueNote')}</>}{hasFund && <> {t('stock.fundNote')}</>}</p>
     </>
   );
 }
@@ -308,3 +345,64 @@ function ValueChart({ history }: { history: { date: string; value: number }[] })
     </svg>
   );
 }
+
+const MIX_LABEL: Record<MixKey, Key> = { tl: 'pf.mix.tl', gold: 'pf.mix.gold', fx: 'pf.mix.fx', BIST: 'pf.mix.BIST', US: 'pf.mix.US', FON: 'pf.mix.FON' };
+
+/**
+ * Tüm (arşivlenmemiş) yatırım hesaplarının dağılımı: ince segmentli çubuk + her türün adı, payı ve tutarı,
+ * ve önceki kapanışa göre günlük değişim. Tek bir tür varsa ve günlük değişim yoksa gösterilmez.
+ * Renkler sabit sırayla türe bağlıdır (ör. altın hep 2. renk), sıralamaya göre değişmez.
+ */
+function PortfolioCard() {
+  const t = useT();
+  const { data } = useData();
+  const { book } = usePrices();
+  const mix = useMemo(() => portfolioMix(data, book), [data, book]);
+  const day = useMemo(() => portfolioDayChange(data, book), [data, book]);
+  const hide = data.settings.hideTotals;
+  const total = mix.reduce((s, x) => s + x.value, 0);
+  if (total <= 0 || (mix.length < 2 && !day)) return null;
+  const pct = (v: number) => (v / total) * 100;
+  const pctText = (v: number) => {
+    const p = pct(v);
+    return p > 0 && p < 1 ? '<1' : String(Math.round(p));
+  };
+  return (
+    <section className="card card--span pf-card" aria-labelledby="pf-h">
+      <div className="pf-card__head">
+        <h2 id="pf-h" className="label">{t('pf.title')}</h2>
+        <Amount value={total} size="md" tone="invest" hide={hide} />
+      </div>
+      {day && (
+        <p className="pf-card__day">
+          <span className={day.change > 0 ? 'tone-pos' : day.change < 0 ? 'tone-warn' : ''}>
+            {t('pf.day', { amount: hide ? hiddenMoney() : formatMoney(day.change, { sign: true }), pct: pctSigned(day.base > 0 ? (day.change / day.base) * 100 : 0) })}
+          </span>{' '}
+          <small className="muted">{t('pf.dayHint')}</small>
+        </p>
+      )}
+      {mix.length >= 2 && (
+        <>
+          <div className="pf-bar" role="img" aria-label={`${t('pf.barLabel')}: ${mix.map((x) => `${t(MIX_LABEL[x.key])} ${getLangPct(pctText(x.value))}`).join(', ')}`}>
+            {mix.map((x) => (
+              <span key={x.key} className={`pf-bar__seg pf-c-${x.key}`} style={{ flexGrow: x.value }} title={`${t(MIX_LABEL[x.key])} · ${getLangPct(pctText(x.value))}`} />
+            ))}
+          </div>
+          <ul className="pf-legend">
+            {mix.map((x) => (
+              <li key={x.key}>
+                <i className={`pf-sw pf-c-${x.key}`} aria-hidden />
+                <span className="pf-legend__name">{t(MIX_LABEL[x.key])}</span>
+                <span className="pf-legend__pct">{getLangPct(pctText(x.value))}</span>
+                <span className="pf-legend__val">{hide ? hiddenMoney() : formatMoney(x.value)}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </section>
+  );
+}
+
+/** "%12" (tr) / "12%" (en). */
+const getLangPct = (n: string) => (getLang() === 'en' ? `${n}%` : `%${n}`);

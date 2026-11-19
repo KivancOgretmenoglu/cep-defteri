@@ -18,6 +18,8 @@ export interface Toast {
   text: string;
   undo?: boolean;
   tone?: 'ok' | 'error';
+  /** Geri al yerine özel bir düğme (ör. güncellemeden sonra "Yeniden başlat"). */
+  action?: { label: string; run: () => void };
 }
 
 interface State {
@@ -66,9 +68,9 @@ function persist(data: Data): boolean {
   return ok;
 }
 
-export function showToast(text: string, opts: { undo?: boolean; tone?: Toast['tone']; ms?: number } = {}) {
+export function showToast(text: string, opts: { undo?: boolean; tone?: Toast['tone']; ms?: number; action?: Toast['action'] } = {}) {
   clearTimeout(toastTimer);
-  const t: Toast = { id: ++toastSeq, text, undo: opts.undo, tone: opts.tone ?? 'ok' };
+  const t: Toast = { id: ++toastSeq, text, undo: opts.undo, tone: opts.tone ?? 'ok', action: opts.action };
   emit({ toast: t });
   toastTimer = setTimeout(() => {
     if (state.toast?.id === t.id) {

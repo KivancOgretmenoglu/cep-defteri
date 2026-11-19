@@ -14,7 +14,9 @@ import { useData, useLookups } from '../ui/hooks';
 import { MascotNote, EmptyState, SceneEmpty } from '../mascot/MascotNote';
 import { CatIcon } from '../ui/icons';
 import { DueRow } from '../ui/DueRow';
+import { PixelWallet, walletState } from '../ui/Wallet';
 import type { Mood } from '../domain/mood';
+import { recurringSuggestions, RECURRING_DISMISS_PREFIX, type RecurringSuggestion } from '../domain/recurring';
 
 export const FREQ_LABEL: Record<Plan['freq'], Key> = { once: 'freq.once', weekly: 'freq.weekly', monthly: 'freq.monthly', yearly: 'freq.yearly' };
 
@@ -62,6 +64,8 @@ export function Budget() {
     </li>
   );
 
+  // Maskotun cüzdanı: kalan bütçeye göre (yalnız bu ay).
+  const wallet = walletState(b.remaining, b.budget);
   let note: { text: string; why: string; mood: Mood } | null = null;
   if (b.budget !== null) {
     const st = STATE_TEXT[b.state];
@@ -105,6 +109,7 @@ export function Budget() {
             <span className="budget-head__spent">{formatMoney(b.spent)}</span>
             <span className="budget-head__of">/ {formatMoney(b.budget)}</span>
             {STATE_TEXT[b.state].label && <span className={`badge badge--${b.state}`}>{t(STATE_TEXT[b.state].label!)}</span>}
+            {wallet && <PixelWallet state={wallet} />}
           </div>
           <BudgetBar spentPlanned={b.plannedSpent} spentFlex={Math.max(b.flexibleSpent, 0)} pending={b.plannedPending} budget={b.budget} elapsed={b.elapsedPct} />
           <dl className="legend">
@@ -114,6 +119,7 @@ export function Budget() {
             <div><dt><i className="sw sw--left" />{t('bud.remaining')}</dt><dd>{formatMoney(Math.max(b.remaining ?? 0, 0))}</dd></div>
           </dl>
           <p className="note-line">{t('bud.lineNote', { pct: pctPlain(b.elapsedPct) })}</p>
+          {b.offBudget > 0 && <p className="note-line">{t('ob.budgetLine', { amount: formatMoney(b.offBudget) })}</p>}
           {note && <MascotNote compact mood={note.mood} text={note.text} why={note.why} outfit="planner" size={64} />}
           <FloorRow />
         </section>
@@ -148,6 +154,8 @@ export function Budget() {
           </ul>
         )}
       </section>
+
+      <RecurringCard />
 
       <section className="card" aria-labelledby="plans-h">
         <SectionHead id="plans-h" title={t('bud.upcomingTitle')} action={<button className="link" onClick={() => openSheet({ kind: 'plan' })}><Plus size={16} /> {t('bud.plan')}</button>} />
@@ -292,5 +300,44 @@ function BudgetBar({ spentPlanned, spentFlex, pending, budget, elapsed }: { spen
       {total > budget && <span className="budget-bar__limit" style={{ left: w(budget) }} />}
       <span className="budget-bar__marker" style={{ left: `${(elapsed / 100) * (budget / total) * 100}%` }} />
     </div>
+  );
+}
+
+/** Abonelik avcısı: düzenli tekrar eden ama plan olmayan giderler için "Plan yap / Abonelik değil". */
+function RecurringCard() {
+  const t = useT();
+  const { data, today } = useData();
+  const { cats } = useLookups(data);
+  const list = useMemo(() => recurringSuggestions(data, today), [data, today]);
+  if (list.length === 0) return null;
+  const titleOf = (s: RecurringSuggestion) => s.note ?? catName(cats.get(s.categoryId));
+  const dismiss = (s: RecurringSuggestion) =>
+    commit((d) => A.updateSettings(d, { hintsSeen: [...d.settings.hintsSeen, RECURRING_DISMISS_PREFIX + s.key] }), t('rec.dismissed'));
+  return (
+    <section className="card" aria-labelledby="rec-h">
+      <SectionHead id="rec-h" title={t('rec.title')} />
+      <p className="muted">{t('rec.intro')}</p>
+      <ul className="rec-list">
+        {list.slice(0, 4).map((s) => (
+          <li key={s.key} className="rec-row">
+            <span className="rec-row__icon" style={{ '--cat': cats.get(s.categoryId)?.color } as React.CSSProperties}><CatIcon icon={cats.get(s.categoryId)?.icon ?? 'other'} /></span>
+            <span className="rec-row__main">
+              <b>{titleOf(s)}</b>
+              <small>{t('rec.line', { day: String(s.day), months: String(s.months) })}</small>
+            </span>
+            <span className="rec-row__amt">{formatMoney(s.amount)}</span>
+            <span className="rec-row__actions">
+              <button
+                className="btn btn--secondary btn--small"
+                onClick={() => openSheet({ kind: 'plan', preset: 'expense', draft: { title: titleOf(s), amount: s.amount, categoryId: s.categoryId, accountId: s.accountId, startDate: s.nextDue } })}
+              >
+                <Repeat size={15} aria-hidden /> {t('rec.make')}
+              </button>
+              <button className="btn btn--ghost btn--small" onClick={() => dismiss(s)}>{t('rec.dismiss')}</button>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

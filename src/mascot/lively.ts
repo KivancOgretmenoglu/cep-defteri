@@ -12,7 +12,7 @@ import { OUTFITS, type MascotLive } from './render';
 import { buildAction, OUTFIT_ACTIONS, reduceFrames, sproutRects, type ActionName, type Frame } from './actions';
 import { onMascotEvent, type MascotEvent } from './events';
 import { dayPhase, type Season } from './seasonal';
-import { eventPool, greetFor, jokesFor, popsFor, say as sayLine, TIPS } from './quips';
+import { eventPool, greetFor, jokesFor, MORNING_LOG, NIGHT_LOG, popsFor, say as sayLine, SHAKE, TIPS } from './quips';
 import { CHARACTERS, type Lang, type MascotKey } from './characters';
 import { reactionFor } from './categoryReact';
 import { getState } from '../store/store';
@@ -83,6 +83,12 @@ export interface Lively {
 }
 
 // ── Modül düzeyi: birden çok maskot aynı anda espri yapmasın ──
+/** Gece/sabah kayıt tepkisi günde bir kez (Date.toDateString). */
+let lastNightAt = '';
+let lastMorningAt = '';
+/** Salla tepkisi en sık bu aralıkla. */
+const SHAKE_GAP = 4000;
+let lastShakeAt = 0;
 const QUIP_GAP = 120_000;
 let lastQuipAt = -Infinity;
 let greeted = false;
@@ -386,6 +392,23 @@ export function useLively({ who, lang, name, season = null, exam = false, mood, 
     quip(greetFor(cur.current.who, spy ? 'spy' : 'spyOff'), 1, true);
   }, [spy, play, quip]);
 
+  // Telefonu sallama (yalnız ana ekran maskotu; hareket azaltmada kapalı). İvme ölçer izni gerekmez (Android).
+  useEffect(() => {
+    if (!home || typeof window === 'undefined' || !('DeviceMotionEvent' in window)) return;
+    const onMotion = (ev: DeviceMotionEvent) => {
+      const a = ev.acceleration;
+      if (!a || a.x === null || a.y === null || a.z === null) return;
+      const mag = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+      const c = cur.current;
+      if (mag < 16 || !c.active || c.reduced || Date.now() - lastShakeAt < SHAKE_GAP) return;
+      lastShakeAt = Date.now();
+      play('dizzy');
+      quip(SHAKE, 1, true);
+    };
+    window.addEventListener('devicemotion', onMotion);
+    return () => window.removeEventListener('devicemotion', onMotion);
+  }, [home, play, quip]);
+
   // Uygulama olayları
   useEffect(() => {
     return onMascotEvent((e: MascotEvent) => {
@@ -406,10 +429,25 @@ export function useLively({ who, lang, name, season = null, exam = false, mood, 
           const name = reactionFor({ type: e.type, ...info }, c.outfit === 'ledger' ? 'write' : 'note');
           const pool = eventPool(e, c.who);
           const ch = chance;
+          // Gece (23–06) kayıt: esneme + uykulu not, gecede bir kez. Sabah (06–10) günün ilk kaydı: gerinme.
+          const ph = dayPhase(new Date());
+          const day = new Date().toDateString();
+          const nightOwl = e.type !== 'refund' && ph.night && lastNightAt !== day;
+          const earlyBird = e.type !== 'refund' && ph.morning && lastMorningAt !== day;
           r.current.reactTimer = setTimeout(() => {
             const now = cur.current;
             if (!now.active) return;
             play(name);
+            if (nightOwl || earlyBird) {
+              if (nightOwl) lastNightAt = day;
+              if (earlyBird) lastMorningAt = day;
+              setTimeout(() => {
+                if (!cur.current.active) return;
+                play(nightOwl ? 'yawn' : 'stretch');
+                quip(nightOwl ? NIGHT_LOG : MORNING_LOG, 1, true);
+              }, 1400 + 80 * now.priority);
+              return;
+            }
             if (pool) setTimeout(() => quip(pool, ch), 400 + 80 * now.priority);
           }, REACT_DEBOUNCE_MS);
           return;

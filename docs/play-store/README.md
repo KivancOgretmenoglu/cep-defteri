@@ -4,7 +4,7 @@ Bu klasör Google Play Console'da doldurman gereken her şeyi içerir: metinler,
 
 - Görseller: `graphics/` (ekran görüntüleri `tr/`, `en/`; tanıtım görseli `feature-*.png`; simge `icon-512.png`)
 - Gizlilik politikası: `public/privacy.html` → yayında `https://kivancogretmenoglu.github.io/cep-defteri/privacy.html` (GitHub Pages açılınca, aşağıya bak)
-- Yüklenecek dosya: Releases'taki **`CepDefteri-1.0.N.aab`** (APK değil)
+- Yüklenecek dosya: Releases'taki **`CepDefteri-1.1.N.aab`** (APK değil)
 
 ---
 
@@ -43,7 +43,7 @@ Play Console → **Uygulama oluştur**
 ### Veri güvenliği formu
 
 - *Uygulamanız, gerekli kullanıcı verisi türlerinden herhangi birini topluyor veya paylaşıyor mu?* → **Hayır**
-  - Gerekçe: Tüm kayıtlar yalnızca cihazda kalır. Google'ın tanımında "toplama" = verinin cihazdan geliştiriciye/üçüncü tarafa aktarılması; bizde böyle bir aktarım yok. Altın/döviz fiyatı isteği kullanıcı verisi içermez.
+  - Gerekçe: Tüm kayıtlar yalnızca cihazda kalır. Google'ın tanımında "toplama" = verinin cihazdan geliştiriciye/üçüncü tarafa aktarılması; bizde böyle bir aktarım yok. Altın/döviz/hisse fiyatı isteği kullanıcı verisi içermez (hisse isteğinde yalnız hisse kodu gider; tutar, kimlik, cihaz bilgisi yok).
 - Form bu cevapla kısa sürer. "Veriler aktarım sırasında şifreleniyor mu" gibi sorular gelirse: fiyat istekleri HTTPS'dir.
 - "Kullanıcılar verilerinin silinmesini isteyebilir mi": Uygulamayı kaldırmak + Ayarlar → Tüm verileri sil (hesap olmadığından silme talebi adresi gerekmez).
 
@@ -91,7 +91,7 @@ Kullanılabilir para; kira, abonelik gibi yaklaşan ödemeleri ve birikim payın
 Her ay tekrarlanan ödemeler, taksitler, beklenen gelirler, arkadaşlarla hesap bölüşme ve borç/alacak takibi.
 
 🪙 Altın ve döviz birikimi
-Yatırım hesabını gram, çeyrek, yarım, tam, Cumhuriyet altını ya da dolar, euro, sterlin olarak tutabilirsin; değeri güncel fiyatla hesaplanır.
+Yatırım hesabını gram, çeyrek, yarım, tam, Cumhuriyet altını, dolar, euro, sterlin ya da Borsa İstanbul ve ABD hisseleri (ETF'ler dahil) olarak tutabilirsin; değeri güncel fiyatla hesaplanır.
 
 📱 Widget ve hızlı kayıt
 Maskotunun sahnesiyle ana ekran aracı: kullanılabilir paranı gösterir, Gider/Gelir düğmeleri ve uygulamayı açmadan tek dokunuşla sık kayıt. Bildirim panelinde "+ Kayıt" kutucuğu da var.
@@ -100,7 +100,7 @@ Maskotunun sahnesiyle ana ekran aracı: kullanılabilir paranı gösterir, Gider
 • Hesap yok, reklam yok, izleme yok.
 • Kayıtların yalnızca telefonunda; otomatik günlük yedek Belgeler klasörüne yazılır.
 • PIN ve parmak izi ile uygulama kilidi, bakiyeleri tek dokunuşla gizleme.
-• İnternet yalnızca altın/döviz fiyatı için kullanılır ve kapatılabilir.
+• İnternet yalnızca altın, döviz ve hisse fiyatı için kullanılır ve kapatılabilir.
 
 Ayrıca: aylık bütçe ve kategori limitleri, ay karnesi, raporlar, etiketler, sınav haftası modu, karanlık tema, Türkçe ve İngilizce.
 ```
@@ -137,7 +137,7 @@ Set "keep at least this much at month end" and the balance chart draws a plan li
 Recurring payments, installments, expected income, splitting bills with friends and tracking who owes whom.
 
 🪙 Gold and currency savings
-Keep an investment account in gold (gram, quarter, half, full, Republic coins) or USD/EUR/GBP; its value updates with current prices.
+Keep an investment account in gold (gram, quarter, half, full, Republic coins), USD/EUR/GBP, or Borsa Istanbul and US stocks (ETFs too); its value updates with current prices.
 
 📱 Widget and quick entry
 A home-screen widget with your buddy's scene: available money, Expense/Income buttons and one-tap frequent entries without opening the app. There's also a "+ Entry" Quick Settings tile.
@@ -146,7 +146,7 @@ A home-screen widget with your buddy's scene: available money, Expense/Income bu
 • No account, no ads, no tracking.
 • Records stay on your phone; a daily automatic backup goes to your Documents folder.
 • App lock with PIN or fingerprint, hide balances with one tap.
-• Internet is used only for gold/currency prices, and can be turned off.
+• Internet is used only for gold, currency and stock prices, and can be turned off.
 
 Also: monthly budget and category limits, monthly report card, reports, tags, exam-week mode, dark theme, Turkish and English.
 ```
@@ -165,7 +165,7 @@ Also: monthly budget and category limits, monthly report card, reports, tags, ex
 
 1. Play Console → **Test → Kapalı test → Kanal oluştur** (ör. "Arkadaşlar").
 2. **Test kullanıcıları:** bir e-posta listesi oluştur, 12+ kişinin **Google hesabı (Gmail)** adreslerini ekle. Ya da bir Google Grubu oluşturup onun adresini ekle (kişiler gruba kendileri katılır, daha kolay).
-3. **Sürüm oluştur → App Bundle yükle:** Releases'taki en yeni `CepDefteri-1.0.N.aab`.
+3. **Sürüm oluştur → App Bundle yükle:** Releases'taki en yeni `CepDefteri-1.1.N.aab`.
    - İlk yüklemede **Play App Signing** sorulur → **"Google tarafından oluşturulan anahtarı kullan" (önerilen)**. Bizim CI anahtarımız "yükleme anahtarı" olur, ayrıca bir şey yapman gerekmez.
    - Sürüm notu: `İlk test sürümü. Bulduğun her sorunu bana yaz!`
 4. **İncelemeye gönder.** İlk inceleme birkaç saat – birkaç gün sürebilir.
@@ -177,6 +177,6 @@ Also: monthly budget and category limits, monthly report card, reports, tags, ex
 
 ## 5. Önemli notlar
 
-- **Sürüm numarası:** Her yeni AAB'nin `versionCode`'u bir öncekinden büyük olmalı. CI bunu derleme numarasından (1.0.N) otomatik veriyor; sadece en yeni dosyayı yükle.
+- **Sürüm numarası:** Her yeni AAB'nin `versionCode`'u bir öncekinden büyük olmalı. CI bunu derleme numarasından (1.1.N) otomatik veriyor; sadece en yeni dosyayı yükle.
 - **APK'yı GitHub'dan kuranlar:** Play Store sürümü farklı bir anahtarla (Google'ın imzası) gelir. GitHub'dan kurulan uygulamanın üzerine Play sürümü kurulamaz: önce *Ayarlar → Yedek indir*, eski uygulamayı kaldır, Play'den kur, *Yedekten geri yükle*.
 - **İzinler:** INTERNET, POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED, USE_BIOMETRIC/USE_FINGERPRINT, VIBRATE, WAKE_LOCK (eski Android'de dosya). Hiçbiri özel beyan gerektirmez. Kesin alarm (SCHEDULE_EXACT_ALARM) bilerek kaldırıldı; bildirimler birkaç dakika kayabilir. CI günlüğündeki "İzinleri listele" adımı güncel listeyi yazar.

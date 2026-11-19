@@ -36,7 +36,8 @@ const BAYRAM: [from: ISODate, to: ISODate][] = [
   ['2027-05-15', '2027-05-19'], // Kurban Bayramı 2027
 ];
 
-export type Season = 'newyear' | 'bayram' | 'summer' | null;
+/** 'party': doğum günü / kullanım yıl dönümü (domain/special.ts; tarihten değil veriden gelir). */
+export type Season = 'newyear' | 'bayram' | 'summer' | 'party' | null;
 
 /** O günün özel kıyafeti (öncelik: bayram > yılbaşı > yaz). */
 export function seasonFor(day: ISODate): Season {
@@ -44,6 +45,29 @@ export function seasonFor(day: ISODate): Season {
   const md = day.slice(5);
   if (md >= '12-24' || md <= '01-02') return 'newyear';
   if (md >= '07-01' && md <= '08-31') return 'summer';
+  return null;
+}
+
+// ── Mevsim efektleri (ana ekran gökyüzü bandı) ───────────────────────
+
+export type SeasonFx = 'snow' | 'lantern' | 'petals' | 'leaves' | null;
+
+/**
+ * Ramazan ayı (ilk oruç günü → arefe). 2027, Diyanet takviminden bayram tarihine göre yazıldı; ±1 gün
+ * kayabilir (yalnız süs). Yeni yıllar bayram tablosuyla birlikte eklenmeli.
+ */
+const RAMAZAN: [from: ISODate, to: ISODate][] = [
+  ['2026-02-19', '2026-03-19'],
+  ['2027-02-08', '2027-03-08'],
+];
+
+/** O günün arka plan efekti: Ramazan fenerleri > kış karı (1 Ara–7 Oca) > bahar yaprakları (21 Mar–31 May) > sonbahar yaprakları (Eki–Kas). */
+export function seasonFxFor(day: ISODate): SeasonFx {
+  if (RAMAZAN.some(([a, b]) => day >= a && day <= b)) return 'lantern';
+  const md = day.slice(5);
+  if (md >= '12-01' || md <= '01-07') return 'snow';
+  if (md >= '03-21' && md <= '05-31') return 'petals';
+  if (md >= '10-01' && md <= '11-30') return 'leaves';
   return null;
 }
 

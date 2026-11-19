@@ -106,7 +106,7 @@ describe('Karafatma', () => {
   it('kendi ağzı, selamları ve rehber satırları tam', () => {
     const v = VOICES[k];
     for (const pool of [v.expense, v.income, v.jokes, v.pops, v.invest ?? [], v.debt ?? []]) expect(pool.length).toBeGreaterThan(0);
-    for (const kind of ['morning', 'monday', 'night', 'monthStart', 'spy', 'exam', 'newyear', 'bayram', 'summer'] as const) expect(greetFor(k, kind)).toBe(v.greet![kind]);
+    for (const kind of ['morning', 'monday', 'night', 'monthStart', 'spy', 'exam', 'newyear', 'bayram', 'summer', 'party'] as const) expect(greetFor(k, kind)).toBe(v.greet![kind]);
     expect(greetFor('fistik', 'morning')).not.toBe(v.greet!.morning);
     for (const step of GUIDE_STEPS) expect(GUIDE_LINES[k][step.id].tr && GUIDE_LINES[k][step.id].en, step.id).toBeTruthy();
     expect(eventPool({ type: 'valuation' }, k)).toBeNull();

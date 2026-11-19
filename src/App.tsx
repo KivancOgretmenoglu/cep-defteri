@@ -32,6 +32,7 @@ const GoalSheet = lazyNamed(() => import('./sheets/OtherSheets'), 'GoalSheet');
 const LimitSheet = lazyNamed(() => import('./sheets/OtherSheets'), 'LimitSheet');
 const PlanSheet = lazyNamed(() => import('./sheets/OtherSheets'), 'PlanSheet');
 const ValuationSheet = lazyNamed(() => import('./sheets/OtherSheets'), 'ValuationSheet');
+const PositionSheet = lazyNamed(() => import('./sheets/PositionSheet'), 'PositionSheet');
 const GuideHost = lazyNamed(() => import('./guide/Coach'), 'GuideHost');
 const CameoHost = lazyNamed(() => import('./mascot/cameo/Cameo'), 'CameoHost');
 const ScrollPeek = lazyNamed(() => import('./mascot/peek/ScrollPeek'), 'ScrollPeek');
@@ -42,6 +43,7 @@ const Settings = lazyNamed(() => import('./screens/Settings'), 'Settings');
 const OccurrenceSheet = lazyNamed(() => import('./sheets/PlanSheets'), 'OccurrenceSheet');
 const CancelPlanSheet = lazyNamed(() => import('./sheets/PlanSheets'), 'CancelPlanSheet');
 const ReportCardSheet = lazyNamed(() => import('./sheets/ReportCardSheet'), 'ReportCardSheet');
+const LetterSheet = lazyNamed(() => import('./sheets/LetterSheet'), 'LetterSheet');
 const FloorSheet = lazyNamed(() => import('./sheets/FloorSheet'), 'FloorSheet');
 
 const NAV: { screen: Screen; label: Key; icon: typeof House; phone: boolean }[] = [
@@ -125,12 +127,16 @@ function SheetBody() {
       return <CancelPlanSheet planId={sheet.planId} />;
     case 'reportCard':
       return <ReportCardSheet month={sheet.month} />;
+    case 'letter':
+      return <LetterSheet month={sheet.month} />;
     case 'account':
       return <AccountSheet key={sheet.accountId ?? 'new-' + sheet.kindPreset} accountId={sheet.accountId} kindPreset={sheet.kindPreset} />;
     case 'plan':
-      return <PlanSheet key={sheet.planId ?? 'new'} planId={sheet.planId} preset={sheet.preset} />;
+      return <PlanSheet key={sheet.planId ?? 'new'} planId={sheet.planId} preset={sheet.preset} draft={sheet.draft} />;
     case 'valuation':
-      return <ValuationSheet accountId={sheet.accountId} />;
+      return <ValuationSheet accountId={sheet.accountId} unit={sheet.unit} />;
+    case 'position':
+      return <PositionSheet accountId={sheet.accountId} unit={sheet.unit} />;
     case 'goal':
       return <GoalSheet goalId={sheet.goalId} accountId={sheet.accountId} />;
     case 'category':
@@ -155,6 +161,11 @@ function Toast() {
         {toast.undo && (
           <button className="toast__undo" onClick={undo}>
             <Undo2 size={16} /> {t('common.undo')}
+          </button>
+        )}
+        {toast.action && (
+          <button className="toast__undo" onClick={() => { hideToast(); toast.action!.run(); }}>
+            {toast.action.label}
           </button>
         )}
         <button className="icon-btn icon-btn--small" onClick={hideToast} aria-label={t('common.close')}><X size={16} /></button>

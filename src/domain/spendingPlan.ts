@@ -11,6 +11,9 @@
  * Planlı giderler (kira vb.) vade gününde (gerçekleştiyse işlem gününde) BASAMAK olur; bütçe temposu
  * (ledger.budgetStatus) da planlı ödemeleri esnek bütçeden ayırır, yani "bütçe = planlı + esnek".
  *
+ * Aylık bütçe varsa bütçe dışı işaretli giderler (ve iadeleri) eğriye girmez: plan çizgisi bütçedir.
+ * Ay sonu tabanında (bakiye tabanlı) girer, çünkü para gerçekten hesaptan çıkmıştır.
+ *
  * Harcama hakkı:
  *  1. Aylık bütçe varsa → bütçe (planlı ödemeler dahil; budgetStatus ile aynı). Takip ayın ortasında
  *     başladıysa esnek pay, ayın kapsanan günlerine oranlanır.
@@ -51,10 +54,12 @@ export interface SpendingPlan {
 }
 
 /** Günlük harcama farkları (giderler + , iadeler −) — rangeSummary.spending ile aynı tanım. */
-function spendingByDay(data: Data, from: ISODate, to: ISODate): Map<ISODate, Money> {
+function spendingByDay(data: Data, from: ISODate, to: ISODate, skipOffBudget = false): Map<ISODate, Money> {
   const m = new Map<ISODate, Money>();
+  const off = skipOffBudget ? new Set(data.txs.filter((t) => t.offBudget).map((t) => t.id)) : new Set<string>();
   for (const t of data.txs) {
     if (t.date < from || t.date > to) continue;
+    if (off.has(t.id) || (t.refundOf && off.has(t.refundOf))) continue;
     if (t.type === 'expense') m.set(t.date, (m.get(t.date) ?? 0) + t.amount);
     else if (t.type === 'refund') m.set(t.date, (m.get(t.date) ?? 0) - t.amount);
   }
@@ -67,7 +72,8 @@ export function spendingPlan(data: Data, today: ISODate): SpendingPlan | null {
   if (!period) return null;
   const { from, to } = period;
 
-  const byDay = spendingByDay(data, from, to);
+  const hasBudget = data.settings.monthlyBudget !== null && data.settings.monthlyBudget > 0;
+  const byDay = spendingByDay(data, from, to, hasBudget);
   const spending: SpendPoint[] = [];
   const last = minDate(today, to);
   let acc = 0;

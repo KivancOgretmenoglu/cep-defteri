@@ -84,7 +84,9 @@ describe('fiyat ayrıştırma', () => {
     };
     const b = parseTruncgil(fixture, NOW);
     expect(Object.keys(b).sort()).toEqual(['EUR', 'GBP', 'USD', 'bilezik22', 'ceyrek', 'cumhuriyet', 'gram', 'tam', 'yarim']);
-    expect(b.gram).toEqual({ buy: 512045, sell: 512599, at: NOW, source: 'live' });
+    // Önceki kapanış "Değişim" yüzdesinden: 5.120,45 ÷ 1,003
+    expect(b.gram).toEqual({ buy: 512045, sell: 512599, at: NOW, source: 'live', prevBuy: Math.round(512045 / 1.003) });
+    expect(b.yarim!.prevBuy).toBeUndefined();
     expect(b.USD!.buy).toBe(4165);
     expect(b.ceyrek!.sell).toBe(848000);
   });
@@ -383,7 +385,8 @@ describe('eski tek birimli hesaplardan geçiş', () => {
     const b: PriceBook = { ceyrek: { buy: TL(8400), sell: TL(8600), at: NOW, source: 'live' }, USD: { buy: 4160, sell: 4170, at: NOW, source: 'live' } };
     // Eski kural: değer = (açılış + alınan − satılan) × güncel alış; fiyat yoksa son işlem fiyatı.
     const g = L.investmentState(r.data, 'g', b)!;
-    expect(g.asset!.positions).toEqual([{ unit: 'ceyrek', qty: 1.5, price: TL(8400), priceAt: NOW, priceSource: 'live', value: TL(1.5 * 8400) }]);
+    expect(g.asset!.positions).toMatchObject([{ unit: 'ceyrek', qty: 1.5, price: TL(8400), priceAt: NOW, priceSource: 'live', value: TL(1.5 * 8400) }]);
+    expect(g.asset!.positions).toHaveLength(1);
     expect(g.currentValue).toBe(TL(12600));
     expect(g.netContribution).toBe(TL(8500 - 8300));
     expect(g.valueDiff).toBe(TL(12600 - 15000 - 200));

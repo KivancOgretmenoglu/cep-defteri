@@ -3,13 +3,14 @@
  * geçersiz girişte ActionError fırlatır. Bakiye/rapor gibi türetilmiş değerler saklanmaz,
  * bu yüzden düzenleme ve silme her şeyi kendiliğinden tutarlı günceller.
  */
+import { isBirthday } from './special';
 import type { Account, Category, Data, Goal, ID, Lang, Plan, PlanRef, Settings, Tx, TxType, Valuation } from './types';
 import { translate, type Key, type Vars } from '../i18n/core';
 import { isMoney, type Money } from './money';
 import { isISODate, type ISODate } from './dates';
 import { accountIndex, assetOverdraft, assetQuantities, availableQty, cashBalance, installmentEnd, isDaily, isInvestment, isPerson, occKey, occurrences } from './ledger';
 import { addDays } from './dates';
-import { isAssetLot, isAssetUnit, isQty, roundQty, unitOrder, valueOf, type AssetLot, type AssetUnit } from './assets';
+import { isAssetLot, isAssetUnit, isQty, isUnitPrice, roundQty, unitOrder, valueOf, type AssetLot, type AssetUnit } from './assets';
 
 /**
  * Doğrulama hatası. Mesaj bir sözlük anahtarı + değişkenler olarak taşınır; arayüz sınırında
@@ -58,6 +59,8 @@ export interface TxDraft {
   unit?: AssetUnit;
   qty?: number;
   unitPrice?: Money;
+  /** Yalnız gider: aylık bütçeye sayılmasın. */
+  offBudget?: boolean;
 }
 
 /** Transferin altın/döviz tutan yatırım tarafı (varsa). */
@@ -120,7 +123,7 @@ export function validateTx(data: Data, d: TxDraft, today: ISODate, editingId?: I
     if (asset) {
       if (!isAssetUnit(d.unit)) fail('err.assetUnit');
       if (!isQty(d.qty)) fail('err.assetQty');
-      if (!isMoney(d.unitPrice) || d.unitPrice! <= 0) fail('err.assetPrice');
+      if (!isUnitPrice(d.unitPrice, d.unit)) fail('err.assetPrice');
       if (asset.id === d.accountId) {
         // Çekim: o tarihte (ve sonraki çekimleri karşılıksız bırakmadan) o birimden elde olan kadar.
         const held = availableQty(data, asset, d.unit!, { date: d.date, seq: existing?.seq ?? data.nextSeq }, editingId);
@@ -176,8 +179,9 @@ export function validateTx(data: Data, d: TxDraft, today: ISODate, editingId?: I
   }
 }
 
-function cleanDraft(d: TxDraft, data: Data): TxDraft {
-  const out: TxDraft = { type: d.type, amount: d.amount, date: d.date, accountId: d.accountId };
+/** Doğrulanmış taslaktan saklanacak alanlar (işlem türüne göre gereksizler atılır). */
+function cleanDraft(d: TxDraft, data: Data): Omit<Tx, 'id' | 'seq' | 'createdAt'> {
+  const out: Omit<Tx, 'id' | 'seq' | 'createdAt'> = { type: d.type, amount: d.amount, date: d.date, accountId: d.accountId };
   if (d.type === 'transfer') out.toAccountId = d.toAccountId;
   const asset = assetSideOf(data, d);
   if (asset) {
@@ -187,6 +191,7 @@ function cleanDraft(d: TxDraft, data: Data): TxDraft {
   }
   else out.categoryId = d.categoryId;
   if (d.type === 'refund') out.refundOf = d.refundOf;
+  if (d.type === 'expense' && d.offBudget) out.offBudget = true;
   const note = d.note?.trim();
   if (note) out.note = note.slice(0, 200);
   if (d.planRef) out.planRef = { ...d.planRef };
@@ -270,7 +275,7 @@ function validateAccount(data: Data, d: AccountDraft, editing?: Account) {
     for (const l of d.asset.opening) {
       if (!isAssetUnit(l.unit)) fail('err.assetInvalid');
       if (!isQty(l.qty)) fail('err.assetQty');
-      if (!isMoney(l.price) || l.price <= 0) fail('err.assetPrice');
+      if (!isUnitPrice(l.price, l.unit)) fail('err.assetPrice');
       if (!isAssetLot(l)) fail('err.assetInvalid');
     }
     if (new Set(d.asset.opening.map((l) => l.unit)).size !== d.asset.opening.length) fail('err.assetDupUnit');
@@ -626,5 +631,6 @@ export function updateSettings(data: Data, patch: Partial<Settings>): Data {
   if (patch.monthlyBudget != null && (!isMoney(patch.monthlyBudget) || patch.monthlyBudget <= 0)) fail('err.budgetPositive');
   if (patch.reserve !== undefined && (!isMoney(patch.reserve) || patch.reserve < 0)) fail('err.reserveNegative');
   if (patch.monthEndFloor != null && (!isMoney(patch.monthEndFloor) || patch.monthEndFloor < 0)) fail('err.floorNegative');
+  if (patch.birthday != null && !isBirthday(patch.birthday)) fail('err.validDate');
   return { ...data, settings: { ...data.settings, ...patch } };
 }

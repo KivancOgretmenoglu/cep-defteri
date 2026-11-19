@@ -92,3 +92,278 @@
 .asset-breakdown__row--total .asset-breakdown__val {
   color: inherit;
 }
+
+/* Hisse seçici (formun içinde açılan panel) */
+.stock-picker {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  margin: 8px 0;
+  background: var(--surface);
+  display: grid;
+  gap: 8px;
+}
+.stock-picker__title {
+  margin: 0;
+  font-weight: 700;
+}
+.stock-picker__search {
+  position: relative;
+  display: block;
+}
+.stock-picker__search svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-3);
+  pointer-events: none;
+}
+.stock-picker__search .input {
+  padding-left: 34px;
+  width: 100%;
+}
+.stock-picker .field__label {
+  margin: 0;
+}
+.stock-hits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  border-top: 1px solid var(--line);
+}
+.stock-hit {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 4px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.stock-hit:hover,
+.stock-hit:focus-visible {
+  background: var(--surface-2, rgba(0, 0, 0, 0.04));
+}
+.stock-hit:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.stock-hit__sym {
+  font-variant-numeric: tabular-nums;
+  min-width: 4.2em;
+}
+.stock-hit__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-2, inherit);
+}
+.stock-hit__mkt {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.stock-picker__code {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.stock-name-line {
+  margin-top: -4px;
+}
+
+/* ── Portföy dağılımı (Yatırım ekranı) ──
+ * Kategorik renkler sabit sırayla türe bağlı (renk sıralamaya göre değişmez). Açık ve koyu zemin için
+ * ayrı seçildi ve doğrulandı (CVD/normal ayrım geçer). Açık zeminde 3 rengin karşıtlığı düşük olduğundan
+ * her parçanın adı, payı ve tutarı her zaman yanında yazılıdır. */
+:root {
+  --mix-tl: #2a78d6;
+  --mix-gold: #eb6834;
+  --mix-fx: #1baf7a;
+  --mix-BIST: #eda100;
+  --mix-US: #e87ba4;
+  --mix-FON: #008300;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --mix-tl: #3987e5;
+    --mix-gold: #d95926;
+    --mix-fx: #199e70;
+    --mix-BIST: #c98500;
+    --mix-US: #d55181;
+    --mix-FON: #0ca30c;
+  }
+}
+:root[data-theme='dark'] {
+  --mix-tl: #3987e5;
+  --mix-gold: #d95926;
+  --mix-fx: #199e70;
+  --mix-BIST: #c98500;
+  --mix-US: #d55181;
+  --mix-FON: #0ca30c;
+}
+.pf-c-tl { --c: var(--mix-tl); }
+.pf-c-gold { --c: var(--mix-gold); }
+.pf-c-fx { --c: var(--mix-fx); }
+.pf-c-BIST { --c: var(--mix-BIST); }
+.pf-c-US { --c: var(--mix-US); }
+.pf-c-FON { --c: var(--mix-FON); }
+
+.pf-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.pf-card__day {
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+.pf-bar {
+  display: flex;
+  gap: 2px; /* zemin rengi aralık: bitişik parçalar ayrılır */
+  height: 12px;
+  margin: 12px 0 8px;
+}
+.pf-bar__seg {
+  min-width: 4px;
+  background: var(--c);
+}
+.pf-bar__seg:first-child {
+  border-radius: 4px 0 0 4px;
+}
+.pf-bar__seg:last-child {
+  border-radius: 0 4px 4px 0;
+}
+.pf-bar__seg:only-child {
+  border-radius: 4px;
+}
+.pf-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.pf-legend li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.pf-sw {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--c);
+}
+.pf-legend__pct {
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.pf-legend__val {
+  font-variant-numeric: tabular-nums;
+  min-width: 6.5em;
+  text-align: right;
+}
+
+/* Dokunulabilir tür satırı → pozisyon ayrıntısı */
+.asset-breakdown__row--btn {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 0;
+}
+.asset-breakdown li:first-child .asset-breakdown__row--btn {
+  border-top: 0;
+}
+.asset-breakdown__row--btn:hover,
+.asset-breakdown__row--btn:focus-visible {
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+.asset-breakdown__row--btn .asset-breakdown__val {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.asset-breakdown__row--btn .asset-breakdown__val svg {
+  color: var(--ink-3);
+}
+.asset-breakdown__name small.asset-breakdown__pnl {
+  font-variant-numeric: tabular-nums;
+}
+.invest-hero__pnl {
+  margin: 6px 0 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.stale-fund {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 8px 0;
+}
+
+/* Pozisyon ayrıntısı */
+.pos-kv dd {
+  font-variant-numeric: tabular-nums;
+}
+.pos-chart {
+  margin: 12px 0;
+}
+.pos-events {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+}
+.pos-ev {
+  display: grid;
+  grid-template-columns: 4.5em minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 2px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+button.pos-ev {
+  cursor: pointer;
+}
+.pos-ev__date {
+  color: var(--ink-2);
+  font-size: 13px;
+}
+.pos-ev__main small {
+  display: block;
+  color: var(--ink-3);
+}
+.pos-ev__amt {
+  font-variant-numeric: tabular-nums;
+}
+.pos-actions {
+  flex-wrap: wrap;
+}

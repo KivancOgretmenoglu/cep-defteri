@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Trash2, Archive, ArchiveRestore, Ban, RotateCw } from 'lucide-react';
+import { isAssetUnit, type AssetUnit } from '../domain/assets';
 import type { AccountKind, Freq, ID, PlanKind } from '../domain/types';
 import * as A from '../domain/actions';
 import { catName, formatMoney, moneyUnit, parseMoney, shortDate } from '../i18n/format';
@@ -7,7 +8,7 @@ import { useT } from '../i18n';
 import type { Key } from '../i18n/core';
 import { cashBalance, installmentEnd, investmentState, isDaily, isInvestment } from '../domain/ledger';
 import { commit } from '../store/store';
-import { closeSheet, openSheet } from '../ui/nav';
+import { closeSheet, openSheet, type PlanPrefill } from '../ui/nav';
 import { Chip, Field, FormError, MoneyInput, Segmented, Sheet, inputFromMoney } from '../ui/kit';
 import { CATEGORY_COLORS, CATEGORY_ICONS, CatIcon } from '../ui/icons';
 import { dailyAccounts, useData, useLookups } from '../ui/hooks';
@@ -248,19 +249,19 @@ function CascadeConfirm({ accountId, onCancel, onConfirm }: { accountId: ID; onC
 }
 
 // ───────────────────────── Yatırım değeri ─────────────────────────
-export function ValuationSheet({ accountId }: { accountId: ID }) {
+export function ValuationSheet({ accountId, unit }: { accountId: ID; unit?: string }) {
   const { data } = useData();
-  if (data.accounts.find((a) => a.id === accountId)?.asset) return <AssetPriceSheet accountId={accountId} />;
+  if (data.accounts.find((a) => a.id === accountId)?.asset) return <AssetPriceSheet accountId={accountId} unit={isAssetUnit(unit) ? unit : undefined} />;
   return <ValueSheet accountId={accountId} />;
 }
 
 /** Altın/döviz hesabında "değeri güncelle" yerine birim fiyat elle girilir. */
-function AssetPriceSheet({ accountId }: { accountId: ID }) {
+function AssetPriceSheet({ accountId, unit }: { accountId: ID; unit?: AssetUnit }) {
   const T = useT();
   const { data } = useData();
   const account = data.accounts.find((a) => a.id === accountId)!;
   const [err, setErr] = useState<string | null>(null);
-  const { save, body } = useManualPrice(account, () => { closeSheet(); }, setErr);
+  const { save, body } = useManualPrice(account, () => { closeSheet(); }, setErr, unit);
   return (
     <Sheet title={T('asset.priceTitle')} onClose={closeSheet} footer={<button className="btn btn--primary btn--block" onClick={save}>{T('common.save')}</button>}>
       {body}
@@ -312,7 +313,7 @@ const FREQ: { value: Freq; label: Key }[] = [
   { value: 'once', label: 'freq.once' },
 ];
 
-export function PlanSheet({ planId, preset }: { planId?: ID; preset?: PlanKind }) {
+export function PlanSheet({ planId, preset, draft: pre }: { planId?: ID; preset?: PlanKind; draft?: PlanPrefill }) {
   const T = useT();
   const { data, today } = useData();
   const plan = planId ? data.plans.find((p) => p.id === planId) : undefined;
@@ -320,13 +321,13 @@ export function PlanSheet({ planId, preset }: { planId?: ID; preset?: PlanKind }
   const daily = dailyAccounts(data);
   const inv = data.accounts.filter((a) => isInvestment(a) && !a.archived);
   const [kind, setKind] = useState<PlanKind>(plan?.kind ?? preset ?? 'expense');
-  const [title, setTitle] = useState(plan?.title ?? '');
-  const [amount, setAmount] = useState(inputFromMoney(plan?.amount));
-  const [categoryId, setCategoryId] = useState<ID | undefined>(plan?.categoryId);
-  const [accountId, setAccountId] = useState<ID>(plan?.accountId ?? data.settings.lastAccountId ?? daily[0]?.account.id ?? '');
+  const [title, setTitle] = useState(plan?.title ?? pre?.title ?? '');
+  const [amount, setAmount] = useState(inputFromMoney(plan?.amount ?? pre?.amount));
+  const [categoryId, setCategoryId] = useState<ID | undefined>(plan?.categoryId ?? pre?.categoryId);
+  const [accountId, setAccountId] = useState<ID>(plan?.accountId ?? pre?.accountId ?? data.settings.lastAccountId ?? daily[0]?.account.id ?? '');
   const [toAccountId, setToAccountId] = useState<ID>(plan?.toAccountId ?? inv[0]?.id ?? '');
   const [freq, setFreq] = useState<Freq>(plan?.freq ?? 'monthly');
-  const [startDate, setStartDate] = useState(plan?.startDate ?? today);
+  const [startDate, setStartDate] = useState(plan?.startDate ?? pre?.startDate ?? today);
   const [endDate, setEndDate] = useState(plan?.endDate ?? '');
   const [instOn, setInstOn] = useState(!!plan?.installments);
   const [instN, setInstN] = useState(String(plan?.installments ?? 6));

@@ -42,3 +42,20 @@ export function pct(n: number, form: PctForm): string {
   }
   return `%${n}'${suf}`;
 }
+
+/**
+ * Özel isme kesme işaretiyle hâl eki: "Ekim'de", "Kasım'a", "Pamuk'tan", "Bilge'den", "Mayıs'ta".
+ * loc: -da/-de/-ta/-te; dat: -a/-e (ünlüden sonra -ya/-ye); abl: -dan/-den/-tan/-ten.
+ * Ünsüz benzeşmesi (fıstıkçı şahap) son harfe göre; kısaltma ve sayı okunuşu desteklenmez.
+ */
+export function properSuffix(word: string, kind: 'loc' | 'dat' | 'abl'): string {
+  const w = word.trim();
+  const low = w.toLocaleLowerCase('tr');
+  const last = low[low.length - 1] ?? 'e';
+  const a = v2(lastVowel(low));
+  const hard = 'fstkçşhp'.includes(last);
+  const vowelEnd = VOWELS.includes(last);
+  if (kind === 'dat') return `${w}'${vowelEnd ? 'y' : ''}${a}`;
+  const d = hard ? 't' : 'd';
+  return `${w}'${d}${a}${kind === 'abl' ? 'n' : ''}`;
+}

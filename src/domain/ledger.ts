@@ -4,7 +4,7 @@
  */
 import type { Account, Category, Data, Goal, ID, Plan, Tx, Valuation } from './types';
 import { sum, type Money } from './money';
-import { roundQty, unitOrder, valueOf, type AssetUnit } from './assets';
+import { isFundUnit, roundQty, stockMarket, unitKind, unitOrder, valueOf, type AssetUnit, type StockUnit } from './assets';
 import type { PriceBook, PriceSource } from './prices';
 import {
   addDays, addMonths, dayInMonth, weekStart, dayOfMonth, daysInMonth, diffDays, inRange, monthEnd, monthOf, monthStart,
@@ -133,6 +133,21 @@ export interface AssetPosition {
   priceSource: PriceSource | 'last-tx' | null;
   /** qty × price (fiyat yoksa 0). */
   value: Money;
+  /**
+   * Eldeki miktarın maliyeti (ağırlıklı ortalama yöntemi): açılış kalemi qty × fiyat, alımlarda ödenen TL
+   * eklenir; satışta ortalama maliyet × satılan miktar düşülür. TL katkı tutarı (makas/komisyon dahil) esas alınır.
+   */
+  cost: Money;
+  /** cost ÷ qty (kuruş/birim). */
+  avgCost: number;
+  /** Gerçekleşmemiş kâr/zarar = value − cost. Yalnız güncel fiyat varken (son işlem fiyatıyla anlamsız). */
+  pnl: Money | null;
+  /** pnl ÷ cost (%, ondalıklı). */
+  pnlPct: number | null;
+  /** Satışlardan gerçekleşen kâr/zarar: satış tutarı − satılanın ortalama maliyeti. */
+  realized: Money;
+  /** Son günlük değişim (TL): qty × (alış − önceki kapanış). Önceki kapanış bilinmiyorsa null. */
+  dayChange: Money | null;
 }
 
 export interface AssetHolding {
@@ -140,6 +155,41 @@ export interface AssetHolding {
   positions: AssetPosition[];
   /** Σ pozisyon değeri. */
   value: Money;
+  /** Güncel fiyatı olan pozisyonların maliyeti ve gerçekleşmemiş kâr/zararı (yoksa null). */
+  pricedCost: Money;
+  pnl: Money | null;
+  /** Önceki kapanışı bilinen pozisyonların günlük değişimi ve o pozisyonların önceki değeri (yüzde için). */
+  dayChange: Money | null;
+  dayBase: Money;
+}
+
+/** Bir birimin maliyet yürüyüşü (ağırlıklı ortalama). */
+export interface CostState {
+  qty: number;
+  cost: Money;
+  realized: Money;
+}
+
+/**
+ * Varlık hesabındaki her birimin maliyeti: kronolojik yürüyüş (açılış → işlemler). Satışta ortalama
+ * maliyet düşer, kalan maliyet değişmez oranda kalır; miktar sıfırlanınca maliyet de sıfırlanır.
+ */
+export function assetCosts(data: Data, account: Account): Map<AssetUnit, CostState> {
+  const m = new Map<AssetUnit, CostState>();
+  const get = (u: AssetUnit) => m.get(u) ?? { qty: 0, cost: 0, realized: 0 };
+  for (const l of account.asset?.opening ?? []) m.set(l.unit, { qty: l.qty, cost: valueOf(l.qty, l.price), realized: 0 });
+  for (const t of assetTxsOf(data, account.id)) {
+    const s = get(t.unit!);
+    if (t.toAccountId === account.id) {
+      m.set(t.unit!, { qty: s.qty + t.qty!, cost: s.cost + t.amount, realized: s.realized });
+    } else {
+      const sold = Math.min(t.qty!, s.qty);
+      const removed = s.qty > 0 ? Math.round((s.cost * sold) / s.qty) : 0;
+      const left = roundQty(s.qty - t.qty!, t.unit!);
+      m.set(t.unit!, { qty: left, cost: left > 0 ? s.cost - removed : 0, realized: s.realized + t.amount - removed });
+    }
+  }
+  return m;
 }
 
 const byTime = (a: Point, b: Point) => (a.date === b.date ? a.seq - b.seq : a.date < b.date ? -1 : 1);
@@ -203,18 +253,42 @@ export function assetHolding(data: Data, account: Account, prices?: PriceBook): 
   const last = new Map<AssetUnit, { date: ISODate; seq: number; price: Money }>();
   for (const l of account.asset.opening) last.set(l.unit, { date: account.openingDate, seq: 0, price: l.price });
   for (const t of assetTxsOf(data, account.id)) if (t.unitPrice) last.set(t.unit!, { date: t.date, seq: t.seq, price: t.unitPrice });
+  const costs = assetCosts(data, account);
   const positions: AssetPosition[] = [];
   for (const [unit, qty] of assetQuantities(data, account)) {
     if (!(qty > 0)) continue;
     const live = prices?.[unit];
     const l = last.get(unit);
-    const p: Omit<AssetPosition, 'value'> = live
+    const base = live
       ? { unit, qty, price: live.buy, priceAt: live.at, priceSource: live.source }
-      : { unit, qty, price: l?.price ?? null, priceAt: l?.date ?? null, priceSource: l ? 'last-tx' : null };
-    positions.push({ ...p, value: p.price === null ? 0 : valueOf(qty, p.price) });
+      : { unit, qty, price: l?.price ?? null, priceAt: l?.date ?? null, priceSource: l ? ('last-tx' as const) : null };
+    const value = base.price === null ? 0 : valueOf(qty, base.price);
+    const c = costs.get(unit) ?? { qty, cost: 0, realized: 0 };
+    const priced = !!live;
+    const pnl = priced && c.cost > 0 ? value - c.cost : null;
+    const prev = live?.prevBuy;
+    positions.push({
+      ...base,
+      value,
+      cost: c.cost,
+      avgCost: qty > 0 ? c.cost / qty : 0,
+      pnl,
+      pnlPct: pnl !== null ? (pnl / c.cost) * 100 : null,
+      realized: c.realized,
+      dayChange: priced && prev && prev > 0 && live!.source === 'live' ? value - valueOf(qty, prev) : null,
+    });
   }
   positions.sort((a, b) => unitOrder(a.unit, b.unit));
-  return { positions, value: sum(positions.map((p) => p.value)) };
+  const withPnl = positions.filter((p) => p.pnl !== null);
+  const withDay = positions.filter((p) => p.dayChange !== null);
+  return {
+    positions,
+    value: sum(positions.map((p) => p.value)),
+    pricedCost: sum(withPnl.map((p) => p.cost)),
+    pnl: withPnl.length ? sum(withPnl.map((p) => p.pnl!)) : null,
+    dayChange: withDay.length ? sum(withDay.map((p) => p.dayChange!)) : null,
+    dayBase: sum(withDay.map((p) => p.value - p.dayChange!)),
+  };
 }
 
 /**
@@ -321,6 +395,62 @@ export function investmentTotal(data: Data, prices?: PriceBook): Money {
   return sum(investmentAccounts(data).filter((a) => !a.archived).map((a) => investmentState(data, a.id, prices)?.currentValue ?? 0));
 }
 
+// ───────────────────────── Portföy ─────────────────────────
+
+export type MixKey = 'tl' | 'gold' | 'fx' | 'BIST' | 'US' | 'FON';
+export const MIX_ORDER: MixKey[] = ['tl', 'gold', 'fx', 'BIST', 'US', 'FON'];
+
+/**
+ * Arşivlenmemiş yatırım hesaplarının dağılımı: TL hesaplar, altın, döviz, BIST, ABD, fon. Değer 0 olanlar
+ * atlanır; sıra sabittir. Toplam investmentTotal ile aynıdır (TL hesap değeri negatif olamaz).
+ */
+export function portfolioMix(data: Data, prices?: PriceBook): { key: MixKey; value: Money }[] {
+  const m = new Map<MixKey, Money>();
+  const add = (k: MixKey, v: Money) => m.set(k, (m.get(k) ?? 0) + v);
+  for (const a of investmentAccounts(data)) {
+    if (a.archived) continue;
+    const st = investmentState(data, a.id, prices)!;
+    if (!st.asset) {
+      add('tl', st.currentValue);
+      continue;
+    }
+    for (const p of st.asset.positions) {
+      const kind = unitKind(p.unit);
+      add(kind === 'stock' ? stockMarket(p.unit as StockUnit) : kind, p.value);
+    }
+  }
+  return MIX_ORDER.filter((k) => (m.get(k) ?? 0) > 0).map((key) => ({ key, value: m.get(key)! }));
+}
+
+/** Portföyün günlük değişimi: önceki kapanışı bilinen pozisyonlar üzerinden (yoksa null). */
+export function portfolioDayChange(data: Data, prices?: PriceBook): { change: Money; base: Money } | null {
+  let change = 0, base = 0, any = false;
+  for (const a of investmentAccounts(data)) {
+    if (a.archived || !a.asset) continue;
+    const h = investmentState(data, a.id, prices)!.asset!;
+    if (h.dayChange === null) continue;
+    any = true;
+    change += h.dayChange;
+    base += h.dayBase;
+  }
+  return any ? { change, base } : null;
+}
+
+/**
+ * Fiyatı eskimiş fonlar: güncel (elle) fiyatı ya da yoksa son işlem fiyatı `days` günden eski olan fon
+ * pozisyonları. Fon fiyatı otomatik gelmediği için kullanıcıya hatırlatılır.
+ */
+export function staleFunds(holding: AssetHolding, now: number, days = 7): { unit: AssetUnit; ageDays: number }[] {
+  const out: { unit: AssetUnit; ageDays: number }[] = [];
+  for (const p of holding.positions) {
+    if (!isFundUnit(p.unit) || p.priceAt === null) continue;
+    const at = typeof p.priceAt === 'number' ? p.priceAt : Date.parse(p.priceAt + 'T12:00:00');
+    const age = Math.floor((now - at) / 86_400_000);
+    if (age >= days) out.push({ unit: p.unit, ageDays: age });
+  }
+  return out;
+}
+
 /** Bir değerlemenin, o hesap için hangi hareketleri kapsadığını açıklamak için: değerlemeden sonraki net akış. */
 export function flowsAfter(data: Data, accountId: ID, v: Valuation): Money {
   const accounts = accountIndex(data);
@@ -357,8 +487,13 @@ export interface RangeSummary {
   /** Tüketim harcaması = giderler − iadeler. Transfer ve yatırım katkısı hariç. */
   spending: Money;
   spendingByCategory: Map<ID, Money>;
-  /** Bu aralıkta planlı ödemelere bağlı harcama (iadeleri düşülmüş). */
+  /** Bu aralıkta planlı ödemelere bağlı harcama (iadeleri düşülmüş; bütçe dışı olanlar hariç). */
   plannedSpending: Money;
+  /** Bütçe dışı işaretli giderler − onların iadeleri (spending'in içindedir). */
+  offBudget: Money;
+  offBudgetByCategory: Map<ID, Money>;
+  /** Bütçe dışı gider sayısı. */
+  offBudgetCount: number;
   refunds: Money;
   contributions: Money;
   withdrawals: Money;
@@ -371,6 +506,8 @@ export function rangeSummary(data: Data, from: ISODate, to: ISODate): RangeSumma
   const txById = new Map(data.txs.map((t) => [t.id, t]));
   const incomeBySource = new Map<ID, Money>();
   const spendingByCategory = new Map<ID, Money>();
+  const offBudgetByCategory = new Map<ID, Money>();
+  let offBudget = 0, offBudgetCount = 0;
   const add = (m: Map<ID, Money>, k: ID | undefined, v: Money) => {
     const key = k ?? 'none';
     m.set(key, (m.get(key) ?? 0) + v);
@@ -387,14 +524,21 @@ export function rangeSummary(data: Data, from: ISODate, to: ISODate): RangeSumma
       case 'expense':
         spending += t.amount;
         add(spendingByCategory, t.categoryId, t.amount);
-        if (t.planRef) plannedSpending += t.amount;
+        if (t.offBudget) {
+          offBudget += t.amount;
+          offBudgetCount++;
+          add(offBudgetByCategory, t.categoryId, t.amount);
+        } else if (t.planRef) plannedSpending += t.amount;
         break;
       case 'refund': {
         spending -= t.amount;
         refunds += t.amount;
         add(spendingByCategory, refundCategory(t, txById), -t.amount);
         const orig = t.refundOf ? txById.get(t.refundOf) : undefined;
-        if (orig?.planRef) plannedSpending -= t.amount;
+        if (orig?.offBudget) {
+          offBudget -= t.amount;
+          add(offBudgetByCategory, refundCategory(t, txById), -t.amount);
+        } else if (orig?.planRef) plannedSpending -= t.amount;
         break;
       }
       case 'transfer': {
@@ -405,7 +549,7 @@ export function rangeSummary(data: Data, from: ISODate, to: ISODate): RangeSumma
       }
     }
   }
-  return { from, to, income, incomeBySource, spending, spendingByCategory, plannedSpending, refunds, contributions, withdrawals, txCount };
+  return { from, to, income, incomeBySource, spending, spendingByCategory, plannedSpending, offBudget, offBudgetByCategory, offBudgetCount, refunds, contributions, withdrawals, txCount };
 }
 
 export const monthSummary = (data: Data, m: MonthKey) => rangeSummary(data, monthStart(m), monthEnd(m));
@@ -623,8 +767,11 @@ export interface CategoryLimitStatus {
 export interface BudgetStatus {
   month: MonthKey;
   budget: Money | null;
-  /** Ayın toplam tüketim harcaması (iadeler düşülmüş). */
+  /** Bütçeye sayılan harcama: ayın tüketim harcaması − bütçe dışı giderler (iadeler düşülmüş). */
   spent: Money;
+  /** Bütçe dışı tutulan harcama (bilgi; spent'e dahil değil). */
+  offBudget: Money;
+  offBudgetCount: number;
   /** Planlı ödemelere bağlı gerçekleşen harcama. */
   plannedSpent: Money;
   /** Bu ay vadesi gelen ama henüz ödenmemiş planlı ödemeler. */
@@ -658,12 +805,15 @@ export function budgetStatus(data: Data, month: MonthKey, today: ISODate): Budge
         )
       : 0;
   const plannedSpent = s.plannedSpending;
-  const flexibleSpent = s.spending - plannedSpent;
+  // Bütçe dışı giderler (biriktirip alınan gitar gibi) bütçe, tempo ve kategori limitlerine sayılmaz.
+  const spent = s.spending - s.offBudget;
+  const flexibleSpent = spent - plannedSpent;
+  const off = { offBudget: s.offBudget, offBudgetCount: s.offBudgetCount };
 
   const categories: CategoryLimitStatus[] = data.categories
     .filter((c) => c.kind === 'expense' && c.limit && c.limit > 0 && !c.archived)
     .map((c) => {
-      const used = s.spendingByCategory.get(c.id) ?? 0;
+      const used = (s.spendingByCategory.get(c.id) ?? 0) - (s.offBudgetByCategory.get(c.id) ?? 0);
       const pct = Math.round((used / (c.limit as Money)) * 100);
       return { category: c, limit: c.limit as Money, used, pct, level: pct >= 100 ? 'over' : pct >= 70 ? 'near' : 'ok' };
     });
@@ -671,19 +821,19 @@ export function budgetStatus(data: Data, month: MonthKey, today: ISODate): Budge
   const B = data.settings.monthlyBudget;
   if (B === null || B <= 0) {
     return {
-      month, budget: null, spent: s.spending, plannedSpent, plannedPending, flexibleSpent,
+      month, budget: null, spent, ...off, plannedSpent, plannedPending, flexibleSpent,
       flexibleBudget: null, remaining: null, usedPct: null, flexUsedPct: null, elapsedPct, state: 'none', categories,
     };
   }
   const flexibleBudget = B - plannedSpent - plannedPending;
-  const remaining = B - s.spending - plannedPending;
-  const usedPct = Math.round((s.spending / B) * 100);
+  const remaining = B - spent - plannedPending;
+  const usedPct = Math.round((spent / B) * 100);
   const flexUsedPct = flexibleBudget > 0 ? Math.round((Math.max(flexibleSpent, 0) / flexibleBudget) * 100) : null;
   let state: BudgetState;
   // Planlı ödemeler bütçeyi tek başına dolduruyorsa bu bir aşım değil, bilgidir.
   if (month > current) state = 'future';
   else if (flexibleBudget <= 0) state = 'planned-full';
-  else if (s.spending > B) state = 'over';
+  else if (spent > B) state = 'over';
   else if (!isCurrent) state = 'closed-within';
   else if ((flexUsedPct ?? 0) > 100) state = 'tight';
   else {
@@ -691,7 +841,7 @@ export function budgetStatus(data: Data, month: MonthKey, today: ISODate): Budge
     state = lead <= 10 ? 'on-track' : lead <= 25 ? 'watch' : 'tight';
   }
   return {
-    month, budget: B, spent: s.spending, plannedSpent, plannedPending, flexibleSpent,
+    month, budget: B, spent, ...off, plannedSpent, plannedPending, flexibleSpent,
     flexibleBudget, remaining, usedPct, flexUsedPct, elapsedPct, state, categories,
   };
 }

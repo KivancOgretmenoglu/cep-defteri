@@ -13,6 +13,8 @@
  *  - Güncel değer = Σ birim miktarı × o birimin güncel ALIŞ fiyatı (kuyumcu/döviz bürosu senden bu fiyata
  *    alır; yani bugün satsan eline geçecek tutar). Bir birimin fiyatı yoksa son işlem/açılış fiyatı.
  *  - Hedefler ve net katkı TL üzerinden ölçülmeye devam eder.
+ *  - Hisse senetleri de aynı hesapta birer birimdir ("BIST:THYAO", "US:AAPL"; src/domain/stocks.ts). Miktar
+ *    adettir; TL tutar ve TL birim fiyat saklanır (ABD hissesinde işlem anındaki dolar kuruyla çevrilmiş).
  *  - Eski sürümün tek birimli hesapları (asset: { kind, unit } + openingQty/openingPrice) yüklenirken
  *    src/domain/migrate.ts ile bu yapıya çevrilir.
  */
@@ -20,8 +22,18 @@ import type { Money } from './money';
 
 export type GoldUnit = 'gram' | 'ceyrek' | 'yarim' | 'tam' | 'cumhuriyet' | 'bilezik22';
 export type FxUnit = 'USD' | 'EUR' | 'GBP';
-export type AssetUnit = GoldUnit | FxUnit;
-export type AssetKind = 'gold' | 'fx';
+/**
+ * Borsa: Borsa İstanbul (TL), ABD borsaları (NYSE/Nasdaq, USD) ya da yatırım fonu (TEFAS, TL).
+ * Fonlar borsada işlem görmez; fiyatları otomatik alınamaz (TEFAS'ın herkese açık bir veri servisi yok),
+ * kullanıcı "Fiyatı gir" ile günceller. Fon fiyatı 6 ondalıklı TL'dir (ör. 1,234567).
+ */
+export type Market = 'BIST' | 'US' | 'FON';
+/** Hisse/ETF/fon birimi: "BIST:THYAO", "US:AAPL", "US:BRK.B", "FON:GTL". Miktar adet (fonda pay) cinsindendir. */
+export type StockUnit = `BIST:${string}` | `US:${string}` | `FON:${string}`;
+/** Altın/döviz türleri sabit listedir; hisseler borsa + kodla açık uçludur. */
+export type FixedUnit = GoldUnit | FxUnit;
+export type AssetUnit = FixedUnit | StockUnit;
+export type AssetKind = 'gold' | 'fx' | 'stock';
 
 /** Açılış kalemi: takip başlangıcında elde olan miktar ve o günkü birim fiyat (kuruş). */
 export interface AssetLot {
@@ -38,10 +50,58 @@ export interface AssetAccount {
 
 export const GOLD_UNITS: GoldUnit[] = ['gram', 'ceyrek', 'yarim', 'tam', 'cumhuriyet', 'bilezik22'];
 export const FX_UNITS: FxUnit[] = ['USD', 'EUR', 'GBP'];
-export const ALL_UNITS: AssetUnit[] = [...GOLD_UNITS, ...FX_UNITS];
+/** Sabit (altın + döviz) birimler. Hisseler bu listede yoktur; elde olanlar işlemlerden gelir. */
+export const ALL_UNITS: FixedUnit[] = [...GOLD_UNITS, ...FX_UNITS];
+export const MARKETS: Market[] = ['BIST', 'US', 'FON'];
 
-export const unitKind = (u: AssetUnit): AssetKind => ((FX_UNITS as string[]).includes(u) ? 'fx' : 'gold');
-export const isAssetUnit = (v: unknown): v is AssetUnit => typeof v === 'string' && (ALL_UNITS as string[]).includes(v);
+/**
+ * Hisse kodu kuralları. BIST: harfle başlayan 3–6 harf/rakam (THYAO, A1CAP). ABD: 1–5 harf, isteğe bağlı
+ * tek harfli sınıf eki noktayla (BRK.B). Kodlar büyük harfle saklanır.
+ */
+const STOCK_RE: Record<Market, RegExp> = { BIST: /^[A-Z][A-Z0-9]{2,5}$/, US: /^[A-Z]{1,5}(\.[A-Z])?$/, FON: /^[A-Z0-9]{3}$/ };
+
+export const isStockUnit = (v: unknown): v is StockUnit => {
+  if (typeof v !== 'string') return false;
+  const i = v.indexOf(':');
+  const m = v.slice(0, i) as Market;
+  return i > 0 && m in STOCK_RE && STOCK_RE[m].test(v.slice(i + 1));
+};
+export const stockMarket = (u: StockUnit): Market => u.slice(0, u.indexOf(':')) as Market;
+export const stockSymbol = (u: StockUnit): string => u.slice(u.indexOf(':') + 1);
+
+/** Kullanıcının yazdığı kodu birime çevirir ("thyao", "BRK-B", "brk/b" → "US:BRK.B"); geçersizse null. */
+export function toStockUnit(market: Market, symbol: string): StockUnit | null {
+  let s = symbol.trim().toUpperCase().replace(/\s/g, '');
+  if (market === 'BIST') s = s.replace(/\.IS$|\.E$/, '');
+  else s = s.replace(/[-/]/g, '.');
+  const u = `${market}:${s}`;
+  return isStockUnit(u) ? u : null;
+}
+
+/** Hissenin işlem gördüğü para birimi. */
+export const stockCurrency = (u: StockUnit): 'TRY' | 'USD' => (stockMarket(u) === 'US' ? 'USD' : 'TRY');
+
+/** Yatırım fonu mu (TEFAS). */
+export const isFundUnit = (u: unknown): u is StockUnit => isStockUnit(u) && stockMarket(u) === 'FON';
+
+/**
+ * Birim fiyatın kuruş altı ondalığı: fonlarda 4 (yani TL'de 6 ondalık: 1,234567), diğerlerinde 0 (tam kuruş).
+ * Fon fiyatı kuruşa yuvarlansaydı 0,03 TL'lik bir fonda değer %10'dan fazla sapardı.
+ */
+export const priceDecimals = (u: AssetUnit | undefined): number => (u && isFundUnit(u) ? 4 : 0);
+export function roundPrice(p: number, u: AssetUnit | undefined): number {
+  const f = 10 ** priceDecimals(u);
+  return Math.round(p * f) / f;
+}
+/** Birim fiyat geçerli mi: > 0; fon dışında tam kuruş, fonda en fazla 4 kuruş altı ondalık. */
+export function isUnitPrice(v: unknown, u: AssetUnit | undefined): v is Money {
+  if (typeof v !== 'number' || !Number.isFinite(v) || v <= 0 || v >= 1e13) return false;
+  return priceDecimals(u) === 0 ? Number.isSafeInteger(v) : Math.abs(roundPrice(v, u) - v) < 1e-9;
+}
+
+export const unitKind = (u: AssetUnit): AssetKind => (isStockUnit(u) ? 'stock' : (FX_UNITS as string[]).includes(u) ? 'fx' : 'gold');
+export const isFixedUnit = (v: unknown): v is FixedUnit => typeof v === 'string' && (ALL_UNITS as string[]).includes(v);
+export const isAssetUnit = (v: unknown): v is AssetUnit => isFixedUnit(v) || isStockUnit(v);
 
 export const isQty = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v > 0 && v < 1e9;
 
@@ -49,7 +109,7 @@ export const isQty = (v: unknown): v is number => typeof v === 'number' && Numbe
 export function isAssetLot(v: unknown): v is AssetLot {
   if (typeof v !== 'object' || v === null) return false;
   const o = v as Record<string, unknown>;
-  return isAssetUnit(o.unit) && isQty(o.qty) && Number.isSafeInteger(o.price) && (o.price as number) > 0;
+  return isAssetUnit(o.unit) && isQty(o.qty) && isUnitPrice(o.price, o.unit);
 }
 
 /** Hesabın varlık bilgisi doğru mu: kalemler geçerli ve her birim en fazla bir kez. */
@@ -60,11 +120,22 @@ export function isAssetAccount(v: unknown): v is AssetAccount {
   return new Set(o.map((l) => l.unit)).size === o.length;
 }
 
-/** Birimleri sabit sırada dizer (altınlar, sonra dövizler). */
-export const unitOrder = (a: AssetUnit, b: AssetUnit) => ALL_UNITS.indexOf(a) - ALL_UNITS.indexOf(b);
+/** Sıralama anahtarı: altınlar, dövizler, sonra BIST hisseleri ve ABD hisseleri (kendi içinde alfabetik). */
+const orderKey = (u: AssetUnit): [number, string] =>
+  isStockUnit(u) ? [ALL_UNITS.length + MARKETS.indexOf(stockMarket(u)), stockSymbol(u)] : [ALL_UNITS.indexOf(u), ''];
 
-/** Miktarın kaç ondalıkla tutulacağı: gram 0,001; sikke ve döviz 0,01. */
+/** Birimleri sabit sırada dizer (altınlar, dövizler, BIST hisseleri, ABD hisseleri). */
+export const unitOrder = (a: AssetUnit, b: AssetUnit) => {
+  const [x, xs] = orderKey(a), [y, ys] = orderKey(b);
+  return x !== y ? x - y : xs < ys ? -1 : xs > ys ? 1 : 0;
+};
+
+/**
+ * Miktarın kaç ondalıkla tutulacağı: gram 0,001; sikke ve döviz 0,01; BIST hissesi tam adet (kesirli
+ * hisse yok); ABD hissesi 0,000001 adet (aracı kurumlar kesirli hisse satar).
+ */
 export function qtyDecimals(u: AssetUnit): number {
+  if (isStockUnit(u)) return stockMarket(u) === 'BIST' ? 0 : 6; // ABD ve fon: kesirli (fonda pay)
   return u === 'gram' || u === 'bilezik22' ? 3 : 2;
 }
 
@@ -95,9 +166,9 @@ export function qtyFromAmount(amount: Money, unitPrice: Money, u: AssetUnit): nu
 }
 
 /** TL tutar ÷ miktar → birim fiyat (kuruş). */
-export function priceFromQty(amount: Money, qty: number): Money | null {
+export function priceFromQty(amount: Money, qty: number, u?: AssetUnit): Money | null {
   if (!(qty > 0) || !(amount > 0)) return null;
-  const p = Math.round(amount / qty);
+  const p = roundPrice(amount / qty, u);
   return p > 0 ? p : null;
 }
 

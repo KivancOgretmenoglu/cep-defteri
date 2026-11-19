@@ -12,10 +12,12 @@ export interface WidgetPrefs {
    * maskot gizli ajan gözlüğüyle. Uygulamadaki "Toplamları gizle" açıksa araç zaten gizler.
    */
   hideAmount: boolean;
+  /** Büyük araçta "Yatırım: 41.857 TL" satırı (arşivlenmemiş yatırım hesaplarının güncel değeri). */
+  showPortfolio: boolean;
 }
 
 const KEY = 'cep-defteri:widget';
-export const DEFAULT_WIDGET_PREFS: WidgetPrefs = { animate: true, hideAmount: false };
+export const DEFAULT_WIDGET_PREFS: WidgetPrefs = { animate: true, hideAmount: false, showPortfolio: false };
 
 function read(): WidgetPrefs {
   try {

@@ -3,7 +3,7 @@
  * Ayarlar.tsx bunları mevcut kartların arasına yerleştirir.
  */
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Bell, EyeOff, Fingerprint, HardDriveDownload, LayoutGrid, Lock, RotateCcw } from 'lucide-react';
+import { Bell, EyeOff, Fingerprint, HardDriveDownload, LayoutGrid, Lock, RotateCcw, Sprout } from 'lucide-react';
 import { SectionHead, Segmented } from '../ui/kit';
 import { isNative } from '../platform';
 import { getDevice, setDevice, useDevice, type DevicePrefs } from '../store/device';
@@ -245,6 +245,9 @@ export function NotificationSettings() {
           <Row title={t('ns.evening')} hint={t('ns.eveningHint')}>
             <Segmented<OnOff> size="sm" label={t('ns.evening')} value={n.dailyReminder ? 'on' : 'off'} onChange={(v) => setNotif({ dailyReminder: v === 'on' })} options={ONOFF} />
           </Row>
+          <Row title={t('ns.weekly')} hint={t('ns.weeklyHint')}>
+            <Segmented<OnOff> size="sm" label={t('ns.weekly')} value={n.weekly ? 'on' : 'off'} onChange={(v) => setNotif({ weekly: v === 'on' })} options={ONOFF} />
+          </Row>
           {n.dailyReminder && (
             <Row title={t('ns.reminderHour')}>
               <select className="input input--small nset-select" value={n.reminderHour} onChange={(e) => setNotif({ reminderHour: Number(e.target.value) })} aria-label={t('ns.reminderHour')}>
@@ -398,6 +401,8 @@ const WIDGET_TXT = {
     animHint: 'Büyük araçta (4×3 ve üstü) maskot kendi sahnesinde kısa bir döngü oynar. Kapalıyken sabit durur.',
     hide: "Widget'ta tutarı gizle",
     hideHint: 'Ana ekrandaki araçta tutarlar "•••• TL" görünür (çiplerde ve bugünkü harcamada da), maskot gizli ajan gözlüğü takar. Uygulamanın içi etkilenmez.',
+    portfolio: 'Widget\'ta yatırım değeri',
+    portfolioHint: 'Büyük araçta "Bugün" satırının altında yatırım hesaplarının güncel toplam değeri. Tutar gizleme açıksa o da gizlenir.',
     info: 'Araç boyuna göre değişir: küçükte tutar, karede büyük maskot ve +, ortada Gider / Gelir düğmeleri, büyükte bugünkü harcama ve sık kayıtların tek dokunuşla eklendiği çipler. Çiplerle eklenenler araçtaki tutara hemen yansır, uygulamayı açınca kaydedilir.',
   },
   en: {
@@ -406,6 +411,8 @@ const WIDGET_TXT = {
     animHint: 'On the large widget (4×3 and up) your mascot plays a short loop in its own scene. When off, it stays still.',
     hide: 'Hide amount on widget',
     hideHint: 'The home screen widget shows "₺••••" instead of amounts (on chips and today’s spending too) and your mascot puts on its secret-agent glasses. The app itself is unaffected.',
+    portfolio: 'Investments on widget',
+    portfolioHint: 'On the large widget, the current total of your investment accounts under the "Today" line. Hidden too when amounts are hidden.',
     info: 'The widget adapts to its size: the amount when small, a big mascot and + when square, Expense / Income buttons when medium, and today’s spending plus one-tap chips for frequent entries when large. Chip entries show up in the widget’s amount right away and are saved the next time you open the app.',
   },
 } as const;
@@ -424,6 +431,9 @@ export function WidgetSettings() {
       </Row>
       <Row title={<><EyeOff size={16} aria-hidden /> {s.hide}</>} hint={s.hideHint}>
         <Segmented<OnOff> size="sm" label={s.hide} value={w.hideAmount ? 'on' : 'off'} onChange={(v) => setWidgetPrefs({ hideAmount: v === 'on' })} options={ONOFF} />
+      </Row>
+      <Row title={<><Sprout size={16} aria-hidden /> {s.portfolio}</>} hint={s.portfolioHint}>
+        <Segmented<OnOff> size="sm" label={s.portfolio} value={w.showPortfolio ? 'on' : 'off'} onChange={(v) => setWidgetPrefs({ showPortfolio: v === 'on' })} options={ONOFF} />
       </Row>
       <p className="muted small">{s.info}</p>
     </section>

@@ -1,6 +1,6 @@
 # Cep Defteri — Gizlilik Politikası
 
-_Son güncelleme: 9 Ekim 2026_
+_Son güncelleme: 15 Kasım 2026_
 
 **Kısaca:** Cep Defteri hesap açtırmaz, reklam göstermez, analiz/izleme aracı kullanmaz ve kayıtlarını hiçbir sunucuya göndermez. Girdiğin her şey yalnızca senin cihazında saklanır.
 
@@ -15,7 +15,7 @@ _Son güncelleme: 9 Ekim 2026_
 
 ## İnternet bağlantısı ne için?
 
-Yalnızca **altın ve döviz fiyatlarını** almak için (bir yatırım hesabını altın ya da döviz olarak tuttuysan). Uygulama şu adreslerden herkese açık fiyat listesini indirir: `finans.truncgil.com`, yedek olarak `cdn.jsdelivr.net` ve `currency-api.pages.dev`. Bu isteklerde **hiçbir kişisel veri, kayıt ya da kimlik bilgisi gönderilmez**; yalnızca fiyat listesi istenir. Bu sunucular, her web isteğinde olduğu gibi IP adresini teknik olarak görebilir. Ayarlar'dan otomatik fiyat almayı kapatıp fiyatı elle girebilirsin; o durumda uygulama hiç internete bağlanmaz.
+Yalnızca **altın, döviz ve hisse senedi fiyatlarını** almak için (bir yatırım hesabında altın, döviz ya da hisse tutuyorsan). Altın/döviz için herkese açık fiyat listesi `finans.truncgil.com` adresinden, yedek olarak `cdn.jsdelivr.net` ve `currency-api.pages.dev` adreslerinden indirilir. Hisse fiyatları için yalnızca **elindeki (ya da o an seçtiğin) hissenin kodu** (ör. THYAO, AAPL) şu adreslere gönderilir: `query1.finance.yahoo.com` / `query2.finance.yahoo.com` (Yahoo Finance), `api.nasdaq.com` (Nasdaq) ve `www.isyatirim.com.tr` (İş Yatırım). Bu isteklerde **hiçbir kişisel veri, tutar, kayıt ya da kimlik bilgisi gönderilmez**; yalnızca fiyat istenir. Bu sunucular, her web isteğinde olduğu gibi IP adresini teknik olarak görebilir. Ayarlar'dan otomatik fiyat almayı kapatıp fiyatı elle girebilirsin; o durumda uygulama hiç internete bağlanmaz.
 
 ## Paylaşım ve satış
 
@@ -37,7 +37,7 @@ Bu politika değişirse bu sayfa güncellenir. Sorular için: cep.defteri2026@gm
 
 # Cep Defteri — Privacy Policy
 
-_Last updated: October 9, 2026_
+_Last updated: November 15, 2026_
 
 **In short:** Cep Defteri has no accounts, no ads, no analytics or tracking, and never sends your records to any server. Everything you enter stays on your device.
 
@@ -52,7 +52,7 @@ _Last updated: October 9, 2026_
 
 ## Why internet access?
 
-Only to fetch **gold and currency prices** (if you keep an investment account in gold or foreign currency). The app downloads public price lists from `finans.truncgil.com`, with `cdn.jsdelivr.net` and `currency-api.pages.dev` as fallbacks. **No personal data, records or identifiers are sent** — only the price list is requested. As with any web request, these servers can technically see your IP address. You can turn off automatic prices in Settings and enter prices manually; the app then never connects to the internet.
+Only to fetch **gold, currency and stock prices** (if an investment account holds gold, currency or stocks). Gold/currency prices come as a public price list from `finans.truncgil.com`, with `cdn.jsdelivr.net` and `currency-api.pages.dev` as fallbacks. For stock prices, only the **ticker of a stock you hold (or are picking)** (e.g. THYAO, AAPL) is sent to `query1.finance.yahoo.com` / `query2.finance.yahoo.com` (Yahoo Finance), `api.nasdaq.com` (Nasdaq) and `www.isyatirim.com.tr` (İş Yatırım). **No personal data, amounts, records or identifiers are sent** — only prices are requested. As with any web request, these servers can technically see your IP address. You can turn off automatic prices in Settings and enter prices manually; the app then never connects to the internet.
 
 ## Sharing and selling
 

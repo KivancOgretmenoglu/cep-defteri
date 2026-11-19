@@ -7,8 +7,10 @@ import { isMoney } from './money';
 import { isISODate } from './dates';
 import { DEFAULT_SETTINGS } from './defaults';
 import { accountIndex, assetOverdraft, refundCategory, transferKind } from './ledger';
-import { isAssetAccount, isAssetUnit, isQty, type AssetUnit } from './assets';
+import { isAssetAccount, isAssetUnit, isQty, isUnitPrice, priceDecimals, type AssetUnit } from './assets';
+import { unitLabel } from '../i18n/units';
 import { migrateRawData } from './migrate';
+import { isBirthday } from './special';
 
 export const APP_ID = 'cep-defteri';
 
@@ -81,7 +83,8 @@ export function parseBackup(text: string, lang: Lang = 'tr'): Result {
     if (!optStr(t.note) || !optStr(t.refundOf)) return err('bk.txNote');
     if (t.tags !== undefined && (!Array.isArray(t.tags) || !t.tags.every((x) => isStr(x) && x.length > 0 && x.length <= 24) || t.tags.length > 5)) return err('bk.tags');
     if (t.planRef !== undefined && (!isObj(t.planRef) || !isStr(t.planRef.planId) || !isISODate(t.planRef.due))) return err('bk.planRef');
-    if ((t.qty !== undefined && !isQty(t.qty)) || (t.unitPrice !== undefined && (!isMoney(t.unitPrice) || (t.unitPrice as number) <= 0)) || (t.unit !== undefined && !isAssetUnit(t.unit))) return err('bk.assetTx');
+    if (t.offBudget !== undefined && (t.offBudget !== true || t.type !== 'expense')) return err('bk.tx');
+    if ((t.qty !== undefined && !isQty(t.qty)) || (t.unitPrice !== undefined && !isUnitPrice(t.unitPrice, isAssetUnit(t.unit) ? t.unit : undefined)) || (t.unit !== undefined && !isAssetUnit(t.unit))) return err('bk.assetTx');
     txIds.add(t.id);
     maxSeq = Math.max(maxSeq, t.seq as number);
   }
@@ -112,6 +115,7 @@ export function parseBackup(text: string, lang: Lang = 'tr'): Result {
   if (s.theme !== undefined && !['system', 'light', 'dark'].includes(s.theme as string)) return err('bk.theme');
   if (s.lang !== undefined && !['tr', 'en'].includes(s.lang as string)) return err('bk.lang');
   if (s.examUntil != null && !isISODate(s.examUntil)) return err('bk.exam');
+  if (s.birthday != null && !isBirthday(s.birthday)) return err('bk.settings');
   // Eski sürümden kalan Clawd ayarları taşınmaz.
   const { clawd: _oldClawd, clawdQuips: _oldQuips, ...rest } = s;
   const settings = {
@@ -227,11 +231,20 @@ export function transactionsCSV(data: Data, lang: Lang = 'tr'): string {
   const acc = accountIndex(data);
   const cats = new Map(data.categories.map((c) => [c.id, c]));
   const txById = new Map(data.txs.map((t) => [t.id, t]));
-  // Altın/döviz işlemi varsa miktar, birim ve birim fiyat sütunları eklenir (yoksa CSV eskisiyle aynı).
+  // Altın/döviz/hisse işlemi varsa miktar, birim ve birim fiyat sütunları eklenir (yoksa CSV eskisiyle aynı).
   const withQty = data.txs.some((t) => t.qty !== undefined);
   const qtyCell = (q: number) => (lang === 'en' ? String(q) : String(q).replace('.', ','));
-  const unitCell = (u: AssetUnit | undefined) => (u ? T(`asset.unit.${u}`) : '');
-  const header = [T('csv.date'), T('csv.type'), T('csv.amount'), T('csv.account'), T('csv.toAccount'), T('csv.category'), T('csv.note'), T('csv.planned'), T('csv.tags'), ...(withQty ? [T('csv.qty'), T('csv.unit'), T('csv.unitPrice')] : [])];
+  const unitCell = (u: AssetUnit | undefined) => (u ? unitLabel(T, u) : '');
+  // Fon fiyatı 6 ondalıklı TL (1,234567); diğerleri kuruş.
+  const unitPriceCell = (p: number, u: AssetUnit | undefined) => {
+    const d = priceDecimals(u);
+    if (d === 0) return csvAmount(p, lang);
+    const txt = (p / 100).toFixed(2 + d).replace(/0{1,4}$/, '');
+    return lang === 'en' ? txt : txt.replace('.', ',');
+  };
+  // Bütçe dışı gider varsa ayrı sütun (yoksa CSV eskisiyle aynı).
+  const withOff = data.txs.some((t) => t.offBudget);
+  const header = [T('csv.date'), T('csv.type'), T('csv.amount'), T('csv.account'), T('csv.toAccount'), T('csv.category'), T('csv.note'), T('csv.planned'), T('csv.tags'), ...(withQty ? [T('csv.qty'), T('csv.unit'), T('csv.unitPrice')] : []), ...(withOff ? [T('csv.offBudget')] : [])];
   const rows = [...data.txs]
     .sort((a, b) => (a.date === b.date ? a.seq - b.seq : a.date < b.date ? -1 : 1))
     .map((t) => {
@@ -246,7 +259,8 @@ export function transactionsCSV(data: Data, lang: Lang = 'tr'): string {
         t.note ?? '',
         t.planRef ? T('csv.yes') : '',
         (t.tags ?? []).join(', '),
-        ...(withQty ? [t.qty !== undefined ? qtyCell(t.qty) : '', unitCell(t.unit), t.unitPrice !== undefined ? csvAmount(t.unitPrice, lang) : ''] : []),
+        ...(withQty ? [t.qty !== undefined ? qtyCell(t.qty) : '', unitCell(t.unit), t.unitPrice !== undefined ? unitPriceCell(t.unitPrice, t.unit) : ''] : []),
+        ...(withOff ? [t.offBudget ? T('csv.yes') : ''] : []),
       ];
     });
   return csvRows([header, ...rows], lang);

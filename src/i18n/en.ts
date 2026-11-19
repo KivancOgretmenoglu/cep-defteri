@@ -3,6 +3,10 @@ import type { Dict } from './core';
 import { plural } from './grammar';
 import { hintsEn } from './hints.en';
 import { assetsEn } from './assets.en';
+import { stocksEn } from './stocks.en';
+import { offBudgetEn } from './offbudget.en';
+import { growthEn } from './growth.en';
+import { portfolioEn } from './portfolio.en';
 import { defaultsEn } from './defaults.en';
 import { ringsEn } from './rings.en';
 import { planEn } from './plan.en';
@@ -14,6 +18,10 @@ import { accdelEn } from './accdel.en';
 export const en: Dict = {
   ...hintsEn,
   ...assetsEn,
+  ...stocksEn,
+  ...offBudgetEn,
+  ...growthEn,
+  ...portfolioEn,
   ...defaultsEn,
   'err.validDate': "Pick a valid date.",
   'err.futureDate': "You can't log something in the future. Add a plan for upcoming payments instead.",
@@ -152,6 +160,8 @@ export const en: Dict = {
   'home.perDayPre': "about",
   'home.perDayPost': " a day",
   'home.inDaily': "In everyday accounts",
+  'home.nowTitle': "Money in your accounts",
+  'home.afterPayments': "Spendable after payments",
   'home.upcomingPayments': "Upcoming payments",
   'home.plannedInvest': "Planned investing",
   'home.reserve': "Savings you set aside",

@@ -104,6 +104,6 @@ export async function onNotificationTap(handler: (extra: NotifExtra) => void) {
   const LN = await plugin();
   await LN.addListener('localNotificationActionPerformed', (a) => {
     const ex = a.notification?.extra as NotifExtra | undefined;
-    if (ex && (ex.open === 'add' || ex.open === 'confirm')) handler(ex);
+    if (ex && (ex.open === 'add' || ex.open === 'confirm' || ex.open === 'reports')) handler(ex);
   });
 }
