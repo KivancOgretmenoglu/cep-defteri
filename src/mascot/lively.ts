@@ -8,7 +8,7 @@
  */
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type RefObject } from 'react';
 import type { Mood } from '../domain/mood';
-import { OUTFITS, type MascotLive } from './render';
+import { outfitFor, SPY_OVER, type MascotLive } from './render';
 import { buildAction, OUTFIT_ACTIONS, reduceFrames, sproutRects, type ActionName, type Frame } from './actions';
 import { onMascotEvent, type MascotEvent } from './events';
 import { dayPhase, type Season } from './seasonal';
@@ -134,7 +134,10 @@ export function useLively({ who, lang, name, season = null, exam = false, mood, 
   const active = useActive(ref);
   const uid = 'masc' + useId().replace(/[^a-zA-Z0-9]/g, '');
   // Öncelik: ajan (bakiye gizli) > sınav haftası > özel gün > seçilen kıyafet. Özel durumlar yalnız ana ekranda.
-  const outfit = spy ? 'spy' : home && exam ? 'exam' : home && season ? season : wantOutfit;
+  // Ajan kılığı seçili kıyafetin üstüne giyilir; sınav/özel gün yalnız sade kıyafetin yerine geçer (bkz. seasonal.homeOutfit).
+  const outfit = spy
+    ? wantOutfit.startsWith('spy') ? wantOutfit : wantOutfit === 'plain' ? 'spy' : SPY_OVER + wantOutfit
+    : home && exam && wantOutfit === 'plain' ? 'exam' : home && season && wantOutfit === 'plain' ? season : wantOutfit;
 
   const [frame, setFrame] = useState<Frame | null>(null);
   const [blink, setBlink] = useState(false);
@@ -351,7 +354,8 @@ export function useLively({ who, lang, name, season = null, exam = false, mood, 
         if (!r.current.playing && !c.bubble) {
           const ph = dayPhase(new Date());
           const pool: ActionName[] = ['stretch', 'hop', 'wave', 'turn', 'peek', 'sneeze', 'lookaround'];
-          const own = OUTFIT_ACTIONS[c.outfit] ?? [];
+          const over = c.outfit.startsWith(SPY_OVER);
+          const own = [...(OUTFIT_ACTIONS[c.outfit] ?? []), ...(over ? [...(OUTFIT_ACTIONS.spy ?? []), ...(OUTFIT_ACTIONS[c.outfit.slice(SPY_OVER.length)] ?? [])] : [])];
           for (let k = 0; k < 3; k++) pool.push(...own);
           // Karakterin imza hareketleri daha sık
           for (let k = 0; k < 2; k++) pool.push(...(CHARACTERS[c.who].signature as ActionName[]));
@@ -546,7 +550,7 @@ export function useLively({ who, lang, name, season = null, exam = false, mood, 
   const lastEventAt = useCallback(() => r.current.lastEventAt, []);
 
   // ── Kareyi birleştir ──
-  const o = OUTFITS[frame?.outfit ?? outfit] ?? OUTFITS.plain;
+  const o = outfitFor(who, frame?.outfit ?? outfit);
   const sleepy = phase.night || phase.mondayMorning;
   const busy = o.hold ? [o.hold.side] : [];
   const coffeeSide = phase.morning && coffeeLuck && !phase.night ? (!busy.includes('r') ? 'r' : !busy.includes('l') ? 'l' : undefined) : undefined;

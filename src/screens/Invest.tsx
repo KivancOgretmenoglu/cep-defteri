@@ -107,7 +107,7 @@ export function Invest() {
         <div className="head-with-back invest-head">
           <h1>{t('nav.invest')}</h1>
           {/* Yatırım ekranının maskotu takım elbiseli; toplamlar gizliyse gizli ajan */}
-          <LiveMascot outfit={data.settings.hideTotals ? 'spy' : 'suit'} mood="happy" size={56} />
+          <LiveMascot outfit={data.settings.hideTotals ? 'spy+suit' : 'suit'} mood="happy" size={56} />
         </div>
         {invAccounts.length > 1 && (
           <div className="chip-row">
@@ -169,7 +169,7 @@ export function Invest() {
             <MascotNote
               compact
               size={64}
-              outfit={data.settings.hideTotals ? 'spy' : 'suit'}
+              outfit={data.settings.hideTotals ? 'spy+suit' : 'suit'}
               mood={reached ? 'celebrate' : 'happy'}
               text={reached ? t('inv.goalDone', { goal: reached.goal.title, amount: formatMoney(reached.current) }) : t('inv.goalNear', { goal: near!.goal.title, pct: pctForm(near!.pct, 'locYou') })}
               why={t('inv.goalWhy')}

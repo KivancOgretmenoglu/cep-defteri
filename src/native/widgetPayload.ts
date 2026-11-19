@@ -11,6 +11,7 @@ import { formatMoney, hiddenMoney, type Money } from '../domain/money';
 import { categoryName } from '../domain/defaults';
 import { frequentTemplates } from '../ui/hooks';
 import { ANDROID_KEYS, DEFAULT_MASCOT, type MascotKey } from '../mascot/characters';
+import { wardrobeFor } from '../mascot/render';
 
 /**
  * Büyük araçtaki tek dokunuşla kayıt çipi. Dokununca uygulama açılmadan kuyruğa eklenir
@@ -47,6 +48,11 @@ export interface WidgetPayload {
   add: string;
   /** Seçili maskot anahtarı (drawable-nodpi/widget_mascot_<anahtar>.png) */
   mascot: MascotKey;
+  /**
+   * Maskotun dolaptan seçilen kıyafeti ("plain" = sade). Araç görselleri widget_anim_<anahtar>_o_<kıyafet>[_spy]_*.png;
+   * gizliyken ajan kılığı bu kıyafetin üstüne giyilir (_spy).
+   */
+  outfit: string;
   lang: Lang;
   updatedAt: number;
   /** Orta/büyük araç düğmeleri: "Gider" / "Gelir" */
@@ -125,6 +131,12 @@ export function widgetLang(data: Data): Lang {
   return data.settings.lang === 'en' ? 'en' : 'tr';
 }
 
+/** Araçta giyilen kıyafet: maskotun dolabındaki bir kıyafetse o, değilse sade. */
+export function widgetOutfit(data: Data): string {
+  const o = data.settings.mascot?.outfit ?? 'plain';
+  return wardrobeFor(widgetMascot(data)).includes(o) ? o : 'plain';
+}
+
 export function widgetMascot(data: Data): MascotKey {
   const k = data.settings.mascot?.key;
   return (ANDROID_KEYS as string[]).includes(k ?? '') ? (k as MascotKey) : DEFAULT_MASCOT;
@@ -189,6 +201,7 @@ export function widgetPayload(data: Data, today: ISODate, mode: 'real' | 'demo',
     title: s.title,
     add: s.add,
     mascot: widgetMascot(data),
+    outfit: widgetOutfit(data),
     lang,
     updatedAt: now,
     expense: s.expense,

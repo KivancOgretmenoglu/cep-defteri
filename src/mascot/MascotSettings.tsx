@@ -16,8 +16,8 @@ const T = {
   name: { tr: 'Adı', en: 'Name' },
   wardrobe: { tr: 'Ana ekranda giydiği', en: 'Home screen outfit' },
   wardrobeHint: {
-    tr: 'Diğer ekranlarda işine uygun kıyafeti kendisi giyer. Yılbaşı, bayram ve yaz günlerinde de kendiliğinden özel kıyafet giyer.',
-    en: 'On other screens it dresses for the job. On New Year, holidays and summer days it dresses up on its own.',
+    tr: 'Seçtiğin kıyafet ana ekranda ve widget’ta görünür; toplamlar gizliyken üstüne ajan gözlüğü ve fötrü takar. “Sade” seçiliyken gece pijama, yılbaşı, bayram ve yaz günlerinde özel kıyafet giyer. Diğer ekranlarda işine uygun kıyafeti kendisi giyer.',
+    en: 'Your pick shows on the home screen and the widget; with totals hidden it adds spy shades and a fedora on top. With “Plain” it wears pajamas at night and dresses up on New Year, holidays and summer days. On other screens it dresses for the job.',
   },
   quips: { tr: 'Ara sıra espri yapsın', en: 'Crack a joke now and then' },
   quipsHint: { tr: 'Kayıttan sonra kısa, yargılamayan şakalar', en: 'Short, never-judging jokes after you log something' },

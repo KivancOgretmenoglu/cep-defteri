@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { homeOutfit, pajamaTime, seasonFxFor, skyBand, skyBody } from './seasonal';
 import { SKY_ACCENT, SKY_TINTS } from '../ui/Sky';
 import { CHARACTERS, MASCOT_KEYS } from './characters';
-import { compose, OUTFITS } from './render';
+import { compose, OUTFITS, outfitFor } from './render';
 import { OUTFIT_ACTIONS } from './actions';
 
 const at = (h: number, m = 0) => new Date(2026, 9, 8, h, m);
@@ -75,13 +75,31 @@ describe('gece pijaması', () => {
     expect(pajamaTime(at(6))).toBe(false);
   });
 
-  it('öncelik: ajan > sınav > özel gün > pijama > seçim', () => {
+  it('seçilen kıyafet görünür; pijama ve mevsim yalnız sade seçiliyken; ajan kılığı üstüne giyilir', () => {
     const base = { spy: false, exam: false, season: null, night: false, user: 'cap' } as const;
     expect(homeOutfit(base)).toBe('cap');
-    expect(homeOutfit({ ...base, night: true })).toBe('pajama');
-    expect(homeOutfit({ ...base, night: true, season: 'newyear' })).toBe('newyear');
+    expect(homeOutfit({ ...base, night: true })).toBe('cap');
+    expect(homeOutfit({ ...base, night: true, season: 'newyear' })).toBe('cap');
+    expect(homeOutfit({ ...base, season: 'party' })).toBe('party');
     expect(homeOutfit({ ...base, night: true, season: 'bayram', exam: true })).toBe('exam');
-    expect(homeOutfit({ ...base, night: true, season: 'summer', exam: true, spy: true })).toBe('spy');
+    expect(homeOutfit({ ...base, spy: true })).toBe('spy+cap');
+    expect(homeOutfit({ ...base, night: true, season: 'summer', exam: true, spy: true })).toBe('spy+exam');
+    const plain = { ...base, user: 'plain' } as const;
+    expect(homeOutfit(plain)).toBe('plain');
+    expect(homeOutfit({ ...plain, night: true })).toBe('pajama');
+    expect(homeOutfit({ ...plain, night: true, season: 'newyear' })).toBe('newyear');
+    expect(homeOutfit({ ...plain, spy: true })).toBe('spy');
+    expect(homeOutfit({ ...plain, spy: true, night: true })).toBe('spy+pajama');
+  });
+
+  it('ajan kılığı seçili kıyafetin üstüne: pembe takım korunur, fötr ve gözlük eklenir', () => {
+    const o = outfitFor('karafatma', 'spy+pinksuit');
+    expect(o.neck).toBe('pinksuit');
+    expect(o.hat).toBe('fedora');
+    expect(o.face).toBe('sunglasses');
+    const w = outfitFor('fistik', 'spy+winter');
+    expect(w.neck).toBe('scarf');
+    expect(outfitFor('fistik', 'spy+pinksuit').neck).toBe('collar'); // başkasının özel kıyafeti sade sayılır
   });
 
   it('her karakterde şapka ve yaka çizilir; esneme pijamayla gelir', () => {

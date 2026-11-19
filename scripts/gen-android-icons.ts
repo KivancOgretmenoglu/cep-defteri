@@ -23,7 +23,7 @@ import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ANDROID_KEYS, CHARACTERS, INK, bodyGrid, grid, type Grid, type MascotKey } from '../src/mascot/characters';
-import { CW, OX, OY, OUTFITS, compose, type MascotLive, type R } from '../src/mascot/render';
+import { CW, OX, OY, OUTFITS, SPY_OVER, compose, outfitFor, wardrobeFor, type MascotLive, type R } from '../src/mascot/render';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const RES = join(ROOT, 'android/app/src/main/res');
@@ -1012,7 +1012,12 @@ function roundMask(c: Canvas, r: number) {
  * Yalnız bu betikte tanımlanır; uygulamadaki dolapta görünmez.
  */
 OUTFITS.spyPlanner ??= { ...OUTFITS.spy, hold: OUTFITS.planner.hold };
-const spyOutfit = (o: string) => (o === 'planner' ? 'spyPlanner' : 'spy');
+/** Kıyafetli yazma pozu: giyilen kıyafet + koltuk altında ajanda (yalnız bu betikte tanımlanır). */
+function withPlanner(k: MascotKey, worn: string): string {
+  const id = `gen_${k}_${worn.replace(/\W/g, '_')}_planner`;
+  OUTFITS[id] ??= { ...outfitFor(k, worn), hold: OUTFITS.planner.hold };
+  return id;
+}
 
 /**
  * Bir maskotun tüm kareleri ve büstleri, sade ve gizli ajan ("_spy") takımı olarak.
@@ -1020,13 +1025,17 @@ const spyOutfit = (o: string) => (o === 'planner' ? 'spyPlanner' : 'spy');
  *   widget_anim_<k>_<0..5|write|noted>.png, widget_anim_<k>_spy_<0..5|write|noted>.png
  *   widget_bust_<k>[_write|_noted].png,     widget_bust_<k>_spy[_write|_noted].png
  */
-function widgetSprites(k: MascotKey) {
+function widgetSprites(k: MascotKey, wear = 'plain') {
   const frames = ANIMS[k];
+  // Dosya adı: sade için widget_anim_<k>…, kıyafetli için widget_anim_<k>_o_<kıyafet>… (CepWidgetProvider adla arar)
+  const tag = wear === 'plain' ? k : `${k}_o_${wear}`;
   if (frames.length !== ANIM_FRAMES) throw new Error(`${k}: ${ANIM_FRAMES} kare olmalı`);
   for (const spy of [false, true]) {
     const sfx = spy ? '_spy' : '';
-    const of = (o: string) => (spy ? spyOutfit(o) : o);
-    const items: [string, Live, string][] = [...frames.map((L, i): [string, Live, string] => [String(i), L, of('plain')]), ['write', WRITE, of('planner')], ['noted', NOTED, of('plain')]];
+    // Giyilen: sade → 'plain' / 'spy'; kıyafetli → kıyafet / ajan kılığı üstünde ('spy+<kıyafet>'). Yazma pozu ajandayı da tutar.
+    const worn = wear === 'plain' ? (spy ? 'spy' : 'plain') : spy ? SPY_OVER + wear : wear;
+    const writing = wear === 'plain' ? (spy ? 'spyPlanner' : 'planner') : withPlanner(k, worn);
+    const items: [string, Live, string][] = [...frames.map((L, i): [string, Live, string] => [String(i), L, worn]), ['write', WRITE, writing], ['noted', NOTED, worn]];
     let b: Box | null = null;
     for (const [, L, o] of items) {
       const PAD = 6;
@@ -1034,21 +1043,23 @@ function widgetSprites(k: MascotKey) {
       const bb: Box = { x0: raw.x0 - PAD, y0: raw.y0 - PAD, x1: raw.x1 - PAD, y1: raw.y1 - PAD };
       b = b ? union(b, bb) : bb;
     }
-    if (!b || b.x0 < 0 || b.y0 < 0 || b.x1 > SPRITE_W || b.y1 > SPRITE_H) throw new Error(`${k}${sfx}: kare tuvale sığmıyor ${JSON.stringify(b)}`);
+    // Kıyafetli karelerde ayakların altına sarkan tek satır (ör. kirpinin atkı ucu) alttan kırpılabilir; ayaklar zeminde kalır.
+    const yMax = wear === 'plain' ? SPRITE_H : SPRITE_H + 1;
+    if (!b || b.x0 < 0 || b.y0 < 0 || b.x1 > SPRITE_W || b.y1 > yMax) throw new Error(`${tag}${sfx}: kare tuvale sığmıyor ${JSON.stringify(b)}`);
     const fb: Box = { x0: Math.max(0, b.x0 - 1), y0: Math.max(0, b.y0 - 1), x1: Math.min(SPRITE_W, b.x1 + 1), y1: SPRITE_H };
-    for (const [name, L, o] of items) write(join(RES, `drawable-nodpi/widget_anim_${k}${sfx}_${name}.png`), pngSmall(crop(spriteFull(k, L, SPRITE_K, o), fb, SPRITE_K)));
+    for (const [name, L, o] of items) write(join(RES, `drawable-nodpi/widget_anim_${tag}${sfx}_${name}.png`), pngSmall(crop(spriteFull(k, L, SPRITE_K, o), fb, SPRITE_K)));
 
     // Büst (küçük araç): baş + omuzlar, boynun biraz altında kesilir ve başın çevresine dar kırpılır
     // (≈ kare oran: aracın yüksekliğinin ≈ %88'ini kaplarken tutara yer kalır). Her poz kendi kutusuyla kırpılır.
     const { head, neck } = CHARACTERS[k].anchors;
     const bottom = OY + neck.y + 3 + (BASE_DY[k] ?? 0);
     const cx = OX + head.x;
-    const busts: [string, Live, string][] = [['', frames[0], of('plain')], ['_write', WRITE, of('planner')], ['_noted', NOTED, of('plain')]];
+    const busts: [string, Live, string][] = [['', frames[0], worn], ['_write', WRITE, writing], ['_noted', NOTED, worn]];
     for (const [suffix, L, o] of busts) {
       const region: Box = { x0: Math.max(0, cx - 10), y0: 0, x1: Math.min(SPRITE_W, cx + 11), y1: bottom };
       const x = alphaBox(crop(spriteFull(k, { ...L, over: [] }, MEASURE_K, o), region, MEASURE_K), MEASURE_K);
       const cb: Box = { x0: Math.max(0, region.x0 + x.x0 - 1), y0: Math.max(0, x.y0 - 1), x1: Math.min(SPRITE_W, region.x0 + x.x1 + 1), y1: bottom };
-      write(join(RES, `drawable-nodpi/widget_bust_${k}${sfx}${suffix}.png`), pngSmall(crop(spriteFull(k, L, SPRITE_K, o), cb, SPRITE_K)));
+      write(join(RES, `drawable-nodpi/widget_bust_${tag}${sfx}${suffix}.png`), pngSmall(crop(spriteFull(k, L, SPRITE_K, o), cb, SPRITE_K)));
     }
   }
 }
@@ -1138,6 +1149,8 @@ function widgetAssets() {
   for (const k of ANDROID_KEYS) {
     for (const size of Object.keys(SCENE_SIZES) as SceneSize[]) write(join(RES, `drawable-nodpi/widget_scene_${k}_${size}.png`), pngSmall(sceneBg(k, size)));
     widgetSprites(k);
+    // Dolaptaki her kıyafet (maskota özel olanlar dahil): araç seçilen kıyafeti giyer
+    for (const o of wardrobeFor(k)) if (o !== 'plain') widgetSprites(k, o);
   }
   widgetButtons();
   write(join(RES, 'drawable-nodpi/widget_preview.png'), widgetPreview());

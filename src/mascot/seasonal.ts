@@ -103,12 +103,15 @@ export function skyBody(d: Date): { kind: 'sun' | 'moon'; x: number; y: number }
 export const pajamaTime = (d: Date) => d.getHours() >= 22 || d.getHours() < 6;
 
 /**
- * Ana ekran maskotunun kıyafeti. Öncelik: ajan (gizli toplamlar) > sınav haftası > özel gün > gece pijaması > kullanıcının seçimi.
+ * Ana ekran maskotunun kıyafeti.
+ * - Dolaptan bir kıyafet seçildiyse o görünür (gece pijaması ve mevsim kıyafetleri onu ezmez); yalnız sınav haftası
+ *   ve doğum günü partisi seçimin önüne geçer.
+ * - "Sade" seçiliyken: sınav > parti > özel gün > gece pijaması > sade.
+ * - Toplamlar gizliyken ajan kılığı bunların üstüne giyilir ("spy+<kıyafet>"; sadeyse tam ajan takımı "spy").
  */
 export function homeOutfit(o: { spy: boolean; exam: boolean; season: Season; night: boolean; user: string }): string {
-  if (o.spy) return 'spy';
-  if (o.exam) return 'exam';
-  if (o.season) return o.season;
-  if (o.night) return 'pajama';
-  return o.user;
+  const chosen = o.user !== 'plain';
+  const base = o.exam ? 'exam' : o.season === 'party' ? 'party' : chosen ? o.user : o.season ? o.season : o.night ? 'pajama' : 'plain';
+  if (o.spy) return base === 'plain' ? 'spy' : `spy+${base}`;
+  return base;
 }

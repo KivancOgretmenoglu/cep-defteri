@@ -267,8 +267,18 @@ export function wardrobeFor(key: MascotKey): string[] {
   return [...HOME_OUTFITS, ...Object.keys(OUTFITS).filter((o) => OUTFITS[o].only === key)];
 }
 
-/** Kıyafet çözümü: başka maskota özel kıyafet sade görünür; Hamamcan takım elbiseyi hep pembe giyer. */
+/** Ajan kılığının seçili kıyafetin üstüne giyilmiş hâli: "spy+<kıyafet>" (bkz. seasonal.homeOutfit). */
+export const SPY_OVER = 'spy+';
+
+/**
+ * Kıyafet çözümü: başka maskota özel kıyafet sade görünür; Hamamcan takım elbiseyi hep pembe giyer.
+ * "spy+<kıyafet>": seçili kıyafet korunur, üstüne fötr ve güneş gözlüğü (yakası yoksa trençkot yakası) gelir.
+ */
 export function outfitFor(key: MascotKey, outfitKey: string): Outfit {
+  if (outfitKey.startsWith(SPY_OVER)) {
+    const base = outfitFor(key, outfitKey.slice(SPY_OVER.length));
+    return { ...base, name: OUTFITS.spy.name, hat: 'fedora', face: 'sunglasses', neck: base.neck ?? 'collar', sparkle: false };
+  }
   const o = OUTFITS[outfitKey] ?? OUTFITS.plain;
   if (o.only && o.only !== key) return OUTFITS.plain;
   if (key === 'karafatma' && o.neck === 'suit') return { ...o, neck: 'pinksuit' };

@@ -3,7 +3,7 @@ import type { Mood } from '../domain/mood';
 import { useStore } from '../store/store';
 import { Mascot } from './Mascot';
 import { useLively, type Lively } from './lively';
-import { HOME_OUTFITS } from './render';
+import { HOME_OUTFITS, OUTFITS } from './render';
 import { characterOf, type Lang } from './characters';
 import { examActive, homeOutfit, pajamaTime, seasonFor } from './seasonal';
 import { specialDay } from '../domain/special';
@@ -69,14 +69,14 @@ function Announce({ lv }: { lv: Lively }) {
 }
 
 /** Maskot + kısa durum notu. "Neden?" ile kuralın açıklaması görünür. */
-export function MascotNote({ mood, text, why, outfit, size = 92, action, compact = false }: { mood: Mood; text: string; why?: string; outfit: string; size?: number; action?: React.ReactNode; compact?: boolean }) {
+export function MascotNote({ mood, text, why, outfit, size = 92, action, compact = false, home: isHome = false }: { mood: Mood; text: string; why?: string; outfit: string; size?: number; action?: React.ReactNode; compact?: boolean; home?: boolean }) {
   const m = useMascot();
   const pulse = useStore((s) => s.pulse);
   const hideTotals = useStore((s) => !!s.data.settings.hideTotals);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLButtonElement>(null);
-  // Ana ekran maskotu (dolaptaki kıyafetlerden biri): bakiyeler gizliyse ajan, özel günlerde bayramlık.
-  const home = HOME.includes(outfit) || outfit === 'spy';
+  // Ana ekran maskotu (dolaptaki kıyafetlerden biri, maskota özeller dahil): bakiyeler gizliyse ajan kılığı, özel günlerde bayramlık.
+  const home = isHome || HOME.includes(outfit) || outfit === 'spy' || !!OUTFITS[outfit]?.only;
   // Gece 22–06 ana ekran maskotu pijamalı (ajan > sınav > özel gün > pijama > seçilen kıyafet)
   const night = pajamaTime(useNow());
   const mine = outfit === 'spy' ? 'plain' : outfit;

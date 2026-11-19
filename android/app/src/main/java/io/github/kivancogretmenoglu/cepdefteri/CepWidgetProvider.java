@@ -374,6 +374,9 @@ public class CepWidgetProvider extends AppWidgetProvider {
         String writing;
         String queued;
         int mascot = 0;
+        /** Maskot anahtarı (AppIconPlugin.KEYS[mascot]) ve dolaptan seçilen kıyafet ("plain" = sade). */
+        String key = "fistik";
+        String outfit = "plain";
         boolean negative = false;
         boolean animate = true;
         /** Tutarlar gizli (toplamları gizle ya da araçta gizle): "•••• TL" + gizli ajan maskot. */
@@ -495,6 +498,9 @@ public class CepWidgetProvider extends AppWidgetProvider {
                 st.writing = o.optString("writingText", st.writing);
                 st.queued = o.optString("queuedText", st.queued);
                 st.mascot = mascotIndex(o.optString("mascot", "fistik"));
+                st.key = AppIconPlugin.KEYS[st.mascot];
+                String outfit = o.optString("outfit", "plain");
+                st.outfit = outfit.matches("[a-z0-9]{1,24}") ? outfit : "plain";
                 st.negative = o.optBoolean("negative", false);
                 st.animate = o.optBoolean("animate", true);
                 st.hidden = o.optBoolean("hidden", false);
@@ -610,6 +616,12 @@ public class CepWidgetProvider extends AppWidgetProvider {
     /** Gizli tutar: "•••• TL" (en: "₺••••"). */
     static String hiddenMoney(String lang) {
         return "en".equals(lang) ? "₺••••" : "•••• TL";
+    }
+
+    /** Adı verilen görselin kimliği (scripts/gen-android-icons.ts üretir); yoksa `fallback` (sade görsel). */
+    static int drawable(Context context, String name, int fallback) {
+        int id = context.getResources().getIdentifier(name, "drawable", context.getPackageName());
+        return id != 0 ? id : fallback;
     }
 
     static int mascotIndex(String key) {
@@ -737,6 +749,8 @@ public class CepWidgetProvider extends AppWidgetProvider {
         boolean known = w > 0 && h > 0;
         int m = st.mascot;
         boolean spy = st.hidden;
+        // Kıyafetli görseller adla aranır: widget_anim_<anahtar>_o_<kıyafet>[_spy]_*, widget_bust_<anahtar>_o_<kıyafet>[_spy]*
+        String dressed = "plain".equals(st.outfit) ? null : st.key + "_o_" + st.outfit + (spy ? "_spy" : "");
 
         // Çerçeve: kök zemini maskot renginin koyusu (içerik 2 dp içeride).
         views.setInt(R.id.widget_root, "setBackgroundResource", FRAME_BG[m]);
@@ -782,6 +796,10 @@ public class CepWidgetProvider extends AppWidgetProvider {
         if (st.pose == POSE_WRITING) bust = spy ? BUST_WRITE_SPY[m] : BUST_WRITE[m];
         else if (st.pose == POSE_NOTED) bust = spy ? BUST_NOTED_SPY[m] : BUST_NOTED[m];
         else bust = spy ? BUST_SPY[m] : BUST[m];
+        if (dressed != null) {
+            String poseSfx = st.pose == POSE_WRITING ? "_write" : st.pose == POSE_NOTED ? "_noted" : "";
+            bust = drawable(context, "widget_bust_" + dressed + poseSfx, bust);
+        }
         // Dar geniş araçta (3×1) tam boy maskot çok küçülür: onun yerine büst (yüksekliğin ≈ %90'ı).
         boolean narrowWide = size == SIZE_WIDE && known && w < 280f;
 
@@ -796,10 +814,17 @@ public class CepWidgetProvider extends AppWidgetProvider {
         }
 
         int[] frames = spy ? FRAMES_SPY[m] : FRAMES[m];
+        if (dressed != null) {
+            int[] f = new int[frames.length];
+            for (int i = 0; i < frames.length; i++) f[i] = drawable(context, "widget_anim_" + dressed + "_" + i, frames[i]);
+            frames = f;
+        }
         int still;
         if (st.pose == POSE_WRITING) still = spy ? WRITE_IMG_SPY[m] : WRITE_IMG[m];
         else if (st.pose == POSE_NOTED) still = spy ? NOTED_IMG_SPY[m] : NOTED_IMG[m];
         else still = frames[0];
+        if (dressed != null && st.pose == POSE_WRITING) still = drawable(context, "widget_anim_" + dressed + "_write", still);
+        if (dressed != null && st.pose == POSE_NOTED) still = drawable(context, "widget_anim_" + dressed + "_noted", still);
         if (size != SIZE_LARGE) views.setImageViewResource(R.id.widget_mascot, narrowWide ? bust : still);
 
         views.setOnClickPendingIntent(R.id.widget_body, openPi);
