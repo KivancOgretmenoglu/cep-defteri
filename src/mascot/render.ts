@@ -652,9 +652,56 @@ function rowEdges(key: MascotKey, y: number): [number, number] {
   return r < 0 ? [6, 17] : [l, r];
 }
 
+/**
+ * Ayrıntılı (res 2) gövdede kaldırılmış kollar: omuzdan çıkan ince, eklemli böcek bacağı (dirsek + uçta küçük
+ * diken). Koordinatlar gövde ızgarasında (48'lik); sağ kol aynalanır.
+ */
+const HI_LEG = '#3A1A0A';
+const HI_SPIKE = '#8A5230';
+function hiPawRects(ch: Character, pose: PawPose): R[] {
+  const res = ch.res ?? 2, n = 24 * res, k = 1 / res;
+  const out: R[] = [];
+  const dot = (x: number, y: number, c: string) => out.push(at(x * k, y * k, k, k, c));
+  const seg = (x0: number, y0: number, x1: number, y1: number, mirror: boolean) => {
+    const steps = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
+    for (let i = 0; i <= steps; i++) {
+      const x = Math.round(x0 + ((x1 - x0) * i) / steps), y = Math.round(y0 + ((y1 - y0) * i) / steps);
+      for (const dx of [0, 1]) dot(mirror ? n - 1 - (x + dx) : x + dx, y, HI_LEG);
+    }
+  };
+  // Omuz (11, 30) → dirsek → el; uçta diken
+  const arm = (mirror: boolean, elbow: [number, number], hand: [number, number]) => {
+    seg(11, 30, elbow[0], elbow[1], mirror);
+    seg(elbow[0], elbow[1], hand[0], hand[1], mirror);
+    dot(mirror ? n - 1 - (elbow[0] - 1) : elbow[0] - 1, elbow[1] + 1, HI_SPIKE);
+    dot(mirror ? n - 1 - hand[0] : hand[0], hand[1] - 1, HI_SPIKE);
+  };
+  switch (pose) {
+    case 'up':
+      arm(false, [4, 26], [3, 17]);
+      arm(true, [4, 26], [3, 17]);
+      break;
+    case 'stretch':
+      arm(false, [4, 24], [5, 12]);
+      arm(true, [4, 24], [5, 12]);
+      break;
+    case 'wave':
+      arm(true, [4, 26], [2, 17]);
+      break;
+    case 'wave2':
+      arm(true, [5, 25], [6, 15]);
+      break;
+    case 'face':
+      arm(true, [5, 33], [17, 26]);
+      break;
+  }
+  return out;
+}
+
 /** Kaldırılmış patiler: gövdenin dış kenarından çıkar (kontur sütunuyla örtüşür, yapışık görünür). */
 function pawRects(ch: Character, pose: PawPose): R[] {
   if (!pose) return [];
+  if ((ch.res ?? 1) > 1) return hiPawRects(ch, pose);
   const ey = ch.anchors.eye[1];
   const paw = (side: 'l' | 'r', y: number, up = 0): R[] => {
     const [l, r] = rowEdges(ch.key, y);

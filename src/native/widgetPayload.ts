@@ -190,9 +190,17 @@ export function widgetChips(data: Data, today: ISODate, lang: Lang = widgetLang(
     });
 }
 
+/** Maskotun kendi ağzından araç yazıları (kayıt sonrası "Not aldım" vb.); yoksa ortak yazılar. */
+const VOICE: Partial<Record<MascotKey, Record<Lang, { noted: string; writing: string; queued: string }>>> = {
+  karafatma: {
+    tr: { noted: 'Yazdım lan! ✓', writing: 'Yazıyorum, bekle lan…', queued: 'Yazdım lan ✓' },
+    en: { noted: 'Logged, damn it! ✓', writing: 'Hold on, writing it…', queued: 'Logged ✓' },
+  },
+};
+
 export function widgetPayload(data: Data, today: ISODate, mode: 'real' | 'demo', now = Date.now(), opts: WidgetOpts = {}): WidgetPayload {
   const lang = widgetLang(data);
-  const s = STR[lang];
+  const s = { ...STR[lang], ...VOICE[widgetMascot(data)]?.[lang] };
   const demo = mode === 'demo';
   const hidden = !!data.settings.hideTotals || !!opts.hideAmount;
   const masked = hiddenMoney(lang, '••••');

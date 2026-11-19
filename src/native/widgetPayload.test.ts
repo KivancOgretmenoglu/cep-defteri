@@ -3,6 +3,7 @@ import { emptyData } from '../domain/defaults';
 import * as A from '../domain/actions';
 import type { Data } from '../domain/types';
 import { widgetMascot, widgetPayload } from './widgetPayload';
+import { buildDemo } from '../domain/demo';
 
 const TODAY = '2026-10-15';
 const TL = (n: number) => Math.round(n * 100);
@@ -60,5 +61,34 @@ describe('ana ekran aracı: ham tutarlar ve gizleme', () => {
 
   it('hesap yokken tutar null', () => {
     expect(widgetPayload(emptyData(), TODAY, 'real')).toMatchObject({ amount: '—', available: null, todayTpl: '' });
+  });
+});
+
+describe('araçta kıyafet ve Hamamcan', () => {
+  const base = () => {
+    const d = buildDemo('2026-11-19', 'tr');
+    d.settings.unlockedMascots = ['karafatma'];
+    return d;
+  };
+  it('dolaptan seçilen kıyafet araca gider; başkasına özel kıyafet sade olur', () => {
+    const d = base();
+    d.settings.mascot = { key: 'karafatma', name: null, outfit: 'pinksuit' };
+    expect(widgetPayload(d, '2026-11-19', 'real').outfit).toBe('pinksuit');
+    expect(widgetPayload(d, '2026-11-19', 'real').mascot).toBe('karafatma');
+    d.settings.mascot = { key: 'fistik', name: null, outfit: 'pinksuit' };
+    expect(widgetPayload(d, '2026-11-19', 'real').outfit).toBe('plain');
+    d.settings.mascot = { key: 'fistik', name: null, outfit: 'cap' };
+    expect(widgetPayload(d, '2026-11-19', 'real').outfit).toBe('cap');
+    d.settings.mascot = { key: 'fistik', name: null, outfit: 'suit' }; // ekrana özgü, dolapta yok
+    expect(widgetPayload(d, '2026-11-19', 'real').outfit).toBe('plain');
+  });
+  it('Hamamcan araç yazılarını kendi ağzından söyler', () => {
+    const d = base();
+    d.settings.mascot = { key: 'karafatma', name: null, outfit: 'plain' };
+    const p = widgetPayload(d, '2026-11-19', 'real');
+    expect(p.notedText).toBe('Yazdım lan! ✓');
+    expect(p.queuedText).toBe('Yazdım lan ✓');
+    d.settings.mascot = { key: 'fistik', name: null, outfit: 'plain' };
+    expect(widgetPayload(d, '2026-11-19', 'real').notedText).toBe('Not aldım! ✓');
   });
 });
