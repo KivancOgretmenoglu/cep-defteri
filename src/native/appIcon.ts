@@ -5,10 +5,10 @@
  * Not: bazı başlatıcılar yeni simgeyi birkaç saniye sonra gösterir, ana ekrandaki kısayolu kaldırabilir (ANDROID.md).
  */
 import { Capacitor, registerPlugin } from '@capacitor/core';
-import { DEFAULT_MASCOT, MASCOT_KEYS, type MascotKey, type PublicMascotKey } from '../mascot/characters';
+import { ANDROID_KEYS, type MascotKey } from '../mascot/characters';
 
 interface AppIconPlugin {
-  setIcon(options: { key: PublicMascotKey }): Promise<{ key: PublicMascotKey; changed: boolean }>;
+  setIcon(options: { key: MascotKey }): Promise<{ key: MascotKey; changed: boolean }>;
   getIcon(): Promise<{ key: string }>;
 }
 
@@ -19,16 +19,12 @@ export function appIconSupported(): boolean {
   return Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android';
 }
 
-/**
- * Simgeyi değiştirir. true: istenen simge artık etkin (zaten öyleyse de true). Tarayıcıda / hata olursa false.
- * Gizli maskotların simgesi yok (ana ekranda kimse görmesin): varsayılan (kedi) simgeye döner.
- */
+/** Simgeyi değiştirir. true: istenen simge artık etkin (zaten öyleyse de true). Tarayıcıda / hata olursa false. */
 export async function setAppIcon(key: MascotKey): Promise<boolean> {
-  if (!appIconSupported()) return false;
-  const target: PublicMascotKey = (MASCOT_KEYS as string[]).includes(key) ? (key as PublicMascotKey) : DEFAULT_MASCOT;
+  if (!appIconSupported() || !ANDROID_KEYS.includes(key)) return false;
   try {
-    const r = await AppIcon.setIcon({ key: target });
-    return r.key === target;
+    const r = await AppIcon.setIcon({ key });
+    return r.key === key;
   } catch {
     // Eski APK'da eklenti yoksa ya da sistem reddederse.
     return false;
@@ -40,7 +36,7 @@ export async function getAppIcon(): Promise<MascotKey | null> {
   if (!appIconSupported()) return null;
   try {
     const { key } = await AppIcon.getIcon();
-    return (MASCOT_KEYS as string[]).includes(key) ? (key as MascotKey) : null;
+    return (ANDROID_KEYS as string[]).includes(key) ? (key as MascotKey) : null;
   } catch {
     return null;
   }

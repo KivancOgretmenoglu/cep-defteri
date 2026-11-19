@@ -10,7 +10,7 @@ import { dayOfMonth, monthName, monthOf, type ISODate, type MonthKey } from '../
 import { formatMoney, hiddenMoney, type Money } from '../domain/money';
 import { categoryName } from '../domain/defaults';
 import { frequentTemplates } from '../ui/hooks';
-import { DEFAULT_MASCOT, MASCOT_KEYS, type MascotKey } from '../mascot/characters';
+import { ANDROID_KEYS, DEFAULT_MASCOT, type MascotKey } from '../mascot/characters';
 
 /**
  * Büyük araçtaki tek dokunuşla kayıt çipi. Dokununca uygulama açılmadan kuyruğa eklenir
@@ -127,7 +127,7 @@ export function widgetLang(data: Data): Lang {
 
 export function widgetMascot(data: Data): MascotKey {
   const k = data.settings.mascot?.key;
-  return (MASCOT_KEYS as string[]).includes(k ?? '') ? (k as MascotKey) : DEFAULT_MASCOT;
+  return (ANDROID_KEYS as string[]).includes(k ?? '') ? (k as MascotKey) : DEFAULT_MASCOT;
 }
 
 export function periodLabel(data: Data, today: ISODate, periodEnd: ISODate, lang: Lang = widgetLang(data)): string {

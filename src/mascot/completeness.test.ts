@@ -6,7 +6,7 @@
 // @ts-expect-error -- node:fs vitest altında mevcut
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { bodyGrid, CHARACTERS, MASCOT_KEYS } from './characters';
+import { ANDROID_KEYS, bodyGrid, CHARACTERS, MASCOT_KEYS } from './characters';
 import { VOICES } from './quips';
 import { GUIDE_LINES } from '../guide/lines';
 import { GUIDE_STEPS } from '../guide/steps';
@@ -95,8 +95,8 @@ describe('her maskot her tabloda', () => {
     const night = read(`${MAIN}/res/values-night/widget_mascot_colors.xml`);
     const launcher = read(`${MAIN}/res/values/ic_launcher_mascots.xml`);
     const keys = plugin.match(/KEYS = \{([^}]*)\}/)![1].match(/"(\w+)"/g)!.map((s: string) => s.slice(1, -1));
-    expect(keys).toEqual(MASCOT_KEYS);
-    MASCOT_KEYS.forEach((k, i) => {
+    expect(keys).toEqual(ANDROID_KEYS);
+    ANDROID_KEYS.forEach((k, i) => {
       expect(manifest, k).toContain(`android:name=".Icon_${k}"`);
       expect(colors, k).toContain(`name="widget_btn_${k}"`);
       expect(night, k).toContain(`name="widget_soft_${k}"`);
@@ -106,12 +106,12 @@ describe('her maskot her tabloda', () => {
       for (const f of [`res/drawable-nodpi/widget_scene_${k}_mini.png`, `res/drawable-nodpi/widget_anim_${k}_0.png`, `res/mipmap-xxxhdpi/ic_launcher_${k}_foreground.png`, `res/mipmap-anydpi-v26/ic_launcher_${k}_round.xml`, `res/drawable/widget_btn_soft_${k}.xml`])
         expect(exists(f), f).toBe(true);
     });
-    // Diziler maskot sırasıyla: her dizide anahtarlar MASCOT_KEYS sırasında geçer.
+    // Diziler maskot sırasıyla: her dizide anahtarlar ANDROID_KEYS sırasında geçer.
     for (const m of widget.matchAll(/static final int\[\](?:\[\])? (\w+) = \{([\s\S]*?)\n    \};/g)) {
-      const seen = [...m[2].matchAll(/R\.\w+\.(\w+)/g)].map((x) => MASCOT_KEYS.find((k) => x[1].split('_').includes(k))).filter((x) => x !== undefined);
+      const seen = [...m[2].matchAll(/R\.\w+\.(\w+)/g)].map((x) => ANDROID_KEYS.find((k) => x[1].split('_').includes(k))).filter((x) => x !== undefined);
       if (!seen.length) continue;
       const order = seen.filter((x, i) => x !== seen[i - 1]);
-      expect(order, m[1]).toEqual(MASCOT_KEYS);
+      expect(order, m[1]).toEqual(ANDROID_KEYS);
     }
   });
 });

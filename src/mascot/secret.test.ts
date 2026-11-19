@@ -2,7 +2,7 @@
 // @ts-expect-error -- node:fs vitest altında mevcut
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { bodyGrid, CHARACTERS, MASCOT_KEYS, SECRET_KEYS, characterOf, unitGrid } from './characters';
+import { ANDROID_KEYS, bodyGrid, CHARACTERS, MASCOT_KEYS, SECRET_KEYS, characterOf, unitGrid } from './characters';
 import { pickable, redeemCode, unlockedOf } from './secret';
 import { compose, CH, CW, OUTFITS, outfitFor, PINK_SUIT, wardrobeFor, type EyeStyle } from './render';
 import { buildAction, reduceFrames, type ActionName } from './actions';
@@ -50,11 +50,12 @@ describe('Karafatma', () => {
   const k = 'karafatma' as const;
   const ch = CHARACTERS[k];
 
-  it('herkese açık listede yok (misafir, Android simgesi ve araç onu kullanmaz)', () => {
+  it('herkese açık listede yok (misafir olarak uğramaz) ama Android simgesi ve aracı var', () => {
     expect(SECRET_KEYS).toContain(k);
     expect(MASCOT_KEYS as string[]).not.toContain(k);
     for (const id of SCENE_IDS) expect(SCENES[id].pref as string[]).not.toContain(k);
     expect(characterOf(k).key).toBe(k);
+    expect(ANDROID_KEYS).toContain(k);
   });
 
   it('48×48 ayrıntılı gövde; birim ızgarası 24×24', () => {

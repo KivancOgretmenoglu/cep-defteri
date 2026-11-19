@@ -10,12 +10,17 @@ export type PublicMascotKey = 'fistik' | 'bilge' | 'ceviz' | 'diken' | 'karamel'
 export type SecretMascotKey = 'karafatma';
 export type MascotKey = PublicMascotKey | SecretMascotKey;
 /**
- * Herkese açık maskotlar. Seçici, misafir sahneleri, Android simgeleri ve ana ekran aracı bu listeyle çalışır.
- * Gizli maskotlar burada yoktur: misafir olarak uğramazlar, Android'de simge/araç olarak varsayılana düşerler.
+ * Herkese açık maskotlar. Seçici ve misafir sahneleri bu listeyle çalışır.
+ * Gizli maskotlar burada yoktur: seçicide kodla açılınca görünür, misafir olarak uğramazlar.
  */
 export const MASCOT_KEYS: PublicMascotKey[] = ['fistik', 'bilge', 'ceviz', 'diken', 'karamel', 'pamuk'];
 export const SECRET_KEYS: SecretMascotKey[] = ['karafatma'];
 export const ALL_MASCOT_KEYS: MascotKey[] = [...MASCOT_KEYS, ...SECRET_KEYS];
+/**
+ * Android'de simgesi ve ana ekran aracı olan maskotlar (gizliler dahil), bu sırayla: AppIconPlugin.KEYS,
+ * CepWidgetProvider dizileri ve manifest'teki ".Icon_<anahtar>" takma adları aynı sırayı izler.
+ */
+export const ANDROID_KEYS: MascotKey[] = ALL_MASCOT_KEYS;
 export const isSecretMascot = (k: string | null | undefined): k is SecretMascotKey => (SECRET_KEYS as string[]).includes(k ?? '');
 export const DEFAULT_MASCOT: PublicMascotKey = 'fistik';
 

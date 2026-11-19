@@ -104,7 +104,7 @@ export const GUIDE_LINES: Record<MascotKey, Record<StepId, Line>> = {
     rings: L('Bu kart ayın gidişatı: bütçe, hedef, geçen günler. Tek bakışta durum, hassiktir ya da oh be.', 'This card is your month at a glance: budget, goals, days gone. Either “oh shit” or “phew”.'),
     floor: L('Bütçe yoksa buradan harcama planı çizerim. Plandan hızlı gidersen ağzımı bozarım.', 'No budget? I’ll draw a spending plan from this. Run ahead of it and I’ll start swearing.'),
     invest: L('Yatırımın ayrı sekmede. Altın, döviz, ne varsa tut; fiyatı ben güncellerim lan.', 'Investments get their own tab. Gold, currency, whatever; I keep the price current, damn it.'),
-    widget: L('Beni ana ekrana koy. Gerçi orada Fıstık görünür, ben gizli kalırım. Yine de işini görür.', 'Put the widget on your home screen. Fıstık shows up there, I stay undercover. Still works.'),
+    widget: L('Beni ana ekrana koy lan. Uygulamayı açmadan bakiyeni görürsün, tek dokunuşla kayıt eklersin.', 'Put me on your home screen, damn it. See your balance and add entries without opening the app.'),
     tile: L('Bildirim paneline bir kutucuk koy, kayıt bir kaydırma uzakta olsun. Tembellik bilimdir.', 'Add a quick settings tile so entries are one swipe away. Laziness is a science.'),
     settings: L('Bitti lan. Rehberi Ayarlar’dan tekrar açarsın. Hadi bakalım.', 'Done, damn it. Replay the guide from Settings. Off you go.'),
   },

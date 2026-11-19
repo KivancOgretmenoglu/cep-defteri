@@ -86,7 +86,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
     static final int POSE_WRITING = 1;
     static final int POSE_NOTED = 2;
 
-    // Sıra: AppIconPlugin.KEYS ile aynı (fistik, bilge, ceviz, diken, karamel, pamuk).
+    // Sıra: AppIconPlugin.KEYS ile aynı (fistik, bilge, ceviz, diken, karamel, pamuk, karafatma).
     /** Maskotun tek başına simgesi (eski düzen; görsel hâlâ üretiliyor, mascotDrawable ile erişilir). */
     static final int[] MASCOT = {
         R.drawable.widget_mascot_fistik,
@@ -95,6 +95,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_mascot_diken,
         R.drawable.widget_mascot_karamel,
         R.drawable.widget_mascot_pamuk,
+        R.drawable.widget_mascot_karafatma,
     };
     /** Sahne zeminleri, her düzenin en/boy oranında (scripts/gen-android-icons.ts SCENE_SIZES). */
     static final int[] SCENE_MINI = {
@@ -104,6 +105,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_scene_diken_mini,
         R.drawable.widget_scene_karamel_mini,
         R.drawable.widget_scene_pamuk_mini,
+        R.drawable.widget_scene_karafatma_mini,
     };
     static final int[] SCENE_STRIP = {
         R.drawable.widget_scene_fistik_strip,
@@ -112,6 +114,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_scene_diken_strip,
         R.drawable.widget_scene_karamel_strip,
         R.drawable.widget_scene_pamuk_strip,
+        R.drawable.widget_scene_karafatma_strip,
     };
     static final int[] SCENE_SQUARE = {
         R.drawable.widget_scene_fistik_square,
@@ -120,6 +123,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_scene_diken_square,
         R.drawable.widget_scene_karamel_square,
         R.drawable.widget_scene_pamuk_square,
+        R.drawable.widget_scene_karafatma_square,
     };
     static final int[] SCENE_WIDE = {
         R.drawable.widget_scene_fistik_wide,
@@ -128,6 +132,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_scene_diken_wide,
         R.drawable.widget_scene_karamel_wide,
         R.drawable.widget_scene_pamuk_wide,
+        R.drawable.widget_scene_karafatma_wide,
     };
     static final int[] SCENE_TALL = {
         R.drawable.widget_scene_fistik_tall,
@@ -136,6 +141,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_scene_diken_tall,
         R.drawable.widget_scene_karamel_tall,
         R.drawable.widget_scene_pamuk_tall,
+        R.drawable.widget_scene_karafatma_tall,
     };
     /** Saydam maskot pozları: "yazmaya gidiyorum" ve "Not aldım! ✓" (sade / gizli ajan). */
     static final int[] WRITE_IMG = {
@@ -145,6 +151,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_anim_diken_write,
         R.drawable.widget_anim_karamel_write,
         R.drawable.widget_anim_pamuk_write,
+        R.drawable.widget_anim_karafatma_write,
     };
     static final int[] WRITE_IMG_SPY = {
         R.drawable.widget_anim_fistik_spy_write,
@@ -153,6 +160,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_anim_diken_spy_write,
         R.drawable.widget_anim_karamel_spy_write,
         R.drawable.widget_anim_pamuk_spy_write,
+        R.drawable.widget_anim_karafatma_spy_write,
     };
     static final int[] NOTED_IMG = {
         R.drawable.widget_anim_fistik_noted,
@@ -161,6 +169,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_anim_diken_noted,
         R.drawable.widget_anim_karamel_noted,
         R.drawable.widget_anim_pamuk_noted,
+        R.drawable.widget_anim_karafatma_noted,
     };
     static final int[] NOTED_IMG_SPY = {
         R.drawable.widget_anim_fistik_spy_noted,
@@ -169,6 +178,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_anim_diken_spy_noted,
         R.drawable.widget_anim_karamel_spy_noted,
         R.drawable.widget_anim_pamuk_spy_noted,
+        R.drawable.widget_anim_karafatma_spy_noted,
     };
     /** Küçük araç: alttan bakan büst (sabit, yazıyor, not aldı; sade / gizli ajan). */
     static final int[] BUST = {
@@ -178,6 +188,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_bust_diken,
         R.drawable.widget_bust_karamel,
         R.drawable.widget_bust_pamuk,
+        R.drawable.widget_bust_karafatma,
     };
     static final int[] BUST_SPY = {
         R.drawable.widget_bust_fistik_spy,
@@ -186,6 +197,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_bust_diken_spy,
         R.drawable.widget_bust_karamel_spy,
         R.drawable.widget_bust_pamuk_spy,
+        R.drawable.widget_bust_karafatma_spy,
     };
     static final int[] BUST_WRITE = {
         R.drawable.widget_bust_fistik_write,
@@ -194,6 +206,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_bust_diken_write,
         R.drawable.widget_bust_karamel_write,
         R.drawable.widget_bust_pamuk_write,
+        R.drawable.widget_bust_karafatma_write,
     };
     static final int[] BUST_WRITE_SPY = {
         R.drawable.widget_bust_fistik_spy_write,
@@ -202,6 +215,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_bust_diken_spy_write,
         R.drawable.widget_bust_karamel_spy_write,
         R.drawable.widget_bust_pamuk_spy_write,
+        R.drawable.widget_bust_karafatma_spy_write,
     };
     static final int[] BUST_NOTED = {
         R.drawable.widget_bust_fistik_noted,
@@ -210,6 +224,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_bust_diken_noted,
         R.drawable.widget_bust_karamel_noted,
         R.drawable.widget_bust_pamuk_noted,
+        R.drawable.widget_bust_karafatma_noted,
     };
     static final int[] BUST_NOTED_SPY = {
         R.drawable.widget_bust_fistik_spy_noted,
@@ -218,6 +233,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_bust_diken_spy_noted,
         R.drawable.widget_bust_karamel_spy_noted,
         R.drawable.widget_bust_pamuk_spy_noted,
+        R.drawable.widget_bust_karafatma_spy_noted,
     };
     /** Maskot renginde düğmeler ve çerçeve (üretilir: values/widget_mascot_colors.xml + drawable/widget_*_<anahtar>.xml). */
     static final int[] BTN = {
@@ -227,6 +243,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_btn_diken,
         R.drawable.widget_btn_karamel,
         R.drawable.widget_btn_pamuk,
+        R.drawable.widget_btn_karafatma,
     };
     static final int[] BTN_INK = {
         R.color.widget_btn_ink_fistik,
@@ -235,6 +252,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.color.widget_btn_ink_diken,
         R.color.widget_btn_ink_karamel,
         R.color.widget_btn_ink_pamuk,
+        R.color.widget_btn_ink_karafatma,
     };
     static final int[] BTN_SOFT = {
         R.drawable.widget_btn_soft_fistik,
@@ -243,6 +261,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_btn_soft_diken,
         R.drawable.widget_btn_soft_karamel,
         R.drawable.widget_btn_soft_pamuk,
+        R.drawable.widget_btn_soft_karafatma,
     };
     static final int[] CHIP_BG = {
         R.drawable.widget_chip_fistik,
@@ -251,6 +270,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_chip_diken,
         R.drawable.widget_chip_karamel,
         R.drawable.widget_chip_pamuk,
+        R.drawable.widget_chip_karafatma,
     };
     static final int[] FAB = {
         R.drawable.widget_fab_fistik,
@@ -259,6 +279,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_fab_diken,
         R.drawable.widget_fab_karamel,
         R.drawable.widget_fab_pamuk,
+        R.drawable.widget_fab_karafatma,
     };
     static final int[] FRAME_BG = {
         R.drawable.widget_frame_fistik,
@@ -267,6 +288,7 @@ public class CepWidgetProvider extends AppWidgetProvider {
         R.drawable.widget_frame_diken,
         R.drawable.widget_frame_karamel,
         R.drawable.widget_frame_pamuk,
+        R.drawable.widget_frame_karafatma,
     };
     /** Canlandırma kareleri, saydam (scripts/gen-android-icons.ts, ANIM_FRAMES = 6). İlki aynı zamanda sabit kare. */
     static final int[][] FRAMES = {
@@ -294,6 +316,10 @@ public class CepWidgetProvider extends AppWidgetProvider {
             R.drawable.widget_anim_pamuk_0, R.drawable.widget_anim_pamuk_1, R.drawable.widget_anim_pamuk_2,
             R.drawable.widget_anim_pamuk_3, R.drawable.widget_anim_pamuk_4, R.drawable.widget_anim_pamuk_5,
         },
+        {
+            R.drawable.widget_anim_karafatma_0, R.drawable.widget_anim_karafatma_1, R.drawable.widget_anim_karafatma_2,
+            R.drawable.widget_anim_karafatma_3, R.drawable.widget_anim_karafatma_4, R.drawable.widget_anim_karafatma_5,
+        },
     };
     static final int[][] FRAMES_SPY = {
         {
@@ -319,6 +345,10 @@ public class CepWidgetProvider extends AppWidgetProvider {
         {
             R.drawable.widget_anim_pamuk_spy_0, R.drawable.widget_anim_pamuk_spy_1, R.drawable.widget_anim_pamuk_spy_2,
             R.drawable.widget_anim_pamuk_spy_3, R.drawable.widget_anim_pamuk_spy_4, R.drawable.widget_anim_pamuk_spy_5,
+        },
+        {
+            R.drawable.widget_anim_karafatma_spy_0, R.drawable.widget_anim_karafatma_spy_1, R.drawable.widget_anim_karafatma_spy_2,
+            R.drawable.widget_anim_karafatma_spy_3, R.drawable.widget_anim_karafatma_spy_4, R.drawable.widget_anim_karafatma_spy_5,
         },
     };
     static final int[] FRAME_IDS = {
@@ -594,6 +624,8 @@ public class CepWidgetProvider extends AppWidgetProvider {
                 return 4;
             case "pamuk":
                 return 5;
+            case "karafatma":
+                return 6;
             default:
                 return 0;
         }
