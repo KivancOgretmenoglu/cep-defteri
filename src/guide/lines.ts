@@ -1,7 +1,7 @@
 /**
  * Rehberin maskot ağzından satırları: adım × 6 karakter × tr+en. Her satır 1–2 kısa cümle.
  * Ton: Fıstık oyuncu, Bilge sakin ve az sözlü, Ceviz tutumlu/telaşlı, Diken kuru ve minimal, Karamel neşeli/sadık,
- * Pamuk tatlı, şefkatli ve biraz dramatik.
+ * Pamuk tatlı, şefkatli ve biraz dramatik. Karafatma (gizli) pişkin ve küfürbaz: duruma söver, kullanıcıya değil.
  */
 import type { Lang, MascotKey } from '../mascot/characters';
 import type { StepId } from './steps';
@@ -93,6 +93,20 @@ export const GUIDE_LINES: Record<MascotKey, Record<StepId, Line>> = {
     widget: L('Beni ana ekranına koy! Her baktığında seni gaza getiririm, kayıt da tek dokunuş.', 'Put me on your home screen! I’ll cheer you on every time you look, and entries are one tap.'),
     tile: L('Bildirim paneline bir kutucuk ekleyelim; kayıt bir kaydırma uzakta. Pratik ve şık.', 'Let’s add a quick settings tile; logging is one swipe away. Practical and chic.'),
     settings: L('Bitti, harikaydın! Rehberi buradan, Ayarlar’dan istediğin zaman tekrar açabilirsin.', 'Done, you were amazing! Replay the guide from Settings, right here, anytime.'),
+  },
+  karafatma: {
+    add: L('Kayıt buradan lan. Tutar, kategori, kaydet. Üç dokunuş, uzatmayalım.', 'Entries start here, damn it. Amount, category, save. Three taps, let’s not drag it out.'),
+    amount: L('Önce tutarı yaz. Üşeniyorsan hazır tutarlara dokun, ben de üşenirim.', 'Type the amount first. Feeling lazy? Tap a ready amount. I would too.'),
+    newCat: L('Kategori yok mu? “+ Yeni kategori” bas, kendin yap. Ben mi yapayım amk.', 'No category? Hit “+ New category” and make it. What, am I supposed to do it?'),
+    why: L('Suratım niye böyle diye merak edersen “Neden böyle?”ye bas. Boşuna asmam suratı.', 'Wondering why I’ve got this face? Tap “Why?”. I don’t sulk for nothing.'),
+    eye: L('Biri omzundan mı dikizliyor? Göze bas, toplamları saklarım. Dikizciye de söverim.', 'Someone peeking over your shoulder? Tap the eye, I hide the totals. And curse the peeker.'),
+    reports: L('Raporlar burada. Paran nereye gitmiş, grafikle gösteriyorum. Üzülmek serbest.', 'Reports are here. I chart where your money went. Crying is allowed.'),
+    rings: L('Bu kart ayın gidişatı: bütçe, hedef, geçen günler. Tek bakışta durum, hassiktir ya da oh be.', 'This card is your month at a glance: budget, goals, days gone. Either “oh shit” or “phew”.'),
+    floor: L('Bütçe yoksa buradan harcama planı çizerim. Plandan hızlı gidersen ağzımı bozarım.', 'No budget? I’ll draw a spending plan from this. Run ahead of it and I’ll start swearing.'),
+    invest: L('Yatırımın ayrı sekmede. Altın, döviz, ne varsa tut; fiyatı ben güncellerim lan.', 'Investments get their own tab. Gold, currency, whatever; I keep the price current, damn it.'),
+    widget: L('Beni ana ekrana koy. Gerçi orada Fıstık görünür, ben gizli kalırım. Yine de işini görür.', 'Put the widget on your home screen. Fıstık shows up there, I stay undercover. Still works.'),
+    tile: L('Bildirim paneline bir kutucuk koy, kayıt bir kaydırma uzakta olsun. Tembellik bilimdir.', 'Add a quick settings tile so entries are one swipe away. Laziness is a science.'),
+    settings: L('Bitti lan. Rehberi Ayarlar’dan tekrar açarsın. Hadi bakalım.', 'Done, damn it. Replay the guide from Settings. Off you go.'),
   },
 };
 

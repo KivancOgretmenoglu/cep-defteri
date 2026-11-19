@@ -1,6 +1,7 @@
 /**
  * Maskotların kısa espri, selam ve ipuçları (Türkçe + İngilizce).
  * Ton: sıcak, yargılamayan; harcamayı asla ayıplamaz, yatırım değerinin düşüşünü yorumlamaz.
+ * Karafatma (gizli maskot) küfürbazdır: fiyatlara, faturaya, terliğe, ay sonuna söver; kullanıcıya asla.
  * `{name}` yer tutucusu maskotun (kullanıcının verdiği ya da varsayılan) adıyla değişir.
  * Her karakterin kendi "ağzı" vardır; ortak havuzla karıştırılır.
  */
@@ -46,7 +47,8 @@ const GOAL: Pool = [L('Hedef tamam! Konfeti benden.', 'Goal reached! Confetti’
 const UNDO: Pool = [L('Olur böyle şeyler. Sanki hiç olmamış gibi.', 'It happens. As if it never was.')];
 const DEBT: Pool = [L('Borç-alacak defteri güncel. Dostluk bozulmaz.', 'IOUs updated. Friendships intact.')];
 
-export const GREET: Record<'morning' | 'monday' | 'night' | 'monthStart' | 'spy' | 'spyOff' | 'exam' | 'newyear' | 'bayram' | 'summer', Pool> = {
+export type GreetKey = 'morning' | 'monday' | 'night' | 'monthStart' | 'spy' | 'spyOff' | 'exam' | 'newyear' | 'bayram' | 'summer';
+export const GREET: Record<GreetKey, Pool> = {
   morning: [L('Günaydın! Defter açık, gün başlıyor.', 'Good morning! Notebook’s open, let’s go.'), L('Günaydın! Önce kahve, sonra kuruşlar.', 'Morning! Coffee first, coins second.')],
   monday: [L('Pazartesi... Gözlerim yarı açık ama defter tamamen açık.', 'Monday… eyes half open, notebook wide open.')],
   night: [L('Geç oldu, ben esnemeye başladım.', 'It’s late, I’m starting to yawn.'), L('Gece kuşu musun? Ben biraz uykuluyum.', 'Night owl? I’m a bit sleepy.')],
@@ -88,6 +90,13 @@ interface Voice {
   pops: Pool;
   invest?: Pool;
   debt?: Pool;
+  refund?: Pool;
+  goal?: Pool;
+  undo?: Pool;
+  /** Kendi selamları (ortak selamların yerine geçer) */
+  greet?: Partial<Record<GreetKey, Pool>>;
+  /** Kendi ağzından konuşma olasılığı (varsayılan 0,45; gerisi ortak havuz) */
+  own?: number;
 }
 export const VOICES: Record<MascotKey, Voice> = {
   fistik: {
@@ -138,6 +147,47 @@ export const VOICES: Record<MascotKey, Voice> = {
     ],
     pops: [L('Iyy, gıdıklanıyorum!', 'Eek, hi!'), L('Pıt pıt!', 'Hop hop!')],
   },
+  karafatma: {
+    own: 0.8,
+    expense: [
+      L('Yazdım lan. Fiyatlar uçmuş, ben hâlâ yerde sürünüyorum.', 'Logged, damn it. Prices took off, I’m still crawling on the floor.'),
+      L('Ulan bu fiyatlar ne böyle? Neyse, deftere geçtim.', 'What the hell are these prices? Anyway, it’s in the book.'),
+      L('Hassiktir, bir bu eksikti. Tamam tamam, yazdım.', 'Oh, shit, just what we needed. Fine, fine, logged.'),
+      L('Harca kardeşim harca, ben kaydı tutarım. Enflasyon utansın, sen değil.', 'Spend it, I’ll keep the record. Inflation should be ashamed, not you.'),
+      L('Kaydettim amk. Cüzdan ağladı ama defter güldü.', 'Logged, damn. The wallet cried but the books are smiling.'),
+      L('Yazdık. Zam yapanın da terliği bulsun inşallah.', 'Logged. May whoever raised the prices meet a slipper.'),
+    ],
+    income: [
+      L('Oha lan, para gelmiş! Saklayın beni, zengin oldum.', 'Holy shit, money! Hide me, I’m rich.'),
+      L('Para yattı amk! Bugün çaylar benden. Yani senden.', 'Money’s in, hell yeah! Tea’s on me today. Meaning you.'),
+      L('Gelir yazıldı. Bunu kimseye söyleme, hemen borç isterler lan.', 'Income logged. Don’t tell anyone, they’ll ask for a loan, damn it.'),
+    ],
+    invest: [L('Kenara para koydun ha? Lan sen adam oldun.', 'Putting money aside? Damn, look at you, all grown up.'), L('Bunu kenara attık. Kriz gelse de bu böcek ölmez.', 'Stashed. Crisis or not, this bug doesn’t die.')],
+    debt: [L('Borç defteri tamam. Ödemeyenin saklandığı çatlağı bilirim.', 'IOUs updated. Whoever doesn’t pay, I know which crack they hide in.')],
+    refund: [L('İade gelmiş lan! Para geri döndü, ben de dönmem sandım.', 'A refund, hell yes! Money came back. Didn’t think it would.')],
+    goal: [L('Hedef tamam amk! Ben bile inanamadım, konfeti patlatıyorum.', 'Goal reached, holy shit! Even I didn’t believe it. Confetti time.')],
+    undo: [L('Siktir et, hiç olmamış say.', 'Screw it, never happened.')],
+    jokes: [
+      L('Nükleer savaştan sağ çıkarım ama ay sonundan emin değilim, hassiktir.', 'I’d survive a nuclear war, but the end of the month? Shit, not sure.'),
+      L('Terlikten kaçmayı bilirim, faturadan kaçamıyorum lan.', 'I can dodge a slipper, but not a damn bill.'),
+      L('Altı bacağım var, bir tane cebim yok. Ne biçim tasarım bu amk.', 'Six legs and not a single pocket. What kind of damn design is this.'),
+      L('Bana hamam böceği diyorlar. Ulan ben hamama hiç gitmedim ki.', 'They call me a bathhouse bug. I’ve never even been to a damn bathhouse.'),
+      L('Çay, cips, maç. Bütçe kaldırır mı? Kaldırır lan, kaldırır.', 'Tea, chips, the match. Can the budget take it? Hell yes it can.'),
+      L('Pembe takımı kiraladım sanma, peşin aldım. Taksit bana göre değil.', 'Don’t think I rented the pink suit. Paid cash. Installments aren’t my style.'),
+    ],
+    pops: [L('Ne var lan?', 'What the hell?'), L('Çek elini!', 'Hands off!'), L('Ulan!', 'Damn!'), L('Hıh.', 'Hmph.')],
+    greet: {
+      morning: [L('Günaydın lan. Çay demlendi mi? Demlenmediyse gün başlamadı.', 'Morning, damn it. Is the tea brewed? If not, the day hasn’t started.')],
+      monday: [L('Pazartesi... Hassiktir. Neyse, defter açık.', 'Monday… oh, shit. Anyway, the book’s open.')],
+      night: [L('Gece oldu, ışıkları söndür de mutfağa bir bakayım. Şaka lan, şaka.', 'It’s late. Turn off the lights so I can check the kitchen. Kidding, damn it.')],
+      monthStart: [L('Ay başı! Maaş geldiyse bayram, gelmediyse hassiktir.', 'New month! If you got paid, party. If not, well, shit.')],
+      spy: [L('Bakiye gizlendi. Kimse görmez lan, merak etme.', 'Balances hidden. Nobody’s seeing a damn thing, relax.')],
+      exam: [L('Sınav haftası. Sen çalış, ben bildirimleri susturdum. Kalırsan da dünyanın sonu değil amk.', 'Exam week. You study, I muted the reminders. Even if you flunk, it’s not the end of the damn world.')],
+      newyear: [L('Mutlu yıllar lan! Yeni yılda da hayatta kalırız, bizi kimse öldüremez.', 'Happy New Year, damn it! We’ll survive this one too. Nothing kills us.')],
+      bayram: [L('İyi bayramlar! Harçlık geldiyse yaz, gelmediyse kim almadıysa ayıp ona.', 'Happy holidays! If you got holiday money, log it. If not, shame on them.')],
+      summer: [L('Yaz geldi, sıcaktan kabuğum eriyor lan. Dondurma bütçesi var mı?', 'Summer’s here, my shell’s melting, damn it. Any ice cream budget?')],
+    },
+  },
 };
 
 const last = new Map<Pool, Line>();
@@ -154,32 +204,36 @@ export function say(pool: Pool, lang: Lang, name: string): string {
   return fill(pickLine(pool)[lang], name);
 }
 
-/** Karakterin sesi (%45) ya da ortak havuz. */
-function mix(own: Pool | undefined, shared: Pool): Pool {
-  return own && own.length && Math.random() < 0.45 ? own : shared;
+/** Karakterin sesi (varsayılan %45) ya da ortak havuz. */
+function mix(own: Pool | undefined, shared: Pool, share = 0.45): Pool {
+  return own && own.length && Math.random() < share ? own : shared;
 }
+
+/** Selam havuzu: karakterin kendi selamı varsa o, yoksa ortak selam. */
+export const greetFor = (who: MascotKey, kind: GreetKey): Pool => VOICES[who].greet?.[kind] ?? GREET[kind];
 
 /** Olaya uygun havuz; yorum yapılmayacak olaylarda null (değer girişi, transfer, çekim). */
 export function eventPool(e: MascotEvent, who: MascotKey): Pool | null {
   const v = VOICES[who];
+  const own = v.own;
   switch (e.type) {
     case 'expense':
-      return mix(v.expense, e.categoryId && EXPENSE[e.categoryId] && Math.random() < 0.7 ? EXPENSE[e.categoryId] : ANY_EXPENSE);
+      return mix(v.expense, e.categoryId && EXPENSE[e.categoryId] && Math.random() < 0.7 ? EXPENSE[e.categoryId] : ANY_EXPENSE, own);
     case 'income':
-      return mix(v.income, e.categoryId && INCOME[e.categoryId] ? INCOME[e.categoryId] : ANY_INCOME);
+      return mix(v.income, e.categoryId && INCOME[e.categoryId] ? INCOME[e.categoryId] : ANY_INCOME, own);
     case 'plan-confirmed':
-      return e.kind === 'income' ? mix(v.income, ANY_INCOME) : e.kind === 'expense' ? mix(v.expense, ANY_EXPENSE) : null;
+      return e.kind === 'income' ? mix(v.income, ANY_INCOME, own) : e.kind === 'expense' ? mix(v.expense, ANY_EXPENSE, own) : null;
     case 'invest':
-      return mix(v.invest, INVEST);
+      return mix(v.invest, INVEST, own);
     case 'refund':
-      return REFUND;
+      return v.refund ?? REFUND;
     case 'goal-reached':
-      return GOAL;
+      return v.goal ?? GOAL;
     case 'debt':
-      return mix(v.debt, DEBT);
+      return mix(v.debt, DEBT, own);
     case 'deleted':
     case 'undo':
-      return UNDO;
+      return v.undo ?? UNDO;
     default:
       return null;
   }
@@ -189,7 +243,10 @@ export const popsFor = (who: MascotKey): Pool => [...VOICES[who].pops, ...TAP_PO
 
 /** Testler için: tüm satırlar. */
 export function allLines(): Line[] {
-  const voices = Object.values(VOICES).flatMap((v) => [...v.expense, ...v.income, ...v.jokes, ...v.pops, ...(v.invest ?? []), ...(v.debt ?? [])]);
+  const voices = Object.values(VOICES).flatMap((v) => [
+    ...v.expense, ...v.income, ...v.jokes, ...v.pops, ...(v.invest ?? []), ...(v.debt ?? []), ...(v.refund ?? []), ...(v.goal ?? []), ...(v.undo ?? []),
+    ...Object.values(v.greet ?? {}).flat(),
+  ]);
   return [
     ...ANY_EXPENSE, ...Object.values(EXPENSE).flat(), ...ANY_INCOME, ...Object.values(INCOME).flat(), ...INVEST, ...REFUND, ...GOAL, ...UNDO, ...DEBT,
     ...Object.values(GREET).flat(), ...TIPS, ...JOKES, ...TAP_POPS, TICKLE, DIZZY, SNEEZE, YAWN, ...voices,

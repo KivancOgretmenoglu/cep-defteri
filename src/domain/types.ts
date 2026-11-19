@@ -176,6 +176,8 @@ export interface Settings {
   monthEndFloor: Money | null;
   /** Tamamlanan/geçilen spot ışıklı rehberin sürümü; null = hiç görülmedi. */
   guideVersion?: number | null;
+  /** Gizli kodla açılmış maskotlar (src/mascot/secret.ts). */
+  unlockedMascots?: string[];
 }
 
 export interface Data {

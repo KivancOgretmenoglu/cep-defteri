@@ -337,3 +337,56 @@
   }
 }
 
+
+/* Gizli maskot kartı: kesik çizgili kenar ve köşede küçük bir "gizli" işareti */
+.mascot-card--secret {
+  border-style: dashed;
+}
+.mascot-card--secret::before {
+  content: '★';
+  position: absolute;
+  top: 5px;
+  left: 8px;
+  font-size: 11px;
+  color: var(--card-accent);
+  opacity: 0.8;
+}
+
+/* ───────── Gizli kod (Ayarlar'ın en altı) ───────── */
+.secret-code {
+  margin-top: 12px;
+  animation: secret-in 0.35s var(--spring-bouncy, ease-out) both;
+}
+.secret-code h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.secret-code__row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.secret-code__row .field {
+  flex: 1;
+  min-width: 0;
+}
+.secret-code__row.is-wrong {
+  animation: secret-shake 0.32s ease-in-out;
+}
+.secret-code__owned {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+@keyframes secret-in {
+  from { opacity: 0; transform: translateY(12px); }
+}
+@keyframes secret-shake {
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .secret-code, .secret-code__row.is-wrong { animation: none; }
+}

@@ -6,10 +6,12 @@ import { useState } from 'react';
 import { Check } from 'lucide-react';
 import * as A from '../domain/actions';
 import { commit, useStore } from '../store/store';
-import { CHARACTERS, MASCOT_KEYS, characterOf, type Lang, type MascotKey } from './characters';
+import { ALL_MASCOT_KEYS, CHARACTERS, characterOf, isSecretMascot, type Lang, type MascotKey } from './characters';
+import { pickable, unlockedOf } from './secret';
 import { Mascot } from './Mascot';
 import { LiveMascot } from './MascotNote';
 import { haptic } from '../native/haptics';
+import { OUTFITS } from './render';
 
 const T = {
   title: { tr: 'Yol arkadaşını seç', en: 'Pick your sidekick' },
@@ -19,9 +21,13 @@ const T = {
 };
 
 export function MascotGrid({ value, onPick, lang, size = 72 }: { value: MascotKey; onPick: (k: MascotKey) => void; lang: Lang; size?: number }) {
+  // Gizli maskotlar yalnız kodla açıldıysa (ya da zaten seçiliyse) listelenir.
+  const raw = useStore((s) => s.data.settings.unlockedMascots);
+  const unlocked = unlockedOf(raw);
+  const keys = ALL_MASCOT_KEYS.filter((k) => k === value || pickable(k, unlocked));
   return (
     <div className="mascot-grid" role="radiogroup" aria-label={T.title[lang]}>
-      {MASCOT_KEYS.map((k) => {
+      {keys.map((k) => {
         const c = CHARACTERS[k];
         const on = value === k;
         return (
@@ -30,7 +36,7 @@ export function MascotGrid({ value, onPick, lang, size = 72 }: { value: MascotKe
             type="button"
             role="radio"
             aria-checked={on}
-            className={`mascot-card ${on ? 'is-on' : ''}`}
+            className={`mascot-card ${on ? 'is-on' : ''} ${isSecretMascot(k) ? 'mascot-card--secret' : ''}`}
             style={{ '--card': c.palette.soft, '--card-accent': c.palette.accent } as React.CSSProperties}
             onClick={() => { haptic('light'); onPick(k); }}
           >
@@ -45,13 +51,19 @@ export function MascotGrid({ value, onPick, lang, size = 72 }: { value: MascotKe
   );
 }
 
+/** Maskot değişince, eskisine özel kıyafet (ör. pembe takım) sade kıyafete döner. */
+export function mascotWith<P extends { key: string; outfit: string }>(prev: P, key: MascotKey): P {
+  const only = OUTFITS[prev.outfit]?.only;
+  return { ...prev, key, outfit: only && only !== key ? 'plain' : prev.outfit };
+}
+
 /** İlk açılış adımı. `iconStep` Android'de simge sorusunu gösterir. */
 export function MascotPicker({ onDone, iconQuestion }: { onDone: () => void; iconQuestion?: React.ReactNode }) {
   const lang = useStore((s) => s.data.settings.lang ?? 'tr') as Lang;
   const current = useStore((s) => s.data.settings.mascot);
   const ch = characterOf(current?.key);
   const [name, setName] = useState(current?.name ?? '');
-  const pick = (k: MascotKey) => commit((d) => A.updateSettings(d, { mascot: { ...d.settings.mascot, key: k } }));
+  const pick = (k: MascotKey) => commit((d) => A.updateSettings(d, { mascot: mascotWith(d.settings.mascot, k) }));
   const finish = () => {
     commit((d) => A.updateSettings(d, { mascot: { ...d.settings.mascot, name: name.trim() ? name.trim().slice(0, 20) : null } }));
     onDone();

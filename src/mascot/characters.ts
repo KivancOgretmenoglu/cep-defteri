@@ -1,13 +1,23 @@
 /**
- * Cep Defteri'nin maskotları: altı özgün hayvan karakter.
+ * Cep Defteri'nin maskotları: altı özgün hayvan karakter ve gizli kodla açılan bir yedinci (Karafatma).
  * Her biri 24×24 piksellik bir gövde çizimi, yüz ve aksesuarlar için bağlantı noktaları (anchors),
  * renk teması ve kişilik bilgisinden oluşur. Bu dosya saftır (tarayıcıya dokunmaz):
  * uygulama, Android simge üretici ve testler aynı tanımı kullanır.
  */
 
-export type MascotKey = 'fistik' | 'bilge' | 'ceviz' | 'diken' | 'karamel' | 'pamuk';
-export const MASCOT_KEYS: MascotKey[] = ['fistik', 'bilge', 'ceviz', 'diken', 'karamel', 'pamuk'];
-export const DEFAULT_MASCOT: MascotKey = 'fistik';
+export type PublicMascotKey = 'fistik' | 'bilge' | 'ceviz' | 'diken' | 'karamel' | 'pamuk';
+/** Gizli maskotlar: seçicide yalnız Ayarlar'daki gizli kod girildikten sonra görünür (bkz. secret.ts). */
+export type SecretMascotKey = 'karafatma';
+export type MascotKey = PublicMascotKey | SecretMascotKey;
+/**
+ * Herkese açık maskotlar. Seçici, misafir sahneleri, Android simgeleri ve ana ekran aracı bu listeyle çalışır.
+ * Gizli maskotlar burada yoktur: misafir olarak uğramazlar, Android'de simge/araç olarak varsayılana düşerler.
+ */
+export const MASCOT_KEYS: PublicMascotKey[] = ['fistik', 'bilge', 'ceviz', 'diken', 'karamel', 'pamuk'];
+export const SECRET_KEYS: SecretMascotKey[] = ['karafatma'];
+export const ALL_MASCOT_KEYS: MascotKey[] = [...MASCOT_KEYS, ...SECRET_KEYS];
+export const isSecretMascot = (k: string | null | undefined): k is SecretMascotKey => (SECRET_KEYS as string[]).includes(k ?? '');
+export const DEFAULT_MASCOT: PublicMascotKey = 'fistik';
 
 export type Lang = 'tr' | 'en';
 export type L10n = Record<Lang, string>;
@@ -74,28 +84,41 @@ export interface Character {
   /** Sürpriz havuzunda daha sık görülen imza hareketleri */
   signature: string[];
   anchors: Anchors;
+  /**
+   * Izgara çözünürlüğü: 1 = 24×24 (varsayılan), 2 = 48×48 (her hücre yarım tuval birimi; daha ayrıntılı çizim).
+   * Bağlantı noktaları (anchors) her zaman 24'lük birimdedir; aksesuarlar aynı yere oturur.
+   */
+  res?: 1 | 2;
+  /**
+   * Ayrıntılı yüz (res 2): göz akı ve kontur gövdede çizilir; bebekler, kapaklar ve ağız duyguya göre render.ts'te.
+   * Koordinatlar gövde ızgarasında (48'lik).
+   */
+  hiFace?: { eyes: [number, number][]; rx: number; ry: number; lid: string; mouth: [number, number] };
   /** Gövde (göz/ifade hariç) */
   body: () => Grid;
 }
 
 // ── Izgara yardımcıları ───────────────────────────────
-export const grid = (): Grid => Array.from({ length: S }, () => Array<string | null>(S).fill(null));
+export const grid = (n = S): Grid => Array.from({ length: n }, () => Array<string | null>(n).fill(null));
 const inEll = (x: number, y: number, cx: number, cy: number, rx: number, ry: number) => ((x + 0.5 - cx) / rx) ** 2 + ((y + 0.5 - cy) / ry) ** 2 <= 1;
 function ell(g: Grid, cx: number, cy: number, rx: number, ry: number, c: string) {
-  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) if (inEll(x, y, cx, cy, rx, ry)) g[y][x] = c;
+  const n = g.length;
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (inEll(x, y, cx, cy, rx, ry)) g[y][x] = c;
 }
 function rect(g: Grid, x: number, y: number, w: number, h: number, c: string) {
-  for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (i >= 0 && j >= 0 && i < S && j < S) g[j][i] = c;
+  const n = g.length;
+  for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (i >= 0 && j >= 0 && i < n && j < n) g[j][i] = c;
 }
 function px(g: Grid, pts: [number, number][], c: string) {
-  for (const [x, y] of pts) if (x >= 0 && y >= 0 && x < S && y < S) g[y][x] = c;
+  const n = g.length;
+  for (const [x, y] of pts) if (x >= 0 && y >= 0 && x < n && y < n) g[y][x] = c;
 }
 function disk(g: Grid, cx: number, cy: number, r: number, c: string) {
   ell(g, cx, cy, r, r, c);
 }
 function ring(g: Grid, cx: number, cy: number, R: number, r: number, c: string) {
-  for (let y = 0; y < S; y++)
-    for (let x = 0; x < S; x++) {
+  for (let y = 0; y < g.length; y++)
+    for (let x = 0; x < g.length; x++) {
       const d = Math.hypot(x + 0.5 - cx, y + 0.5 - cy);
       if (d <= R && d >= r) g[y][x] = c;
     }
@@ -103,8 +126,8 @@ function ring(g: Grid, cx: number, cy: number, R: number, r: number, c: string) 
 /** Siluetin dışına 1 px kontur. */
 function outline(g: Grid): Grid {
   const out = g.map((r) => r.slice());
-  for (let y = 0; y < S; y++)
-    for (let x = 0; x < S; x++) {
+  for (let y = 0; y < g.length; y++)
+    for (let x = 0; x < g.length; x++) {
       if (g[y][x]) continue;
       if (([[1, 0], [-1, 0], [0, 1], [0, -1]] as const).some(([dx, dy]) => g[y + dy]?.[x + dx])) out[y][x] = INK;
     }
@@ -113,9 +136,39 @@ function outline(g: Grid): Grid {
 /** Bir rengin sağ/alt kenarını koyulaştırır (hacim). */
 function shadeEdge(g: Grid, color: string, dark: string): Grid {
   const out = g.map((r) => r.slice());
-  for (let y = 0; y < S - 1; y++) for (let x = 0; x < S; x++) if (g[y][x] === color && (g[y + 1][x] !== color || g[y][x + 1] !== color)) out[y][x] = dark;
+  for (let y = 0; y < g.length - 1; y++) for (let x = 0; x < g.length; x++) if (g[y][x] === color && (g[y + 1][x] !== color || g[y][x + 1] !== color)) out[y][x] = dark;
   return out;
 }
+
+/** Bresenham çizgisi; `t` kalınlık (sağa doğru ek sütunlar). */
+function line(g: Grid, x0: number, y0: number, x1: number, y1: number, c: string, t = 1) {
+  const pts: [number, number][] = [];
+  const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+  let err = dx + dy, x = x0, y = y0;
+  for (;;) {
+    for (let k = 0; k < t; k++) pts.push([x + k, y]);
+    if (x === x1 && y === y1) break;
+    const e2 = 2 * err;
+    if (e2 >= dy) { err += dy; x += sx; }
+    if (e2 <= dx) { err += dx; y += sy; }
+  }
+  px(g, pts, c);
+}
+/** İkinci derece Bézier eğrisi (ince anten gibi). */
+function curve(g: Grid, p0: [number, number], p1: [number, number], p2: [number, number], c: string) {
+  let prev: [number, number] | null = null;
+  for (let i = 0; i <= 40; i++) {
+    const t = i / 40, u = 1 - t;
+    const p: [number, number] = [Math.round(u * u * p0[0] + 2 * u * t * p1[0] + t * t * p2[0]), Math.round(u * u * p0[1] + 2 * u * t * p1[1] + t * t * p2[1])];
+    if (prev) line(g, prev[0], prev[1], p[0], p[1], c);
+    prev = p;
+  }
+}
+/** Elips içinde yalnız `from` renkli pikselleri `to` yapar (parlaklık/gölge). */
+function tint(g: Grid, cx: number, cy: number, rx: number, ry: number, from: string, to: string) {
+  for (let y = 0; y < g.length; y++) for (let x = 0; x < g.length; x++) if (g[y][x] === from && inEll(x, y, cx, cy, rx, ry)) g[y][x] = to;
+}
+const mirror = (pts: [number, number][], n: number): [number, number][] => pts.map(([x, y]) => [n - 1 - x, y]);
 
 // ── Karakterler ───────────────────────────────────────
 export const CHARACTERS: Record<MascotKey, Character> = {
@@ -328,14 +381,140 @@ export const CHARACTERS: Record<MascotKey, Character> = {
       return g;
     },
   },
+  karafatma: {
+    key: 'karafatma',
+    fur: '#5A2C12',
+    name: { tr: 'Karafatma', en: 'Karafatma' },
+    species: { tr: 'Hamam böceği', en: 'Cockroach' },
+    intro: {
+      tr: 'Ben Karafatma. Terlikten kaçtım, enflasyondan kaçamadım lan. Ağzım bozuk ama defterim tertemiz.',
+      en: "I'm Karafatma. Dodged the slipper, couldn't dodge inflation, damn it. Filthy mouth, spotless books.",
+    },
+    traits: {
+      tr: 'Pişkin, küfürbaz, her şeye rağmen hayatta kalır. Çayı, cipsi ve maçı sever. Sana değil, fiyatlara söver.',
+      en: 'Cheeky, foul-mouthed, survives anything. Loves tea, chips and the match. Swears at prices, never at you.',
+    },
+    palette: { accent: '#8C4A1C', soft: '#F3DFCB', line: '#DDB48F', paper: '#F5EEE6', darkAccent: '#E39A5E', darkSoft: '#43281A', darkLine: '#74472C', iconBg: '#F3DFCB' },
+    quipChance: 0.45,
+    signature: ['tea', 'antenna', 'scuttle'],
+    res: 2,
+    hiFace: { eyes: [[17.5, 18], [30.5, 18]], rx: 4.4, ry: 5, lid: '#A65A28', mouth: [24, 25] },
+    anchors: {
+      eye: [8, 8],
+      eyeGap: 6,
+      lid: '#A65A28',
+      head: { x: 12, y: 4, w: 12 },
+      neck: { x: 12, y: 14, w: 12 },
+      hold: { l: [3, 17], r: [20, 17] },
+      blush: [[7, 12], [16, 12]],
+      // Antenler şapkanın önünde kalır (24'lük birim)
+      ears: [[0, 0, 11, 4], [13, 0, 24, 4]],
+    },
+    body() {
+      const N = 48;
+      let g = grid(N);
+      const HD = '#A65A28', HL = '#CC8448', HS = '#7E3F1A';
+      const PR = '#6E3415', PL = '#9A5428';
+      const AB = '#8E4A20', BL = '#DCA466', BS = '#B0703A', BD = '#C48A50';
+      const WG = '#7A3A16', WL = '#A8622F', WH = '#D49A64';
+      const LG = '#3A1A0A', LS = '#8A5230';
+      // Kanatlar: gövdenin arkasında, yanlardan taşan uzun parlak kabuk
+      ell(g, 13.5, 36, 4.6, 11.5, WG);
+      ell(g, 34.5, 36, 4.6, 11.5, WG);
+      // Karın (gövde)
+      ell(g, 24, 37.5, 9.8, 9.5, AB);
+      // Bacaklar (kontur alsın diye konturdan önce): ön çift kol gibi, orta ve arka çift dışa açık
+      const legs: [number, number, number, number][] = [
+        [11, 30, 3, 33], [3, 33, 2, 39], // ön: omuz → dirsek → el
+        [13, 40, 4, 42], [4, 42, 1, 47], // orta
+        [18, 44, 15, 47], // arka: ayak
+      ];
+      for (const [a, b, c2, d] of legs) {
+        line(g, a, b, c2, d, LG, 2);
+        line(g, N - 1 - a - 1, b, N - 1 - c2 - 1, d, LG, 2);
+      }
+      // Pronotum: başın altında omuz kalkanı
+      ell(g, 24, 29, 13, 4.2, PR);
+      // Baş
+      ell(g, 24, 17.5, 12.5, 10.5, HD);
+      g = outline(g);
+      // Kabuk parlaklığı ve gölgesi
+      tint(g, 19, 11, 6, 3.2, HD, HL);
+      tint(g, 24, 27, 9, 2.2, HD, HS);
+      tint(g, 24, 28, 9, 1.6, PR, PL);
+      tint(g, 11, 31, 2.2, 7, WG, WL);
+      tint(g, 37, 31, 2.2, 7, WG, WL);
+      px(g, [[10, 29], [10, 30], [11, 32], [37, 29], [37, 30], [36, 32]], WH);
+      // Karın boğumları: açık renk, yatay çizgili, kenarları koyu
+      ell(g, 24, 38.5, 6.6, 7.4, BL);
+      for (const y of [33, 36, 39, 42, 45]) for (let x = 0; x < N; x++) if (g[y][x] === BL) g[y][x] = BS;
+      tint(g, 24, 38.5, 6.6, 7.4, BL, BL);
+      for (let y = 32; y < 47; y++) for (const x of [17, 18, 29, 30]) if (g[y][x] === BL) g[y][x] = BD;
+      // Bacak dikenleri
+      const spikes: [number, number][] = [[6, 31], [1, 36], [8, 41], [0, 44], [16, 46]];
+      px(g, spikes, LS);
+      px(g, mirror(spikes, N), LS);
+      // Kocaman, beyazı belli gözler (akımın imzası); bebekler render.ts'te
+      for (const cx of [17.5, 30.5]) {
+        ell(g, cx, 18, 5.4, 6, INK);
+        ell(g, cx, 18, 4.4, 5, W);
+      }
+      // Kalın, çatık kaşlar
+      line(g, 12, 10, 20, 12, INK, 1);
+      line(g, 12, 11, 20, 13, INK, 1);
+      line(g, 35, 10, 27, 12, INK, 1);
+      line(g, 35, 11, 27, 13, INK, 1);
+      // Pişkin sırıtış (sağ uç yukarı) ve iki ön diş
+      line(g, 19, 25, 27, 25, INK);
+      px(g, [[28, 24], [29, 23], [18, 24]], INK);
+      rect(g, 22, 26, 4, 2, W);
+      px(g, [[23, 27], [24, 27]], '#E4DACB');
+      line(g, 22, 28, 25, 28, INK);
+      px(g, [[21, 26], [21, 27], [26, 26], [26, 27]], INK);
+      // Antenler: başın tepesinden uzun, dışa kıvrık (ince, konturdan sonra)
+      curve(g, [20, 8], [12, -6], [1, 7], LG);
+      curve(g, [27, 8], [35, -6], [46, 7], LG);
+      return g;
+    },
+  },
 };
 
 export const characterOf = (k: string | null | undefined): Character => CHARACTERS[(k as MascotKey) in CHARACTERS ? (k as MascotKey) : DEFAULT_MASCOT];
 
 const bodyCache = new Map<MascotKey, Grid>();
-/** Gövde ızgarası (önbellekli). */
+/** Gövde ızgarası (önbellekli), karakterin kendi çözünürlüğünde (24 ya da 48). */
 export function bodyGrid(k: MascotKey): Grid {
   let g = bodyCache.get(k);
   if (!g) bodyCache.set(k, (g = CHARACTERS[k].body()));
   return g;
+}
+
+const unitCache = new Map<MascotKey, Grid>();
+/**
+ * 24×24 birim ızgarası: yüksek çözünürlüklü gövde 2×2 bloklarla küçültülür (blokta konturdan başka renk varsa o,
+ * yoksa kontur). Kenar/silüet hesapları (patiler, takım elbise yakası) bununla yapılır.
+ */
+export function unitGrid(k: MascotKey): Grid {
+  const res = CHARACTERS[k].res ?? 1;
+  if (res === 1) return bodyGrid(k);
+  let u = unitCache.get(k);
+  if (u) return u;
+  const g = bodyGrid(k);
+  u = grid();
+  for (let y = 0; y < S; y++)
+    for (let x = 0; x < S; x++) {
+      let ink = false;
+      for (let j = 0; j < res && !u[y][x]; j++)
+        for (let i = 0; i < res; i++) {
+          const c = g[y * res + j]?.[x * res + i];
+          if (c === INK) ink = true;
+          else if (c) {
+            u[y][x] = c;
+            break;
+          }
+        }
+      if (!u[y][x] && ink) u[y][x] = INK;
+    }
+  unitCache.set(k, u);
+  return u;
 }

@@ -5,8 +5,8 @@ import { addDays } from '../domain/dates';
 import { commit, useStore } from '../store/store';
 import { characterOf, type Lang, type MascotKey } from './characters';
 import { Mascot } from './Mascot';
-import { MascotGrid } from './MascotPicker';
-import { HOME_OUTFITS, OUTFITS } from './render';
+import { MascotGrid, mascotWith } from './MascotPicker';
+import { OUTFITS, wardrobeFor } from './render';
 import { examActive } from './seasonal';
 
 const T = {
@@ -48,7 +48,7 @@ export function MascotSettings({ iconRow, children }: { iconRow?: React.ReactNod
       <div className="section-head">
         <h2 id="s-mascot">{T.title[lang]}</h2>
       </div>
-      <MascotGrid value={ch.key} onPick={(k: MascotKey) => setMascot({ key: k })} lang={lang} size={60} />
+      <MascotGrid value={ch.key} onPick={(k: MascotKey) => commit((d) => A.updateSettings(d, { mascot: mascotWith(d.settings.mascot, k) }))} lang={lang} size={60} />
       <p className="muted small">“{ch.intro[lang]}”</p>
       <label className="field">
         <span className="field__label">{T.name[lang]}</span>
@@ -66,7 +66,7 @@ export function MascotSettings({ iconRow, children }: { iconRow?: React.ReactNod
       <fieldset className="block">
         <legend>{T.wardrobe[lang]}</legend>
         <div className="wardrobe" role="radiogroup" aria-label={T.wardrobe[lang]}>
-          {HOME_OUTFITS.map((o) => (
+          {wardrobeFor(ch.key).map((o) => (
             <button key={o} role="radio" aria-checked={m?.outfit === o} className={`wardrobe__item ${m?.outfit === o ? 'is-on' : ''}`} onClick={() => setMascot({ outfit: o })}>
               <Mascot who={ch.key} mood="happy" outfit={o} size={64} idle={false} lang={lang} />
               <span>{OUTFITS[o].name[lang]}</span>

@@ -18,6 +18,7 @@ import { CatIcon, ACCOUNT_ICONS } from '../ui/icons';
 import { SecuritySettings, NotificationSettings, AutoBackupSettings, WidgetSettings } from '../native/NativeSettings';
 import { appIconSupported, setAppIcon } from '../native/appIcon';
 import { MascotSettings } from '../mascot/MascotSettings';
+import { SecretCode } from '../mascot/SecretCode';
 import { startGuide } from '../guide/state';
 import { characterOf } from '../mascot/characters';
 import { FeedbackSettings } from '../ui/Feedback';
@@ -192,6 +193,8 @@ export function Settings() {
         )}
       </div>
       <p className="app-foot">{t('set.foot')}</p>
+      {/* Gizli: en alttayken bir kez daha aşağı kaydırınca açılır */}
+      <SecretCode />
     </div>
   );
 }

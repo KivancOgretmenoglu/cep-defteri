@@ -1,4 +1,5 @@
 /** Yedek (JSON) ve CSV dışa aktarma. Geri yükleme, veriyi kullanmadan önce baştan sona doğrular. */
+import { unlockedOf } from '../mascot/secret';
 import type { Data, Lang, Tx } from './types';
 import { translator, type Key, type Vars } from '../i18n/core';
 import { categoryName } from './defaults';
@@ -117,6 +118,8 @@ export function parseBackup(text: string, lang: Lang = 'tr'): Result {
     ...DEFAULT_SETTINGS,
     ...rest,
     mascot: { ...DEFAULT_SETTINGS.mascot, ...(isObj(s.mascot) ? s.mascot : {}) },
+    // Gizli maskotlar: yalnız bilinen anahtarlar taşınır (alan yoksa eklenmez)
+    ...(s.unlockedMascots !== undefined ? { unlockedMascots: unlockedOf(s.unlockedMascots) } : {}),
     // Eski sürümden: Clawd espri ayarı
     quips: typeof s.quips === 'boolean' ? s.quips : typeof s.clawdQuips === 'boolean' ? s.clawdQuips : DEFAULT_SETTINGS.quips,
   };

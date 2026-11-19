@@ -21,7 +21,7 @@ export interface Frame extends MascotLive {
 export type ActionName =
   | 'stretch' | 'hop' | 'wave' | 'turn' | 'peek' | 'sneeze' | 'yawn' | 'dance' | 'lookaround'
   | 'glasses' | 'water' | 'write' | 'pages' | 'music' | 'shiver' | 'captip' | 'spylook' | 'glint' | 'psst' | 'study'
-  | 'tailwag' | 'earflap' | 'stash' | 'curl' | 'leaf' | 'tilt' | 'bowfix' | 'nibble'
+  | 'tailwag' | 'earflap' | 'stash' | 'curl' | 'leaf' | 'tilt' | 'bowfix' | 'nibble' | 'tea' | 'antenna' | 'scuttle'
   | 'giggle' | 'jump' | 'spin' | 'hey' | 'dizzy' | 'tickle'
   | 'note' | 'coins' | 'sprout' | 'confetti' | 'wiggle' | 'shrug' | 'disguise' | 'undisguise' | 'nod'
   | CategoryReaction;
@@ -235,6 +235,47 @@ export function buildAction(name: ActionName, ctx: ActionCtx): Frame[] {
         { ms: 300, eyes: 'happy', blush: true, pop: P('Nom!', 'Nom!') },
       ];
     }
+    case 'tea': {
+      // İnce belli bardakta çay: ağza götürür, buhar, keyif.
+      const mx = Math.round((eyeL + eyeR + 2) / 2) - 1, my = eyeY + 4;
+      const [x, y] = holdR;
+      // Bardağın ağzı ağız hizasında (yukarısı göze biner)
+      const low = teaGlass(x, y - 3), up = teaGlass(mx + 1, my);
+      return [
+        { ms: 160, look: [1, 0], props: low },
+        { ms: 160, look: [1, 1], props: teaGlass(mx + 3, my + 1) },
+        { ms: 320, eyes: 'closed', props: up, over: [[mx + 4, my - 1, 1, 2, '#CFC6B8']] },
+        { ms: 160, eyes: 'closed', squash: true, props: up },
+        { ms: 160, props: low },
+        { ms: 300, eyes: 'happy', blush: true, props: low, pop: P('Oh be! Çay gibisi yok.', 'Ahh. Nothing beats tea.') },
+      ];
+    }
+    case 'antenna': {
+      // Antenler seğirir: uçlara birer piksel eklenip kalkar (Karafatma'nın anten uçları gövdede (0,2) ve (23,2)).
+      const c = '#4A2410';
+      const tipL = (down: boolean): R[] => [[OX - 1, OY + (down ? 3 : 1), 1, 1, c]];
+      const tipR = (down: boolean): R[] => [[OX + 24, OY + (down ? 3 : 1), 1, 1, c]];
+      return [
+        { ms: 140, look: [-1, -1], props: tipL(true) },
+        { ms: 140, look: [-1, -1], props: tipL(false) },
+        { ms: 140, look: [1, -1], props: tipR(true) },
+        { ms: 140, look: [1, -1], props: tipR(false) },
+        { ms: 160, props: [...tipL(true), ...tipR(true)] },
+        { ms: 260, eyes: 'wide', props: [...tipL(false), ...tipR(false)] },
+      ];
+    }
+    case 'scuttle': {
+      // Terlik paniği: sağa sola fır fır koşturur, ayağının dibinde toz.
+      const fy = OY + 23;
+      return [
+        { ms: 160, eyes: 'wide', dy: -1, pop: P('Terlik! Terlik!', 'Slipper! Slipper!') },
+        ...rep(4, (i) => [
+          { ms: 110, dx: -2, flip: true, eyes: 'wide', over: dust(midX + 6, fy) } as Frame,
+          { ms: 110, dx: 2, eyes: i === 3 ? 'happy' : 'wide', over: dust(midX - 6, fy) } as Frame,
+        ]),
+        { ms: 220, eyes: 'happy', squash: true },
+      ];
+    }
     case 'tilt':
       return [{ ms: 200, look: [-1, 0], dx: -1 }, { ms: 420, look: [-1, -1], dx: -1, eyes: 'wide' }, { ms: 200, look: [1, 0], dx: 1 }, { ms: 200 }];
 
@@ -346,6 +387,7 @@ export const OUTFIT_ACTIONS: Partial<Record<string, ActionName[]>> = {
   bayram: ['wave'],
   pajama: ['yawn'],
   suit: ['coins', 'nod'],
+  pinksuit: ['coins', 'tea'],
 };
 
 /** Hareketi azaltılmış görünüm: yalnız kısa bir yüz ifadesi. */
@@ -392,6 +434,8 @@ const plane = (x: number, y: number): R[] => [
   [x + 3, y, 2, 1, '#9AA6B8'], [x + 3, y + 3, 2, 1, '#9AA6B8'], [x + 6, y - 1, 1, 2, '#D2423A'],
   [x + 8, y + 2, 3, 1, '#E3DCCF'],
 ];
+/** İnce belli çay bardağı (sol üst köşe): ağız, kızıl çay, bel, alt gövde. */
+const teaGlass = (x: number, y: number): R[] => [[x, y, 3, 1, '#EDE6DA'], [x, y + 1, 3, 1, '#B5361E'], [x + 1, y + 2, 1, 1, '#8E2512'], [x, y + 3, 3, 1, '#B5361E'], [x, y + 4, 3, 1, '#EDE6DA']];
 const dust = (x: number, y: number): R[] => [[x, y, 1, 1, '#D9D0C1'], [x - 2, y - 1, 1, 1, '#E3DCCF']];
 
 function categoryFrames(name: ActionName, g: Geo): Frame[] {

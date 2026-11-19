@@ -5,10 +5,10 @@
  * Not: bazı başlatıcılar yeni simgeyi birkaç saniye sonra gösterir, ana ekrandaki kısayolu kaldırabilir (ANDROID.md).
  */
 import { Capacitor, registerPlugin } from '@capacitor/core';
-import { MASCOT_KEYS, type MascotKey } from '../mascot/characters';
+import { DEFAULT_MASCOT, MASCOT_KEYS, type MascotKey, type PublicMascotKey } from '../mascot/characters';
 
 interface AppIconPlugin {
-  setIcon(options: { key: MascotKey }): Promise<{ key: MascotKey; changed: boolean }>;
+  setIcon(options: { key: PublicMascotKey }): Promise<{ key: PublicMascotKey; changed: boolean }>;
   getIcon(): Promise<{ key: string }>;
 }
 
@@ -19,12 +19,16 @@ export function appIconSupported(): boolean {
   return Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android';
 }
 
-/** Simgeyi değiştirir. true: istenen simge artık etkin (zaten öyleyse de true). Tarayıcıda / hata olursa false. */
+/**
+ * Simgeyi değiştirir. true: istenen simge artık etkin (zaten öyleyse de true). Tarayıcıda / hata olursa false.
+ * Gizli maskotların simgesi yok (ana ekranda kimse görmesin): varsayılan (kedi) simgeye döner.
+ */
 export async function setAppIcon(key: MascotKey): Promise<boolean> {
-  if (!appIconSupported() || !MASCOT_KEYS.includes(key)) return false;
+  if (!appIconSupported()) return false;
+  const target: PublicMascotKey = (MASCOT_KEYS as string[]).includes(key) ? (key as PublicMascotKey) : DEFAULT_MASCOT;
   try {
-    const r = await AppIcon.setIcon({ key });
-    return r.key === key;
+    const r = await AppIcon.setIcon({ key: target });
+    return r.key === target;
   } catch {
     // Eski APK'da eklenti yoksa ya da sistem reddederse.
     return false;

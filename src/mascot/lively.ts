@@ -12,7 +12,7 @@ import { OUTFITS, type MascotLive } from './render';
 import { buildAction, OUTFIT_ACTIONS, reduceFrames, sproutRects, type ActionName, type Frame } from './actions';
 import { onMascotEvent, type MascotEvent } from './events';
 import { dayPhase, type Season } from './seasonal';
-import { eventPool, GREET, jokesFor, popsFor, say as sayLine, TIPS } from './quips';
+import { eventPool, greetFor, jokesFor, popsFor, say as sayLine, TIPS } from './quips';
 import { CHARACTERS, type Lang, type MascotKey } from './characters';
 import { reactionFor } from './categoryReact';
 import { getState } from '../store/store';
@@ -367,21 +367,8 @@ export function useLively({ who, lang, name, season = null, exam = false, mood, 
       const c = cur.current;
       if (greeted || !c.quips || !c.active) return;
       const ph = dayPhase(new Date());
-      const pool = c.spy
-        ? GREET.spy
-        : c.exam
-          ? GREET.exam
-          : c.season
-            ? GREET[c.season]
-            : ph.monthStart
-              ? GREET.monthStart
-              : ph.mondayMorning
-                ? GREET.monday
-                : ph.morning
-                  ? GREET.morning
-                  : ph.night
-                    ? GREET.night
-                    : null;
+      const kind = c.spy ? 'spy' : c.exam ? 'exam' : c.season ? c.season : ph.monthStart ? 'monthStart' : ph.mondayMorning ? 'monday' : ph.morning ? 'morning' : ph.night ? 'night' : null;
+      const pool = kind ? greetFor(c.who, kind) : null;
       greeted = true;
       if (pool) quip(pool, 1);
     }, 1800);
@@ -396,7 +383,7 @@ export function useLively({ who, lang, name, season = null, exam = false, mood, 
     if (Date.now() - r.current.lastDisguiseAt < 1500) return;
     r.current.lastDisguiseAt = Date.now();
     play(spy ? 'disguise' : 'undisguise');
-    quip(spy ? GREET.spy : GREET.spyOff, 1, true);
+    quip(greetFor(cur.current.who, spy ? 'spy' : 'spyOff'), 1, true);
   }, [spy, play, quip]);
 
   // Uygulama olayları
@@ -449,7 +436,7 @@ export function useLively({ who, lang, name, season = null, exam = false, mood, 
           if (Date.now() - r.current.lastDisguiseAt < 1500) return;
           r.current.lastDisguiseAt = Date.now();
           play(e.hidden ? 'disguise' : 'undisguise');
-          quip(e.hidden ? GREET.spy : GREET.spyOff, 1, true);
+          quip(greetFor(c.who, e.hidden ? 'spy' : 'spyOff'), 1, true);
           return;
         }
       }

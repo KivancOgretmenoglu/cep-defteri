@@ -60,6 +60,8 @@ const TREAT: Record<MascotKey, L2> = {
   diken: { tr: 'elmayı', en: 'the apple' },
   bilge: { tr: 'tohumu', en: 'the seed' },
   pamuk: { tr: 'havucu', en: 'the carrot' },
+  // Gizli maskot misafir olarak gelmez; tablo tam kalsın diye
+  karafatma: { tr: 'cipsi', en: 'the chips' },
 };
 type L2 = Record<Lang, string>;
 
