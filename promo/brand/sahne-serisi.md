@@ -496,6 +496,46 @@ Kelime zamanları ElevenLabs Scribe ile ölçüldü (`assets/voice/bilet/words.j
 
 ---
 
+## 13. Bedava sihirbazı
+**Durum:** üretildi (`out/bedava-sihirbazi.mp4`, 24,73 sn) · **Tür:** sihir şovu · **Oyuncular:** silindir şapkalı, değnekli sihirbaz Diken (şapka sprite üstünde ayrı katman: `SH_TOPHAT`, Bot teorisi'ndeki çizim), gönüllü Ceviz
+**Fikir:** Aynı 14 liralık fark, ucuz ürün bedava olunca tercihi tersine çeviriyor. İzleyici önce iki fiyatı ve Ceviz'in seçimini görür; sihirbaz iki fiyatı da 1'er lira düşürür ve karar izleyiciye kalır.
+
+**Kanca (0. kare):** Kırmızı kadife perde, altın saçaklı drape, üç spot; mor örtülü, yıldızlı "BÜYÜK DİKEN" masasında trüf ve şeker, arkalarında TRÜF 15 TL ve ŞEKER 1 TL kartları; solda silindir şapkalı Diken değneğini şekere uzatmış, sağda Ceviz. Altta sahne ışıkları ve seyirci başları. Kutu: **"Bu numaraya herkes kanıyor"**
+
+**Akış (videodaki zamanlar)**
+- 0–3,25 sn: Kanca; seslendirme 0,12'de. "15"te (0,44) trüf kartı, "1 lira"da (1,44) şeker kartı zıplar; "trüfü"nde (2,5) Ceviz'in patisi trüfü gösterir, TRÜF kartının üstünde yeşil onay.
+- 3,29–4,36 sn: "Abrakadabra!": kamera Diken'e yaklaşır, değnek yukarı kalkar, ucunda dönen kıvılcımlar, Diken zıplar. Kutu: "Abrakadabra: ikisi de 1 TL ucuz".
+- 4,36 sn: Değnek kartlara iner: beyaz flaş, iki kartın üstünde duman, renkli kıvılcımlar; kartlar döner: 15 TL çizilir 14 TL olur, 1 TL çizilir yeşil parlayan BEDAVA olur.
+- 5,89–6,4 sn: "Şimdi?": kamera Ceviz'e döner, kalp atışı başlar. Kutu: "Sen olsan? TRÜF mü, ŞEKER mi?" (sayımda soluklaşır).
+- 6,4–9,4 sn: Karar anı (gerçek 3 sn): müzik ve altyazı susar; halka ve "KARAR VER / T mi, Ş mi? Yoruma yaz"; Ceviz'in patisi iki kart arasında gider gelir, BEDAVA kartı kalp atışıyla parlar.
+- 9,4 sn: Ceviz şekeri kapar: şeker kucağına uçar, "BEDAVA!" yazısı, konfeti, seyirci zıplar, alkış.
+- 9,52–12,5 sn: "Ceviz bedavaya koştu. Fark hâlâ 14 lira!": "Fark"ta (11,08) pano açılır: ÖNCE 15 − 1 = 14 TL, SONRA 14 − 0 = 14 TL; "14"te (11,78) iki "14 TL" parlar. Kutu: "Ceviz bedavaya koştu. Fark hâlâ 14 TL!"
+- 12,62–15,6 sn: "Gerçek deneyde: %27'den %69'a!": kart "ŞEKERİ SEÇENLER": 1 TL iken %27 (13,81), BEDAVA iken %69 (14,81); altta "Kaynak: Ariely 2008 · Shampanier, Mazar ve Ariely 2007". Kutu: "Fark aynı kaldı, tercih tersine döndü".
+- 15,71–18,2 sn: "Bedava görünce hesap yapmayı bırakıyoruz!": pano geri gelir, "Bedava"da (15,83) üstüne yeşil "BEDAVA!" çıkartması şaplak diye yapışır, hesap kapanır. Kutu: "Bedava görünce hesap duruyor".
+- 18,29–21,1 sn: Kapanış sorusu; masanın önünde Cep Defteri satırı yazılır: "Bedava kargo −250 TL". Kutu: "Bedava kargo için sepete en son ne ekledin?" + "Yoruma yaz" + "Eklediğin ürün, kargonun fiyatı".
+- 21,2–24,18 sn: Ortak takip satırı ve takip kartı; 23,7'de Ceviz'in patisi "Takip et"e basar, Diken şapkasını sallar.
+- 24,18–24,73 sn: Işıklar söner, dairesel geçişle yeniden kanca (döngü). Kıvılcımlar ilk karede değil 0,3 sn'de başlar: kapakta şeker açıkta kalır.
+
+**Müzik:** kancada `masal` (minör, müzik kutusu, çansız), "abrakadabra"dan sayıma `quiz` (sayımda bant durması), Ceviz bedavaya koşunca `ragtime`, araştırmada `lofi`, ders, soru ve takipte `pop`, döngüde yine `masal`. Büyüde yükseliş, basamaklı çan, duman patlaması ve zil; kararda konfeti ve alkış. Konuşma altında müzik `voiceDuck` ile kısılır. Miks −13,8 LUFS, tepe −2,4 dBFS.
+
+**Seslendirme (videodaki hali; altı satır da ilk denemede marka sesine uydu, 3,38–4,80 dB)**
+1. `[energetic]` Trüf on beş, şeker bir lira. Ceviz trüfü seçti!
+2. `[excited]` Abrakadabra! İkisi de bir lira ucuz. Şimdi?
+3. `[dramatic]` Ceviz bedavaya koştu. Fark hâlâ on dört lira!
+4. `[excited]` Gerçek deneyde: yüzde yirmi yediden, altmış dokuza!
+5. `[dramatic]` Bedava görünce hesap yapmayı bırakıyoruz!
+6. `[playful]` Sen bedava kargo için sepete en son ne ekledin? (altyazısız)
+7. `[playful]` Her hafta bir para tuzağı. Kaçırmamak için takip et! (ortak takip satırı)
+
+Kelime zamanları ElevenLabs Scribe ile ölçüldü (`assets/voice/sihir/words.json`; dökümler metinle birebir aynı). ElevenLabs akışı: "Cep Defteri · Bedava sihirbazı seslendirme".
+
+**Kapanış kutusu:** "Bedava kargo için sepete en son ne ekledin?" · çipler: "Yoruma yaz", "Eklediğin ürün, kargonun fiyatı" · ardından takip kartı
+**Uygulamayla bağı:** Kargo bedava olsun diye sepete eklediğin ürünü ayrı yaz: kargonun gerçek fiyatı o. Masadaki Cep Defteri satırı bunu gösterir: "Bedava kargo −250 TL".
+**Açıklamanın ilk satırı:** 15 TL'lik trüf mü, 1 TL'lik şeker mi? Şimdi ikisi de 1 TL ucuz 🎩
+**Doğrulama sonucu:** Shampanier, Mazar ve Ariely (2007), "Zero as a Special Price: The True Value of Free Products", *Marketing Science* 26(6): 742–757. Videodaki rakamlar Ariely'nin kendi anlatımından (*Predictably Irrational*, 2008; Time dergisi yazısı): bir stantta Lindt trüf 15 sent, Hershey's Kiss 1 sent iken alıcıların %73'ü trüfü seçti; ikisi de 1 sent düşünce (14 sent ve bedava) trüfü seçenler %31'e indi, yani şekeri seçenler yaklaşık %27'den %69'a çıktı. Makaledeki deneylerde fiyatlar ve oranlar farklı (ör. 14 ve 1 sentten 13 sente ve bedavaya; "hiçbiri" seçeneğiyle), yön aynı: ucuz ürün bedava olunca talebi sıçrıyor, pahalının payı düşüyor. Ariely'nin başka bir denemesinde (26 sentlik trüf) bedava Kiss'i seçenler %90'a çıktı. Makalenin tam metnine bu ortamdan erişilemedi (ağ kuralı); rakamlar Ariely'nin yazısından ve ikincil kaynaklardan. Bu yüzden ekrandaki kaynak satırı önce kitabı (Ariely 2008) sayar. TL tutarları örnek.
+
+---
+
 ## Kaynaklar
 - Gneezy, Haruvy ve Yafe (2004): [RePEc](https://ideas.repec.org/a/ecj/econjl/v114y2004i495p265-280.html), [özet](https://en.wikipedia.org/wiki/Unscrupulous_diner%27s_dilemma)
 - Bankrate (2021) borç anketi: [PDF](https://www.bankrate.com/pdfs/pr/20211213-lending-money-survey.pdf)
@@ -513,3 +553,4 @@ Kelime zamanları ElevenLabs Scribe ile ölçüldü (`assets/voice/bilet/words.j
 - Dunn, Aknin ve Norton (2008): [Science](https://www.science.org/doi/10.1126/science.1150952), [Harvard Gazette](https://news.harvard.edu/gazette/story/2008/04/money-spent-on-others-can-buy-happiness/), [ScienceDaily](https://www.sciencedaily.com/releases/2008/03/080320150034.htm), [HBS Working Knowledge](https://www.library.hbs.edu/working-knowledge/spending-on-happiness)
 - Aknin, Dunn, Proulx, Lok ve Norton (2020) kayıtlı yineleme: [ResearchGate](https://www.researchgate.net/publication/340468788_Does_spending_money_on_others_promote_happiness_A_registered_replication_report) · Kim ve ark. (2022): [PLOS ONE](https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0272434), [PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC9451075/)
 - Tversky ve Kahneman (1981): [Science](https://www.science.org/doi/10.1126/science.7455683), [Indiana Public Media](https://indianapublicmedia.org/amomentofscience/when-psychology-meets-accounting.php)
+- Shampanier, Mazar ve Ariely (2007): [Duke (PDF)](https://people.duke.edu/~dandan/webfiles/PapersPI/Zero%20as%20a%20Special%20Price.pdf), [Semantic Scholar](https://www.semanticscholar.org/paper/Zero-as-a-Special-Price:-The-True-Value-of-Free-Shampanier-Mazar/91783e7de55a3a0f2523b7c4f4f85c12faf5a5bf) · Ariely, Time yazısı: [danariely.com](https://danariely.com/time-magazine/) · özet: [The Decision Lab](https://thedecisionlab.com/reference-guide/psychology/zero-price-effect)

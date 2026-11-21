@@ -7585,5 +7585,268 @@
         "assets/voice/ortak/takip.mp3"
       ]
     ]
+  },
+  "bedava-sihirbazi": {
+    "title": "Bedava sihirbazı (sıfır fiyat etkisi): 15 TL'lik trüf mü, 1 TL'lik şeker mi? İkisi de 1 TL ucuzlayınca: 14 TL mi, BEDAVA mı? (sihir şovu, silindir şapkalı Diken, gönüllü Ceviz, gerçek 3 sn karar anı; Ariely 2008 / Shampanier, Mazar ve Ariely 2007; Sahne serisi)",
+    "end": 24.73,
+    "loop": true,
+    "handheld": true,
+    "musicGain": 0.45,
+    "noMusicVariant": true,
+    "limiter": true,
+    "musicPlan": [
+      [
+        0,
+        3.29,
+        "masal",
+        {
+          "mode": "minor",
+          "bpm": 132,
+          "gain": 0.8,
+          "bells": false
+        }
+      ],
+      [
+        3.29,
+        9.4,
+        "quiz"
+      ],
+      [
+        9.4,
+        12.62,
+        "ragtime",
+        {
+          "bpm": 112
+        }
+      ],
+      [
+        12.62,
+        15.71,
+        "lofi"
+      ],
+      [
+        15.71,
+        24.43,
+        "pop",
+        {
+          "bpm": 108
+        }
+      ],
+      [
+        24.43,
+        24.73,
+        "masal",
+        {
+          "mode": "minor",
+          "bpm": 132,
+          "gain": 0.8,
+          "bells": false
+        }
+      ]
+    ],
+    "music": {
+      "gaps": [
+        [
+          6.4,
+          9.4
+        ]
+      ]
+    },
+    "voiceDuck": {
+      "release": 0.25,
+      "music": 0.22
+    },
+    "captionPixel": true,
+    "captionY": 590,
+    "captionMaxWords": 3,
+    "captionUntil": 18.29,
+    "captionCut": [
+      [
+        6.4,
+        9.4
+      ]
+    ],
+    "boxes": [
+      [
+        0,
+        3.25,
+        "Bu numaraya<br><b>herkes kanıyor</b>",
+        300,
+        {
+          "size": 88,
+          "pulse": true
+        }
+      ],
+      [
+        3.29,
+        5.85,
+        "Abrakadabra:<br><b>ikisi de 1 TL ucuz</b>",
+        300,
+        {
+          "size": 80,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        5.89,
+        9.38,
+        "Sen olsan?<br><b>TRÜF mü, ŞEKER mi?</b>",
+        300,
+        {
+          "size": 80,
+          "pulse": true,
+          "quiet": true,
+          "dim": [
+            6.4,
+            9.4
+          ]
+        }
+      ],
+      [
+        9.45,
+        12.58,
+        "Ceviz bedavaya koştu.<br><b>Fark hâlâ 14 TL!</b>",
+        300,
+        {
+          "size": 76,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        12.62,
+        15.66,
+        "Fark aynı kaldı,<br><b>tercih tersine döndü</b>",
+        300,
+        {
+          "size": 80,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        15.71,
+        18.25,
+        "Bedava görünce<br><b>hesap duruyor</b>",
+        300,
+        {
+          "size": 84,
+          "pulse": true,
+          "quiet": true
+        }
+      ],
+      [
+        18.29,
+        21.1,
+        "Bedava kargo için sepete<br><b>en son ne ekledin?</b>",
+        300,
+        {
+          "size": 72,
+          "pulse": true
+        }
+      ],
+      [
+        18.39,
+        21.1,
+        "Yoruma yaz",
+        596,
+        {
+          "size": 50,
+          "quiet": true
+        }
+      ],
+      [
+        18.49,
+        21.1,
+        "Eklediğin ürün, kargonun fiyatı",
+        664,
+        {
+          "size": 36,
+          "quiet": true
+        }
+      ],
+      [
+        24.43,
+        24.73,
+        "Bu numaraya<br><b>herkes kanıyor</b>",
+        300,
+        {
+          "size": 88,
+          "pulse": true,
+          "quiet": true
+        }
+      ]
+    ],
+    "scenes": [
+      [
+        "sihir",
+        0,
+        {
+          "p15": 0.44,
+          "p1": 1.44,
+          "pick": 2.5,
+          "abra": 3.36,
+          "poof": 4.36,
+          "ask": 5.89,
+          "count": 6.4,
+          "zero": 9.4,
+          "fark": 11.08,
+          "f14": 11.78,
+          "sci": 12.74,
+          "s27": 13.81,
+          "s69": 14.81,
+          "bedava": 15.83,
+          "cta": 18.29,
+          "follow": 21.2,
+          "tapf": 23.7,
+          "dim": 24.18
+        }
+      ],
+      [
+        "sihir",
+        24.43,
+        {
+          "wdur": 0.3
+        }
+      ]
+    ],
+    "voiceTempo": 1.2,
+    "voiceFilter": "brand",
+    "voiceFiles": [
+      [
+        0.12,
+        "assets/voice/sihir/s1.mp3",
+        "Trüf 15, şeker 1 lira. Ceviz trüfü seçti!"
+      ],
+      [
+        3.29,
+        "assets/voice/sihir/s2.mp3",
+        "Abrakadabra! İkisi de 1 lira ucuz. Şimdi?"
+      ],
+      [
+        9.52,
+        "assets/voice/sihir/s3.mp3",
+        "Ceviz bedavaya koştu. Fark hâlâ 14 lira!"
+      ],
+      [
+        12.62,
+        "assets/voice/sihir/s4.mp3",
+        "Gerçek deneyde: %27'den %69'a!"
+      ],
+      [
+        15.71,
+        "assets/voice/sihir/s5.mp3",
+        "Bedava görünce hesap yapmayı bırakıyoruz!"
+      ],
+      [
+        18.29,
+        "assets/voice/sihir/s6.mp3"
+      ],
+      [
+        21.2,
+        "assets/voice/ortak/takip.mp3"
+      ]
+    ]
   }
 }

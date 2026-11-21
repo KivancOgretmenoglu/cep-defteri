@@ -3410,6 +3410,111 @@ def cue_bilet(t0, skip=0, o=None):
         put(SFX, key_click(0.4), T(o['dim'])); put(SFX, sub(0.8), T(o['dim'] + 0.02), 0.3)
 
 
+def cue_sihir(t0, skip=0, o=None):
+    """Bedava sihirbazı (sihir şovu): spot ve parıltı, etiket vuruşları, seçim zili, "abrakadabra" yükselişi ve duman patlaması,
+    BEDAVA çanları, kalp atışı ve gerçek 3 sn sayım, Ceviz şekeri kapar (konfeti, seyirci), fark panosu, sayaçlar, BEDAVA!
+    çıkartması, Cep Defteri satırı, takip kartı. Takvim sihir.js'teki SCENES.sihir ile aynı."""
+    o = o or {}
+    T = at(t0, skip)
+
+    def thump(v):  # kalp: alt vuruş + telefon hoparlöründe de duyulan üst katman
+        x = np.sin(2 * np.pi * phase(glide(70, 40, 0.18))) * expd(0.18, 16)
+        h = np.sin(2 * np.pi * phase(glide(170, 95, 0.1))) * expd(0.1, 30) * 0.45
+        x[: len(h)] += h
+        return x * v
+
+    sub = lambda d=1.0: np.tanh(np.sin(2 * np.pi * phase(glide(65, 30, d))) * expd(d, 3) * 1.4)
+
+    def puff(d=0.6):  # duman patlaması: boğuk gürültü + alçak gövde
+        x = lp(noise(d), 1400, 2) * expd(d, 7) * 1.6
+        b = np.sin(2 * np.pi * phase(glide(110, 45, d))) * expd(d, 9) * 0.9
+        return np.tanh((x + b) * 1.2)
+
+    # açılış: spot şalteri ve değnek ucundaki parıltı
+    put(SFX, key_click(0.5), T(0.0), pan=-0.2)
+    for i, f in enumerate((1568, 2093, 2637)):
+        put(SFX, pling(f, 0.08, 0.4), T(0.05 + i * 0.07), pan=-0.3)
+    if 'p15' in o:  # "on beş": trüf etiketi
+        put(SFX, bloop(520, 1040, 0.07, 0.22), T(o['p15']), pan=-0.2); put(SFX, pling(1319, 0.1, 0.35), T(o['p15'] + 0.06), pan=-0.2)
+    if 'p1' in o:  # "bir lira": şeker etiketi
+        put(SFX, bloop(400, 800, 0.07, 0.2), T(o['p1']), pan=0.2); put(SFX, pling(988, 0.1, 0.35), T(o['p1'] + 0.06), pan=0.2)
+    if 'pick' in o:  # Ceviz trüfü gösterir: onay zili
+        P = o['pick']
+        put(SFX, stereo_move(whoosh(0.25, 600, 2400, 0.5), 0.4, -0.2), T(P - 0.05), 0.16)
+        put(SFX, fm_bell(1568, 0.6, 0.18), T(P + 0.27), pan=-0.2)
+    if 'abra' in o:  # "abrakadabra": yükseliş ve basamak basamak parıltı
+        A = o['abra']
+        put(SFX, riser(max(0.3, o.get('poof', A + 1.0) - A)), T(A), 0.5)
+        for i, f in enumerate((1047, 1319, 1568, 2093, 2637)):
+            put(SFX, fm_bell(f, 0.5, 0.1), T(A + 0.1 + i * 0.16), pan=-0.4 + 0.2 * i)
+    if 'poof' in o:  # duman patlaması, etiketler döner, BEDAVA çanları
+        P = o['poof']
+        put(SFX, puff(0.7), T(P), 0.7)
+        put(SFX, crash(0.4, 1.2), T(P), 0.3)
+        put(SFX, whoosh(0.2, 800, 3000, 0.5), T(P + 0.12), 0.2, pan=-0.3)
+        put(SFX, whoosh(0.2, 800, 3000, 0.5), T(P + 0.17), 0.2, pan=0.3)
+        put(SFX, ding_ding(), T(P + 0.5), 0.35, pan=0.25)
+    if 'ask' in o:  # "Şimdi?": alt vuruş; kalp atışı (sihir.js'teki takvimle aynı)
+        A, Z = o['ask'], o['zero']
+        put(SFX, sub(1.0), T(A - 0.03), 0.5)
+        t, k = A + 0.15, 0
+        while t < Z - 0.1:
+            put(SFX, thump(0.9), T(t)); put(SFX, thump(0.6), T(t + 0.16))
+            t += max(0.42, 0.62 - 0.03 * k); k += 1
+    if 'count' in o:  # gerçek 3 saniye: bip, saat tıkı, sonda nefes
+        C, Z = o['count'], o['zero']
+        n = int(round(Z - C))
+        for j in range(n):
+            put(SFX, pluck(81 if j < n - 1 else 86, 0.14, 'square', 0.5, cut=4000, v=0.3), T(C + j))
+            put(SFX, tick(j % 2 == 0, 0.22), T(C + j + 0.5), pan=0.2)
+        put(SFX, inhale(0.3), T(Z - 0.32), 0.6)
+    if 'zero' in o:  # Ceviz şekeri kapar: atılma, konfeti, seyirci
+        Z = o['zero']
+        put(SFX, stereo_move(whoosh(0.25, 500, 2600, 0.6), 0.5, 0.1), T(Z - 0.05), 0.25)
+        put(SFX, ui_tap(0.7), T(Z + 0.1), pan=0.3)
+        put(SFX, popper(), T(Z + 0.15), 0.5, pan=0.3)
+        put(SFX, pling(2093, 0.14, 0.5), T(Z + 0.2), pan=0.3)
+        put(SFX, applause(1.4), T(Z + 0.35), 0.28)
+    if 'fark' in o:  # fark panosu: satırlar yazılır
+        F = o['fark']
+        put(SFX, stereo_move(whoosh(0.3, 400, 2600, 0.5), -0.3, 0.3), T(F - 0.05), 0.18)
+        for row in (0.1, 0.5):
+            for i in range(5):
+                put(SFX, key_click(0.12), T(F + row + i * 0.05))
+    if 'f14' in o:  # iki "14 TL" parlar
+        put(SFX, pling(1319, 0.12, 0.4), T(o['f14'])); put(SFX, pling(1319, 0.12, 0.4), T(o['f14'] + 0.12))
+    if 'sci' in o:  # araştırma kartı
+        S = o['sci']
+        put(SFX, stereo_move(whoosh(0.35, 400, 3000, 0.6), 0.3, -0.1), T(S - 0.08), 0.2)
+    for key, n_, f in (('s27', 5, 988), ('s69', 9, 1568)):  # sayaçlar: tıklar, sonunda zil
+        if key in o:
+            S_ = o[key]
+            for i in range(n_):
+                put(SFX, key_click(0.12), T(S_ + i * 0.06))
+            put(SFX, pling(f, 0.14, 0.5), T(S_ + 0.6))
+    if 'bedava' in o:  # BEDAVA! çıkartması panoya yapışır
+        B = o['bedava']
+        put(SFX, stamp(), T(B), 0.7)
+        put(SFX, sub(0.8), T(B), 0.45)
+    if 'cta' in o:  # soru; masada Cep Defteri satırı yazılır
+        C = o['cta']
+        put(SFX, flutter(0.3), T(C), 0.18)
+        put(SFX, bloop(500, 1100, 0.1, 0.2), T(C + 0.25), pan=0.1)
+        for i in range(8):
+            put(SFX, key_click(0.12), T(C + 0.42 + i * 0.07))
+    if 'follow' in o:  # takip kartı açılır
+        F = o['follow']
+        put(SFX, stereo_move(whoosh(0.3, 500, 2400, 0.5), -0.3, 0.2), T(F - 0.05), 0.18)
+        put(SFX, bloop(520, 1300, 0.07, 0.28), T(F + 0.05))
+    if 'tapf' in o:  # Ceviz'in patisi "Takip et"e basar
+        Tf = o['tapf']
+        put(SFX, ui_tap(0.6), T(Tf))
+        put(SFX, fm_bell(1568, 0.7, 0.18), T(Tf + 0.06))
+        put(SFX, pling(2093, 0.1, 0.5), T(Tf + 0.12), pan=0.3)
+    if 'dim' in o:  # ışıklar söner; döngü kancaya döner
+        put(SFX, key_click(0.4), T(o['dim'])); put(SFX, sub(0.8), T(o['dim'] + 0.02), 0.3)
+
+
 CUES = {k[4:]: v for k, v in globals().items() if k.startswith('cue_')}
 
 # ═════════ ANA MÜZİK ═════════

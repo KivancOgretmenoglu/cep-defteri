@@ -701,3 +701,36 @@ Cep Defteri'nde kaybı da harcama olarak yaz: kullanılabilir para gerçeği gö
 ```
 
 **Yayın notu:** Kapak karesi olarak 0,0 sn'yi seç (tiyatro kapısında papyonlu Fıstık, rüzgârda uçan "BİLET 200 TL" + "Bileti kaybettin. Yenisini alır mısın?"). İlk yorumu sabitle: "Bir Fıstık bileti kaybetti ve döndü, öteki parayı kaybetti ve yine bilet aldı. Sen hangisi olurdun? (Tutarlar örnek.)" Karar anında soru "AL mı, DÖN mü?" + "Yoruma yaz": izleyicinin kendi seçimi. Çağrılar sonda: önce kapanış sorusu + "Yoruma yaz", sonra ortak takip satırı ve takip kartı. Süre 24,23 sn (Kasım 2026'dan itibaren hedef 20–25 sn). Bulunmuş para ve Batık maliyet ile kavram akrabası: aralarına en az bir hafta koy. Yayından önce doğrula: iki sorunun örneklem sayıları (makalenin metni; ikincil kaynaklarda "yaklaşık 200"). Instagram'da "Yapay zekâ bilgisi" etiketini aç.
+
+---
+
+## 32 · bedava-sihirbazi (kavram: sıfır fiyat etkisi / "bedava", Sahne serisi, seslendirme: Buğra, döngülü, 24,73 sn)
+
+**Neden bu video:** Fikir listesindeki 41. madde; 20–25 sn kalıbının ikinci sahne reelsi. Tek mekân (sihir şovu), tek karar anı, kendiliğinden cevaplanan bir soru ("1 lira indirim neyi değiştirir?") ve sonunda herkesin yaşadığı bir an (bedava kargo için sepete ürün eklemek). Efsane Cuma haftasına denk geliyor.
+
+**Seslendirme satırları** (`assets/voice/sihir/s1…s6.mp3`, hepsi `eleven_v4` ve ilk denemede UYGUN; ElevenLabs akışı "Cep Defteri · Bedava sihirbazı seslendirme"):
+1. `[energetic]` Trüf on beş, şeker bir lira. Ceviz trüfü seçti!
+2. `[excited]` Abrakadabra! İkisi de bir lira ucuz. Şimdi?
+3. `[dramatic]` Ceviz bedavaya koştu. Fark hâlâ on dört lira!
+4. `[excited]` Gerçek deneyde: yüzde yirmi yediden, altmış dokuza!
+5. `[dramatic]` Bedava görünce hesap yapmayı bırakıyoruz!
+6. `[playful]` Sen bedava kargo için sepete en son ne ekledin? (altyazısız) + ortak takip satırı
+
+**Açıklama:**
+```
+15 TL'lik trüf mü, 1 TL'lik şeker mi? Şimdi ikisi de 1 TL ucuz 🎩
+Bedava kargo için sepete en son ne ekledin? Yoruma yaz 👇
+📌 Kaydet; Efsane Cuma'da "kargo bedava" yazısını görünce aklına gelsin. Android erken erişim yakında.
+
+Sihirbaz Diken masaya iki çikolata koydu: trüf 15 TL, şeker 1 TL. Ceviz trüfü seçti.
+"Abrakadabra!" İkisi de 1 TL ucuzladı: trüf 14 TL, şeker BEDAVA. Ceviz şekere koştu. Oysa aradaki fark hâlâ 14 TL. Tutarlar örnek.
+Araştırma: Dan Ariely'nin anlattığı deneyde trüf 15 sent, şeker 1 sent iken çoğu kişi trüfü seçti; ikisi de 1 sent ucuzlayınca (14 sent ve bedava) şekeri seçenler %27'den %69'a çıktı (Ariely, 2008; Shampanier, Mazar ve Ariely, 2007, Marketing Science). "Bedava" fiyatların en düşüğü gibi değil, ayrı bir şey gibi algılanıyor; karşılaştırma duruyor.
+Hayattaki hâli: "200 TL üstü kargo bedava" yazısı. 30 TL kargo ödememek için sepete 250 TL'lik ürün eklersen, o kargo sana 250 TL'ye geldi.
+
+"Kargo bedava olsun diye bir şey daha ekleyeyim" diyen arkadaşına gönder.
+Cep Defteri'nde kargo bedava olsun diye eklediğin ürünü ayrı yaz: kargonun gerçek fiyatı o.
+
+#bedavakargo #efsanecuma #sıfırfiyatetkisi #davranışsalekonomi #öğrencibütçesi #paraipuçları #cepdefteri
+```
+
+**Yayın notu:** Kapak karesi olarak 0,0 sn'yi seç (sihir şovu, silindir şapkalı Diken, TRÜF 15 TL / ŞEKER 1 TL kartları, Ceviz + "Bu numaraya herkes kanıyor"). En iyi zaman Efsane Cuma'dan (27 Kasım 2026) önceki günler: kargo kampanyaları konuşulurken. 40. madde (Efsane Cuma zombileri) de aynı haftaya planlıysa ikisinin arasına en az iki gün koy. İlk yorumu sabitle: "Ceviz önce trüfü seçti, şeker bedava olunca ona koştu. Sen ne derdin: T mi, Ş mi? (Tutarlar örnek.)" Karar anında soru "TRÜF mü, ŞEKER mi?" + "Yoruma yaz": izleyicinin kendi seçimi. Çağrılar sonda: önce kapanış sorusu + "Yoruma yaz", sonra ortak takip satırı ve takip kartı. Rakamlar Ariely'nin anlattığı deneyden; makaledeki deneylerde fiyatlar farklı, bu yüzden ekrandaki kaynak satırı önce kitabı sayar ("Ariely 2008 · Shampanier, Mazar ve Ariely 2007"). Instagram'da "Yapay zekâ bilgisi" etiketini aç.

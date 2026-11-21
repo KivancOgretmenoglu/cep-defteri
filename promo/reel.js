@@ -654,6 +654,7 @@ window.ready = (async () => {
   if (typeof defineValue === 'function') defineValue();
   if (typeof defineKarar === 'function') defineKarar();
   if (typeof defineBilet === 'function') defineBilet();
+  if (typeof defineSihir === 'function') defineSihir();
   for (const [type, t0, opts = {}] of reel.scenes) {
     OPTS = opts;
     SCENES[type](t0, opts);
